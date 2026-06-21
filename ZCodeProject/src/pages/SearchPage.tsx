@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import SearchBar from '../components/SearchBar';
 import MovieCard from '../components/MovieCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { searchMovies, discoverMovies, getGenres } from '../api/tmdb';
+import { searchCatalog, getCatalog, getGenres, hasToken } from '../api/catalog';
 import type { Movie, Genre } from '../types';
 import './SearchPage.css';
 
@@ -17,11 +17,16 @@ const SearchPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const observerRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   /** Загрузка жанров */
   useEffect(() => {
+    if (!hasToken()) {
+      setError('Источник не настроен. Укажите токен в «Профиль → Настройки → Источники».');
+      return;
+    }
     getGenres().then(setGenres).catch(console.error);
   }, []);
 
@@ -31,13 +36,15 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       try {
         let result;
+        const genre = selectedGenres.length > 0 ? selectedGenres[0] : undefined;
         if (query.trim()) {
-          result = await searchMovies(query.trim(), pageNum);
+          result = await searchCatalog(query.trim(), pageNum);
         } else {
-          result = await discoverMovies({
+          result = await getCatalog({
             page: pageNum,
-            with_genres: selectedGenres.length > 0 ? selectedGenres.join(',') : undefined,
-            primary_release_year: selectedYear || undefined,
+            genre,
+            year: selectedYear || undefined,
+            sort: 'novelty',
           });
         }
         setMovies((prev) => (reset ? result.results : [...prev, ...result.results]));
@@ -53,6 +60,7 @@ const SearchPage: React.FC = () => {
 
   /** Поиск с debounce */
   useEffect(() => {
+    if (!hasToken()) return;
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);
@@ -92,6 +100,18 @@ const SearchPage: React.FC = () => {
   };
 
   const currentYear = new Date().getFullYear();
+
+  if (error && !loading) {
+    return (
+      <div className="search-page">
+        <h1 className="search-page__title">Поиск</h1>
+        <div className="search-empty">
+          <span className="search-empty__icon">⚠️</span>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="search-page">
@@ -134,7 +154,7 @@ const SearchPage: React.FC = () => {
       {/* Результаты */}
       <div className="search-results">
         {movies.map((movie) => (
-          <MovieCard key={movie.id} movie={movie} variant="grid" />
+          <MovieCard key={`${movie.id}-${movie.kinopoisk_id}`} movie={movie} variant="grid" />
         ))}
         {loading &&
           Array.from({ length: 4 }).map((_, i) => (

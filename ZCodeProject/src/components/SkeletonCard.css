@@ -1,10 +1,9 @@
-/* Скелетон карточки */
+/* ===== Скелетон карточки (Glass Aurora) ===== */
 .skeleton-card {
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  background: var(--card-bg);
 }
 
 .skeleton-card--card {
@@ -19,7 +18,7 @@
 .skeleton-card__image {
   width: 100%;
   aspect-ratio: 2 / 3;
-  border-radius: 12px;
+  border-radius: 14px;
 }
 
 .skeleton-card__info {

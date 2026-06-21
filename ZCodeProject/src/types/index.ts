@@ -1,6 +1,12 @@
-/* ===== Типы данных для приложения ===== */
+/* ===== Типы данных приложения (источник: VideoCDN) ===== */
 
-/** Фильм из TMDB API */
+/** Жанр */
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+/** Карточка фильма/сериала (нормализованный формат VideoCDN) */
 export interface Movie {
   id: number;
   title: string;
@@ -10,96 +16,79 @@ export interface Movie {
   backdrop_path: string | null;
   release_date: string;
   vote_average: number;
-  vote_count: number;
+  kinopoisk_rating: number;
+  imdb_rating: number;
+  runtime: number | null;
   genre_ids: number[];
+  genres: Genre[];
+  type: string; // movie | serial | tvshow | anime
+  is_serial: boolean;
+  imdb_id: string;
+  kinopoisk_id: string;
+  quality: string;
+  translator: string;
+  iframe_url: string;
+  countries: string[];
+  actors: string[];
+  directors: string[];
   popularity: number;
   adult: boolean;
   media_type?: string;
 }
 
-/** Детальная информация о фильме */
+/** Серия сериала */
+export interface Episode {
+  id: string | number;
+  episode: number;
+  season: number;
+  title: string;
+  iframe_url: string;
+  preview: string;
+}
+
+/** Сезон сериала */
+export interface Season {
+  id: string | number;
+  season_number: number;
+  episodes_count: number;
+  episodes: Episode[];
+}
+
+/** Детальная информация о фильме/сериале */
 export interface MovieDetail extends Movie {
-  runtime: number | null;
-  budget: number;
-  revenue: number;
-  status: string;
-  tagline: string;
-  genres: Genre[];
-  production_countries: ProductionCountry[];
-  credits?: {
-    cast: CastMember[];
-    crew: CrewMember[];
-  };
-  similar?: {
-    results: Movie[];
-  };
+  seasons: Season[];
+  similar?: Movie[];
 }
 
-/** Жанр */
-export interface Genre {
-  id: number;
-  name: string;
-}
-
-/** Страна производства */
-export interface ProductionCountry {
-  iso_3166_1: string;
-  name: string;
-}
-
-/** Актёр */
-export interface CastMember {
-  id: number;
-  name: string;
-  character: string;
-  profile_path: string | null;
-  order: number;
-}
-
-/** Член съёмочной группы */
-export interface CrewMember {
-  id: number;
-  name: string;
-  job: string;
-  department: string;
-  profile_path: string | null;
-}
-
-/** Ответ TMDB API со списком фильмов */
-export interface TMDBResponse {
+/** Ответ API со списком */
+export interface CatalogResponse {
+  ok: boolean;
   page: number;
   results: Movie[];
   total_pages: number;
   total_results: number;
 }
 
-/** Ответ Kodik API */
-export interface KodikResponse {
-  time: string;
-  total: number;
-  results: KodikResult[];
+/** Ответ API деталей фильма */
+export interface MovieDetailResponse {
+  ok: boolean;
+  movie: MovieDetail;
+  similar: Movie[];
 }
 
-/** Результат Kodik */
-export interface KodikResult {
-  id: string;
-  type: string;
-  link: string;
-  title: string;
-  title_orig: string;
-  year: number;
-  kinopoisk_id: string;
-  imdb_id: string;
-  worldart_link: string;
-  shikimori_id: string;
+/** Ответ API плеера */
+export interface PlayerResponse {
+  ok: boolean;
+  url: string;
+  id: number;
   quality: string;
-  camrip: boolean;
-  translation: {
-    id: number;
-    title: string;
-    type: string;
-  };
-  screenshots: string[];
+  translator: string;
+}
+
+/** Ответ API мета (жанры/категории) */
+export interface MetaResponse {
+  ok: boolean;
+  genres: Genre[];
 }
 
 /** Пользователь Telegram */
@@ -120,3 +109,9 @@ export interface WatchHistoryItem {
 
 /** Тема приложения */
 export type AppTheme = 'dark' | 'light';
+
+/** Источник видео (для настроек) */
+export interface VideoSourceConfig {
+  token: string;
+  enabled: boolean;
+}

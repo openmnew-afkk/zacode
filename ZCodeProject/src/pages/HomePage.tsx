@@ -1,44 +1,66 @@
 import React, { useState, useEffect } from 'react';
 import MovieList from '../components/MovieList';
-import { getTrending, getNowPlaying, getUpcoming, backdropUrl, hasApiKey } from '../api/tmdb';
+import {
+  getCatalog,
+  getNovelty,
+  getTop,
+  backdropUrl,
+  hasToken,
+} from '../api/catalog';
 import type { Movie } from '../types';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 /* ===== Главная страница ===== */
 
+interface Category {
+  id: string;
+  title: string;
+  icon: string;
+}
+
+const CATEGORIES: Category[] = [
+  { id: '', title: 'Всё', icon: '✨' },
+  { id: 'movie', title: 'Фильмы', icon: '🎬' },
+  { id: 'serial', title: 'Сериалы', icon: '📺' },
+  { id: 'anime', title: 'Аниме', icon: '🍥' },
+  { id: 'tvshow', title: 'ТВ-шоу', icon: '🎙️' },
+];
+
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [trending, setTrending] = useState<Movie[]>([]);
-  const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
-  const [upcoming, setUpcoming] = useState<Movie[]>([]);
+  const [novelty, setNovelty] = useState<Movie[]>([]);
+  const [categoryItems, setCategoryItems] = useState<Movie[]>([]);
   const [heroMovies, setHeroMovies] = useState<Movie[]>([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [category, setCategory] = useState('');
 
-  /** Загрузка данных */
+  /** Загрузка дефолтных секций */
   useEffect(() => {
-    if (!hasApiKey()) {
-      setError('API ключ TMDB не указан. Добавьте VITE_TMDB_API_KEY в .env файл.');
+    if (!hasToken()) {
+      setError(
+        'Источник не настроен. Откройте «Профиль → Настройки → Источники» и укажите токен VideoCDN, либо задайте его в переменной окружения VIDEOCDN_TOKEN на сервере.'
+      );
       setLoading(false);
       return;
     }
 
     const fetchData = async () => {
       try {
-        const [trendingRes, nowPlayingRes, upcomingRes] = await Promise.all([
-          getTrending(),
-          getNowPlaying(),
-          getUpcoming(),
-        ]);
-        setTrending(trendingRes.results);
-        setNowPlaying(nowPlayingRes.results);
-        setUpcoming(upcomingRes.results);
-        setHeroMovies(trendingRes.results.slice(0, 5));
+        const [topRes, novRes] = await Promise.all([getTop(), getNovelty()]);
+        setTrending(topRes.results || []);
+        setNovelty(novRes.results || []);
+        // Hero — фильмы с лучшим рейтингом и постером
+        const heroes = (topRes.results || [])
+          .filter((m) => m.backdrop_path || m.poster_path)
+          .slice(0, 5);
+        setHeroMovies(heroes);
       } catch (err) {
         console.error('Ошибка загрузки данных:', err);
-        setError('Не удалось загрузить данные. Проверьте подключение к интернету.');
+        setError('Не удалось загрузить данные. Проверьте токен и подключение.');
       } finally {
         setLoading(false);
       }
@@ -47,7 +69,17 @@ const HomePage: React.FC = () => {
     fetchData();
   }, []);
 
-  /** Автопрокрутка карусели каждые 5 секунд */
+  /** Загрузка по выбранной категории */
+  useEffect(() => {
+    if (!hasToken()) return;
+    setLoading(true);
+    getCatalog({ type: category || undefined, sort: 'novelty', limit: 20 })
+      .then((res) => setCategoryItems(res.results || []))
+      .catch((err) => console.error('Ошибка категории:', err))
+      .finally(() => setLoading(false));
+  }, [category]);
+
+  /** Автопрокрутка карусели */
   useEffect(() => {
     if (heroMovies.length === 0) return;
     const interval = setInterval(() => {
@@ -69,6 +101,28 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="home-page">
+      {/* Шапка */}
+      <div className="home-header">
+        <div>
+          <h1 className="home-header__title">TeleCinema</h1>
+          <p className="home-header__sub">Кино и сериалы онлайн</p>
+        </div>
+      </div>
+
+      {/* Быстрое меню категорий */}
+      <div className="home-categories">
+        {CATEGORIES.map((cat) => (
+          <button
+            key={cat.id || 'all'}
+            className={`home-category ${category === cat.id ? 'home-category--active' : ''}`}
+            onClick={() => setCategory(cat.id)}
+          >
+            <span className="home-category__icon">{cat.icon}</span>
+            {cat.title}
+          </button>
+        ))}
+      </div>
+
       {/* Карусель */}
       {currentHero && (
         <div
@@ -78,21 +132,26 @@ const HomePage: React.FC = () => {
           <div
             className="hero-carousel__bg"
             style={{
-              backgroundImage: `url(${backdropUrl(currentHero.backdrop_path)})`,
+              backgroundImage: `url(${backdropUrl(currentHero.backdrop_path || currentHero.poster_path)})`,
             }}
           />
           <div className="hero-carousel__overlay" />
           <div className="hero-carousel__content">
             <h1 className="hero-carousel__title">{currentHero.title}</h1>
             <p className="hero-carousel__overview">
-              {currentHero.overview?.slice(0, 120)}
-              {(currentHero.overview?.length ?? 0) > 120 ? '...' : ''}
+              {currentHero.overview?.slice(0, 140)}
+              {(currentHero.overview?.length ?? 0) > 140 ? '…' : ''}
             </p>
             <div className="hero-carousel__meta">
               <span className="hero-carousel__rating">★ {currentHero.vote_average.toFixed(1)}</span>
               <span className="hero-carousel__year">
                 {currentHero.release_date?.slice(0, 4)}
               </span>
+              {(currentHero.is_serial || currentHero.type === 'anime') && (
+                <span className="hero-carousel__year">
+                  {currentHero.type === 'anime' ? 'Аниме' : 'Сериал'}
+                </span>
+              )}
             </div>
           </div>
           {/* Индикаторы */}
@@ -112,9 +171,14 @@ const HomePage: React.FC = () => {
       )}
 
       {/* Секции */}
-      <MovieList title="🔥 Сейчас в тренде" movies={trending} loading={loading} />
-      <MovieList title="🎬 Новинки" movies={nowPlaying} loading={loading} />
-      <MovieList title="📅 Скоро выйдут" movies={upcoming} loading={loading} />
+      {category ? (
+        <MovieList title="По категории" movies={categoryItems} loading={loading} />
+      ) : (
+        <>
+          <MovieList title="🔥 Сейчас в тренде" movies={trending} loading={loading} />
+          <MovieList title="🆕 Новинки" movies={novelty} loading={loading} />
+        </>
+      )}
     </div>
   );
 };

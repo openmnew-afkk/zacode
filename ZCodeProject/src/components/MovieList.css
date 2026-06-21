@@ -1,4 +1,4 @@
-/* Горизонтальный список фильмов */
+/* ===== Горизонтальный список фильмов (Glass Aurora) ===== */
 .movie-list {
   margin-bottom: 24px;
 }
@@ -8,6 +8,18 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0 0 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.movie-list__title::before {
+  content: '';
+  width: 4px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 .movie-list__scroll {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { posterUrl } from '../api/tmdb';
+import { posterUrl } from '../api/catalog';
 import { useStore } from '../store/useStore';
 import type { Movie } from '../types';
 import './MovieCard.css';
@@ -58,6 +58,11 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, variant = 'default' }) => 
           <span className="movie-card__star">★</span>
           {movie.vote_average.toFixed(1)}
         </div>
+        {(movie.is_serial || movie.type === 'anime') && (
+          <span className="movie-card__type">
+            {movie.type === 'anime' ? 'Аниме' : 'Сериал'}
+          </span>
+        )}
         <button
           className={`movie-card__fav ${favorite ? 'active' : ''} ${heartAnim ? 'animate' : ''}`}
           onClick={handleFavorite}

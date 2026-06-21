@@ -1,13 +1,14 @@
-/* Страница избранного */
+/* ===== Страница избранного (Glass Aurora) ===== */
 .favorites-page {
-  padding: 16px 0 80px;
+  padding: max(16px, env(safe-area-inset-top)) 0 110px;
 }
 
 .favorites-page__title {
   font-size: 28px;
   font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--text-primary);
-  margin: 0 16px 20px;
+  margin: 0 16px 16px;
 }
 
 .favorites-grid {
@@ -29,6 +30,13 @@
   }
 }
 
+@media (min-width: 1100px) {
+  .favorites-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+/* Пустое состояние */
 .favorites-empty {
   display: flex;
   flex-direction: column;
@@ -42,6 +50,7 @@
 .favorites-empty__icon {
   font-size: 56px;
   margin-bottom: 16px;
+  filter: drop-shadow(0 0 16px var(--accent-glow));
 }
 
 .favorites-empty h3 {
