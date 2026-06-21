@@ -1,0 +1,124 @@
+/* Главная страница */
+.home-page {
+  padding-bottom: 80px;
+}
+
+/* Ошибка */
+.home-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 32px;
+  text-align: center;
+}
+
+.home-error__icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.home-error__text {
+  font-size: 15px;
+  color: var(--text-secondary);
+  max-width: 300px;
+  line-height: 1.5;
+}
+
+/* Карусель */
+.hero-carousel {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+.hero-carousel__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  transition: background-image 0.8s ease;
+}
+
+.hero-carousel__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    var(--bg-primary) 0%,
+    rgba(15, 15, 15, 0.6) 50%,
+    rgba(15, 15, 15, 0.3) 100%
+  );
+}
+
+.hero-carousel__content {
+  position: absolute;
+  bottom: 40px;
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+}
+
+.hero-carousel__title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.hero-carousel__overview {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+
+.hero-carousel__meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.hero-carousel__rating {
+  color: #f5c518;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.hero-carousel__year {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+}
+
+/* Индикаторы */
+.hero-carousel__dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 3;
+}
+
+.hero-carousel__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.3s ease;
+}
+
+.hero-carousel__dot.active {
+  background: var(--accent);
+  width: 24px;
+  border-radius: 4px;
+}

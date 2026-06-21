@@ -1,0 +1,40 @@
+/* Скелетон карточки */
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+.skeleton-card--card {
+  width: 140px;
+  min-width: 140px;
+}
+
+.skeleton-card--wide {
+  width: 100%;
+}
+
+.skeleton-card__image {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+}
+
+.skeleton-card__info {
+  padding: 8px 4px;
+}
+
+.skeleton-card__title {
+  height: 14px;
+  width: 80%;
+  border-radius: 4px;
+  margin-bottom: 6px;
+}
+
+.skeleton-card__subtitle {
+  height: 12px;
+  width: 50%;
+  border-radius: 4px;
+}

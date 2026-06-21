@@ -1,0 +1,29 @@
+/* Горизонтальный список фильмов */
+.movie-list {
+  margin-bottom: 24px;
+}
+
+.movie-list__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 12px 16px;
+}
+
+.movie-list__scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 0 16px 8px;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.movie-list__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.movie-list__scroll > * {
+  scroll-snap-align: start;
+}

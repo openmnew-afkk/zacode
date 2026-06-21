@@ -1,0 +1,136 @@
+/* Карточка фильма */
+.movie-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.movie-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.movie-card:active {
+  transform: scale(0.97);
+}
+
+.movie-card--default {
+  width: 140px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.movie-card--grid {
+  width: 100%;
+}
+
+/* Постер */
+.movie-card__poster-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--card-bg);
+}
+
+.movie-card__poster-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.movie-card__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.movie-card__poster.loaded {
+  opacity: 1;
+}
+
+/* Рейтинг */
+.movie-card__rating {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  padding: 3px 8px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  z-index: 2;
+}
+
+.movie-card__star {
+  color: #f5c518;
+  font-size: 11px;
+}
+
+/* Кнопка избранного */
+.movie-card__fav {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.movie-card__fav:hover {
+  transform: scale(1.15);
+}
+
+.movie-card__fav.animate {
+  animation: heart-pop 0.4s ease;
+}
+
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.4); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Информация */
+.movie-card__info {
+  padding: 8px 4px;
+}
+
+.movie-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.movie-card__year {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 2px 0 0;
+}
