@@ -18,6 +18,7 @@ const SearchPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [searchType, setSearchType] = useState<'movie' | 'series'>('movie');
   const observerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -35,7 +36,7 @@ const SearchPage: React.FC = () => {
         const genre = selectedGenres.length > 0 ? String(selectedGenres[0]) : undefined;
         const year = selectedYear ? String(selectedYear) : undefined;
         if (query.trim()) {
-          result = await searchCatalog(query.trim(), pageNum);
+          result = await searchCatalog(query.trim(), pageNum, searchType);
         } else {
           result = await getCatalog({
             page: pageNum,
@@ -113,6 +114,18 @@ const SearchPage: React.FC = () => {
     <div className="search-page">
       <h1 className="search-page__title">Поиск</h1>
       <SearchBar value={query} onChange={setQuery} />
+
+      {/* Переключатель Фильмы / Сериалы */}
+      <div className="search-type-toggle">
+        <button
+          className={`search-type-btn ${searchType === 'movie' ? 'search-type-btn--active' : ''}`}
+          onClick={() => setSearchType('movie')}
+        >🎬 Фильмы</button>
+        <button
+          className={`search-type-btn ${searchType === 'series' ? 'search-type-btn--active' : ''}`}
+          onClick={() => setSearchType('series')}
+        >📺 Сериалы</button>
+      </div>
 
       {/* Фильтр по жанрам */}
       <div className="search-filters">

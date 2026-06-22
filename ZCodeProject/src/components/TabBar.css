@@ -1,105 +1,48 @@
-/* ===== Минималистичная нижняя навигация ===== */
+/* ===== Premium TabBar ===== */
 .tab-bar {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding:
-    0
-    max(8px, env(safe-area-inset-right, 8px))
-    max(8px, env(safe-area-inset-bottom, 8px))
-    max(8px, env(safe-area-inset-left, 8px));
+  bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: center;
+  padding: 0 env(safe-area-inset-right,12px) max(env(safe-area-inset-bottom,12px),12px) env(safe-area-inset-left,12px);
   z-index: 100;
   pointer-events: none;
 }
-
 .tab-bar__inner {
   pointer-events: auto;
-  width: 100%;
-  max-width: 500px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  border-radius: 24px;
-  padding: 6px 6px;
-  background: rgba(12, 12, 24, 0.65);
-  backdrop-filter: blur(25px) saturate(180%);
-  -webkit-backdrop-filter: blur(25px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  width: 100%; max-width: 480px;
+  display: flex; justify-content: space-around;
+  padding: 6px;
+  border-radius: 20px;
+  background: rgba(8,8,15,0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
 }
-
-[data-theme='light'] .tab-bar__inner {
-  background: rgba(240, 243, 250, 0.7);
-  border-color: rgba(20, 21, 42, 0.08);
-}
-
 .tab-bar__item {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
   flex: 1;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px 4px 6px;
-  border-radius: 16px;
-  color: rgba(255, 255, 255, 0.45);
-  transition: color 0.2s ease;
+  background: none; border: none;
+  padding: 8px 4px 4px;
+  border-radius: 14px;
+  color: var(--text-3);
+  transition: color 0.2s;
   -webkit-tap-highlight-color: transparent;
 }
-
-[data-theme='light'] .tab-bar__item {
-  color: rgba(20, 21, 42, 0.4);
-}
-
-.tab-bar__item:active {
-  opacity: 0.7;
-}
-
-.tab-bar__item--active {
-  color: #fff;
-}
-
-[data-theme='light'] .tab-bar__item--active {
-  color: #14152a;
-}
-
+.tab-bar__item--active { color: var(--text); }
 .tab-bar__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
 }
-
-.tab-bar__label {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  opacity: 0.8;
-}
-
-/* Бейдж избранного */
+.tab-bar__item--active .tab-bar__icon { transform: scale(1.15); }
+.tab-bar__label { font-size: 9px; font-weight: 600; opacity: 0.7; }
 .tab-bar__badge {
-  position: absolute;
-  top: 2px;
-  right: calc(50% - 20px);
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
-  background: #ff2d55;
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  line-height: 16px;
-  text-align: center;
-  padding: 0 4px;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(255, 45, 85, 0.5);
+  position: absolute; top: 1px; right: calc(50% - 18px);
+  min-width: 15px; height: 15px; border-radius: 7.5px;
+  background: #ef4444; color: #fff;
+  font-size: 8px; font-weight: 800; line-height: 15px; text-align: center;
+  padding: 0 4px; z-index: 2;
+  box-shadow: 0 2px 8px rgba(239,68,68,0.5);
 }

@@ -86,8 +86,12 @@ async function omdbFetch(params: Record<string, any>): Promise<any> {
 }
 
 /** Поиск + обогащение деталями первых 5 */
-async function searchOMDb(query: string, page = 1): Promise<CatalogResponse> {
-  const data = await omdbFetch({ s: query, page, type: 'movie' });
+async function searchOMDb(query: string, page = 1, type?: string): Promise<CatalogResponse> {
+  const params: Record<string, any> = { s: query, page };
+  if (type === 'series') params.type = 'series';
+  else params.type = 'movie';
+
+  const data = await omdbFetch(params);
   if (!data.Search) return { ok: true, page, results: [], total_pages: 0, total_results: 0 };
   const items = data.Search.map(omdbToMovie);
   const enriched = await Promise.all(
@@ -143,8 +147,8 @@ async function fetchPopular(): Promise<Movie[]> {
 /* ===== Публичные функции ===== */
 
 /** Поиск по названию */
-export const searchCatalog = async (query: string, page = 1): Promise<CatalogResponse> => {
-  return searchOMDb(query, page);
+export const searchCatalog = async (query: string, page = 1, type?: string): Promise<CatalogResponse> => {
+  return searchOMDb(query, page, type);
 };
 
 /** Каталог — всегда пытается найти фильмы */
