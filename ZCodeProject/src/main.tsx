@@ -6,8 +6,20 @@ import App from './App';
 
 // Инициализация Telegram WebApp
 if (window.Telegram?.WebApp) {
-  window.Telegram.WebApp.ready();
-  window.Telegram.WebApp.expand();
+  const tg = window.Telegram.WebApp;
+  tg.ready();
+  tg.expand();
+
+  // Отключаем свайп-жест закрытия (iOS)
+  if (tg.disableVerticalSwipes) {
+    try { tg.disableVerticalSwipes(); } catch {}
+  }
+  if (tg.setHeaderColor) {
+    try { tg.setHeaderColor('#08080f'); } catch {}
+  }
+  if (tg.setBottomBarColor) {
+    try { tg.setBottomBarColor('#08080f'); } catch {}
+  }
 }
 
 // Применяем сохранённую тему
@@ -19,7 +31,6 @@ try {
   document.documentElement.setAttribute('data-theme', 'dark');
 }
 
-// Рендер приложения
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

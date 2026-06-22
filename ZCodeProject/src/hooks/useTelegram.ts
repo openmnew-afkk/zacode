@@ -20,6 +20,9 @@ declare global {
         close: () => void;
         expand: () => void;
         isExpanded: boolean;
+        disableVerticalSwipes?: () => void;
+        setHeaderColor?: (color: string) => void;
+        setBottomBarColor?: (color: string) => void;
         initDataUnsafe: {
           user?: TelegramUser;
           query_id?: string;
@@ -79,6 +82,17 @@ export const useTelegram = () => {
     if (tg) {
       tg.ready();
       tg.expand();
+      // Отключаем свайп закрытия (iOS Telegram)
+      if (typeof tg.disableVerticalSwipes === 'function') {
+        try { tg.disableVerticalSwipes(); } catch {}
+      }
+      // Цвет хедера под фон приложения
+      if (typeof tg.setHeaderColor === 'function') {
+        try { tg.setHeaderColor('#08080f'); } catch {}
+      }
+      if (typeof tg.setBottomBarColor === 'function') {
+        try { tg.setBottomBarColor('#08080f'); } catch {}
+      }
     }
   }, []);
 
