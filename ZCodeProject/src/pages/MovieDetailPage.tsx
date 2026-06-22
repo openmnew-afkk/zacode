@@ -65,27 +65,18 @@ const MovieDetailPage: React.FC = () => {
   /** Открыть плеер */
   const handleWatch = async () => {
     haptic('medium');
-    if (movie) {
-      addToHistory(movie);
-    }
+    if (movie) addToHistory(movie);
 
-    // Если URL уже есть — просто открываем
-    if (playerUrl) {
-      setShowPlayer(true);
-      return;
-    }
+    if (playerUrl) { setShowPlayer(true); return; }
 
-    // Для сериала с выбранной серией — серии открываются по кнопке Смотреть
-    // poiskkino.dev не отдаёт URL на серии, поэтому просто открываем плеер сериала
-
-    // Тянем ссылки на плеер с сервера
     try {
       const sources = await getPlayerUrl(movieId, movie?.title || 'фильм');
-      if (sources.length > 0 && sources[0].url) {
-        setPlayerUrl(sources[0].url);
+      const first = sources.find((s) => s.type === 'embed') || sources[0];
+      if (first?.url) {
+        setPlayerUrl(first.url);
         setShowPlayer(true);
       } else {
-        setError('Плеер не найден. Укажите ссылку на плеер в Настройках.');
+        setError('Плеер не найден.');
       }
     } catch {
       setError('Ошибка загрузки плеера.');

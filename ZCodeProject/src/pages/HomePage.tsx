@@ -1,93 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import MovieList from '../components/MovieList';
-import {
-  getCatalog,
-  getNovelty,
-  getTop,
-  backdropUrl,
-} from '../api/catalog';
+import { getCatalog, backdropUrl, getNovelty } from '../api/catalog';
 import type { Movie } from '../types';
 import { useNavigate } from 'react-router-dom';
 import './HomePage.css';
 
 /* ===== Главная страница ===== */
 
-interface Category {
-  id: string;
-  title: string;
-  icon: string;
-}
-
-const CATEGORIES: Category[] = [
-  { id: '', title: 'Всё', icon: '✨' },
-  { id: 'movie', title: 'Фильмы', icon: '🎬' },
-  { id: 'serial', title: 'Сериалы', icon: '📺' },
-  { id: 'anime', title: 'Аниме', icon: '🍥' },
-  { id: 'tvshow', title: 'ТВ-шоу', icon: '🎙️' },
-];
-
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const [trending, setTrending] = useState<Movie[]>([]);
-  const [novelty, setNovelty] = useState<Movie[]>([]);
-  const [categoryItems, setCategoryItems] = useState<Movie[]>([]);
-  const [heroMovies, setHeroMovies] = useState<Movie[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [heroIndex, setHeroIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [category, setCategory] = useState('');
 
-  /** Загрузка дефолтных секций */
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [topRes, novRes] = await Promise.all([getTop(), getNovelty()]);
-        setTrending(topRes.results || []);
-        setNovelty(novRes.results || []);
-        // Hero — фильмы с лучшим рейтингом и постером
-        const heroes = (topRes.results || [])
-          .filter((m) => m.backdrop_path || m.poster_path)
-          .slice(0, 5);
-        setHeroMovies(heroes);
+        const res = await getCatalog({ page: 1, limit: 20 });
+        if (res.results && res.results.length > 0) {
+          setMovies(res.results);
+        } else {
+          // Fallback встроенный
+          const nov = await getNovelty();
+          setMovies(nov.results || []);
+        }
       } catch (err) {
-        console.error('Ошибка загрузки данных:', err);
-        setError('Не удалось загрузить данные. Проверьте токен и подключение.');
+        console.error('Ошибка:', err);
+        setError('Не удалось загрузить фильмы.');
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  /** Загрузка по выбранной категории */
-  useEffect(() => {
-    setLoading(true);
-    getCatalog({ sort: 'rating', limit: 20 })
-      .then((res) => setCategoryItems(res.results || []))
-      .catch((err) => console.error('Ошибка категории:', err))
-      .finally(() => setLoading(false));
-  }, [category]);
-
-  /** Автопрокрутка карусели */
+  // Автопрокрутка
+  const heroMovies = movies.filter((m) => m.backdrop_path).slice(0, 5);
   useEffect(() => {
     if (heroMovies.length === 0) return;
-    const interval = setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % heroMovies.length);
-    }, 5000);
-    return () => clearInterval(interval);
+    const iv = setInterval(() => setHeroIndex((p) => (p + 1) % heroMovies.length), 5000);
+    return () => clearInterval(iv);
   }, [heroMovies]);
 
-  const currentHero = heroMovies[heroIndex];
-
-  if (error) {
-    return (
-      <div className="home-error">
-        <div className="home-error__icon">⚠️</div>
-        <p className="home-error__text">{error}</p>
-      </div>
-    );
-  }
+  const hero = heroMovies[heroIndex];
 
   return (
     <div className="home-page">
@@ -99,75 +55,42 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Быстрое меню категорий */}
-      <div className="home-categories">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id || 'all'}
-            className={`home-category ${category === cat.id ? 'home-category--active' : ''}`}
-            onClick={() => setCategory(cat.id)}
-          >
-            <span className="home-category__icon">{cat.icon}</span>
-            {cat.title}
-          </button>
-        ))}
-      </div>
-
       {/* Карусель */}
-      {currentHero && (
-        <div
-          className="hero-carousel"
-          onClick={() => navigate(`/movie/${currentHero.id}`)}
-        >
+      {hero && (
+        <div className="hero-carousel" onClick={() => navigate(`/movie/${hero.id}`)}>
           <div
             className="hero-carousel__bg"
-            style={{
-              backgroundImage: `url(${backdropUrl(currentHero.backdrop_path || currentHero.poster_path)})`,
-            }}
+            style={{ backgroundImage: `url(${backdropUrl(hero.backdrop_path || hero.poster_path)})` }}
           />
           <div className="hero-carousel__overlay" />
           <div className="hero-carousel__content">
-            <h1 className="hero-carousel__title">{currentHero.title}</h1>
+            <h1 className="hero-carousel__title">{hero.title}</h1>
             <p className="hero-carousel__overview">
-              {currentHero.overview?.slice(0, 140)}
-              {(currentHero.overview?.length ?? 0) > 140 ? '…' : ''}
+              {hero.overview?.slice(0, 140)}{hero.overview?.length > 140 ? '…' : ''}
             </p>
             <div className="hero-carousel__meta">
-              <span className="hero-carousel__rating">★ {currentHero.vote_average.toFixed(1)}</span>
-              <span className="hero-carousel__year">
-                {currentHero.release_date?.slice(0, 4)}
-              </span>
-              {(currentHero.is_serial || currentHero.type === 'anime') && (
-                <span className="hero-carousel__year">
-                  {currentHero.type === 'anime' ? 'Аниме' : 'Сериал'}
-                </span>
-              )}
+              <span className="hero-carousel__rating">★ {hero.vote_average.toFixed(1)}</span>
+              <span className="hero-carousel__year">{hero.release_date?.slice(0, 4)}</span>
             </div>
           </div>
-          {/* Индикаторы */}
           <div className="hero-carousel__dots">
             {heroMovies.map((_, i) => (
-              <button
-                key={i}
-                className={`hero-carousel__dot ${i === heroIndex ? 'active' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setHeroIndex(i);
-                }}
-              />
+              <button key={i} className={`hero-carousel__dot ${i === heroIndex ? 'active' : ''}`}
+                onClick={(e) => { e.stopPropagation(); setHeroIndex(i); }} />
             ))}
           </div>
         </div>
       )}
 
-      {/* Секции */}
-      {category ? (
-        <MovieList title="По категории" movies={categoryItems} loading={loading} />
-      ) : (
-        <>
-          <MovieList title="🔥 Сейчас в тренде" movies={trending} loading={loading} />
-          <MovieList title="🆕 Новинки" movies={novelty} loading={loading} />
-        </>
+      {/* Список фильмов */}
+      <MovieList title="Популярное" movies={movies} loading={loading} />
+      <MovieList title="Рекомендуем" movies={[...movies].reverse()} loading={loading} />
+
+      {error && (
+        <div className="home-error">
+          <div className="home-error__icon">⚠️</div>
+          <p className="home-error__text">{error}</p>
+        </div>
       )}
     </div>
   );
