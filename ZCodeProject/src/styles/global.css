@@ -190,3 +190,28 @@ button {
   background: var(--accent-glow);
   color: #fff;
 }
+
+/* Простая заглушка загрузки */
+.page-loader {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  z-index: 9998;
+}
+
+.page-loader::after {
+  content: '';
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--accent);
+  animation: loader-spin 0.7s linear infinite;
+}
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}

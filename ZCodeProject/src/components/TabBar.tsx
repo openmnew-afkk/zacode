@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useStore } from '../store/useStore';
 import './TabBar.css';
 
-/* ===== Плавающая стеклянная нижняя навигация ===== */
+/* ===== Новая нижняя навигация с анимированным pill ===== */
 
 interface Tab {
   path: string;
@@ -10,7 +11,6 @@ interface Tab {
   icon: React.ReactNode;
 }
 
-/* SVG-иконки (строковые размеры сохранены — полная совместимость) */
 const HomeIcon = (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" />
@@ -44,16 +44,42 @@ const tabs: Tab[] = [
 const TabBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { favorites } = useStore();
+  const innerRef = useRef<HTMLDivElement>(null);
+  const [pillStyle, setPillStyle] = useState({ left: 0, width: 0 });
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
+  const activeIndex = tabs.findIndex((t) => isActive(t.path));
+
+  /** Пересчитываем позицию pill */
+  useEffect(() => {
+    if (!innerRef.current) return;
+    const items = innerRef.current.querySelectorAll<HTMLButtonElement>('.tab-bar__item');
+    const active = items[activeIndex];
+    if (active) {
+      const parentRect = innerRef.current.getBoundingClientRect();
+      const rect = active.getBoundingClientRect();
+      setPillStyle({
+        left: rect.left - parentRect.left,
+        width: rect.width,
+      });
+    }
+  }, [activeIndex, location.pathname]);
+
   return (
     <nav className="tab-bar" role="navigation" aria-label="Навигация">
-      <div className="tab-bar__inner glass">
-        {tabs.map((tab) => {
+      <div className="tab-bar__inner" ref={innerRef}>
+        {/* Плавающий pill */}
+        <div
+          className="tab-bar__pill"
+          style={{ left: pillStyle.left, width: pillStyle.width }}
+        />
+
+        {tabs.map((tab, i) => {
           const active = isActive(tab.path);
           return (
             <button
@@ -65,6 +91,13 @@ const TabBar: React.FC = () => {
             >
               <span className="tab-bar__icon">{tab.icon}</span>
               <span className="tab-bar__label">{tab.label}</span>
+
+              {/* Бейдж для избранного */}
+              {tab.path === '/favorites' && favorites.length > 0 && (
+                <span className="tab-bar__badge">
+                  {favorites.length > 99 ? '99+' : favorites.length}
+                </span>
+              )}
             </button>
           );
         })}

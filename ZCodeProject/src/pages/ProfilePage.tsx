@@ -10,7 +10,7 @@ import {
 } from '../api/catalog';
 import './ProfilePage.css';
 
-/* ===== Страница профиля ===== */
+/* ===== Страница профиля с модальным подтверждением ===== */
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,8 +26,10 @@ const ProfilePage: React.FC = () => {
   // Состояние плеера (embed pattern)
   const [showPlayer, setShowPlayer] = useState(false);
   const [patternInput, setPatternInput] = useState(getPlayerPattern());
-  const [patternStatus, setPatternStatus] = useState<'idle' | 'ok'>('idle');
   const [patternMsg, setPatternMsg] = useState('');
+
+  // Модалка закрытия
+  const [showCloseModal, setShowCloseModal] = useState(false);
 
   const displayName = user
     ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`
@@ -52,8 +54,7 @@ const ProfilePage: React.FC = () => {
   /* ===== Embed-паттерн плеера ===== */
   const handleSavePattern = () => {
     setPlayerPattern(patternInput.trim());
-    setPatternStatus('ok');
-    setPatternMsg('Паттерн сохранён. Используйте {ID} — подставится kinopoisk_id фильма.');
+    setPatternMsg('Паттерн сохранён. {ID} подставится автоматически.');
     setTimeout(() => setPatternMsg(''), 4000);
   };
 
@@ -137,11 +138,11 @@ const ProfilePage: React.FC = () => {
           </span>
         </div>
 
-        {/* ===== Каталог (poiskkino.dev) ===== */}
+        {/* Каталог (poiskkino.dev) */}
         <div className="profile-setting" onClick={() => setShowSources((v) => !v)}>
           <span className="profile-setting__label">📚 Каталог Кинопоиска</span>
           <span className="profile-setting__value">
-            {showSources ? 'Скрыть ▲' : 'Настроить ▼'}
+            {showSources ? '▲' : '▼'}
           </span>
         </div>
 
@@ -162,7 +163,7 @@ const ProfilePage: React.FC = () => {
               <input
                 className="source-card__input"
                 type="text"
-                placeholder="Вставьте API-ключ poiskkino.dev"
+                placeholder="API-ключ poiskkino.dev"
                 value={tokenInput}
                 onChange={(e) => setTokenInput(e.target.value)}
                 autoComplete="off"
@@ -177,32 +178,31 @@ const ProfilePage: React.FC = () => {
                 onClick={handleCheckToken}
                 disabled={tokenStatus === 'checking'}
               >
-                {tokenStatus === 'checking' ? 'Проверка…' : 'Проверить'}
+                {tokenStatus === 'checking' ? '…' : 'Проверить'}
               </button>
             </div>
 
             {tokenMsg && <p className="source-card__status">{tokenMsg}</p>}
 
             <p className="source-card__hint">
-              Получите API-ключ на <strong>poiskkino.dev</strong> (бывший kinopoisk.dev).
-              Токен можно задать как серверную переменную <code>KINOPOISK_API_KEY</code> — тогда
-              вводить здесь не обязательно.
+              API-ключ на <strong>poiskkino.dev</strong> (бесплатно).
+              Можно задать серверной переменной <code>KINOPOISK_API_KEY</code>.
             </p>
           </div>
         )}
 
-        {/* ===== Плеер (embed pattern) ===== */}
+        {/* Плеер (embed pattern) */}
         <div className="profile-setting" onClick={() => setShowPlayer((v) => !v)}>
           <span className="profile-setting__label">🎬 Плеер</span>
           <span className="profile-setting__value">
-            {showPlayer ? 'Скрыть ▲' : 'Настроить ▼'}
+            {showPlayer ? '▲' : '▼'}
           </span>
         </div>
 
         {showPlayer && (
           <div className="source-card">
             <div className="source-card__head">
-              <span className="source-card__name">📺 Embed-адрес плеера</span>
+              <span className="source-card__name">📺 URL плеера</span>
               <span className={`source-card__badge ${patternInput ? 'source-card__badge--ok' : 'source-card__badge--idle'}`}>
                 {patternInput ? 'Задан' : 'По умолч.'}
               </span>
@@ -227,8 +227,7 @@ const ProfilePage: React.FC = () => {
                 onClick={() => {
                   setPatternInput('');
                   setPlayerPattern('');
-                  setPatternStatus('ok');
-                  setPatternMsg('Паттерн сброшен. Используется Kinobase по умолчанию.');
+                  setPatternMsg('Сброшен. Используется Kinobase.');
                 }}
               >
                 Сбросить
@@ -238,19 +237,42 @@ const ProfilePage: React.FC = () => {
             {patternMsg && <p className="source-card__status">{patternMsg}</p>}
 
             <p className="source-card__hint">
-              Введите URL шаблона плеера, где <code>{'{ID}'}</code> — ID Кинопоиска.
+              <code>{'{ID}'}</code> — ID Кинопоиска.
               По умолчанию: <code>https://kinobase.org/film/{'{ID}'}</code>.
-              Можете заменить на <code>https://zona.plus/movies/{'{ID}'}</code> или любое зеркало.
-              YouTube-поиск всегда доступен как запасной вариант.
+              YouTube всегда как фолбэк.
             </p>
           </div>
         )}
       </div>
 
-      {/* Выход */}
-      <button className="profile-exit" onClick={closeApp}>
-        Закрыть приложение
-      </button>
+      {/* Кнопка закрытия (безопасная, малозаметная) */}
+      <div className="profile-close-wrap">
+        <button className="profile-close" onClick={() => setShowCloseModal(true)}>
+          Закрыть приложение
+        </button>
+      </div>
+
+      {/* Модальное подтверждение */}
+      {showCloseModal && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCloseModal(false); }}>
+          <div className="modal-box">
+            <div className="modal-box__icon">🚪</div>
+            <h3 className="modal-box__title">Закрыть приложение?</h3>
+            <p className="modal-box__text">
+              Вы уверены, что хотите закрыть TeleCinema?<br />
+              История и избранное сохранятся.
+            </p>
+            <div className="modal-box__actions">
+              <button className="modal-box__btn modal-box__btn--cancel" onClick={() => setShowCloseModal(false)}>
+                Остаться
+              </button>
+              <button className="modal-box__btn modal-box__btn--danger" onClick={closeApp}>
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
