@@ -1,7 +1,6 @@
 {
   "rewrites": [
     { "source": "/api/catalog", "destination": "/api/catalog" },
-    { "source": "/api/movie", "destination": "/api/movie" },
     { "source": "/api/player", "destination": "/api/player" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]

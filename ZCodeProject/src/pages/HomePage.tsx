@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     if (!hasToken()) return;
     setLoading(true);
-    getCatalog({ type: category || undefined, sort: 'novelty', limit: 20 })
+    getCatalog({ sort: 'rating', limit: 20 })
       .then((res) => setCategoryItems(res.results || []))
       .catch((err) => console.error('Ошибка категории:', err))
       .finally(() => setLoading(false));

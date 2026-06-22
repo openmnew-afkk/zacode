@@ -36,15 +36,16 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       try {
         let result;
-        const genre = selectedGenres.length > 0 ? selectedGenres[0] : undefined;
+        const genre = selectedGenres.length > 0 ? String(selectedGenres[0]) : undefined;
+        const year = selectedYear ? String(selectedYear) : undefined;
         if (query.trim()) {
           result = await searchCatalog(query.trim(), pageNum);
         } else {
           result = await getCatalog({
             page: pageNum,
             genre,
-            year: selectedYear || undefined,
-            sort: 'novelty',
+            year,
+            sort: 'year',
           });
         }
         setMovies((prev) => (reset ? result.results : [...prev, ...result.results]));

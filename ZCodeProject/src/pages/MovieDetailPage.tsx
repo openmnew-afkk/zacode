@@ -69,41 +69,23 @@ const MovieDetailPage: React.FC = () => {
       addToHistory(movie);
     }
 
-    // Для сериала: открыть конкретную серию, иначе основной iframe
-    let url = playerUrl;
-
-    if (!url) {
-      // Если уже есть iframe_url в деталях — используем
-      if (movie?.iframe_url) {
-        url = movie.iframe_url.startsWith('//')
-          ? `https:${movie.iframe_url}`
-          : movie.iframe_url;
-      }
-    }
-
-    // Для сериала с выбранной серией
-    if (movie?.is_serial && activeEpisode !== null) {
-      const season = movie.seasons?.[activeSeason];
-      const ep = season?.episodes.find((e) => e.id === activeEpisode);
-      if (ep?.iframe_url) {
-        url = ep.iframe_url.startsWith('//') ? `https:${ep.iframe_url}` : ep.iframe_url;
-      }
-    }
-
-    if (url) {
-      setPlayerUrl(url);
+    // Если URL уже есть — просто открываем
+    if (playerUrl) {
       setShowPlayer(true);
       return;
     }
 
-    // Иначе тянем ссылку на плеер по id
+    // Для сериала с выбранной серией — серии открываются по кнопке Смотреть
+    // poiskkino.dev не отдаёт URL на серии, поэтому просто открываем плеер сериала
+
+    // Тянем ссылки на плеер с сервера
     try {
-      const fetched = await getPlayerUrl(movieId);
-      if (fetched) {
-        setPlayerUrl(fetched);
+      const sources = await getPlayerUrl(movieId, movie?.title || 'фильм');
+      if (sources.length > 0 && sources[0].url) {
+        setPlayerUrl(sources[0].url);
         setShowPlayer(true);
       } else {
-        setError('Видео не найдено. Попробуйте позже.');
+        setError('Плеер не найден. Укажите ссылку на плеер в Настройках.');
       }
     } catch {
       setError('Ошибка загрузки плеера.');
