@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import SearchBar from '../components/SearchBar';
 import MovieCard from '../components/MovieCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { searchCatalog, getCatalog, getGenres, hasToken } from '../api/catalog';
+import { searchCatalog, getCatalog, getGenres } from '../api/catalog';
 import type { Movie, Genre } from '../types';
 import './SearchPage.css';
 
@@ -23,10 +23,6 @@ const SearchPage: React.FC = () => {
 
   /** Загрузка жанров */
   useEffect(() => {
-    if (!hasToken()) {
-      setError('Источник не настроен. Укажите токен в «Профиль → Настройки → Источники».');
-      return;
-    }
     getGenres().then(setGenres).catch(console.error);
   }, []);
 
@@ -61,7 +57,6 @@ const SearchPage: React.FC = () => {
 
   /** Поиск с debounce */
   useEffect(() => {
-    if (!hasToken()) return;
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setPage(1);

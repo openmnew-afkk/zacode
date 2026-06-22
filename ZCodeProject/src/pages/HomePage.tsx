@@ -5,7 +5,6 @@ import {
   getNovelty,
   getTop,
   backdropUrl,
-  hasToken,
 } from '../api/catalog';
 import type { Movie } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -40,14 +39,6 @@ const HomePage: React.FC = () => {
 
   /** Загрузка дефолтных секций */
   useEffect(() => {
-    if (!hasToken()) {
-      setError(
-        'Источник не настроен. Откройте «Профиль → Настройки → Источники» и укажите токен VideoCDN, либо задайте его в переменной окружения VIDEOCDN_TOKEN на сервере.'
-      );
-      setLoading(false);
-      return;
-    }
-
     const fetchData = async () => {
       try {
         const [topRes, novRes] = await Promise.all([getTop(), getNovelty()]);
@@ -71,7 +62,6 @@ const HomePage: React.FC = () => {
 
   /** Загрузка по выбранной категории */
   useEffect(() => {
-    if (!hasToken()) return;
     setLoading(true);
     getCatalog({ sort: 'rating', limit: 20 })
       .then((res) => setCategoryItems(res.results || []))

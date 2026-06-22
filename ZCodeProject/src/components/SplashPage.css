@@ -1,4 +1,4 @@
-/* ===== Анимированная загрузочная страница ===== */
+/* ===== Загрузочная страница ===== */
 .splash {
   position: fixed;
   inset: 0;
@@ -7,7 +7,7 @@
   justify-content: center;
   z-index: 9999;
   background: var(--bg-primary);
-  animation: splash-out 0.6s ease 2.8s forwards;
+  animation: splash-out 0.5s ease 2.5s forwards;
 }
 
 @keyframes splash-out {
@@ -18,130 +18,60 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  animation: splash-fade-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  gap: 12px;
+  animation: splash-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
-@keyframes splash-fade-in {
-  from { opacity: 0; transform: translateY(30px) scale(0.95); }
+@keyframes splash-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ===== Логотип (SVG) ===== */
-.splash__logo-wrap {
-  position: relative;
-  width: 90px;
-  height: 90px;
-  margin-bottom: 8px;
-}
-
 .splash__logo {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 30px var(--accent-glow));
-  animation: logo-pulse 2.4s ease-in-out infinite;
+  width: 72px;
+  height: 72px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 20px var(--accent-glow));
+  animation: logo-pulse 1.5s ease-in-out infinite;
 }
 
 @keyframes logo-pulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 30px var(--accent-glow)); }
-  50% { transform: scale(1.06); filter: drop-shadow(0 0 50px var(--accent-glow)); }
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
 }
 
-/* Кадры плёнки — мерцают */
-.splash__frame {
-  animation: frame-blink 2s ease-in-out infinite;
-}
-
-.splash__frame--1 { animation-delay: 0s; }
-.splash__frame--2 { animation-delay: 0.3s; }
-.splash__frame--3 { animation-delay: 0.6s; }
-.splash__frame--4 { animation-delay: 0.9s; }
-.splash__frame--5 { animation-delay: 1.2s; }
-.splash__frame--6 { animation-delay: 1.5s; }
-
-@keyframes frame-blink {
-  0%, 100% { opacity: 0.8; }
-  50% { opacity: 0.3; }
-}
-
-/* Звезда — вращение */
-.splash__star {
-  animation: star-rotate 3s linear infinite;
-  transform-origin: 40px 40px;
-}
-
-@keyframes star-rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* ===== Название ===== */
 .splash__title {
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 800;
   letter-spacing: -0.03em;
   margin: 0;
   line-height: 1;
-  animation: title-reveal 1s ease 0.3s both;
 }
 
-@keyframes title-reveal {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.splash__title-t {
+.splash__title span:first-child {
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.splash__title-c {
+.splash__title span:last-child {
   background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* ===== Теглайн ===== */
-.splash__tagline {
-  font-size: 14px;
+.splash__subtitle {
+  font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
   margin: 0;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0;
-  animation: tagline-fade 1s ease 0.8s forwards;
+  letter-spacing: 0.04em;
+  animation: blink 1.5s ease-in-out infinite;
 }
 
-@keyframes tagline-fade {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== Анимированные точки загрузки ===== */
-.splash__dots {
-  display: flex;
-  gap: 6px;
-  margin-top: 16px;
-}
-
-.splash__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  animation: dot-bounce 1s ease-in-out infinite;
-}
-
-.splash__dot:nth-child(1) { animation-delay: 0s; }
-.splash__dot:nth-child(2) { animation-delay: 0.15s; }
-.splash__dot:nth-child(3) { animation-delay: 0.3s; }
-.splash__dot:nth-child(4) { animation-delay: 0.45s; }
-
-@keyframes dot-bounce {
-  0%, 80%, 100% { transform: scale(0.4); opacity: 0.3; }
-  40% { transform: scale(1); opacity: 1; }
+@keyframes blink {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
 }

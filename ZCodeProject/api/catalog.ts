@@ -1,154 +1,87 @@
-/* ===== /api/catalog — каталог, поиск, детали из poiskkino.dev =====
+/* ===== /api/catalog — поиск и детали через OMDb API (бесплатно) =====
  *
- * GET /api/catalog?q=...&page=...&sort=...&genre=...&year=... — список/поиск
- * GET /api/catalog?id=... (kinopoisk_id) — детали + similar
- * GET /api/catalog?meta=1 — жанры
+ * GET /api/catalog?q=Matrix&page=1 — поиск по названию
+ * GET /api/catalog?id=tt0133093 — детали по IMDb ID
+ * GET /api/catalog?meta=1 — жанры (хардкод)
  */
 
-import { getToken, fetchPoiskkino, hasToken } from './_lib/poiskkino';
-import { json, error, handleOptions, CORS_HEADERS, ResShape } from './_lib/common';
+import { fetchOMDb, json, error, handleOptions, ResShape } from './_lib/omdb';
 
-/* ===== Нормализация ===== */
+/* ===== Хардкодные жанры (OMDb не возвращает список жанров) ===== */
+const GENRES = [
+  { id: 1, name: 'Боевик' }, { id: 2, name: 'Триллер' }, { id: 3, name: 'Комедия' },
+  { id: 4, name: 'Драма' }, { id: 5, name: 'Фантастика' }, { id: 6, name: 'Ужасы' },
+  { id: 7, name: 'Приключения' }, { id: 8, name: 'Мелодрама' }, { id: 9, name: 'Детектив' },
+  { id: 10, name: 'Военный' }, { id: 11, name: 'Исторический' }, { id: 12, name: 'Семейный' },
+  { id: 13, name: 'Мультфильм' }, { id: 14, name: 'Фэнтези' }, { id: 15, name: 'Документальный' },
+  { id: 16, name: 'Криминал' }, { id: 17, name: 'Биография' }, { id: 18, name: 'Спорт' },
+  { id: 19, name: 'Вестерн' }, { id: 20, name: 'Мюзикл' },
+];
 
-interface KPMovieDoc {
-  id: number;
-  name: string;
-  alternativeName: string;
-  enName?: string;
-  year: number;
-  description: string;
-  shortDescription: string;
-  movieLength: number;
-  ageRating: number;
-  rating: { kp: number; imdb: number; filmCritics: number; russianFilmCritics: number; await: number };
-  votes: { kp: number; imdb: number };
-  poster: { url: string; previewUrl: string };
-  backdrop: { url: string; previewUrl: string };
-  genres: { name: string }[];
-  countries: { name: string }[];
-  persons: KPAPerson[];
-  similarMovies: KPSimilarMovie[];
-  seasonsInfo: KPSeasonInfo[];
-  isSeries: boolean;
-  type: string;
-  externalId: { kpHD: string; imdb: string; tmdb: number };
-}
-
-interface KPAPerson {
-  id: number;
-  name: string;
-  enName: string;
-  photo: string;
-  profession: string;
-  enProfession: string;
-}
-
-interface KPSimilarMovie {
-  id: number;
-  name: string;
-  alternativeName: string;
-  poster: { url: string; previewUrl: string };
-  year: number;
-  rating: { kp: number; imdb: number };
-}
-
-interface KPSeasonInfo {
-  number: number;
-  episodesCount: number;
-}
-
-/** Нормализовать один фильм из poiskkino */
-function normalizeMovie(doc: KPMovieDoc) {
-  const ratingKp = doc.rating?.kp || 0;
-  const imdbRating = doc.rating?.imdb || 0;
-  const poster = doc.poster?.url || doc.poster?.previewUrl || '';
-  const backdrop = doc.backdrop?.url || doc.backdrop?.previewUrl || poster;
-
-  // Жанры с auto-id
-  const genres = (doc.genres || []).map((g: { name: string }, i: number) => ({
-    id: i + 1,
-    name: g.name.charAt(0).toUpperCase() + g.name.slice(1),
-  }));
-
-  // Актёры + режиссёры
-  const persons = doc.persons || [];
-  const actors = persons
-    .filter((p) => p.profession === 'актеры' || p.enProfession === 'actor')
-    .slice(0, 20)
-    .map((p) => p.name);
-
-  const directors = persons
-    .filter((p) => p.profession === 'режиссеры' || p.enProfession === 'director')
-    .slice(0, 3)
-    .map((p) => p.name);
-
-  // Страны
-  const countries = (doc.countries || []).map((c: { name: string }) => c.name);
-
-  // Похожие
-  const similar = (doc.similarMovies || []).map((s: KPSimilarMovie) => ({
-    id: s.id,
-    title: s.name || s.alternativeName || '',
-    original_title: s.alternativeName || s.name || '',
+/** Нормализовать один фильм из OMDb Search-ответа */
+function normalizeSearchItem(item: any) {
+  const imdbID = item.imdbID || '';
+  const poster = item.Poster && item.Poster !== 'N/A' ? item.Poster : null;
+  return {
+    id: imdbID,
+    title: item.Title || 'Без названия',
+    original_title: '',
     overview: '',
-    poster_path: s.poster?.url || s.poster?.previewUrl || null,
-    backdrop_path: null,
-    release_date: String(s.year || ''),
-    vote_average: s.rating?.kp || s.rating?.imdb || 0,
-    kinopoisk_rating: s.rating?.kp || 0,
-    imdb_rating: s.rating?.imdb || 0,
+    poster_path: poster,
+    backdrop_path: poster,
+    release_date: item.Year || '',
+    vote_average: 0,
+    kinopoisk_rating: 0,
+    imdb_rating: 0,
     runtime: null,
     genre_ids: [],
-    genres: [],
-    type: 'movie',
-    is_serial: false,
-    imdb_id: '',
-    kinopoisk_id: String(s.id),
+    genres: [] as { id: number; name: string }[],
+    type: item.Type === 'series' ? 'serial' : 'movie',
+    is_serial: item.Type === 'series',
+    imdb_id: imdbID,
+    kinopoisk_id: imdbID,
     quality: '',
     translator: '',
     iframe_url: '',
-    countries: [],
-    actors: [],
-    directors: [],
+    countries: [] as string[],
+    actors: [] as string[],
+    directors: [] as string[],
     popularity: 0,
     adult: false,
-  }));
+  };
+}
 
-  const isSerial = doc.isSeries || doc.type === 'tv-series' || doc.type === 'anime';
+/** Нормализовать детальный фильм (из ?i= или ?t= запроса) */
+function normalizeDetail(item: any) {
+  const base = normalizeSearchItem(item);
+  const genreNames = item.Genre?.split(', ')?.filter(Boolean) || [];
+  const actors = item.Actors?.split(', ')?.filter(Boolean) || [];
+  const directors = item.Director?.split(', ')?.filter(Boolean) || [];
+  const countries = item.Country?.split(', ')?.filter(Boolean) || [];
+
+  // Извлекаем рейтинг IMDb
+  const imdbRating = parseFloat(item.imdbRating) || 0;
+
+  // runtime: "148 min" -> 148
+  const runtimeMatch = item.Runtime?.match(/(\d+)/);
+  const runtime = runtimeMatch ? parseInt(runtimeMatch[1]) : null;
 
   return {
-    id: doc.id,
-    title: doc.name || doc.alternativeName || 'Без названия',
-    original_title: doc.alternativeName || doc.enName || '',
-    overview: doc.description || doc.shortDescription || '',
-    poster_path: poster || null,
-    backdrop_path: backdrop || null,
-    release_date: String(doc.year || ''),
-    vote_average: ratingKp || imdbRating || 0,
-    kinopoisk_rating: ratingKp,
+    ...base,
+    overview: item.Plot && item.Plot !== 'N/A' ? item.Plot : '',
+    vote_average: imdbRating,
     imdb_rating: imdbRating,
-    runtime: doc.movieLength || null,
-    genre_ids: genres.map((g) => g.id),
-    genres,
-    type: doc.type || (isSerial ? 'serial' : 'movie'),
-    is_serial: isSerial,
-    imdb_id: doc.externalId?.imdb || '',
-    kinopoisk_id: String(doc.id),
-    quality: '',
-    translator: '',
-    iframe_url: '',
-    countries,
+    runtime,
+    genre_ids: genreNames.map((_: string, i: number) => i + 1),
+    genres: genreNames.map((name: string, i: number) => ({ id: i + 1, name })),
     actors,
     directors,
-    popularity: doc.votes?.kp || doc.votes?.imdb || 0,
-    adult: false,
-    seasons: (doc.seasonsInfo || []).map((s: KPSeasonInfo) => ({
-      id: s.number,
-      season_number: s.number,
-      episodes_count: s.episodesCount,
-      episodes: [],
-    })),
-    similar,
+    countries,
+    // Используем постер из детального ответа (он может быть больше)
+    poster_path: item.Poster && item.Poster !== 'N/A' ? item.Poster : base.poster_path,
+    backdrop_path: item.Poster && item.Poster !== 'N/A' ? item.Poster : base.poster_path,
+    is_serial: item.Type === 'series',
+    type: item.Type === 'series' ? 'serial' : 'movie',
   };
 }
 
@@ -163,80 +96,106 @@ export default async function handler(req: {
   if (opts) return opts;
 
   try {
-    const token = getToken(req);
-
-    if (!hasToken(req)) {
-      return error('API-ключ Кинопоиска не указан. Добавьте в Настройках или задайте KINOPOISK_API_KEY.', 401);
-    }
-
     const url = new URL(req.url || '', 'http://localhost');
     const params = url.searchParams;
 
     // === Мета: жанры ===
     if (params.get('meta') === '1') {
-      const data = await fetchPoiskkino('/genre', {}, token);
-      const genres = (data || []).map((g: { name: string }, i: number) => ({
-        id: i + 1,
-        name: g.name.charAt(0).toUpperCase() + g.name.slice(1),
-      }));
-      return json({ ok: true, genres });
+      return json({ ok: true, genres: GENRES });
     }
 
-    // === Детали одного фильма ===
+    // === Детали одного фильма по IMDb ID ===
     const id = params.get('id');
     if (id) {
-      const doc = await fetchPoiskkino(`/movie/${id}`, {}, token);
-      const movie = normalizeMovie(doc);
-      const similar = movie.similar || [];
-      return json({ ok: true, movie, similar });
+      const data = await fetchOMDb({ i: id, plot: 'full' });
+      if (!data || data.Response === 'False') {
+        return error('Фильм не найден', 404);
+      }
+      const movie = normalizeDetail(data);
+      return json({ ok: true, movie, similar: [] });
     }
 
-    // === Поиск или каталог ===
+    // === Поиск ===
     const page = Math.max(1, parseInt(params.get('page') || '1') || 1);
-    const limit = Math.min(40, Math.max(1, parseInt(params.get('limit') || '20') || 20));
     const query = params.get('q') || '';
 
     if (query) {
-      const data = await fetchPoiskkino('/movie/search', { query, page, limit }, token);
-      const items = (data?.docs || []).map(normalizeMovie);
+      const data = await fetchOMDb({ s: query, page, type: 'movie' });
+      const items = (data?.Search || []).map(normalizeSearchItem);
+
+      // Для первых 5 результатов подгружаем детали (чтобы был рейтинг, описание)
+      const enriched = await Promise.all(
+        items.map(async (item: any, i: number) => {
+          if (i < 5 && item.imdb_id) {
+            try {
+              const detail = await fetchOMDb({ i: item.imdb_id });
+              if (detail && detail.Response !== 'False') {
+                return normalizeDetail(detail);
+              }
+            } catch { /* fallback to basic */ }
+          }
+          return item;
+        })
+      );
+
       return json({
         ok: true,
         page,
-        results: items,
-        total_pages: data.pages || 1,
-        total_results: data.total || items.length,
+        results: enriched,
+        total_pages: Math.min(10, Math.ceil((parseInt(data?.totalResults || '0') || 0) / 10)),
+        total_results: parseInt(data?.totalResults || '0') || 0,
       });
     }
 
-    // Каталог с фильтрами
-    const sortField = params.get('sort') === 'year' ? 'year' : 'rating.kp';
-    const sortType = params.get('sort') === 'year' ? '-1' : '-1';
-    const genre = params.get('genre') || '';
-    const year = params.get('year') || '';
+    // === Главная (популярные) — поиск годовыми запросами ===
+    const currentYear = new Date().getFullYear();
+    // Ищем фильмы текущего года (свежие)
+    let popular: any[] = [];
+    for (const searchTerm of ['2026', '2025', '2024']) {
+      if (popular.length >= 20) break;
+      try {
+        const data = await fetchOMDb({
+          s: searchTerm,
+          type: 'movie',
+          page: 1,
+          y: searchTerm,
+        });
+        if (data?.Search) {
+          popular = [...popular, ...data.Search.slice(0, 6)];
+        }
+      } catch { /* skip */ }
+    }
 
-    const kpParams: Record<string, any> = {
-      page,
-      limit,
-      sortField,
-      sortType,
-    };
-    if (genre) kpParams['genres.name'] = genre;
-    if (year) kpParams.year = year;
+    // Убираем дубликаты по imdbID
+    const seen = new Set<string>();
+    const unique = popular.filter((m: any) => {
+      if (seen.has(m.imdbID)) return false;
+      seen.add(m.imdbID);
+      return true;
+    });
 
-    const data = await fetchPoiskkino('/movie', kpParams, token);
-    const items = (data?.docs || []).map(normalizeMovie);
+    // Обогащаем первые 6
+    const enriched = await Promise.all(
+      unique.slice(0, 20).map(async (item: any) => {
+        try {
+          const detail = await fetchOMDb({ i: item.imdbID });
+          if (detail && detail.Response !== 'False') {
+            return normalizeDetail(detail);
+          }
+        } catch { /* fallback */ }
+        return normalizeSearchItem(item);
+      })
+    );
 
     return json({
       ok: true,
-      page,
-      results: items,
-      total_pages: data.pages || 1,
-      total_results: data.total || items.length,
+      page: 1,
+      results: enriched,
+      total_pages: 1,
+      total_results: enriched.length,
     });
   } catch (e: any) {
     const msg = e?.message || 'CATALOG_ERROR';
-    if (msg === 'BAD_TOKEN') return error('Неверный API-ключ Кинопоиска', 401);
-    if (msg === 'NO_TOKEN') return error('API-ключ Кинопоиска не указан', 401);
     return error('Ошибка каталога: ' + msg, 502);
   }
 }

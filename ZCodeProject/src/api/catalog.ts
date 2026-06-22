@@ -1,22 +1,13 @@
 import axios from 'axios';
-import type { Movie, MovieDetail, CatalogResponse, MovieDetailResponse, Genre } from '../types';
+import type { CatalogResponse, MovieDetailResponse, Genre } from '../types';
 
-/* ===== Клиентский слой над serverless-прокси ===== */
+/* ===== Клиентский слой над serverless-прокси =====
+ * Каталог работает без токена — используется OMDb API с бесплатным ключом.
+ */
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
-/* ===== Токен Кинопоиска (poiskkino.dev) ===== */
-const TOKEN_KEY = 'tc_kinopoisk_token';
-
-export const getToken = (): string => {
-  try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; }
-};
-export const setToken = (token: string) => {
-  try { localStorage.setItem(TOKEN_KEY, token); } catch { /* ignore */ }
-};
-export const hasToken = () => !!getToken();
-
-/* ===== Embed-паттерн плеера ({ID} → kinopoisk_id) ===== */
+/* ===== Плеер-паттерн (пользовательский embed URL, {ID} = IMDb ID) ===== */
 const PATTERN_KEY = 'tc_player_pattern';
 
 export const getPlayerPattern = (): string => {
@@ -24,11 +15,6 @@ export const getPlayerPattern = (): string => {
 };
 export const setPlayerPattern = (pattern: string) => {
   try { localStorage.setItem(PATTERN_KEY, pattern); } catch { /* ignore */ }
-};
-
-const headers = () => {
-  const token = getToken();
-  return token ? { 'x-tc-token': token } : {};
 };
 
 const client = axios.create({ baseURL: API_BASE });
@@ -61,7 +47,7 @@ export const getCatalog = async (params: {
   sort?: string;
   limit?: number;
 }): Promise<CatalogResponse> => {
-  const { data } = await client.get<CatalogResponse>('/api/catalog', { params, headers: headers() });
+  const { data } = await client.get<CatalogResponse>('/api/catalog', { params });
   return data;
 };
 
@@ -75,8 +61,8 @@ export const getTop = (page = 1): Promise<CatalogResponse> =>
   getCatalog({ page, sort: 'rating', limit: 20 });
 
 /* ===== Детали ===== */
-export const getMovieDetail = async (id: string | number): Promise<MovieDetail> => {
-  const { data } = await client.get<MovieDetailResponse>('/api/catalog', { params: { id }, headers: headers() });
+export const getMovieDetail = async (id: string | number): Promise<any> => {
+  const { data } = await client.get<MovieDetailResponse>('/api/catalog', { params: { id } });
   return data.movie;
 };
 
@@ -95,7 +81,7 @@ export const getPlayerUrl = async (id: string | number, title: string): Promise<
     if (title) params.title = title;
 
     const { data } = await client.get<{ ok: boolean; sources: PlayerSource[]; default_url: string }>(
-      '/api/player', { params, headers: headers() }
+      '/api/player', { params }
     );
     return data.sources || [];
   } catch (err) {
@@ -104,27 +90,16 @@ export const getPlayerUrl = async (id: string | number, title: string): Promise<
   }
 };
 
-/* ===== Жанры ===== */
+/* ===== Жанры (хардкод, кешируем из API) ===== */
+let genresCache: Genre[] | null = null;
+
 export const getGenres = async (): Promise<Genre[]> => {
+  if (genresCache) return genresCache;
   try {
     const { data } = await client.get<{ ok: boolean; genres: Genre[] }>('/api/catalog', {
-      params: { meta: 1 }, headers: headers(),
+      params: { meta: 1 },
     });
-    return data.genres || [];
+    genresCache = data.genres || [];
+    return genresCache;
   } catch { return []; }
-};
-
-/* ===== Проверка соединения ===== */
-export const checkSource = async (): Promise<{ ok: boolean; message: string }> => {
-  try {
-    const res = await client.get<CatalogResponse>('/api/catalog', {
-      params: { page: 1, limit: 1 }, headers: headers(),
-    });
-    if (res.data.ok) return { ok: true, message: 'Соединение установлено' };
-    return { ok: false, message: 'Нет данных' };
-  } catch (err: any) {
-    const status = err?.response?.status;
-    if (status === 401) return { ok: false, message: 'Неверный API-ключ' };
-    return { ok: false, message: 'Ошибка: ' + (err?.message || '') };
-  }
 };
