@@ -120,55 +120,119 @@ function toDetail(i: OMDBDetail): MovieDetail {
   };
 }
 
-/* ===== Популярные (60 фильмов + 20 сериалов) ===== */
-const TRENDING_IDS = [
-  // 2024-2026 новинки
-  'tt15398776','tt13238346','tt1745960','tt5113040','tt9362722','tt1464335','tt1489887',
-  'tt5433142','tt1517268','tt9114286','tt1642628','tt10731256','tt1790864','tt6443346',
-  'tt4555426','tt6723592','tt21254950','tt14885894','tt23286798','tt24616872','tt27721048',
-  'tt26722974','tt19682634','tt21965076','tt24613980','tt11304740','tt14539740','tt22332140',
-  // Классика
-  'tt0133093','tt1375666','tt0816692','tt0468569','tt0109830','tt0111161','tt0068646',
-  'tt0120737','tt0167260','tt0167261','tt0910970','tt4154756','tt4154796','tt0499549',
-  'tt0103064','tt1345836','tt7286456','tt6751668','tt0120338','tt0110912','tt0137523',
-  'tt0120689','tt0088763','tt0108052','tt0172495','tt0407887','tt0993846','tt0317705',
-  'tt0338013','tt0441773','tt0482571','tt1856101','tt1392190','tt0816711','tt1454468',
-  'tt3315342','tt2582802','tt3659388','tt5027774','tt5580390','tt5726616','tt5109280',
-  'tt6139732','tt7139936','tt7323606','tt7639528','tt7734218','tt8178634','tt8367814',
-];
+/* ===== Быстрая загрузка с OMDb =====
+ * Параллельные запросы + localStorage кэш.
+ * Первая загрузка — 20 фильмов, показываются сразу из кэша при повторных.
+ */
 
-const SERIES_IDS = [
+
+/* ===== 90 фильмов + 40 сериалов (ID для загрузки) ===== */
+const ALL_IDS = [
+  // Топ-20 для быстрого показа (самые популярные)
+  'tt15398776','tt13238346','tt1745960','tt5113040','tt9362722','tt4555426','tt1464335',
+  'tt1375666','tt0816692','tt0133093','tt0468569','tt0109830','tt0111161','tt0120737',
+  'tt4154756','tt0499549','tt7286456','tt6751668','tt0120338','tt0903747',
+  // Ещё фильмы
+  'tt5433142','tt1517268','tt9114286','tt1642628','tt10731256','tt1790864','tt6443346',
+  'tt6723592','tt1489887','tt21254950','tt0068646','tt0167260','tt0167261','tt0910970',
+  'tt4154796','tt0103064','tt1345836','tt0110912','tt0137523','tt0120689','tt0088763',
+  'tt0108052','tt0172495','tt0407887','tt0993846','tt0317705','tt0338013','tt0441773',
+  'tt0482571','tt1856101','tt1392190','tt0816711','tt1454468','tt3315342','tt2582802',
+  'tt3659388','tt5027774','tt5580390','tt5726616','tt5109280','tt6139732','tt7139936',
+  'tt7323606','tt7639528','tt7734218','tt8178634','tt8367814','tt24616872','tt27721048',
+  'tt26722974','tt19682634','tt21965076','tt24613980','tt11304740','tt14539740','tt22332140',
+  'tt14885894','tt23286798',
+  // Сериалы
   'tt0903747','tt0944947','tt5491994','tt7366338','tt0108778','tt0898266','tt0411008',
   'tt1475582','tt1520211','tt3032476','tt2861424','tt2571774','tt5180504','tt7658402',
   'tt2306299','tt3526078','tt4574334','tt8111088','tt9174558','tt10048342','tt10541088',
   'tt1119644','tt1196946','tt1213641','tt1300854','tt1327773','tt1825683','tt2310332',
   'tt2467372','tt2802850','tt3322312','tt3397884','tt35211234','tt3748528','tt3890160',
-  'tt4034228','tt4287320','tt4459900','tt4633694','tt4698684','tt4972582','tt5013056',
-  'tt5052448','tt5311542','tt5606664','tt5776858','tt5898034','tt6105098','tt6156584',
-  'tt6320628','tt6806448','tt6857112','tt6966692','tt7349662','tt8110330',
+  'tt4034228','tt4287320','tt4459900','tt4633694','tt4698684',
 ];
-
-async function loadTrending(type?: 'movie' | 'series'): Promise<Movie[]> {
-  const ids = type === 'series' ? SERIES_IDS : TRENDING_IDS;
-  const movies: Movie[] = [];
-  for (const id of ids) {
-    try {
-      const d = await omdb({ i: id, plot: 'short' });
-      if (d && d.imdbID) {
-        const m = toDetail(d);
-        if (type === 'series' || !type) movies.push(m);
-      }
-    } catch { /* skip */ }
-    if (movies.length >= (type === 'series' ? 20 : 30)) break;
-  }
-  return movies;
-}
 
 /* ===== Публичный API ===== */
 
+/* ===== Параллельная загрузка с кэшем ===== */
+let _cache: Record<string, any> | null = null;
+let _cacheLoaded = false;
+
+function getCache(): Record<string, any> {
+  if (_cacheLoaded) return _cache || {};
+  try {
+    const raw = localStorage.getItem('tc_cache');
+    if (raw) {
+      const { data, time } = JSON.parse(raw);
+      if (Date.now() - time < 30 * 60 * 1000) _cache = data;
+    }
+  } catch {}
+  _cacheLoaded = true;
+  return _cache || {};
+}
+
+function saveCache(data: Record<string, any>) {
+  _cache = data;
+  try { localStorage.setItem('tc_cache', JSON.stringify({ data, time: Date.now() })); } catch {}
+}
+
+async function loadBatch(ids: string[], limit = 30): Promise<Movie[]> {
+  const cache = getCache();
+  const results: Movie[] = [];
+  const toFetch: string[] = [];
+
+  for (const id of ids) {
+    if (cache[id]) results.push(cache[id]);
+    else toFetch.push(id);
+    if (results.length + toFetch.length >= limit * 2) break;
+  }
+
+  if (results.length >= limit) {
+    if (toFetch.length > 0) refreshCache(toFetch);
+    return results.slice(0, limit);
+  }
+
+  const needed = toFetch.slice(0, limit);
+  for (let i = 0; i < needed.length; i += 5) {
+    const batch = needed.slice(i, i + 5);
+    const responses = await Promise.allSettled(
+      batch.map((id) => omdb({ i: id, plot: 'short' }))
+    );
+    for (const r of responses) {
+      if (r.status === 'fulfilled' && r.value?.imdbID) {
+        const m = toDetail(r.value);
+        results.push(m);
+        cache[r.value.imdbID] = m;
+      }
+    }
+    if (results.length >= limit) break;
+  }
+  saveCache(cache);
+  const remaining = toFetch.slice(limit);
+  if (remaining.length > 0) setTimeout(() => refreshCache(remaining), 500);
+  return results.slice(0, limit);
+}
+
+function refreshCache(ids: string[]) {
+  const cache = getCache();
+  const toFetch = ids.filter((id) => !cache[id]);
+  if (toFetch.length === 0) return;
+  (async () => {
+    for (let i = 0; i < toFetch.length; i += 5) {
+      const responses = await Promise.allSettled(
+        toFetch.slice(i, i + 5).map((id) => omdb({ i: id, plot: 'short' }))
+      );
+      for (const r of responses) {
+        if (r.status === 'fulfilled' && r.value?.imdbID) cache[r.value.imdbID] = toDetail(r.value);
+      }
+      if (i % 15 === 0) saveCache(cache);
+    }
+    saveCache(cache);
+  })();
+}
+
 export const getCatalog = async (p?: any): Promise<CatalogResponse> => {
-  const [movies, series] = await Promise.all([loadTrending('movie'), loadTrending('series')]);
-  return { ok: true, page: 1, results: [...movies, ...series], total_pages: 1, total_results: movies.length + series.length };
+  const movies = await loadBatch(ALL_IDS, 24);
+  return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
 };
 
 export const searchCatalog = async (q: string, page = 1, type?: string): Promise<CatalogResponse> => {
@@ -178,7 +242,6 @@ export const searchCatalog = async (q: string, page = 1, type?: string): Promise
     const data = await omdb(params);
     if (!data.Search) return { ok: true, page, results: [], total_pages: 0, total_results: 0 };
     const items = data.Search.map(toMovie);
-    // Обогащаем первые 5
     const enriched = await Promise.all(
       items.slice(0, 6).map(async (m: Movie) => {
         try { const d = await omdb({ i: m.imdb_id, plot: 'short' }); return toDetail(d); }
@@ -197,12 +260,12 @@ export const searchCatalog = async (q: string, page = 1, type?: string): Promise
 };
 
 export const getNovelty = async (page = 1): Promise<CatalogResponse> => {
-  const movies = await loadTrending();
+  const movies = await loadBatch(ALL_IDS, 24);
   return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
 };
 
 export const getTop = async (page = 1): Promise<CatalogResponse> => {
-  const movies = await loadTrending();
+  const movies = await loadBatch(ALL_IDS, 24);
   return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
 };
 
