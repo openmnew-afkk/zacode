@@ -32,15 +32,12 @@
 
 .home-header__title {
   font-family: 'Outfit', 'Inter', sans-serif;
-  font-size: 30px;
-  font-weight: 800;
-  letter-spacing: -0.04em;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   margin: 0;
-  line-height: 1;
-  background: linear-gradient(120deg, #fff 30%, rgba(255,255,255,0.7) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+  color: var(--text);
 }
 
 .home-header__sub {

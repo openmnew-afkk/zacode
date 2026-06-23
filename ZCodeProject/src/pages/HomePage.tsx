@@ -64,8 +64,8 @@ const HomePage: React.FC = () => {
       <div className="home-header">
         <div className="home-header__left">
           <span className="home-header__eyebrow">Добро пожаловать</span>
-          <h1 className="home-header__title">TeleCinema</h1>
-          <p className="home-header__sub">Кино и сериалы онлайн</p>
+          <h1 className="home-header__title">В тренде</h1>
+          <p className="home-header__sub">Популярные фильмы и сериалы</p>
         </div>
         <div className="home-header__avatar" onClick={() => navigate('/profile')} aria-label="Профиль">
           🎭

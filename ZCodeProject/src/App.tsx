@@ -24,6 +24,9 @@ const App: React.FC = () => {
   return (
     <BrowserRouter>
       {showSplash && <SplashPage />}
+      <div className="app-topbar">
+        <span className="app-topbar__title">TeleCinema</span>
+      </div>
       <Suspense fallback={<div className="page-loader" />}>
         <Routes>
           <Route path="/" element={<HomePage />} />
