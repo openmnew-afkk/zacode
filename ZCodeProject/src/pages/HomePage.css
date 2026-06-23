@@ -7,7 +7,7 @@
 
 /* ── Header ── */
 .home-header {
-  padding: max(18px, env(safe-area-inset-top)) 20px 10px;
+  padding: 18px 20px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;

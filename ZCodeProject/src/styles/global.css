@@ -125,6 +125,8 @@ body {
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
   scroll-behavior:smooth;
+  /* Отступ сверху: безопасная зона (notch + Telegram header) */
+  padding-top: calc(var(--sat) + 44px);
 }
 
 /* Page enter animation */
