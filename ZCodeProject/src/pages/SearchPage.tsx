@@ -34,7 +34,7 @@ const SearchPage: React.FC = () => {
         const genre = selectedGenres.length > 0 ? String(selectedGenres[0]) : undefined;
         const year = selectedYear ? String(selectedYear) : undefined;
         if (query.trim()) {
-          result = await searchCatalog(query.trim(), pageNum, searchType);
+          result = await searchCatalog(query.trim(), pageNum);
         } else {
           result = await getCatalog({ page: pageNum, genre, year, sort: 'year' });
         }
