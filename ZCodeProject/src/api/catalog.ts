@@ -120,23 +120,46 @@ function toDetail(i: OMDBDetail): MovieDetail {
   };
 }
 
-/* ===== Предустановленные популярные фильмы (гарантированный контент) ===== */
+/* ===== Популярные (60 фильмов + 20 сериалов) ===== */
 const TRENDING_IDS = [
-  'tt15398776','tt13238346','tt1745960','tt5113040','tt9362722','tt1464335',
-  'tt5433142','tt1517268','tt9114286','tt1642628','tt10731256','tt1489887',
-  'tt1790864','tt6443346','tt4555426','tt6723592','tt0133093','tt1375666',
-  'tt0816692','tt0468569','tt0109830','tt0111161','tt0120737','tt0910970',
-  'tt4154756','tt0499549','tt7286456','tt6751668','tt0903747',
+  // 2024-2026 новинки
+  'tt15398776','tt13238346','tt1745960','tt5113040','tt9362722','tt1464335','tt1489887',
+  'tt5433142','tt1517268','tt9114286','tt1642628','tt10731256','tt1790864','tt6443346',
+  'tt4555426','tt6723592','tt21254950','tt14885894','tt23286798','tt24616872','tt27721048',
+  'tt26722974','tt19682634','tt21965076','tt24613980','tt11304740','tt14539740','tt22332140',
+  // Классика
+  'tt0133093','tt1375666','tt0816692','tt0468569','tt0109830','tt0111161','tt0068646',
+  'tt0120737','tt0167260','tt0167261','tt0910970','tt4154756','tt4154796','tt0499549',
+  'tt0103064','tt1345836','tt7286456','tt6751668','tt0120338','tt0110912','tt0137523',
+  'tt0120689','tt0088763','tt0108052','tt0172495','tt0407887','tt0993846','tt0317705',
+  'tt0338013','tt0441773','tt0482571','tt1856101','tt1392190','tt0816711','tt1454468',
+  'tt3315342','tt2582802','tt3659388','tt5027774','tt5580390','tt5726616','tt5109280',
+  'tt6139732','tt7139936','tt7323606','tt7639528','tt7734218','tt8178634','tt8367814',
 ];
 
-async function loadTrending(): Promise<Movie[]> {
+const SERIES_IDS = [
+  'tt0903747','tt0944947','tt5491994','tt7366338','tt0108778','tt0898266','tt0411008',
+  'tt1475582','tt1520211','tt3032476','tt2861424','tt2571774','tt5180504','tt7658402',
+  'tt2306299','tt3526078','tt4574334','tt8111088','tt9174558','tt10048342','tt10541088',
+  'tt1119644','tt1196946','tt1213641','tt1300854','tt1327773','tt1825683','tt2310332',
+  'tt2467372','tt2802850','tt3322312','tt3397884','tt35211234','tt3748528','tt3890160',
+  'tt4034228','tt4287320','tt4459900','tt4633694','tt4698684','tt4972582','tt5013056',
+  'tt5052448','tt5311542','tt5606664','tt5776858','tt5898034','tt6105098','tt6156584',
+  'tt6320628','tt6806448','tt6857112','tt6966692','tt7349662','tt8110330',
+];
+
+async function loadTrending(type?: 'movie' | 'series'): Promise<Movie[]> {
+  const ids = type === 'series' ? SERIES_IDS : TRENDING_IDS;
   const movies: Movie[] = [];
-  for (const id of TRENDING_IDS) {
+  for (const id of ids) {
     try {
       const d = await omdb({ i: id, plot: 'short' });
-      if (d && d.imdbID) movies.push(toDetail(d));
+      if (d && d.imdbID) {
+        const m = toDetail(d);
+        if (type === 'series' || !type) movies.push(m);
+      }
     } catch { /* skip */ }
-    if (movies.length >= 12) break;
+    if (movies.length >= (type === 'series' ? 20 : 30)) break;
   }
   return movies;
 }
@@ -144,13 +167,15 @@ async function loadTrending(): Promise<Movie[]> {
 /* ===== Публичный API ===== */
 
 export const getCatalog = async (p?: any): Promise<CatalogResponse> => {
-  const movies = await loadTrending();
-  return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
+  const [movies, series] = await Promise.all([loadTrending('movie'), loadTrending('series')]);
+  return { ok: true, page: 1, results: [...movies, ...series], total_pages: 1, total_results: movies.length + series.length };
 };
 
-export const searchCatalog = async (q: string, page = 1): Promise<CatalogResponse> => {
+export const searchCatalog = async (q: string, page = 1, type?: string): Promise<CatalogResponse> => {
   try {
-    const data = await omdb({ s: q, page, type: 'movie' });
+    const params: Record<string, any> = { s: q, page };
+    if (type === 'series') params.type = 'series';
+    const data = await omdb(params);
     if (!data.Search) return { ok: true, page, results: [], total_pages: 0, total_results: 0 };
     const items = data.Search.map(toMovie);
     // Обогащаем первые 5
