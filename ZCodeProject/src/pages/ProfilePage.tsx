@@ -32,7 +32,7 @@ const ProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="profile-page">
+    <div className="profile-page page">
       {/* Профиль */}
       <div className="profile-header">
         <div className="profile-avatar">

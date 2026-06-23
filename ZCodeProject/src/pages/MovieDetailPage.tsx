@@ -134,7 +134,7 @@ const MovieDetailPage: React.FC = () => {
   const isSerial = movie.is_serial || seasons.length > 0;
 
   return (
-    <div className="detail-page">
+    <div className="detail-page page">
       {/* Фоновый постер */}
       <div className="detail-backdrop">
         <img

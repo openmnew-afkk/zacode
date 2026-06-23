@@ -85,7 +85,7 @@ const SearchPage: React.FC = () => {
   const isEmpty = !loading && movies.length === 0;
 
   return (
-    <div className="search-page">
+    <div className="search-page page">
       {/* ── Header ── */}
       <div className="search-page__header">
         <h1 className="search-page__title">Поиск</h1>

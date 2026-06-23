@@ -9,7 +9,7 @@ const FavoritesPage: React.FC = () => {
   const { favorites } = useStore();
 
   return (
-    <div className="favorites-page">
+    <div className="favorites-page page">
       <h1 className="favorites-page__title">Избранное</h1>
 
       {favorites.length > 0 ? (

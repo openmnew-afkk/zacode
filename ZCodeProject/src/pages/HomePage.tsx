@@ -58,7 +58,7 @@ const HomePage: React.FC = () => {
   const recommendedMovies = [...movies].reverse().slice(0, 12);
 
   return (
-    <div className="home-page">
+    <div className="home-page page">
 
       {/* ── Шапка ── */}
       <div className="home-header">

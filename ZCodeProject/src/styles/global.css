@@ -127,6 +127,15 @@ body {
   scroll-behavior:smooth;
 }
 
+/* Page enter animation */
+.page {
+  animation: page-in 0.35s var(--ease-smooth) both;
+}
+@keyframes page-in {
+  from { opacity:0; transform:translateY(12px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
 a { color:inherit; text-decoration:none; }
 img { max-width:100%; display:block; }
 button { font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
