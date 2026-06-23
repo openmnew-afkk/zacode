@@ -1,109 +1,195 @@
-/* ===== TeleCinema — Premium Dark ===== */
+/* ===== TeleCinema — ULTRA PREMIUM DARK ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg: #08080f;
-  --bg-2: #0d0d1a;
-  --surface: rgba(255,255,255,0.04);
-  --surface-2: rgba(255,255,255,0.07);
-  --surface-3: rgba(255,255,255,0.10);
-  --border: rgba(255,255,255,0.06);
-  --border-light: rgba(255,255,255,0.12);
-  --text: #ffffff;
-  --text-2: rgba(255,255,255,0.70);
-  --text-3: rgba(255,255,255,0.40);
-  --accent: #7c3aed;
-  --accent-2: #3b82f6;
-  --accent-glow: rgba(124,58,237,0.35);
-  --gold: #f59e0b;
-  --shadow: rgba(0,0,0,0.6);
+  /* ── Cinematic Color Palette ── */
+  --bg:             #050508;
+  --bg-2:           #09090f;
+  --bg-3:           #0f0f1a;
 
-  /* Safe-area переменные (с фолбэками) */
+  /* Surfaces */
+  --surface:        rgba(255,255,255,0.032);
+  --surface-2:      rgba(255,255,255,0.055);
+  --surface-3:      rgba(255,255,255,0.085);
+  --surface-4:      rgba(255,255,255,0.12);
+
+  /* Borders */
+  --border:         rgba(255,255,255,0.05);
+  --border-light:   rgba(255,255,255,0.10);
+  --border-bright:  rgba(255,255,255,0.18);
+
+  /* Text */
+  --text:           #ffffff;
+  --text-2:         rgba(255,255,255,0.75);
+  --text-3:         rgba(255,255,255,0.45);
+  --text-4:         rgba(255,255,255,0.25);
+
+  /* ── Brand accents ── */
+  --accent:         #8b5cf6;      /* Vivid violet */
+  --accent-2:       #06b6d4;      /* Cyan */
+  --accent-3:       #f472b6;      /* Pink */
+  --accent-gold:    #fbbf24;      /* Gold stars */
+
+  /* Glow */
+  --accent-glow:    rgba(139,92,246,0.40);
+  --accent-2-glow:  rgba(6,182,212,0.35);
+  --accent-3-glow:  rgba(244,114,182,0.35);
+  --gold-glow:      rgba(251,191,36,0.50);
+
+  /* Legacy compat */
+  --accent-gold-raw:#fbbf24;
+  --bg-primary:     var(--bg);
+  --text-primary:   var(--text);
+  --text-secondary: var(--text-2);
+
+  /* Shadow */
+  --shadow:         rgba(0,0,0,0.65);
+  --shadow-lg:      rgba(0,0,0,0.85);
+
+  /* Glass */
+  --glass-bg:       rgba(255,255,255,0.04);
+  --glass-bg-strong:rgba(255,255,255,0.08);
+  --glass-border:   rgba(255,255,255,0.08);
+  --glass-blur:     24px;
+
+  /* Safe-area */
   --sat: env(safe-area-inset-top, 0px);
   --sar: env(safe-area-inset-right, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
 
-  /* Glass */
-  --glass-bg: rgba(255,255,255,0.04);
-  --glass-border: rgba(255,255,255,0.06);
-  --glass-blur: 20px;
+  /* Radius tokens */
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r-md:  16px;
+  --r-lg:  22px;
+  --r-xl:  30px;
+  --r-full:9999px;
+
+  /* Easing */
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+  --ease-smooth: cubic-bezier(0.4,0,0.2,1);
+  --ease-out:    cubic-bezier(0,0,0.2,1);
 }
 
+/* ── Light mode ── */
 [data-theme='light'] {
-  --bg: #f8fafc;
-  --bg-2: #f1f5f9;
-  --surface: rgba(0,0,0,0.03);
-  --surface-2: rgba(0,0,0,0.05);
-  --surface-3: rgba(0,0,0,0.08);
-  --border: rgba(0,0,0,0.06);
-  --border-light: rgba(0,0,0,0.12);
-  --text: #0f172a;
-  --text-2: rgba(15,23,42,0.65);
-  --text-3: rgba(15,23,42,0.35);
-  --accent: #7c3aed;
-  --accent-2: #3b82f6;
-  --accent-glow: rgba(124,58,237,0.20);
-  --gold: #d97706;
-  --shadow: rgba(0,0,0,0.10);
-  --glass-bg: rgba(255,255,255,0.50);
-  --glass-border: rgba(0,0,0,0.06);
+  --bg:             #f0f0f8;
+  --bg-2:           #e8e8f2;
+  --bg-3:           #deddf0;
+  --surface:        rgba(0,0,0,0.025);
+  --surface-2:      rgba(0,0,0,0.045);
+  --surface-3:      rgba(0,0,0,0.07);
+  --surface-4:      rgba(0,0,0,0.10);
+  --border:         rgba(0,0,0,0.06);
+  --border-light:   rgba(0,0,0,0.10);
+  --border-bright:  rgba(0,0,0,0.16);
+  --text:           #0a0a14;
+  --text-2:         rgba(10,10,20,0.65);
+  --text-3:         rgba(10,10,20,0.38);
+  --text-4:         rgba(10,10,20,0.20);
+  --accent-glow:    rgba(139,92,246,0.18);
+  --shadow:         rgba(0,0,0,0.12);
+  --shadow-lg:      rgba(0,0,0,0.22);
+  --glass-bg:       rgba(255,255,255,0.55);
+  --glass-bg-strong:rgba(255,255,255,0.80);
+  --glass-border:   rgba(0,0,0,0.06);
 }
 
-/* ===== Reset ===== */
+/* ── Reset ── */
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
 
-/* Запрещаем pull-to-close Telegram Mini App */
 html {
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+  font-size:16px;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
 }
-html { font-size:16px; -webkit-font-smoothing:antialiased; }
+
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
-  height: 100%;
-  overflow: hidden;
-  transition: background 0.3s, color 0.3s;
+  height:100%;
+  overflow:hidden;
+  transition: background 0.35s var(--ease-smooth), color 0.35s var(--ease-smooth);
 }
+
 #root {
-  height: 100%;
-  overflow-y: auto;
-  overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  height:100%;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  scroll-behavior:smooth;
 }
-a { color: inherit; text-decoration: none; }
-img { max-width: 100%; display: block; }
-button { font-family: inherit; cursor: pointer; }
 
-/* ===== Скелетон ===== */
+a { color:inherit; text-decoration:none; }
+img { max-width:100%; display:block; }
+button { font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width:2px; height:2px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--surface-3); border-radius:2px; }
+
+/* ── Selection ── */
+::selection { background:var(--accent-glow); color:#fff; }
+
+/* ── Skeleton shimmer ── */
 .skeleton-pulse {
-  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s ease-in-out infinite;
+  background: linear-gradient(
+    105deg,
+    var(--surface-2) 0%,
+    var(--surface-3) 40%,
+    var(--surface-4) 50%,
+    var(--surface-3) 60%,
+    var(--surface-2) 100%
+  );
+  background-size:300% 100%;
+  animation:shimmer 1.6s ease-in-out infinite;
 }
-@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes shimmer {
+  0%   { background-position:100% 0; }
+  100% { background-position:-100% 0; }
+}
 
-/* ===== Скроллбар ===== */
-::-webkit-scrollbar { width: 3px; height: 3px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
-
-::selection { background: var(--accent-glow); color: #fff; }
-
-/* ===== Простая заглушка загрузки ===== */
+/* ── Page loader ── */
 .page-loader {
-  position: fixed; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg); z-index: 9998;
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg); z-index:9998;
 }
 .page-loader::after {
-  content: ''; width: 24px; height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--border-light);
-  border-top-color: var(--accent);
-  animation: spin 0.6s linear infinite;
+  content:''; width:28px; height:28px;
+  border-radius:50%;
+  border:2.5px solid var(--border-light);
+  border-top-color:var(--accent);
+  animation:spin 0.65s linear infinite;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ── Utility classes ── */
+.gradient-text {
+  background:linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.glass-card {
+  background:var(--glass-bg);
+  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
+  border:1px solid var(--glass-border);
+}
+
+/* ── Focus ring ── */
+:focus-visible {
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+  border-radius:var(--r-sm);
+}

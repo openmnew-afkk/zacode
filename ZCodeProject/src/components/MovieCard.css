@@ -1,140 +1,150 @@
-/* ===== Карточка фильма (Glass Aurora) ===== */
+/* ===== ULTRA PREMIUM MovieCard ===== */
+
 .movie-card {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  border-radius: 14px;
-  overflow: visible;
   position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.movie-card:hover {
-  transform: translateY(-4px);
-}
-
-.movie-card:active {
-  transform: scale(0.97);
-}
-
+/* ── Default (horizontal scroll) variant ── */
 .movie-card--default {
-  width: 140px;
-  min-width: 140px;
+  width: 136px;
+  min-width: 136px;
   flex-shrink: 0;
 }
 
+/* ── Grid variant ── */
 .movie-card--grid {
   width: 100%;
 }
 
-/* Постер */
+/* ── Hover / press states ── */
+.movie-card:active .movie-card__poster-wrap {
+  transform: scale(0.96);
+}
+
+/* ── Poster wrapper ── */
 .movie-card__poster-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   box-shadow:
-    0 10px 30px var(--shadow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+    0 4px 20px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  transition:
+    transform 0.3s var(--ease-spring),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  will-change: transform;
 }
 
+/* Hover: lift + purple glow */
 .movie-card:hover .movie-card__poster-wrap {
-  border-color: rgba(124, 92, 255, 0.5);
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(139,92,246,0.4);
   box-shadow:
-    0 14px 38px var(--shadow),
-    0 0 22px var(--accent-glow),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 16px 40px rgba(0,0,0,0.55),
+    0 0 24px rgba(139,92,246,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
+/* ── Skeleton ── */
 .movie-card__poster-skeleton {
   position: absolute;
   inset: 0;
   z-index: 1;
+  border-radius: 16px;
 }
 
+/* ── Poster image ── */
 .movie-card__poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s ease;
+  will-change: opacity;
 }
 
-.movie-card__poster.loaded {
-  opacity: 1;
-}
+.movie-card__poster.loaded { opacity: 1; }
 
-/* Градиентный нижний слой для читаемости рейтинга */
+/* ── Bottom gradient for readability ── */
 .movie-card__poster-wrap::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 40%;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.55), transparent);
+  left: 0; right: 0; bottom: 0;
+  height: 55%;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,0.7) 0%,
+    rgba(0,0,0,0.3) 40%,
+    transparent 100%
+  );
   pointer-events: none;
   z-index: 1;
 }
 
-/* Рейтинг */
+/* ── Rating badge ── */
 .movie-card__rating {
   position: absolute;
   top: 8px;
   left: 8px;
-  background: rgba(10, 10, 20, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  padding: 3px 8px;
-  border-radius: 9px;
-  font-size: 12px;
-  font-weight: 700;
-  color: #fff;
   display: flex;
   align-items: center;
   gap: 3px;
+  padding: 3px 8px 3px 6px;
+  border-radius: var(--r-full);
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.10);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
   z-index: 2;
+  transition: background 0.2s ease;
 }
 
 .movie-card__star {
-  color: var(--accent-gold);
-  font-size: 11px;
-  filter: drop-shadow(0 0 4px rgba(245, 197, 24, 0.6));
+  font-size: 10px;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251,191,36,0.7));
 }
 
-/* Тип-бейдж (сериал/аниме) */
+/* ── Type badge (сериал/аниме) ── */
 .movie-card__type {
   position: absolute;
-  top: 8px;
-  right: 44px;
-  background: var(--glass-bg-strong);
+  bottom: 8px;
+  left: 8px;
+  padding: 3px 8px;
+  border-radius: var(--r-full);
+  background: linear-gradient(135deg, rgba(139,92,246,0.4), rgba(6,182,212,0.3));
+  border: 1px solid rgba(139,92,246,0.35);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  padding: 3px 8px;
-  border-radius: 9px;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--accent-2);
+  letter-spacing: 0.06em;
+  color: rgba(167,139,250,1);
   z-index: 2;
 }
 
-/* Кнопка избранного */
+/* ── Favourite button ── */
 .movie-card__fav {
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(10, 10, 20, 0.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.10);
   border-radius: 50%;
   width: 32px;
   height: 32px;
@@ -142,48 +152,55 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 15px;
   z-index: 2;
-  transition: transform 0.2s ease, background 0.2s ease;
+  transition:
+    transform 0.2s var(--ease-spring),
+    background 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .movie-card__fav:hover {
   transform: scale(1.15);
+  background: rgba(244,114,182,0.18);
 }
 
 .movie-card__fav.active {
-  background: rgba(255, 92, 147, 0.25);
-  border-color: rgba(255, 92, 147, 0.5);
+  background: rgba(244,114,182,0.22);
+  border-color: rgba(244,114,182,0.45);
+  box-shadow: 0 0 10px rgba(244,114,182,0.3);
 }
 
 .movie-card__fav.animate {
-  animation: heart-pop 0.4s ease;
+  animation: heart-pop 0.4s var(--ease-spring);
 }
 
 @keyframes heart-pop {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.4); }
-  60% { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.5) rotate(-10deg); }
+  65%  { transform: scale(0.9) rotate(5deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
-/* Информация */
+/* ── Info block ── */
 .movie-card__info {
-  padding: 8px 4px 2px;
+  padding: 10px 2px 4px;
 }
 
 .movie-card__title {
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
+  color: var(--text);
+  margin: 0 0 2px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .movie-card__year {
   font-size: 11px;
-  color: var(--text-secondary);
-  margin: 2px 0 0;
+  color: var(--text-3);
+  margin: 0;
+  font-weight: 500;
 }

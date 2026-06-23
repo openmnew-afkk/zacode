@@ -1,48 +1,196 @@
-/* ===== Premium TabBar ===== */
+/* ===== ULTRA PREMIUM TabBar ===== */
+
 .tab-bar {
   position: fixed;
   bottom: 0; left: 0; right: 0;
-  display: flex; justify-content: center;
-  padding: 0 env(safe-area-inset-right,12px) max(env(safe-area-inset-bottom,12px),12px) env(safe-area-inset-left,12px);
+  display: flex;
+  justify-content: center;
+  padding: 8px 12px max(env(safe-area-inset-bottom, 12px), 12px);
   z-index: 100;
   pointer-events: none;
 }
+
+/* Floating pill */
 .tab-bar__inner {
   pointer-events: auto;
-  width: 100%; max-width: 480px;
-  display: flex; justify-content: space-around;
-  padding: 6px;
-  border-radius: 20px;
-  background: rgba(8,8,15,0.7);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border: 1px solid var(--border-light);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 8px 6px;
+  border-radius: 26px;
+  position: relative;
+  overflow: hidden;
+
+  /* Glass */
+  background: rgba(10, 10, 18, 0.75);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+
+  /* Premium border with gradient */
+  border: 1px solid rgba(255,255,255,0.10);
+
+  /* Multi-layer shadow */
+  box-shadow:
+    0 2px 0 rgba(255,255,255,0.04) inset,
+    0 -1px 0 rgba(0,0,0,0.3) inset,
+    0 8px 32px rgba(0,0,0,0.55),
+    0 24px 48px rgba(0,0,0,0.35),
+    0 0 0 0.5px rgba(255,255,255,0.06);
 }
+
+/* Animated gradient top shine */
+.tab-bar__inner::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139,92,246,0.5) 30%,
+    rgba(6,182,212,0.5) 70%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.tab-bar__inner:has(.tab-bar__item--active)::before {
+  opacity: 1;
+}
+
+/* ── Each Tab Item ── */
 .tab-bar__item {
   position: relative;
-  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
   flex: 1;
-  background: none; border: none;
-  padding: 8px 4px 4px;
-  border-radius: 14px;
-  color: var(--text-3);
-  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 8px 4px 6px;
+  border-radius: 18px;
+  color: rgba(255,255,255,0.35);
+  transition:
+    color 0.25s var(--ease-smooth),
+    background 0.25s var(--ease-smooth);
   -webkit-tap-highlight-color: transparent;
+  min-height: 52px;
 }
-.tab-bar__item--active { color: var(--text); }
+
+/* Active pill background */
+.tab-bar__item--active {
+  color: #fff;
+}
+
+/* Glowing pill indicator for active */
+.tab-bar__item--active::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(139,92,246,0.22),
+    rgba(6,182,212,0.12)
+  );
+  border: 1px solid rgba(139,92,246,0.25);
+  box-shadow:
+    0 0 12px rgba(139,92,246,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  animation: tab-pill-in 0.3s var(--ease-spring) both;
+}
+
+@keyframes tab-pill-in {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Tap ripple */
+.tab-bar__item:active::after {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.08);
+  animation: tab-ripple 0.3s ease forwards;
+}
+
+@keyframes tab-ripple {
+  from { opacity: 1; transform: scale(0.9); }
+  to   { opacity: 0; transform: scale(1.05); }
+}
+
+/* ── Icon ── */
 .tab-bar__icon {
-  display: flex; align-items: center; justify-content: center;
-  width: 24px; height: 24px;
-  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  transition: transform 0.3s var(--ease-spring);
 }
-.tab-bar__item--active .tab-bar__icon { transform: scale(1.15); }
-.tab-bar__label { font-size: 9px; font-weight: 600; opacity: 0.7; }
+
+.tab-bar__item--active .tab-bar__icon {
+  transform: scale(1.18) translateY(-1px);
+}
+
+/* Icon glow for active state */
+.tab-bar__item--active .tab-bar__icon svg {
+  filter: drop-shadow(0 0 6px rgba(139,92,246,0.7));
+}
+
+/* ── Label ── */
+.tab-bar__label {
+  position: relative;
+  z-index: 1;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition:
+    color 0.25s ease,
+    opacity 0.25s ease;
+  opacity: 0.5;
+}
+
+.tab-bar__item--active .tab-bar__label {
+  opacity: 1;
+  font-weight: 700;
+  background: linear-gradient(90deg, #a78bfa, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Badge ── */
 .tab-bar__badge {
-  position: absolute; top: 1px; right: calc(50% - 18px);
-  min-width: 15px; height: 15px; border-radius: 7.5px;
-  background: #ef4444; color: #fff;
-  font-size: 8px; font-weight: 800; line-height: 15px; text-align: center;
-  padding: 0 4px; z-index: 2;
-  box-shadow: 0 2px 8px rgba(239,68,68,0.5);
+  position: absolute;
+  top: 5px;
+  right: calc(50% - 20px);
+  min-width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f472b6, #ec4899);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 800;
+  line-height: 16px;
+  text-align: center;
+  padding: 0 4px;
+  z-index: 2;
+  box-shadow:
+    0 0 0 2px rgba(10,10,18,0.8),
+    0 2px 8px rgba(244,114,182,0.6);
+  animation: badge-pop 0.4s var(--ease-spring);
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
 }

@@ -1,67 +1,203 @@
-/* ===== Страница поиска (Glass Aurora) ===== */
+/* ===== ULTRA PREMIUM — Страница поиска ===== */
+
 .search-page {
-  padding: max(16px, env(safe-area-inset-top)) 0 110px;
+  padding: max(18px, env(safe-area-inset-top)) 0 110px;
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.search-page__header {
+  padding: 0 20px 20px;
 }
 
 .search-page__title {
-  font-size: 28px;
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 30px;
   font-weight: 800;
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-  margin: 0 16px 16px;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  margin: 0 0 4px;
+  line-height: 1;
 }
 
-/* Фильтры */
+.search-page__sub {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+
+/* ── Search input area ── */
+.search-input-wrap {
+  position: relative;
+  margin: 0 20px 16px;
+}
+
+.search-input-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.search-input-wrap:focus-within .search-input-icon {
+  color: var(--accent);
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 44px 14px 48px;
+  border-radius: var(--r-xl);
+  background: var(--surface-2);
+  border: 1.5px solid var(--border-light);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+  -webkit-appearance: none;
+}
+
+.search-input::placeholder { color: var(--text-4); }
+
+.search-input:focus {
+  border-color: rgba(139,92,246,0.5);
+  background: var(--surface-3);
+  box-shadow:
+    0 0 0 3px rgba(139,92,246,0.12),
+    0 4px 20px rgba(0,0,0,0.2);
+}
+
+.search-clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--surface-3);
+  border: none;
+  color: var(--text-3);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.search-clear-btn:active { transform: translateY(-50%) scale(0.9); }
+
+/* ── Type toggle ── */
+.search-type-toggle {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 16px;
+}
+
+.search-type-btn {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  border: 1.5px solid var(--border-light);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.25s var(--ease-smooth);
+  -webkit-tap-highlight-color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.search-type-btn:active { transform: scale(0.96); }
+
+.search-type-btn--active {
+  background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(6,182,212,0.15));
+  border-color: rgba(139,92,246,0.45);
+  color: var(--text);
+  box-shadow: 0 4px 16px rgba(139,92,246,0.18);
+}
+
+/* ── Genre chips ── */
 .search-filters {
-  padding: 0 16px 16px;
+  padding: 0 20px 20px;
+}
+
+.search-filters__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 10px;
 }
 
 .search-filters__genres {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 7px;
+  margin-bottom: 20px;
 }
 
 .genre-chip {
-  padding: 7px 15px;
-  border-radius: 20px;
-  border: 1px solid var(--glass-border);
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: var(--text-secondary);
-  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-light);
+  background: var(--surface);
+  color: var(--text-3);
+  font-size: 12.5px;
   font-weight: 600;
   font-family: 'Inter', sans-serif;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s var(--ease-smooth);
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
 
-.genre-chip:active {
-  transform: scale(0.95);
-}
+.genre-chip:active { transform: scale(0.94); }
 
 .genre-chip--active {
-  background: linear-gradient(120deg, var(--accent), var(--accent-2));
-  border-color: transparent;
-  color: #fff;
-  box-shadow: 0 4px 14px var(--accent-glow);
+  background: linear-gradient(120deg, rgba(139,92,246,0.3), rgba(6,182,212,0.2));
+  border-color: rgba(139,92,246,0.5);
+  color: var(--text);
+  box-shadow: 0 0 12px rgba(139,92,246,0.2);
 }
 
-/* Слайдер года */
+/* ── Year filter ── */
 .search-filters__year {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .year-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 13px;
-  color: var(--text-secondary);
   font-weight: 600;
+  color: var(--text-2);
+}
+
+.year-label span {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 .year-slider {
@@ -69,63 +205,53 @@
   appearance: none;
   width: 100%;
   height: 4px;
-  border-radius: 2px;
+  border-radius: var(--r-full);
   background: linear-gradient(90deg, var(--accent), var(--accent-2));
   outline: none;
+  cursor: pointer;
 }
 
 .year-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  border: 3px solid var(--accent);
+  box-shadow:
+    0 0 0 3px rgba(139,92,246,0.2),
+    0 2px 8px rgba(0,0,0,0.3);
+  transition: transform 0.15s ease;
+}
+
+.year-slider::-webkit-slider-thumb:active { transform: scale(1.15); }
+
+.year-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
   background: #fff;
   cursor: pointer;
   border: 3px solid var(--accent);
-  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
-.year-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  cursor: pointer;
-  border: 3px solid var(--accent);
-}
-
-/* Результаты */
+/* ── Results grid ── */
 .search-results {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   padding: 0 16px;
 }
 
 @media (min-width: 480px) {
-  .search-results {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .search-results { grid-template-columns: repeat(4, 1fr); }
 }
 
-@media (min-width: 768px) {
-  .search-results {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
+.search-observer { height: 50px; }
 
-@media (min-width: 1100px) {
-  .search-results {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-.search-observer {
-  height: 40px;
-}
-
-/* Пустые результаты */
+/* ── Empty state ── */
 .search-empty {
   display: flex;
   flex-direction: column;
@@ -133,38 +259,31 @@
   justify-content: center;
   padding: 60px 32px;
   text-align: center;
-  color: var(--text-secondary);
+  gap: 12px;
 }
 
 .search-empty__icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 12px var(--accent-glow));
+  font-size: 52px;
+  filter: drop-shadow(0 0 16px rgba(139,92,246,0.4));
+  animation: float-icon 3s ease-in-out infinite;
 }
 
-/* Переключатель Фильмы / Сериалы */
-.search-type-toggle {
-  display: flex;
-  gap: 8px;
-  margin: 0 16px 16px;
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
 }
-.search-type-btn {
-  flex: 1;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid var(--border-light);
-  background: var(--surface);
+
+.search-empty__title {
+  font-size: 17px;
+  font-weight: 700;
   color: var(--text-2);
-  font-size: 14px;
-  font-weight: 600;
-  font-family: 'Inter', sans-serif;
-  cursor: pointer;
-  transition: all 0.2s;
-  -webkit-tap-highlight-color: transparent;
+  margin: 0;
 }
-.search-type-btn--active {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-color: transparent;
-  color: #fff;
-  box-shadow: 0 4px 16px var(--accent-glow);
+
+.search-empty__sub {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 220px;
 }

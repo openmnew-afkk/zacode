@@ -1,41 +1,76 @@
-/* ===== Горизонтальный список фильмов (Glass Aurora) ===== */
+/* ===== ULTRA PREMIUM MovieList ===== */
+
 .movie-list {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+}
+
+/* ── Section Header ── */
+.movie-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 14px;
 }
 
 .movie-list__title {
+  font-family: 'Outfit', 'Inter', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 12px 16px;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.02em;
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.movie-list__title::before {
-  content: '';
-  width: 4px;
-  height: 16px;
-  border-radius: 4px;
-  background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  box-shadow: 0 0 8px var(--accent-glow);
+.movie-list__see-all {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 4px 10px;
+  border-radius: var(--r-full);
+  background: rgba(139,92,246,0.10);
+  border: 1px solid rgba(139,92,246,0.20);
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
 }
 
+.movie-list__see-all:active { transform: scale(0.94); }
+.movie-list__see-all:hover  { background: rgba(139,92,246,0.18); }
+
+/* ── Horizontal scroll ── */
 .movie-list__scroll {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding: 0 16px 8px;
+  padding: 4px 20px 12px;
   scroll-snap-type: x proximity;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
-.movie-list__scroll::-webkit-scrollbar {
-  display: none;
-}
+.movie-list__scroll::-webkit-scrollbar { display: none; }
 
 .movie-list__scroll > * {
   scroll-snap-align: start;
+}
+
+/* Fade edges */
+.movie-list__scroll-wrap {
+  position: relative;
+}
+
+.movie-list__scroll-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 40px;
+  background: linear-gradient(to left, var(--bg), transparent);
+  pointer-events: none;
+  z-index: 1;
 }
