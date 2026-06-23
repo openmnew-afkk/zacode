@@ -1,16 +1,13 @@
-/* ===== TMDB + встроенный ключ (для всех пользователей) =====
- * TMDB — русский каталог, постеры, описания, сериалы
- * Ключ встроен в код — работает сразу у всех.
- * Можно переопределить: Vercel env TMDB_API_KEY или в Настройках приложения.
+/* ===== TMDB — русский каталог, постеры, описания, сериалы =====
+ * Запросы через Vercel serverless-прокси (решает CORS).
  */
 
 import type { Movie, CatalogResponse, MovieDetail, Genre, Season, Episode } from '../types';
 
-/* ===== TMDB ===== */
-const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
-/** Встроенный ключ (читается из VITE_TMDB_KEY на сборке, либо встроенный по умолчанию) */
+/** Встроенный ключ TMDB */
 const BUILTIN_KEY = 'dc003aabe0e60ef32360bfdf70deac32';
 const TMDB_KEY_KEY = 'tc_tmdb_key';
 
@@ -25,9 +22,6 @@ export const setTmdbKey = (key: string) => {
 export const hasTmdbKey = () => true; // Всегда true — есть встроенный ключ
 
 /* ===== OMDb (запасной) ===== */
-const OMDB_KEY = 'trilogy';
-const OMDB_BASE = 'https://www.omdbapi.com';
-
 /* ===== Плеер-паттерн ===== */
 const PATTERN_KEY = 'tc_player_pattern';
 export const getPlayerPattern = (): string => {
@@ -53,18 +47,17 @@ export const backdropUrl = (path: string | null, _size?: string): string => {
   return '';
 };
 
-/* ===== TMDB запросы ===== */
+/* ===== TMDB запросы (через Vercel proxy) ===== */
 
 async function tmdbFetch(path: string, params: Record<string, any> = {}): Promise<any> {
   const key = getTmdbKey();
   if (!key) throw new Error('NO_TMDB_KEY');
-  const url = new URL(`${TMDB_BASE}${path}`);
-  url.searchParams.set('api_key', key);
-  url.searchParams.set('language', 'ru-RU');
-  for (const [k, v] of Object.entries(params)) {
-    if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
-  }
-  const res = await fetch(url.toString());
+  const p = new URLSearchParams();
+  p.set('path', path);
+  p.set('query', JSON.stringify(params));
+  const res = await fetch(`${API_BASE}/api/tmdb?${p}`, {
+    headers: { 'x-tmdb-key': key },
+  });
   if (!res.ok) throw new Error(`TMDB_${res.status}`);
   return res.json();
 }
@@ -135,7 +128,8 @@ async function tmdbToDetail(id: number, isTV: boolean): Promise<MovieDetail> {
   };
 }
 
-/* ===== OMDb (устаревший) — удалён, TMDB работает всегда ===== */
+
+
 
 /* ===== Публичные функции ===== */
 
