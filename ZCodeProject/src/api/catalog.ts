@@ -1,6 +1,7 @@
-/* ===== TMDB + OMDb fallback =====
- * Первичный источник: TMDB (русский язык, полные данные, постеры)
- * Фолбэк: OMDb (если TMDB ключ не задан)
+/* ===== TMDB + встроенный ключ (для всех пользователей) =====
+ * TMDB — русский каталог, постеры, описания, сериалы
+ * Ключ встроен в код — работает сразу у всех.
+ * Можно переопределить: Vercel env TMDB_API_KEY или в Настройках приложения.
  */
 
 import type { Movie, CatalogResponse, MovieDetail, Genre, Season, Episode } from '../types';
@@ -9,15 +10,19 @@ import type { Movie, CatalogResponse, MovieDetail, Genre, Season, Episode } from
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
 
+/** Встроенный ключ (читается из VITE_TMDB_KEY на сборке, либо встроенный по умолчанию) */
+const BUILTIN_KEY = 'dc003aabe0e60ef32360bfdf70deac32';
 const TMDB_KEY_KEY = 'tc_tmdb_key';
 
 export const getTmdbKey = (): string => {
-  try { return localStorage.getItem(TMDB_KEY_KEY) || ''; } catch { return ''; }
+  // Приоритет: localStorage → встроенный ключ
+  try { const ls = localStorage.getItem(TMDB_KEY_KEY); if (ls) return ls; } catch {}
+  return BUILTIN_KEY;
 };
 export const setTmdbKey = (key: string) => {
   try { localStorage.setItem(TMDB_KEY_KEY, key); } catch { /* ignore */ }
 };
-export const hasTmdbKey = () => !!getTmdbKey();
+export const hasTmdbKey = () => true; // Всегда true — есть встроенный ключ
 
 /* ===== OMDb (запасной) ===== */
 const OMDB_KEY = 'trilogy';
@@ -130,87 +135,29 @@ async function tmdbToDetail(id: number, isTV: boolean): Promise<MovieDetail> {
   };
 }
 
-/* ===== OMDb запросы (фолбэк) ===== */
-async function omdbFetch(params: Record<string, any>): Promise<any> {
-  if (hasTmdbKey()) throw new Error('USE_TMDB'); // не вызывать если есть TMDB
-  const url = new URL(OMDB_BASE);
-  url.searchParams.set('apikey', OMDB_KEY);
-  for (const [k, v] of Object.entries(params))
-    if (v !== undefined && v !== null && v !== '') url.searchParams.set(k, String(v));
-  const res = await fetch(url.toString());
-  if (!res.ok) throw new Error(`OMDB_${res.status}`);
-  const data = await res.json();
-  if (data.Response === 'False') throw new Error('NOT_FOUND');
-  return data;
-}
-
-function omdbToMovie(item: any): Movie {
-  const imdbID = item.imdbID || '';
-  const poster = item.Poster && item.Poster !== 'N/A' ? item.Poster : null;
-  return {
-    id: imdbID, title: item.Title || 'Без названия', original_title: '',
-    overview: '', poster_path: poster, backdrop_path: poster,
-    release_date: item.Year || '', vote_average: 0,
-    kinopoisk_rating: 0, imdb_rating: 0, runtime: null,
-    genre_ids: [], genres: [],
-    type: item.Type === 'series' ? 'serial' : 'movie',
-    is_serial: item.Type === 'series',
-    imdb_id: imdbID, kinopoisk_id: imdbID,
-    quality: '', translator: '', iframe_url: '',
-    countries: [], actors: [], directors: [],
-    popularity: 0, adult: false,
-  };
-}
-
-function omdbToDetail(item: any): MovieDetail {
-  const base = omdbToMovie(item);
-  const gn = item.Genre?.split(', ')?.filter(Boolean) || [];
-  const rt = item.Runtime?.match(/(\d+)/);
-  const rating = parseFloat(item.imdbRating) || 0;
-  return {
-    ...base,
-    overview: item.Plot && item.Plot !== 'N/A' ? item.Plot : '',
-    vote_average: rating, imdb_rating: rating,
-    runtime: rt ? parseInt(rt[1]) : null,
-    genre_ids: gn.map((_: string, i: number) => i + 1),
-    genres: gn.map((name: string, i: number) => ({ id: i + 1, name })),
-    actors: item.Actors?.split(', ')?.filter(Boolean) || [],
-    directors: item.Director?.split(', ')?.filter(Boolean) || [],
-    countries: item.Country?.split(', ')?.filter(Boolean) || [],
-    poster_path: item.Poster && item.Poster !== 'N/A' ? item.Poster : base.poster_path,
-    backdrop_path: item.Poster && item.Poster !== 'N/A' ? item.Poster : base.poster_path,
-    seasons: [], similar: [],
-  };
-}
+/* ===== OMDb (устаревший) — удалён, TMDB работает всегда ===== */
 
 /* ===== Публичные функции ===== */
 
 export const getCatalog = async (params: {
   page?: number; q?: string; genre?: string; year?: string; sort?: string; limit?: number;
 }): Promise<CatalogResponse> => {
-  if (hasTmdbKey()) {
-    try {
-      const page = params.page || 1;
-      // Поиск
-      if (params.q) {
-        const data = await tmdbFetch('/search/multi', { query: params.q, page });
-        const items = (data.results || [])
-          .filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
-          .map((r: any) => tmdbToMovie(r));
-        return { ok: true, page, results: items, total_pages: data.total_pages || 1, total_results: data.total_results || 0 };
-      }
-      // Тренды
-      const trendData = await tmdbFetch('/trending/movie/week', { page });
-      const items = (trendData.results || []).map((r: any) => tmdbToMovie(r));
-      return { ok: true, page, results: items, total_pages: trendData.total_pages || 1, total_results: trendData.total_results || 0 };
-    } catch (e) {
-      console.error('TMDB error:', e);
-      return { ok: true, page: 1, results: [], total_pages: 0, total_results: 0 };
+  try {
+    const page = params.page || 1;
+    if (params.q) {
+      const data = await tmdbFetch('/search/multi', { query: params.q, page });
+      const items = (data.results || [])
+        .filter((r: any) => r.media_type === 'movie' || r.media_type === 'tv')
+        .map((r: any) => tmdbToMovie(r));
+      return { ok: true, page, results: items, total_pages: data.total_pages || 1, total_results: data.total_results || 0 };
     }
+    const trendData = await tmdbFetch('/trending/movie/week', { page });
+    const items = (trendData.results || []).map((r: any) => tmdbToMovie(r));
+    return { ok: true, page, results: items, total_pages: trendData.total_pages || 1, total_results: trendData.total_results || 0 };
+  } catch (e) {
+    console.error('TMDB error:', e);
+    return { ok: true, page: 1, results: [], total_pages: 0, total_results: 0 };
   }
-
-  // OMDb фолбэк
-  throw new Error('NO_TMDB_KEY');
 };
 
 export const searchCatalog = async (query: string, page = 1): Promise<CatalogResponse> =>
@@ -223,18 +170,17 @@ export const getTop = async (page = 1): Promise<CatalogResponse> =>
   getCatalog({ page, sort: 'trending' });
 
 export const getMovieDetail = async (id: string | number): Promise<MovieDetail> => {
-  if (hasTmdbKey()) {
-    const numId = typeof id === 'string' && id.startsWith('tt') ? NaN : Number(id);
-    if (!isNaN(numId)) {
-      // Сначала пробуем movie, потом tv
-      try { return await tmdbToDetail(numId, false); }
-      catch { return await tmdbToDetail(numId, true); }
-    }
-    // Если tt-шный ID — используем OMDb
+  const numId = Number(id);
+  if (!isNaN(numId)) {
+    try { return await tmdbToDetail(numId, false); }
+    catch { return await tmdbToDetail(numId, true); }
   }
-  // OMDb
-  const d = await omdbFetch({ i: id, plot: 'full' });
-  return omdbToDetail(d);
+  // Если ID не число (tt...), пытаемся найти через TMDB search
+  const data = await tmdbFetch('/search/movie', { query: String(id) });
+  if (data.results?.length > 0) {
+    return await tmdbToDetail(data.results[0].id, false);
+  }
+  throw new Error('NOT_FOUND');
 };
 
 /* ===== Плеер ===== */
@@ -280,12 +226,10 @@ export const getGenres = async (): Promise<Genre[]> => {
   ];
 };
 
-/* ===== Проверка соединения ===== */
 export const checkTmdb = async (): Promise<{ ok: boolean; message: string }> => {
-  if (!hasTmdbKey()) return { ok: false, message: 'Ключ TMDB не указан' };
   try {
     const data = await tmdbFetch('/configuration');
-    if (data.images) return { ok: true, message: 'Соединение установлено' };
+    if (data.images) return { ok: true, message: 'TMDB онлайн' };
     return { ok: false, message: 'Ошибка ключа' };
   } catch {
     return { ok: false, message: 'Ошибка соединения' };
