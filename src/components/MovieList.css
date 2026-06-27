@@ -1,0 +1,75 @@
+/* ===== ULTRA PREMIUM — Горизонтальный список ===== */
+
+.movie-list {
+  margin-bottom: 8px;
+}
+
+/* Header */
+.movie-list__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px 12px;
+}
+
+.movie-list__title {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.movie-list__see-all {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  opacity: 0.85;
+  transition: opacity 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.movie-list__see-all:active { opacity: 0.55; }
+
+/* Scroll wrap */
+.movie-list__scroll-wrap {
+  overflow: hidden;
+  position: relative;
+}
+
+/* Fade-out right edge */
+.movie-list__scroll-wrap::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0; right: 0;
+  width: 32px;
+  background: linear-gradient(to right, transparent, var(--bg));
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Scroll row */
+.movie-list__scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 20px 16px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.movie-list__scroll::-webkit-scrollbar { display: none; }
+
+/* Cards take fixed width */
+.movie-list__scroll .movie-card {
+  flex-shrink: 0;
+  width: 120px;
+  scroll-snap-align: start;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
