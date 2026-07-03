@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './VideoPlayer.css';
 
-/* ===== Модальный видеоплеер с переключением источников ===== */
+/* ===== Модальный видеоплеер — авто-переключение источников ===== */
 
 export interface PlayerSource {
   label: string;
@@ -17,36 +17,53 @@ interface VideoPlayerProps {
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, sources = [], onClose, title }) => {
-  const [activeUrl, setActiveUrl] = useState(url);
-  const [activeLabel, setActiveLabel] = useState(sources[0]?.label || 'Плеер');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-
   const allSources: PlayerSource[] = sources.length > 0
     ? sources
     : [{ label: 'Плеер', url, type: 'embed' }];
 
+  const [srcIndex, setSrcIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [autoSwitched, setAutoSwitched] = useState(false);
+
+  const activeSource = allSources[srcIndex];
+
   useEffect(() => {
     setLoading(true);
     setError(false);
-  }, [activeUrl]);
+  }, [srcIndex]);
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) onClose();
+  // Авто-переключение на следующий источник при ошибке
+  const handleError = () => {
+    setLoading(false);
+    if (srcIndex < allSources.length - 1) {
+      setAutoSwitched(true);
+      setTimeout(() => {
+        setSrcIndex((i) => i + 1);
+        setAutoSwitched(false);
+      }, 1200);
+    } else {
+      setError(true);
+    }
   };
 
-  const handleSource = (src: PlayerSource) => {
-    setActiveUrl(src.url);
-    setActiveLabel(src.label);
+  const handleLoad = () => {
+    setLoading(false);
+    setError(false);
+  };
+
+  const nextSource = () => {
+    if (srcIndex < allSources.length - 1) setSrcIndex((i) => i + 1);
+    else setSrcIndex(0);
   };
 
   return (
-    <div className="vp-overlay" onClick={handleOverlayClick}>
+    <div className="vp-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="vp-modal">
+
         {/* Header */}
         <div className="vp-header">
-          {title && <span className="vp-title">{title}</span>}
+          <span className="vp-title">{title || 'Просмотр'}</span>
           <button className="vp-close" onClick={onClose} aria-label="Закрыть">
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M2 2l14 14M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
@@ -54,30 +71,33 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, sources = [], onClose, t
           </button>
         </div>
 
-        {/* Player area */}
+        {/* Player */}
         <div className="vp-player-wrap">
-          {loading && (
+          {(loading || autoSwitched) && (
             <div className="vp-loading">
               <div className="vp-spinner" />
-              <p>Загрузка плеера…</p>
+              <p>{autoSwitched ? `Переключаем на ${allSources[srcIndex + 1]?.label}…` : 'Загрузка плеера…'}</p>
             </div>
           )}
           {error ? (
             <div className="vp-error">
-              <span>⚠️</span>
-              <p>Источник недоступен. Попробуйте другой.</p>
+              <span>😕</span>
+              <p>Все источники недоступны</p>
+              <button className="vp-error-btn" onClick={() => { setSrcIndex(0); setError(false); }}>
+                Попробовать снова
+              </button>
             </div>
           ) : (
             <iframe
-              ref={iframeRef}
+              key={activeSource.url}
               className="vp-iframe"
-              src={activeUrl}
+              src={activeSource.url}
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
               allowFullScreen
               frameBorder="0"
               title={title || 'Плеер'}
-              onLoad={() => setLoading(false)}
-              onError={() => { setLoading(false); setError(true); }}
+              onLoad={handleLoad}
+              onError={handleError}
             />
           )}
         </div>
@@ -85,26 +105,34 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, sources = [], onClose, t
         {/* Source switcher */}
         {allSources.length > 1 && (
           <div className="vp-sources">
-            <span className="vp-sources__label">Источники:</span>
+            <span className="vp-sources__label">Источник:</span>
             <div className="vp-sources__list">
-              {allSources.map((src) => (
+              {allSources.map((src, i) => (
                 <button
                   key={src.url}
-                  className={`vp-source-btn ${src.url === activeUrl ? 'active' : ''}`}
-                  onClick={() => handleSource(src)}
+                  className={`vp-source-btn ${i === srcIndex ? 'active' : ''}`}
+                  onClick={() => setSrcIndex(i)}
                 >
-                  {src.url === activeUrl ? '▶ ' : ''}{src.label}
+                  {i === srcIndex && '▶ '}{src.label}
                 </button>
               ))}
             </div>
+            {srcIndex < allSources.length - 1 && (
+              <button className="vp-next-btn" onClick={nextSource}>
+                Следующий →
+              </button>
+            )}
           </div>
         )}
 
-        {/* Current source info */}
+        {/* Footer */}
         <div className="vp-footer">
-          <span className="vp-current-src">🎬 {activeLabel}</span>
-          <span className="vp-hint">Если не загружается — смените источник выше</span>
+          <span className="vp-current-src">🎬 {activeSource.label}</span>
+          <span className="vp-hint">
+            {srcIndex + 1} из {allSources.length} · Если не грузит — смените источник
+          </span>
         </div>
+
       </div>
     </div>
   );
