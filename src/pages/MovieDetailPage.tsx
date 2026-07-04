@@ -25,7 +25,7 @@ const MovieDetailPage: React.FC = () => {
   const [watchLoading, setWatchLoading] = useState(false);
 
   const [activeSeason, setActiveSeason] = useState<number>(0);
-  const [activeEpisode, setActiveEpisode] = useState<string | number | null>(null);
+  const [activeEpisode, setActiveEpisode] = useState<number>(1);
 
   const movieId = id || '0';
   const favorite = movie ? isFavorite(movie.id) : false;
@@ -40,7 +40,7 @@ const MovieDetailPage: React.FC = () => {
       .then((data) => {
         setMovie(data);
         setActiveSeason(0);
-        setActiveEpisode(null);
+        setActiveEpisode(1);
         window.scrollTo(0, 0);
       })
       .catch((err) => {
@@ -61,16 +61,28 @@ const MovieDetailPage: React.FC = () => {
     return cleanup;
   }, [showBackButton, navigate, showPlayer]);
 
-  const handleWatch = async () => {
+  const buildSources = async (seasonNum?: number, episodeNum?: number) => {
+    const isSerial = movie?.is_serial || (movie?.seasons?.length ?? 0) > 0;
+    const rawSources = await getPlayerUrl(movieId, movie?.title || '', isSerial);
+    if (!isSerial) return rawSources;
+    // Для сериалов добавляем ?s=&e= к URL
+    const s = seasonNum ?? (activeSeason + 1);
+    const e = episodeNum ?? activeEpisode;
+    return rawSources.map(src => {
+      const url = src.url;
+      // vidsrc.xyz и vidsrc.pro принимают ?s=1&e=1
+      const sep = url.includes('?') ? '&' : '?';
+      return { ...src, url: `${url}${sep}s=${s}&e=${e}` };
+    });
+  };
+
+  const handleWatch = async (seasonNum?: number, episodeNum?: number) => {
     haptic('medium');
     if (movie) addToHistory(movie);
-
-    if (playerSources.length > 0) { setShowPlayer(true); return; }
-
     setWatchLoading(true);
+    setPlayerSources([]);
     try {
-      const isSerial = movie?.is_serial || (movie?.seasons?.length ?? 0) > 0;
-      const sources = await getPlayerUrl(movieId, movie?.title || '', isSerial);
+      const sources = await buildSources(seasonNum, episodeNum);
       if (sources.length > 0) {
         setPlayerSources(sources);
         setShowPlayer(true);
@@ -134,6 +146,19 @@ const MovieDetailPage: React.FC = () => {
   const seasons = movie.seasons || [];
   const currentSeason = seasons[activeSeason];
   const isSerial = movie.is_serial || seasons.length > 0;
+
+  // Генерируем список эпизодов если есть episodes_count но нет episodes
+  const episodeList = currentSeason
+    ? (currentSeason.episodes && currentSeason.episodes.length > 0
+      ? currentSeason.episodes
+      : Array.from({ length: currentSeason.episodes_count || 0 }, (_, i) => ({
+          id: i + 1,
+          episode: i + 1,
+          title: `Серия ${i + 1}`,
+          season: currentSeason.season_number,
+        }))
+    )
+    : [];
 
   return (
     <div className="detail-page page">
@@ -207,7 +232,7 @@ const MovieDetailPage: React.FC = () => {
         <div className="detail-actions">
           <button
             className={`detail-actions__watch ${watchLoading ? 'loading' : ''}`}
-            onClick={handleWatch}
+            onClick={() => handleWatch()}
             disabled={watchLoading}
           >
             {watchLoading ? (
@@ -217,7 +242,7 @@ const MovieDetailPage: React.FC = () => {
                 <path d="M5 3l11 6-11 6V3z" fill="currentColor"/>
               </svg>
             )}
-            {watchLoading ? 'Загрузка…' : 'Смотреть'}
+            {watchLoading ? 'Загрузка…' : isSerial ? `▶ Смотреть С${activeSeason + 1}:Е${activeEpisode}` : 'Смотреть'}
           </button>
 
           <button
@@ -275,27 +300,34 @@ const MovieDetailPage: React.FC = () => {
           <div className="detail-section">
             <h3 className="detail-section__title">Сезоны и серии</h3>
             <div className="seasons-block">
+              {/* Вкладки сезонов */}
               <div className="seasons-block__tabs">
                 {seasons.map((s, i) => (
                   <button
                     key={s.id}
                     className={`season-tab ${i === activeSeason ? 'season-tab--active' : ''}`}
-                    onClick={() => { setActiveSeason(i); setActiveEpisode(null); haptic('light'); }}
+                    onClick={() => { setActiveSeason(i); setActiveEpisode(1); haptic('light'); }}
                   >
                     Сезон {s.season_number}
                   </button>
                 ))}
               </div>
-              {currentSeason && (
+              {/* Список серий */}
+              {episodeList.length > 0 && (
                 <div className="episodes-list">
-                  {currentSeason.episodes.map((ep) => (
+                  {episodeList.map((ep) => (
                     <button
                       key={ep.id}
-                      className={`episode-item ${activeEpisode === ep.id ? 'episode-item--active' : ''}`}
-                      onClick={() => { setActiveEpisode(ep.id); haptic('light'); }}
+                      className={`episode-item ${activeEpisode === ep.episode ? 'episode-item--active' : ''}`}
+                      onClick={() => {
+                        haptic('medium');
+                        setActiveEpisode(ep.episode);
+                        handleWatch(currentSeason.season_number, ep.episode);
+                      }}
                     >
-                      <span className="episode-item__num">{ep.episode}</span>
-                      <span className="episode-item__title">{ep.title}</span>
+                      <span className="episode-item__num">Серия {ep.episode}</span>
+                      <span className="episode-item__title">{ep.title !== `Серия ${ep.episode}` ? ep.title : ''}</span>
+                      <span className="episode-item__play">▶</span>
                     </button>
                   ))}
                 </div>
