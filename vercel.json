@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd ZCodeProject && npm install --cache /tmp/npm-cache && npm run build",
-  "outputDirectory": "ZCodeProject/dist",
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]

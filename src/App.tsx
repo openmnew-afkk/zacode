@@ -1,5 +1,5 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import './styles/global.css';
@@ -15,12 +15,12 @@ const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 3000);
+    const timer = setTimeout(() => setShowSplash(false), 1500);
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       {showSplash && <SplashPage />}
       <Suspense fallback={<div className="page-loader" />}>
         <Routes>
@@ -32,7 +32,7 @@ const App: React.FC = () => {
         </Routes>
       </Suspense>
       {!showSplash && <TabBar />}
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 
