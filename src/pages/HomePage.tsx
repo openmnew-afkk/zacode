@@ -27,20 +27,31 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const res = await getCatalog({ page: 1, limit: 20 });
+        const typeMap: Record<string, string> = {
+          movie: 'movie', series: 'serial', all: '', anime: '', new: ''
+        };
+        const type = typeMap[activeCategory] || '';
+        const res = await getCatalog({ page: 1, type: type || undefined });
         if (res.results && res.results.length > 0) {
-          setMovies(res.results);
+          let items = res.results;
+          if (activeCategory === 'anime') items = res.results.filter(m => m.type === 'anime');
+          if (activeCategory === 'new') items = [...res.results].sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
+          setMovies(items);
+        } else {
+          setMovies([]);
         }
       } catch (err) {
         console.error('Ошибка:', err);
-        setError('Не удалось загрузить фильмы.');
+        setError('Не удалось загрузить контент.');
       } finally {
         setLoading(false);
       }
     };
     fetchData();
-  }, []);
+  }, [activeCategory]);
 
   const heroMovies = movies.filter((m) => m.poster_path && m.poster_path !== '/no-poster.svg').slice(0, 6);
 
@@ -69,18 +80,8 @@ const HomePage: React.FC = () => {
   const hero = heroMovies[heroIndex];
   const bgUrl = hero ? (backdropUrl(hero.backdrop_path) || posterUrl(hero.poster_path)) : '';
 
-  const filtered = activeCategory === 'all'
-    ? movies
-    : activeCategory === 'movie'
-    ? movies.filter((m) => !m.is_serial && m.type !== 'anime')
-    : activeCategory === 'series'
-    ? movies.filter((m) => m.is_serial)
-    : activeCategory === 'anime'
-    ? movies.filter((m) => m.type === 'anime')
-    : movies.slice().sort((a, b) => (b.release_date || '').localeCompare(a.release_date || ''));
-
-  const topMovies = filtered.slice(0, 12);
-  const recommendedMovies = [...filtered].reverse().slice(0, 12);
+  const topMovies = movies.slice(0, 12);
+  const recommendedMovies = [...movies].reverse().slice(0, 12);
 
   return (
     <div className="home-page page">

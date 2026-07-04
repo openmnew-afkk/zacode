@@ -36,7 +36,7 @@ const SearchPage: React.FC = () => {
         if (query.trim()) {
           result = await searchCatalog(query.trim(), pageNum, searchType);
         } else {
-          result = await getCatalog({ page: pageNum, genre, year, sort: 'year' });
+          result = await getCatalog({ page: pageNum, type: searchType || undefined });
         }
         setMovies((prev) => (reset ? result.results : [...prev, ...result.results]));
         setTotalPages(result.total_pages);
