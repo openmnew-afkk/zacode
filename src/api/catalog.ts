@@ -5,8 +5,8 @@
 
 import type { Movie, CatalogResponse, MovieDetail, Genre } from '../types';
 
-// Рабочий бесплатный ключ OMDb (1000 запросов/день)
-const OMDB_KEY = 'dc003aabe0e60ef32360bfdf70deac32';
+// OMDb API key — получи свой бесплатно на https://www.omdbapi.com/apikey.aspx
+const OMDB_KEY = '4a3b711b';
 const OMDB_BASE = 'https://www.omdbapi.com';
 
 /* ===== Источники для плеера (фильмы) ===== */
@@ -27,7 +27,7 @@ export const PLAYER_SOURCES_TV = [
 ];
 
 /* ===== Изображения ===== */
-const posterFallback = '/no-poster.svg';
+const posterFallback = './no-poster.svg';
 const cleanPoster = (p: string | null | undefined): string => {
   if (!p || p === 'N/A') return posterFallback;
   if (p.startsWith('http') || p.startsWith('//')) return p;
