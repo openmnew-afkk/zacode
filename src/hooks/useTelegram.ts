@@ -58,6 +58,7 @@ declare global {
           onClick: (cb: () => void) => void;
           offClick: (cb: () => void) => void;
         };
+        openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
         HapticFeedback: {
           impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
@@ -146,6 +147,14 @@ export const useTelegram = () => {
     tg?.close();
   }, []);
 
+  /** Открыть ссылку во внешнем браузере */
+  const openLink = useCallback((url: string) => {
+    if (tg?.openLink) {
+      try { tg.openLink(url); return; } catch {}
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }, []);
+
   return {
     tg,
     user,
@@ -155,5 +164,6 @@ export const useTelegram = () => {
     hideMainButton,
     haptic,
     closeApp,
+    openLink,
   };
 };

@@ -56,7 +56,7 @@
 /* Content */
 .hero-carousel__content {
   position: absolute;
-  bottom: 90px;
+  bottom: 48px;
   left: 20px;
   right: 20px;
   z-index: 3;
@@ -186,73 +186,49 @@
   transform: scale(0.95);
 }
 
-/* ── Thumbnail Strip ── */
-.hero-carousel__strip {
+/* ── Dots navigation ── */
+.hero-carousel__dots {
   position: absolute;
-  bottom: 24px;
-  left: 20px;
-  right: 20px;
-  z-index: 4;
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.hero-carousel__strip::-webkit-scrollbar { display: none; }
-
-.hero-carousel__thumb {
-  position: relative;
-  flex-shrink: 0;
-  width: 44px;
-  height: 60px;
-  border-radius: 8px;
-  overflow: hidden;
-  cursor: pointer;
-  border: 2px solid transparent;
-  padding: 0;
-  transition: all 0.25s var(--ease-smooth);
-  opacity: 0.55;
-}
-
-.hero-carousel__thumb.active {
-  border-color: var(--accent);
-  opacity: 1;
-  box-shadow: 0 0 0 2px rgba(139,92,246,0.4), 0 4px 12px rgba(0,0,0,0.4);
-  width: 52px;
-}
-
-.hero-carousel__thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.hero-carousel__thumb-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.2);
-}
-
-.hero-carousel__thumb-active-bar {
-  position: absolute;
-  bottom: 0;
+  bottom: 18px;
   left: 0;
   right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  animation: bar-fill 5s linear forwards;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
-@keyframes bar-fill {
-  from { transform: scaleX(0); transform-origin: left; }
-  to   { transform: scaleX(1); transform-origin: left; }
+.hero-carousel__dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  padding: 0;
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: width 0.3s ease, background 0.2s ease;
+  overflow: hidden;
 }
 
-/* Dots */
-.hero-carousel__dots {
-  display: none; /* Replaced by thumbnail strip */
+.hero-carousel__dot.active {
+  width: 28px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-carousel__dot-progress {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background: #fff;
+  transform-origin: left center;
+  animation: dot-progress 5s linear forwards;
+}
+
+@keyframes dot-progress {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
 }
 
 /* ── Header ── */

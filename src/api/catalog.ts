@@ -20,22 +20,22 @@ export const PLAYER_SOURCES: PlayerSourceDef[] = [
   {
     label: 'Collaps',
     lang: 'ru',
-    buildUrl: (id) => `https://api.lap.cat/embed/movie?imdb=${id}`,
+    buildUrl: (id) => `https://api.initem.ws/embed/movie/${id}`,
   },
   {
-    label: 'HDVB',
+    label: 'Bazon',
     lang: 'ru',
-    buildUrl: (id) => `https://hdvb.uk/embed/movie/${id}`,
+    buildUrl: (id) => `https://bazon.cc/embed/movie/${id}`,
   },
   {
-    label: 'VidSrc RU',
+    label: '2Embed RU',
     lang: 'ru',
-    buildUrl: (id) => `https://vidsrc-embed.ru/embed/movie?imdb=${id}&ds_lang=ru`,
+    buildUrl: (id) => `https://www.2embed.cc/embed/${id}?lang=ru`,
   },
   {
     label: 'VidSrc',
     lang: 'en',
-    buildUrl: (id) => `https://vidsrc.xyz/embed/movie/${id}`,
+    buildUrl: (id) => `https://vidsrc.cc/v2/embed/movie/${id}`,
   },
 ];
 
@@ -43,22 +43,22 @@ export const PLAYER_SOURCES_TV: PlayerSourceDef[] = [
   {
     label: 'Collaps',
     lang: 'ru',
-    buildUrl: (id, s = 1, e = 1) => `https://api.lap.cat/embed/series?imdb=${id}&s=${s}&e=${e}`,
+    buildUrl: (id, s = 1, e = 1) => `https://api.initem.ws/embed/tv/${id}/${s}/${e}`,
   },
   {
-    label: 'HDVB',
+    label: 'Bazon',
     lang: 'ru',
-    buildUrl: (id, s = 1, e = 1) => `https://hdvb.uk/embed/tv/${id}/${s}/${e}`,
+    buildUrl: (id, s = 1, e = 1) => `https://bazon.cc/embed/tv/${id}/${s}/${e}`,
   },
   {
-    label: 'VidSrc RU',
+    label: '2Embed RU',
     lang: 'ru',
-    buildUrl: (id, s = 1, e = 1) => `https://vidsrc-embed.ru/embed/tv?imdb=${id}&season=${s}&episode=${e}&ds_lang=ru`,
+    buildUrl: (id, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}&lang=ru`,
   },
   {
     label: 'VidSrc',
     lang: 'en',
-    buildUrl: (id, s = 1, e = 1) => `https://vidsrc.xyz/embed/tv/${id}?s=${s}&e=${e}`,
+    buildUrl: (id, s = 1, e = 1) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
   },
 ];
 

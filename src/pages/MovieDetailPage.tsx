@@ -370,6 +370,7 @@ const MovieDetailPage: React.FC = () => {
           initialIndex={selectedSource}
           onClose={() => setShowPlayer(false)}
           title={movie.title}
+          poster={posterUrl(movie.poster_path, movie.imdb_id)}
         />
       )}
     </div>

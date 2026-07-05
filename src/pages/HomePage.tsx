@@ -24,6 +24,18 @@ const HomePage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [heroTransition, setHeroTransition] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const touchStartX = useRef(0);
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const onTouchEnd = (e: React.TouchEvent) => {
+    const diff = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) < 50 || heroMovies.length === 0) return;
+    if (diff < 0) goToHero((heroIndex + 1) % heroMovies.length);
+    else goToHero((heroIndex - 1 + heroMovies.length) % heroMovies.length);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,7 +103,11 @@ const HomePage: React.FC = () => {
 
       {/* ── Hero-карусель ── */}
       {hero && (
-        <div className="hero-carousel">
+        <div
+          className="hero-carousel"
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
+        >
           {/* Bg Image */}
           <div
             className={`hero-carousel__bg ${heroTransition ? 'fading' : ''}`}
@@ -143,23 +159,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Thumbnail dots / strip */}
-          <div className="hero-carousel__strip">
-            {heroMovies.map((m, i) => (
-              <button
-                key={m.id}
-                className={`hero-carousel__thumb ${i === heroIndex ? 'active' : ''}`}
-                onClick={(e) => { e.stopPropagation(); goToHero(i); }}
-                aria-label={`Слайд ${i + 1}`}
-              >
-                <img src={posterUrl(m.poster_path, m.imdb_id)} alt={m.title} loading="lazy" />
-                <div className="hero-carousel__thumb-overlay" />
-                {i === heroIndex && <div className="hero-carousel__thumb-active-bar" />}
-              </button>
-            ))}
-          </div>
-
-          {/* Dots progress */}
+          {/* Dots — навигация по карусели */}
           <div className="hero-carousel__dots">
             {heroMovies.map((_, i) => (
               <button
@@ -167,7 +167,9 @@ const HomePage: React.FC = () => {
                 className={`hero-carousel__dot ${i === heroIndex ? 'active' : ''}`}
                 onClick={(e) => { e.stopPropagation(); goToHero(i); }}
                 aria-label={`Слайд ${i + 1}`}
-              />
+              >
+                {i === heroIndex && <span className="hero-carousel__dot-progress" key={heroIndex} />}
+              </button>
             ))}
           </div>
         </div>
