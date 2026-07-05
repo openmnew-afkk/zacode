@@ -2,6 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
+import RouteGuard from './components/RouteGuard';
 import './styles/global.css';
 
 /* ===== Ленивая загрузка страниц ===== */
@@ -15,12 +16,13 @@ const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 1500);
+    const timer = setTimeout(() => setShowSplash(false), 3200);
     return () => clearTimeout(timer);
   }, []);
 
   return (
     <HashRouter>
+      <RouteGuard />
       {showSplash && <SplashPage />}
       <Suspense fallback={<div className="page-loader" />}>
         <Routes>

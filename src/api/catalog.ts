@@ -9,35 +9,82 @@ import type { Movie, CatalogResponse, MovieDetail, Genre } from '../types';
 const OMDB_KEY = '4a3b711b';
 const OMDB_BASE = 'https://www.omdbapi.com';
 
-/* ===== Источники для плеера (фильмы) — русская озвучка приоритет ===== */
-export const PLAYER_SOURCES = [
-  { label: '🇷🇺 Collaps',   base: 'https://api.collaps.cc/embed/movie?imdb=',    idType: 'imdb' },
-  { label: '🇷🇺 VideoFrame',base: 'https://videoframe.to/embed/movie/',            idType: 'imdb' },
-  { label: 'VidSrc',     base: 'https://vidsrc.xyz/embed/movie/',              idType: 'imdb' },
-  { label: 'VidSrc Pro', base: 'https://vidsrc.pro/embed/movie/',              idType: 'imdb' },
-  { label: '2Embed',     base: 'https://www.2embed.cc/embed/',                 idType: 'imdb' },
-  { label: 'MultiEmbed', base: 'https://multiembed.mov/?video_id=',            idType: 'imdb' },
+/* ===== Источники для плеера — 3 RU + 1 EN ===== */
+export interface PlayerSourceDef {
+  label: string;
+  lang: 'ru' | 'en';
+  buildUrl: (imdbId: string, season?: number, episode?: number) => string;
+}
+
+export const PLAYER_SOURCES: PlayerSourceDef[] = [
+  {
+    label: 'Collaps',
+    lang: 'ru',
+    buildUrl: (id) => `https://api.lap.cat/embed/movie?imdb=${id}`,
+  },
+  {
+    label: 'HDVB',
+    lang: 'ru',
+    buildUrl: (id) => `https://hdvb.uk/embed/movie/${id}`,
+  },
+  {
+    label: 'VidSrc RU',
+    lang: 'ru',
+    buildUrl: (id) => `https://vidsrc-embed.ru/embed/movie?imdb=${id}&ds_lang=ru`,
+  },
+  {
+    label: 'VidSrc',
+    lang: 'en',
+    buildUrl: (id) => `https://vidsrc.xyz/embed/movie/${id}`,
+  },
 ];
 
-/* ===== Источники для плеера (сериалы) ===== */
-export const PLAYER_SOURCES_TV = [
-  { label: '🇷🇺 Collaps',   base: 'https://api.collaps.cc/embed/series?imdb=',    idType: 'imdb' },
-  { label: '🇷🇺 VideoFrame',base: 'https://videoframe.to/embed/tv/',               idType: 'imdb' },
-  { label: 'VidSrc',     base: 'https://vidsrc.xyz/embed/tv/',                 idType: 'imdb' },
-  { label: 'VidSrc Pro', base: 'https://vidsrc.pro/embed/tv/',                 idType: 'imdb' },
-  { label: '2Embed TV',  base: 'https://www.2embed.cc/embedtv/',               idType: 'imdb' },
+export const PLAYER_SOURCES_TV: PlayerSourceDef[] = [
+  {
+    label: 'Collaps',
+    lang: 'ru',
+    buildUrl: (id, s = 1, e = 1) => `https://api.lap.cat/embed/series?imdb=${id}&s=${s}&e=${e}`,
+  },
+  {
+    label: 'HDVB',
+    lang: 'ru',
+    buildUrl: (id, s = 1, e = 1) => `https://hdvb.uk/embed/tv/${id}/${s}/${e}`,
+  },
+  {
+    label: 'VidSrc RU',
+    lang: 'ru',
+    buildUrl: (id, s = 1, e = 1) => `https://vidsrc-embed.ru/embed/tv?imdb=${id}&season=${s}&episode=${e}&ds_lang=ru`,
+  },
+  {
+    label: 'VidSrc',
+    lang: 'en',
+    buildUrl: (id, s = 1, e = 1) => `https://vidsrc.xyz/embed/tv/${id}?s=${s}&e=${e}`,
+  },
 ];
 
 /* ===== Изображения ===== */
 const posterFallback = './no-poster.svg';
-const cleanPoster = (p: string | null | undefined): string => {
-  if (!p || p === 'N/A') return posterFallback;
+
+const omdbPoster = (imdbId: string): string =>
+  `https://img.omdbapi.com/?i=${imdbId}&h=1000&apikey=${OMDB_KEY}`;
+
+const cleanPoster = (p: string | null | undefined, imdbId?: string): string => {
+  if (!p || p === 'N/A') {
+    if (imdbId?.startsWith('tt')) return omdbPoster(imdbId);
+    return posterFallback;
+  }
   if (p.startsWith('http') || p.startsWith('//')) return p;
+  if (imdbId?.startsWith('tt')) return omdbPoster(imdbId);
   return posterFallback;
 };
-export const posterUrl  = cleanPoster;
-export const backdropUrl = (p: string | null | undefined): string =>
-  cleanPoster(p) !== posterFallback ? cleanPoster(p) : '';
+
+export const posterUrl = (p: string | null | undefined, imdbId?: string): string =>
+  cleanPoster(p, imdbId);
+
+export const backdropUrl = (p: string | null | undefined, imdbId?: string): string => {
+  const url = cleanPoster(p, imdbId);
+  return url !== posterFallback ? url : (imdbId?.startsWith('tt') ? omdbPoster(imdbId) : '');
+};
 
 /* ===== OMDb helpers ===== */
 interface OMDBItem {
@@ -72,8 +119,8 @@ function toMovie(i: OMDBItem): Movie {
     title: i.Title || 'Без названия',
     original_title: i.Title || '',
     overview: '',
-    poster_path: cleanPoster(i.Poster),
-    backdrop_path: cleanPoster(i.Poster),
+    poster_path: cleanPoster(i.Poster, id),
+    backdrop_path: cleanPoster(i.Poster, id),
     release_date: i.Year || '',
     vote_average: 0,
     kinopoisk_rating: 0,
@@ -146,8 +193,7 @@ const BUILTIN_SERIALS: MovieDetail[] = [
   { id: idToNum('tt2306299'), title: 'Викинги', original_title: 'Vikings', overview: 'Легендарный Рагнар Лотброк ведёт набеги и завоёвывает новые земли.', poster_path: 'https://m.media-amazon.com/images/M/MV5BYTIzNjQ5YWItZGZiMS00OTBmLWIxMjItNzVhYTQ5NmQzZjM4XkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BYTIzNjQ5YWItZGZiMS00OTBmLWIxMjItNzVhYTQ5NmQzZjM4XkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2013–2020', vote_average: 8.5, kinopoisk_rating: 8.4, imdb_rating: 8.5, runtime: 44, genre_ids: [4, 10, 1], genres: [{ id: 4, name: 'Драма' }, { id: 10, name: 'Исторический' }, { id: 1, name: 'Боевик' }], type: 'serial', is_serial: true, imdb_id: 'tt2306299', kinopoisk_id: '', quality: '4K', translator: '', iframe_url: '', countries: ['Ирландия', 'Канада'], actors: ['Трэвис Фиммел', 'Клайв Стэндэн', 'Катерин Вингор'], directors: ['Майкл Херст'], popularity: 88, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 9, episodes: [] }, { id: 2, season_number: 2, episodes_count: 10, episodes: [] }, { id: 3, season_number: 3, episodes_count: 10, episodes: [] }, { id: 4, season_number: 4, episodes_count: 20, episodes: [] }, { id: 5, season_number: 5, episodes_count: 20, episodes: [] }, { id: 6, season_number: 6, episodes_count: 20, episodes: [] }], similar: [] },
   { id: idToNum('tt7366338'), title: 'Корона', original_title: 'The Crown', overview: 'История правления королевы Елизаветы II и британской монархии.', poster_path: 'https://m.media-amazon.com/images/M/MV5BZWM4MWI0ZGQtZDFhYS00OGZjLTllMjgtM2NmOWNkNDU5OWZmXkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BZWM4MWI0ZGQtZDFhYS00OGZjLTllMjgtM2NmOWNkNDU5OWZmXkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2016–2023', vote_average: 8.7, kinopoisk_rating: 8.2, imdb_rating: 8.7, runtime: 58, genre_ids: [4, 10], genres: [{ id: 4, name: 'Драма' }, { id: 10, name: 'Исторический' }], type: 'serial', is_serial: true, imdb_id: 'tt7366338', kinopoisk_id: '', quality: '4K', translator: '', iframe_url: '', countries: ['Великобритания'], actors: ['Клэр Фой', 'Оливия Колман', 'Иэн Маклейн'], directors: ['Питер Морган'], popularity: 83, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 10, episodes: [] }, { id: 2, season_number: 2, episodes_count: 10, episodes: [] }, { id: 3, season_number: 3, episodes_count: 10, episodes: [] }, { id: 4, season_number: 4, episodes_count: 10, episodes: [] }, { id: 5, season_number: 5, episodes_count: 10, episodes: [] }, { id: 6, season_number: 6, episodes_count: 10, episodes: [] }], similar: [] },
   { id: idToNum('tt3032476'), title: 'Лучше звоните Солу', original_title: 'Better Call Saul', overview: 'История адвоката Джимми Макгилла — будущего Сола Гудмана из «Во все тяжкие».', poster_path: 'https://m.media-amazon.com/images/M/MV5BZjZlNzE0YzAtZTMzOC00NzYxLWE5MWQtM2M1YzYzY2MxZTI0XkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BZjZlNzE0YzAtZTMzOC00NzYxLWE5MWQtM2M1YzYzY2MxZTI0XkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2015–2022', vote_average: 9.0, kinopoisk_rating: 8.8, imdb_rating: 9.0, runtime: 46, genre_ids: [4, 2, 6], genres: [{ id: 4, name: 'Драма' }, { id: 6, name: 'Криминал' }], type: 'serial', is_serial: true, imdb_id: 'tt3032476', kinopoisk_id: '', quality: '4K', translator: '', iframe_url: '', countries: ['США'], actors: ['Боб Оденкёрк', 'Джонатан Бэнкс', 'Рис Ахмед'], directors: ['Винс Гиллиган', 'Питер Гулд'], popularity: 92, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 10, episodes: [] }, { id: 2, season_number: 2, episodes_count: 10, episodes: [] }, { id: 3, season_number: 3, episodes_count: 10, episodes: [] }, { id: 4, season_number: 4, episodes_count: 10, episodes: [] }, { id: 5, season_number: 5, episodes_count: 10, episodes: [] }, { id: 6, season_number: 6, episodes_count: 13, episodes: [] }], similar: [] },
-  { id: idToNum('tt8111088'), title: 'Дом дракона', original_title: 'House of the Dragon', overview: 'Предыстория «Игры престолов» — гражданская война дома Таргариенов.', poster_path: 'https://m.media-amazon.com/images/M/MV5BM2Q1MjU0ZjMtNzIxNC00NjQxLTk4MTctYWNkNjA5NjkzMGI4XkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BM2Q1MjU0ZjMtNzIxNC00NjQxLTk4MTctYWNkNjA5NjkzMGI4XkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2022–', vote_average: 8.4, kinopoisk_rating: 8.0, imdb_rating: 8.4, runtime: 60, genre_ids: [14, 4, 1], genres: [{ id: 14, name: 'Фэнтези' }, { id: 4, name: 'Драма' }], type: 'serial', is_serial: true, imdb_id: 'tt11198330', kinopoisk_id: '', quality: '4K', translator: '', iframe_url: '', countries: ['США'], actors: ['Падди Консидайн', 'Эмма Д\'Арси', 'Мэтт Смит'], directors: ['Мигель Сапочник', 'Райан Кондал'], popularity: 91, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 10, episodes: [] }, { id: 2, season_number: 2, episodes_count: 8, episodes: [] }], similar: [] },
-  { id: idToNum('tt0898266'), title: 'Теория большого взрыва', original_title: 'The Big Bang Theory', overview: 'Компания учёных-гиков и их общительная соседка Пенни.', poster_path: 'https://m.media-amazon.com/images/M/MV5BY2FmNTI4YzYtMDU3NC00MDQ5LTk5NTItMDU5MWM3NWE1MzI0XkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BY2FmNTI4YzYtMDU3NC00MDQ5LTk5NTItMDU5MWM3NWE1MzI0XkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2007–2019', vote_average: 8.1, kinopoisk_rating: 8.0, imdb_rating: 8.1, runtime: 22, genre_ids: [3], genres: [{ id: 3, name: 'Комедия' }], type: 'serial', is_serial: true, imdb_id: 'tt0898266', kinopoisk_id: '', quality: 'HD', translator: '', iframe_url: '', countries: ['США'], actors: ['Джим Парсонс', 'Джонни Галэки', 'Кейли Куоко'], directors: ['Чак Лорри', 'Билл Прэди'], popularity: 85, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 17, episodes: [] }, { id: 2, season_number: 2, episodes_count: 23, episodes: [] }, { id: 3, season_number: 3, episodes_count: 23, episodes: [] }], similar: [] },
+  { id: idToNum('tt11198330'), title: 'Дом дракона', original_title: 'House of the Dragon', overview: 'Предыстория «Игры престолов» — гражданская война дома Таргариенов.', poster_path: 'https://m.media-amazon.com/images/M/MV5BM2Q1MjU0ZjMtNzIxNC00NjQxLTk4MTctYWNkNjA5NjkzMGI4XkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BM2Q1MjU0ZjMtNzIxNC00NjQxLTk4MTctYWNkNjA5NjkzMGI4XkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2022–', vote_average: 8.4, kinopoisk_rating: 8.0, imdb_rating: 8.4, runtime: 60, genre_ids: [14, 4, 1], genres: [{ id: 14, name: 'Фэнтези' }, { id: 4, name: 'Драма' }], type: 'serial', is_serial: true, imdb_id: 'tt11198330', kinopoisk_id: '', quality: '4K', translator: '', iframe_url: '', countries: ['США'], actors: ['Падди Консидайн', 'Эмма Д\'Арси', 'Мэтт Смит'], directors: ['Мигель Сапочник', 'Райан Кондал'], popularity: 91, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 10, episodes: [] }, { id: 2, season_number: 2, episodes_count: 8, episodes: [] }], similar: [] },
   { id: idToNum('tt9174558'), title: 'Мандалорец', original_title: 'The Mandalorian', overview: 'Охотник за головами во вселенной «Звёздных войн» защищает загадочного малыша Грогу.', poster_path: 'https://m.media-amazon.com/images/M/MV5BZDhlMzY0ZGItZTcyNS00ZTAxLWIyMmYtZGQ2MDYyZjYyNDc5XkEyXkFqcGc@._V1_SX1000.jpg', backdrop_path: 'https://m.media-amazon.com/images/M/MV5BZDhlMzY0ZGItZTcyNS00ZTAxLWIyMmYtZGQ2MDYyZjYyNDc5XkEyXkFqcGc@._V1_SX1000.jpg', release_date: '2019–', vote_average: 8.7, kinopoisk_rating: 8.3, imdb_rating: 8.7, runtime: 40, genre_ids: [5, 1, 12], genres: [{ id: 5, name: 'Фантастика' }, { id: 1, name: 'Боевик' }], type: 'serial', is_serial: true, imdb_id: 'tt8111088', kinopoisk_id: '', quality: '4K', translator: '', iframe_url: '', countries: ['США'], actors: ['Педро Паскаль', 'Грина Кавалланро', 'Карл Уэзерс'], directors: ['Джон Фавро'], popularity: 93, adult: false, seasons: [{ id: 1, season_number: 1, episodes_count: 8, episodes: [] }, { id: 2, season_number: 2, episodes_count: 8, episodes: [] }, { id: 3, season_number: 3, episodes_count: 8, episodes: [] }], similar: [] },
 ];
 
@@ -284,13 +330,18 @@ export const getMovieDetail = async (id: string | number): Promise<MovieDetail> 
   throw new Error('Фильм не найден');
 };
 
-export interface PlayerSource { label: string; url: string; type: string; }
+export interface PlayerSource { label: string; url: string; type: string; lang: 'ru' | 'en'; }
 
-export const getPlayerUrl = async (id: string | number, _title: string, isSerial = false): Promise<PlayerSource[]> => {
+export const getPlayerUrl = async (
+  id: string | number,
+  _title: string,
+  isSerial = false,
+  season = 1,
+  episode = 1,
+): Promise<PlayerSource[]> => {
   const sid = String(id);
   const numId = parseInt(sid);
 
-  // Получаем imdb_id
   let imdbId: string | null = null;
 
   const byNum = BUILTIN_ALL.find(m => m.id === numId);
@@ -303,11 +354,12 @@ export const getPlayerUrl = async (id: string | number, _title: string, isSerial
 
   if (!imdbId) return [];
 
-  const sources = isSerial ? PLAYER_SOURCES_TV : PLAYER_SOURCES;
-  return sources.map(src => ({
-    label: src.label,
-    url: `${src.base}${imdbId}`,
+  const defs = isSerial ? PLAYER_SOURCES_TV : PLAYER_SOURCES;
+  return defs.map(src => ({
+    label: src.lang === 'ru' ? `🇷🇺 ${src.label}` : `🇬🇧 ${src.label}`,
+    url: src.buildUrl(imdbId, season, episode),
     type: 'embed',
+    lang: src.lang,
   }));
 };
 

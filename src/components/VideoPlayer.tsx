@@ -12,16 +12,17 @@ export interface PlayerSource {
 interface VideoPlayerProps {
   url: string;
   sources?: PlayerSource[];
+  initialIndex?: number;
   onClose: () => void;
   title?: string;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, sources = [], onClose, title }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ url, sources = [], initialIndex = 0, onClose, title }) => {
   const allSources: PlayerSource[] = sources.length > 0
     ? sources
     : [{ label: 'Плеер', url, type: 'embed' }];
 
-  const [srcIndex, setSrcIndex] = useState(0);
+  const [srcIndex, setSrcIndex] = useState(initialIndex);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [autoSwitched, setAutoSwitched] = useState(false);

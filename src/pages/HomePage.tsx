@@ -53,7 +53,10 @@ const HomePage: React.FC = () => {
     fetchData();
   }, [activeCategory]);
 
-  const heroMovies = movies.filter((m) => m.poster_path && m.poster_path !== '/no-poster.svg').slice(0, 6);
+  const heroMovies = movies.filter((m) => {
+    const p = posterUrl(m.poster_path, m.imdb_id);
+    return p && !p.includes('no-poster');
+  }).slice(0, 6);
 
   const goToHero = (i: number) => {
     setHeroTransition(true);
@@ -78,7 +81,7 @@ const HomePage: React.FC = () => {
   }, [heroMovies.length]);
 
   const hero = heroMovies[heroIndex];
-  const bgUrl = hero ? (backdropUrl(hero.backdrop_path) || posterUrl(hero.poster_path)) : '';
+  const bgUrl = hero ? (backdropUrl(hero.backdrop_path, hero.imdb_id) || posterUrl(hero.poster_path, hero.imdb_id)) : '';
 
   const topMovies = movies.slice(0, 12);
   const recommendedMovies = [...movies].reverse().slice(0, 12);
@@ -149,7 +152,7 @@ const HomePage: React.FC = () => {
                 onClick={(e) => { e.stopPropagation(); goToHero(i); }}
                 aria-label={`Слайд ${i + 1}`}
               >
-                <img src={posterUrl(m.poster_path)} alt={m.title} loading="lazy" />
+                <img src={posterUrl(m.poster_path, m.imdb_id)} alt={m.title} loading="lazy" />
                 <div className="hero-carousel__thumb-overlay" />
                 {i === heroIndex && <div className="hero-carousel__thumb-active-bar" />}
               </button>

@@ -586,3 +586,106 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ── Где смотреть — выбор озвучки ── */
+.watch-sources {
+  margin: 0 20px 24px;
+  padding: 16px;
+  border-radius: var(--r-lg);
+  background: linear-gradient(145deg, rgba(10, 132, 255, 0.08), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(10, 132, 255, 0.18);
+}
+
+.watch-sources__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.watch-sources__title {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.watch-sources__hint {
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+.watch-sources__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.watch-source-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 12px;
+  border-radius: var(--r-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.2s var(--ease-smooth);
+  text-align: left;
+}
+
+.watch-source-card--ru {
+  border-color: rgba(255, 59, 48, 0.15);
+}
+
+.watch-source-card--en {
+  border-color: rgba(10, 132, 255, 0.15);
+}
+
+.watch-source-card--active {
+  background: rgba(10, 132, 255, 0.14);
+  border-color: rgba(10, 132, 255, 0.55);
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.2), 0 8px 24px rgba(10, 132, 255, 0.15);
+}
+
+.watch-source-card:active {
+  transform: scale(0.97);
+}
+
+.watch-source-card__flag {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.watch-source-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.watch-source-card__lang {
+  font-size: 11px;
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+.watch-source-card__check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #0a84ff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

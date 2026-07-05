@@ -8,8 +8,6 @@ import VideoPlayer from '../components/VideoPlayer';
 import type { MovieDetail } from '../types';
 import './MovieDetailPage.css';
 
-/* ===== Детальная страница фильма ===== */
-
 const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -20,6 +18,7 @@ const MovieDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [playerSources, setPlayerSources] = useState<PlayerSource[]>([]);
+  const [selectedSource, setSelectedSource] = useState(0);
   const [showPlayer, setShowPlayer] = useState(false);
   const [heartAnim, setHeartAnim] = useState(false);
   const [watchLoading, setWatchLoading] = useState(false);
@@ -50,6 +49,21 @@ const MovieDetailPage: React.FC = () => {
       .finally(() => setLoading(false));
   }, [movieId]);
 
+  const seasons = movie?.seasons || [];
+  const currentSeason = seasons[activeSeason];
+  const isSerial = movie?.is_serial || seasons.length > 0;
+  const seasonNum = currentSeason?.season_number ?? activeSeason + 1;
+
+  useEffect(() => {
+    if (!movie) return;
+    getPlayerUrl(movieId, movie.title, isSerial, seasonNum, activeEpisode)
+      .then((sources) => {
+        setPlayerSources(sources);
+        setSelectedSource(0);
+      })
+      .catch(() => setPlayerSources([]));
+  }, [movie, movieId, isSerial, seasonNum, activeEpisode]);
+
   useEffect(() => {
     const cleanup = showBackButton(() => {
       if (showPlayer) {
@@ -61,39 +75,15 @@ const MovieDetailPage: React.FC = () => {
     return cleanup;
   }, [showBackButton, navigate, showPlayer]);
 
-  const buildSources = async (seasonNum?: number, episodeNum?: number) => {
-    const isSerial = movie?.is_serial || (movie?.seasons?.length ?? 0) > 0;
-    const rawSources = await getPlayerUrl(movieId, movie?.title || '', isSerial);
-    if (!isSerial) return rawSources;
-    // Для сериалов добавляем ?s=&e= к URL
-    const s = seasonNum ?? (activeSeason + 1);
-    const e = episodeNum ?? activeEpisode;
-    return rawSources.map(src => {
-      const url = src.url;
-      // vidsrc.xyz и vidsrc.pro принимают ?s=1&e=1
-      const sep = url.includes('?') ? '&' : '?';
-      return { ...src, url: `${url}${sep}s=${s}&e=${e}` };
-    });
-  };
-
-  const handleWatch = async (seasonNum?: number, episodeNum?: number) => {
+  const handleWatch = async (sourceIndex = selectedSource) => {
     haptic('medium');
     if (movie) addToHistory(movie);
-    setWatchLoading(true);
-    setPlayerSources([]);
-    try {
-      const sources = await buildSources(seasonNum, episodeNum);
-      if (sources.length > 0) {
-        setPlayerSources(sources);
-        setShowPlayer(true);
-      } else {
-        setError('Источники воспроизведения не найдены.');
-      }
-    } catch {
-      setError('Ошибка загрузки плеера.');
-    } finally {
-      setWatchLoading(false);
+    if (playerSources.length === 0) {
+      setError('Источники воспроизведения не найдены.');
+      return;
     }
+    setSelectedSource(sourceIndex);
+    setShowPlayer(true);
   };
 
   const handleFavorite = () => {
@@ -101,11 +91,8 @@ const MovieDetailPage: React.FC = () => {
     setHeartAnim(true);
     setTimeout(() => setHeartAnim(false), 400);
     if (movie) {
-      if (favorite) {
-        removeFavorite(movie.id);
-      } else {
-        addFavorite(movie);
-      }
+      if (favorite) removeFavorite(movie.id);
+      else addFavorite(movie);
     }
   };
 
@@ -143,11 +130,6 @@ const MovieDetailPage: React.FC = () => {
     );
   }
 
-  const seasons = movie.seasons || [];
-  const currentSeason = seasons[activeSeason];
-  const isSerial = movie.is_serial || seasons.length > 0;
-
-  // Генерируем список эпизодов если есть episodes_count но нет episodes
   const episodeList = currentSeason
     ? (currentSeason.episodes && currentSeason.episodes.length > 0
       ? currentSeason.episodes
@@ -162,10 +144,9 @@ const MovieDetailPage: React.FC = () => {
 
   return (
     <div className="detail-page page">
-      {/* Фоновый постер */}
       <div className="detail-backdrop">
         <img
-          src={backdropUrl(movie.backdrop_path) || posterUrl(movie.poster_path)}
+          src={backdropUrl(movie.backdrop_path, movie.imdb_id) || posterUrl(movie.poster_path, movie.imdb_id)}
           alt=""
           className="detail-backdrop__img"
         />
@@ -173,22 +154,18 @@ const MovieDetailPage: React.FC = () => {
         <div className="detail-backdrop__blur" />
       </div>
 
-      {/* Кнопка назад */}
       <button className="detail-back-btn" onClick={() => navigate(-1)} aria-label="Назад">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M13 4l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
 
-      {/* Основной контент */}
       <div className="detail-content">
-
-        {/* Hero-постер */}
         <div className="detail-hero">
           <div className="detail-hero__poster-wrap">
             <img
               className="detail-hero__poster"
-              src={posterUrl(movie.poster_path)}
+              src={posterUrl(movie.poster_path, movie.imdb_id)}
               alt={movie.title}
             />
             {movie.quality && <span className="detail-hero__quality">{movie.quality}</span>}
@@ -200,7 +177,6 @@ const MovieDetailPage: React.FC = () => {
               <p className="detail-hero__original">{movie.original_title}</p>
             )}
 
-            {/* Рейтинги */}
             <div className="detail-hero__ratings">
               {movie.imdb_rating > 0 && (
                 <div className="detail-hero__rating detail-hero__rating--imdb">
@@ -211,7 +187,6 @@ const MovieDetailPage: React.FC = () => {
               )}
             </div>
 
-            {/* Мета */}
             <div className="detail-hero__meta">
               {movie.release_date && <span className="detail-hero__meta-chip">{movie.release_date?.slice(0, 4)}</span>}
               {movie.runtime ? <span className="detail-hero__meta-chip">{movie.runtime} мин</span> : null}
@@ -219,7 +194,6 @@ const MovieDetailPage: React.FC = () => {
               {isSerial && <span className="detail-hero__meta-chip detail-hero__meta-chip--serial">Сериал</span>}
             </div>
 
-            {/* Жанры */}
             <div className="detail-hero__genres">
               {movie.genres?.slice(0, 3).map((g) => (
                 <span key={g.id} className="detail-genre-tag">{g.name}</span>
@@ -228,12 +202,11 @@ const MovieDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Кнопки действий */}
         <div className="detail-actions">
           <button
             className={`detail-actions__watch ${watchLoading ? 'loading' : ''}`}
             onClick={() => handleWatch()}
-            disabled={watchLoading}
+            disabled={watchLoading || playerSources.length === 0}
           >
             {watchLoading ? (
               <span className="detail-actions__spinner" />
@@ -242,7 +215,7 @@ const MovieDetailPage: React.FC = () => {
                 <path d="M5 3l11 6-11 6V3z" fill="currentColor"/>
               </svg>
             )}
-            {watchLoading ? 'Загрузка…' : isSerial ? `▶ Смотреть С${activeSeason + 1}:Е${activeEpisode}` : 'Смотреть'}
+            {watchLoading ? 'Загрузка…' : isSerial ? `▶ Смотреть С${seasonNum}:Е${activeEpisode}` : 'Смотреть'}
           </button>
 
           <button
@@ -265,29 +238,40 @@ const MovieDetailPage: React.FC = () => {
               </defs>
             </svg>
           </button>
-
-          <button
-            className="detail-actions__share"
-            onClick={() => { haptic('light'); }}
-            aria-label="Поделиться"
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <circle cx="15" cy="5" r="2" stroke="currentColor" strokeWidth="1.6"/>
-              <circle cx="5" cy="10" r="2" stroke="currentColor" strokeWidth="1.6"/>
-              <circle cx="15" cy="15" r="2" stroke="currentColor" strokeWidth="1.6"/>
-              <path d="M7 9l6-3M7 11l6 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
-            </svg>
-          </button>
         </div>
 
-        {/* Ошибка плеера */}
+        {playerSources.length > 0 && (
+          <div className="watch-sources">
+            <div className="watch-sources__header">
+              <h3 className="watch-sources__title">Где смотреть</h3>
+              <span className="watch-sources__hint">Выберите озвучку</span>
+            </div>
+            <div className="watch-sources__grid">
+              {playerSources.map((src, i) => (
+                <button
+                  key={src.url}
+                  className={`watch-source-card ${i === selectedSource ? 'watch-source-card--active' : ''} watch-source-card--${src.lang}`}
+                  onClick={() => {
+                    haptic('light');
+                    setSelectedSource(i);
+                  }}
+                >
+                  <span className="watch-source-card__flag">{src.lang === 'ru' ? '🇷🇺' : '🇬🇧'}</span>
+                  <span className="watch-source-card__name">{src.label.replace(/^🇷🇺 |^🇬🇧 /, '')}</span>
+                  <span className="watch-source-card__lang">{src.lang === 'ru' ? 'Русская' : 'Оригинал'}</span>
+                  {i === selectedSource && <span className="watch-source-card__check">✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="detail-player-error">
             <span>⚠️</span> {error}
           </div>
         )}
 
-        {/* Описание */}
         {movie.overview && (
           <div className="detail-section">
             <h3 className="detail-section__title">Описание</h3>
@@ -295,12 +279,10 @@ const MovieDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Сезоны и серии */}
         {isSerial && seasons.length > 0 && (
           <div className="detail-section">
             <h3 className="detail-section__title">Сезоны и серии</h3>
             <div className="seasons-block">
-              {/* Вкладки сезонов */}
               <div className="seasons-block__tabs">
                 {seasons.map((s, i) => (
                   <button
@@ -312,7 +294,6 @@ const MovieDetailPage: React.FC = () => {
                   </button>
                 ))}
               </div>
-              {/* Список серий */}
               {episodeList.length > 0 && (
                 <div className="episodes-list">
                   {episodeList.map((ep) => (
@@ -322,7 +303,6 @@ const MovieDetailPage: React.FC = () => {
                       onClick={() => {
                         haptic('medium');
                         setActiveEpisode(ep.episode);
-                        handleWatch(currentSeason.season_number, ep.episode);
                       }}
                     >
                       <span className="episode-item__num">Серия {ep.episode}</span>
@@ -336,7 +316,6 @@ const MovieDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Информация */}
         <div className="detail-section">
           <h3 className="detail-section__title">Информация</h3>
           <div className="detail-info-grid">
@@ -364,16 +343,9 @@ const MovieDetailPage: React.FC = () => {
                 <span className="detail-info-item__value">{movie.runtime} мин</span>
               </div>
             )}
-            {movie.imdb_rating > 0 && (
-              <div className="detail-info-item">
-                <span className="detail-info-item__label">IMDb</span>
-                <span className="detail-info-item__value">{movie.imdb_rating.toFixed(1)}</span>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Актёры */}
         {movie.actors && movie.actors.length > 0 && (
           <div className="detail-section">
             <h3 className="detail-section__title">В ролях</h3>
@@ -391,11 +363,11 @@ const MovieDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* Видеоплеер */}
       {showPlayer && playerSources.length > 0 && (
         <VideoPlayer
-          url={playerSources[0].url}
+          url={playerSources[selectedSource].url}
           sources={playerSources}
+          initialIndex={selectedSource}
           onClose={() => setShowPlayer(false)}
           title={movie.title}
         />

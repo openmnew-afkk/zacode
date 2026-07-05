@@ -41,7 +41,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, variant = 'default' }) => 
         {!imgLoaded && <div className="movie-card__poster-skeleton skeleton-pulse" />}
         <img
           className={`movie-card__poster ${imgLoaded ? 'loaded' : ''}`}
-          src={posterUrl(movie.poster_path)}
+          src={posterUrl(movie.poster_path, movie.imdb_id)}
           alt={movie.title}
           loading="lazy"
           onLoad={() => setImgLoaded(true)}

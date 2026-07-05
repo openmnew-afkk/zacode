@@ -86,7 +86,7 @@ const ProfilePage: React.FC = () => {
               >
                 <img
                   className="history-item__poster"
-                  src={posterUrl(item.movie.poster_path)}
+                  src={posterUrl(item.movie.poster_path, item.movie.imdb_id)}
                   alt={item.movie.title}
                 />
                 <div className="history-item__info">
