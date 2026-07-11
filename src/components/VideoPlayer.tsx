@@ -11,7 +11,7 @@ interface VideoPlayerProps {
   poster?: string;
 }
 
-const LOAD_TIMEOUT_MS = 14000;
+const LOAD_TIMEOUT_MS = 12000;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
   options,
@@ -21,185 +21,190 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   poster,
 }) => {
   const { haptic, openLink } = useTelegram();
-  const iframeOptions = options.filter((o) => o.type === 'iframe');
-  const externalOptions = options.filter((o) => o.type !== 'iframe');
 
-  const [activeIdx, setActiveIdx] = useState(Math.min(initialIndex, Math.max(0, iframeOptions.length - 1)));
-  const [phase, setPhase] = useState<'loading' | 'ready' | 'failed'>('loading');
-  const [showPicker, setShowPicker] = useState(false);
+  const iframeOpts  = options.filter((o) => o.type === 'iframe');
+  const externalOpts = options.filter((o) => o.type !== 'iframe');
+
+  const [activeIdx, setActiveIdx] = useState(
+    Math.min(initialIndex, Math.max(0, iframeOpts.length - 1))
+  );
+  const [phase, setPhase]       = useState<'loading' | 'ready' | 'failed'>('loading');
   const [showSites, setShowSites] = useState(false);
+  const [showDubs, setShowDubs]   = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const activeSource = iframeOptions[activeIdx];
+  const active = iframeOpts[activeIdx];
 
   const clearTimer = useCallback(() => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = null;
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   }, []);
 
   const tryNext = useCallback(() => {
     clearTimer();
-    if (activeIdx < iframeOptions.length - 1) {
+    if (activeIdx < iframeOpts.length - 1) {
       setActiveIdx((i) => i + 1);
       setPhase('loading');
     } else {
       setPhase('failed');
       setShowSites(true);
     }
-  }, [activeIdx, iframeOptions.length, clearTimer]);
+  }, [activeIdx, iframeOpts.length, clearTimer]);
 
   useEffect(() => {
-    if (!activeSource || showSites) return;
+    if (!active || showSites) return;
     setPhase('loading');
     clearTimer();
     timerRef.current = setTimeout(tryNext, LOAD_TIMEOUT_MS);
     return clearTimer;
-  }, [activeSource?.url, showSites]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.url, showSites]);
 
-  const handleLoad = () => {
-    clearTimer();
-    setPhase('ready');
-  };
+  const handleLoad = () => { clearTimer(); setPhase('ready'); };
 
-  const selectSource = (idx: number) => {
+  const selectDub = (idx: number) => {
+    if (idx === activeIdx) return;
     haptic('medium');
     setActiveIdx(idx);
     setPhase('loading');
-    setShowPicker(false);
     setShowSites(false);
   };
 
-  const openExternal = (opt: WatchOption) => {
+  // Открываем ссылку через Telegram (встроенный браузер)
+  const openInTelegram = (opt: WatchOption) => {
     haptic('medium');
     openLink(opt.url);
   };
 
-  // Если только внешние
-  if (iframeOptions.length === 0) {
-    return (
-      <div className="vp-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-        <div className="vp-modal vp-modal--sites">
-          <div className="vp-header">
-            <button className="vp-close" onClick={onClose} aria-label="Закрыть">✕</button>
-            <span className="vp-header__title">{title}</span>
-          </div>
-          <div className="vp-sites-panel">
-            <p className="vp-sites-panel__hint">Откройте фильм на одной из площадок</p>
-            <div className="vp-sites-list">
-              {externalOptions.map((opt) => (
-                <button key={opt.id} className="vp-site-row" onClick={() => openExternal(opt)}>
-                  <span className="vp-site-row__flag">{opt.flag}</span>
-                  <div className="vp-site-row__text">
-                    <span className="vp-site-row__name">{opt.label}</span>
-                    <span className="vp-site-row__sub">{opt.sublabel}</span>
-                  </div>
-                  <span className="vp-site-row__arrow">›</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Если нет iframe-источников — сразу показываем площадки
+  const hasSites = externalOpts.length > 0;
 
   return (
-    <div className="vp-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="vp-modal">
+    <div className="vp-root">
+      {/* Кнопка закрыть */}
+      <button className="vp-close" onClick={onClose} aria-label="Закрыть">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+        </svg>
+      </button>
 
-        {/* Header */}
-        <div className="vp-header">
-          <button className="vp-close" onClick={onClose} aria-label="Закрыть">✕</button>
-          <span className="vp-header__title" title={title}>{title}</span>
-          <button
-            className="vp-sites-btn"
-            onClick={() => { haptic('light'); setShowSites((s) => !s); setShowPicker(false); }}
-          >
-            🌐
-          </button>
-        </div>
+      {/* Кнопка сайты */}
+      {hasSites && (
+        <button
+          className={`vp-sites-toggle ${showSites ? 'vp-sites-toggle--active' : ''}`}
+          onClick={() => { haptic('light'); setShowSites((s) => !s); }}
+          aria-label="Где смотреть"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5"/>
+            <path d="M9 1.5C9 1.5 6 5 6 9s3 7.5 3 7.5M9 1.5C9 1.5 12 5 12 9s-3 7.5-3 7.5M1.5 9h15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+          <span>Сайты</span>
+        </button>
+      )}
 
-        {/* Iframe stage */}
-        {!showSites && (
-          <div className="vp-stage">
-            {poster && phase !== 'ready' && (
-              <div className="vp-stage__bg" style={{ backgroundImage: `url(${poster})` }} />
-            )}
-            {phase === 'loading' && (
-              <div className="vp-stage__overlay">
-                <div className="vp-spinner" />
-                <p className="vp-stage__label">
-                  {activeSource?.flag} {activeSource?.provider}
-                  {activeSource?.label !== activeSource?.provider ? ` · ${activeSource?.label}` : ''}
-                </p>
-                <p className="vp-stage__sub">Загрузка плеера…</p>
-              </div>
-            )}
-            {phase === 'failed' && (
-              <div className="vp-stage__overlay">
-                <p className="vp-stage__fail-icon">😕</p>
-                <p className="vp-stage__label">Плеер не отвечает</p>
-                <button className="vp-stage__sites-btn" onClick={() => setShowSites(true)}>
-                  Открыть на сайте →
+      {/* Iframe плеер — занимает весь экран */}
+      {!showSites && active && (
+        <>
+          {/* Постер-фон пока грузится */}
+          {poster && phase !== 'ready' && (
+            <div className="vp-bg" style={{ backgroundImage: `url(${poster})` }} />
+          )}
+
+          {/* Оверлей загрузки */}
+          {phase === 'loading' && (
+            <div className="vp-loading">
+              <div className="vp-loading__ring" />
+              <p className="vp-loading__src">
+                {active.flag || (active.lang === 'ru' ? '🇷🇺' : '🌐')} {active.provider}
+              </p>
+              <p className="vp-loading__label">Загружаем плеер…</p>
+              {activeIdx < iframeOpts.length - 1 && (
+                <button className="vp-loading__skip" onClick={tryNext}>
+                  Следующий источник →
                 </button>
-              </div>
-            )}
-            {activeSource && (
-              <iframe
-                key={activeSource.url}
-                className={`vp-iframe ${phase === 'ready' ? 'vp-iframe--visible' : ''}`}
-                src={activeSource.url}
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                allowFullScreen
-                referrerPolicy="no-referrer"
-                title={title}
-                onLoad={handleLoad}
-              />
-            )}
-          </div>
-        )}
-
-        {/* Sites panel */}
-        {showSites && (
-          <div className="vp-sites-panel">
-            <p className="vp-sites-panel__hint">Откройте на одной из площадок</p>
-            <div className="vp-sites-list">
-              {externalOptions.map((opt) => (
-                <button key={opt.id} className="vp-site-row" onClick={() => openExternal(opt)}>
-                  <span className="vp-site-row__flag">{opt.flag}</span>
-                  <div className="vp-site-row__text">
-                    <span className="vp-site-row__name">{opt.label}</span>
-                    <span className="vp-site-row__sub">{opt.sublabel}</span>
-                  </div>
-                  <span className="vp-site-row__arrow">›</span>
-                </button>
-              ))}
+              )}
             </div>
-            <button className="vp-sites-panel__back" onClick={() => setShowSites(false)}>
-              ← Назад к плееру
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* Dubbing picker — красивые чипы снизу */}
-        {!showSites && iframeOptions.length > 1 && (
-          <div className="vp-dubs">
-            <p className="vp-dubs__label">Озвучка:</p>
-            <div className="vp-dubs__row">
-              {iframeOptions.map((opt, i) => (
+          {/* Сбой */}
+          {phase === 'failed' && (
+            <div className="vp-loading">
+              <p style={{ fontSize: 40 }}>😕</p>
+              <p className="vp-loading__src">Плеер не отвечает</p>
+              <button className="vp-loading__skip" onClick={() => setShowSites(true)}>
+                Открыть на сайте →
+              </button>
+            </div>
+          )}
+
+          <iframe
+            key={active.url}
+            className={`vp-iframe ${phase === 'ready' ? 'vp-iframe--visible' : ''}`}
+            src={active.url}
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            allowFullScreen
+            referrerPolicy="no-referrer"
+            title={title}
+            onLoad={handleLoad}
+          />
+        </>
+      )}
+
+      {/* Сайты — открытие через Telegram */}
+      {showSites && (
+        <div className="vp-sites">
+          <p className="vp-sites__title">Где смотреть</p>
+          <p className="vp-sites__sub">Откроется в Telegram — не покидая приложение</p>
+          <div className="vp-sites__list">
+            {externalOpts.map((opt) => (
+              <button key={opt.id} className="vp-site-item" onClick={() => openInTelegram(opt)}>
+                <span className="vp-site-item__icon">{opt.flag}</span>
+                <div className="vp-site-item__info">
+                  <span className="vp-site-item__name">{opt.label}</span>
+                  <span className="vp-site-item__sub">{opt.sublabel}</span>
+                </div>
+                <span className="vp-site-item__arrow">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
+              </button>
+            ))}
+          </div>
+          {iframeOpts.length > 0 && (
+            <button className="vp-sites__back" onClick={() => setShowSites(false)}>
+              ← Вернуться к плееру
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Чипы озвучки — поверх видео снизу (только в режиме плеера) */}
+      {!showSites && iframeOpts.length > 1 && (
+        <div className={`vp-dubs ${showDubs ? '' : 'vp-dubs--hidden'}`}>
+          <button className="vp-dubs__toggle" onClick={() => setShowDubs((s) => !s)}>
+            {showDubs ? '▾ Озвучка' : '▸ Озвучка'}
+          </button>
+          {showDubs && (
+            <div className="vp-dubs__chips">
+              {iframeOpts.map((opt, i) => (
                 <button
                   key={opt.id}
-                  className={`vp-dub-chip ${i === activeIdx ? 'vp-dub-chip--active' : ''}`}
-                  onClick={() => selectSource(i)}
+                  className={`vp-chip ${i === activeIdx ? 'vp-chip--active' : ''}`}
+                  onClick={() => selectDub(i)}
                 >
-                  <span className="vp-dub-chip__flag">{opt.flag || (opt.lang === 'ru' ? '🇷🇺' : '🌐')}</span>
-                  <span className="vp-dub-chip__name">{opt.label}</span>
-                  {opt.sublabel && <span className="vp-dub-chip__sub">{opt.sublabel}</span>}
+                  <span>{opt.flag || (opt.lang === 'ru' ? '🇷🇺' : '🌐')}</span>
+                  <span className="vp-chip__name">{opt.label}</span>
                 </button>
               ))}
             </div>
-          </div>
-        )}
+          )}
+        </div>
+      )}
+
+      {/* Заголовок сверху */}
+      <div className="vp-title-bar">
+        <span className="vp-title-bar__text">{title}</span>
       </div>
     </div>
   );

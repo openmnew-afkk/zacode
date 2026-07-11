@@ -79,10 +79,7 @@ const MovieDetailPage: React.FC = () => {
   const handleWatch = async (sourceIndex = selectedSource) => {
     haptic('medium');
     if (movie) addToHistory(movie);
-    if (playerOptions.length === 0) {
-      setError('Источники воспроизведения не найдены.');
-      return;
-    }
+    // Открываем плеер сразу — если источники ещё грузятся, плеер покажет лоадер
     setSelectedSource(sourceIndex);
     setShowPlayer(true);
   };
@@ -207,7 +204,7 @@ const MovieDetailPage: React.FC = () => {
           <button
             className={`detail-actions__watch ${watchLoading ? 'loading' : ''}`}
             onClick={() => handleWatch()}
-            disabled={watchLoading || playerOptions.length === 0}
+            disabled={watchLoading}
           >
             {watchLoading ? (
               <span className="detail-actions__spinner" />
