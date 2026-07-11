@@ -1,41 +1,31 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import TabBar from './components/TabBar';
-import SplashPage from './components/SplashPage';
-import RouteGuard from './components/RouteGuard';
-import './styles/global.css';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Navigation } from './components/Navigation';
+import { HomePage } from './pages/HomePage';
+import { MoviePage } from './pages/MoviePage';
+import { FavoritesPage } from './pages/FavoritesPage';
 
-/* ===== Ленивая загрузка страниц ===== */
-const HomePage      = lazy(() => import('./pages/HomePage'));
-const SearchPage    = lazy(() => import('./pages/SearchPage'));
-const FavoritesPage = lazy(() => import('./pages/FavoritesPage'));
-const ProfilePage   = lazy(() => import('./pages/ProfilePage'));
-const MovieDetailPage = lazy(() => import('./pages/MovieDetailPage'));
-
-const App: React.FC = () => {
-  const [showSplash, setShowSplash] = useState(true);
+function App() {
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowSplash(false), 3200);
-    return () => clearTimeout(timer);
+    // Ensure dark mode is always on
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
   }, []);
 
   return (
-    <HashRouter>
-      <RouteGuard />
-      {showSplash && <SplashPage />}
-      <Suspense fallback={<div className="page-loader" />}>
+    <div className="bg-dark-900 text-white min-h-screen">
+      <Navigation />
+      <main className="md:ml-64">
         <Routes>
-          <Route path="/"         element={<HomePage />} />
-          <Route path="/search"   element={<SearchPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/movie/:id" element={<MoviePage />} />
           <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/profile"  element={<ProfilePage />} />
-          <Route path="/movie/:id" element={<MovieDetailPage />} />
         </Routes>
-      </Suspense>
-      {!showSplash && <TabBar />}
-    </HashRouter>
+      </main>
+    </div>
   );
-};
+}
 
 export default App;
