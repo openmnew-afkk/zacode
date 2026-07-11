@@ -1,91 +1,107 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { posterUrl } from '../api/catalog';
-import { useStore } from '../store/useStore';
+import React from 'react';
+import { Heart, Star } from 'lucide-react';
+import { useStore } from '../store';
 import type { Movie } from '../types';
-import './MovieCard.css';
-
-/* ===== Карточка фильма — Premium ===== */
+import { useNavigate } from 'react-router-dom';
 
 interface MovieCardProps {
   movie: Movie;
-  variant?: 'default' | 'grid';
+  compact?: boolean;
 }
 
-const MovieCard: React.FC<MovieCardProps> = ({ movie, variant = 'default' }) => {
+export const MovieCard: React.FC<MovieCardProps> = ({ movie, compact = false }) => {
   const navigate = useNavigate();
   const { isFavorite, addFavorite, removeFavorite } = useStore();
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [heartAnim, setHeartAnim] = useState(false);
-  const favorite = isFavorite(movie.id);
-
-  const handleClick = () => navigate(`/movie/${movie.id}`);
+  const isLiked = isFavorite(movie.imdbID);
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setHeartAnim(true);
-    setTimeout(() => setHeartAnim(false), 400);
-    if (favorite) removeFavorite(movie.id);
-    else addFavorite(movie);
+    if (isLiked) {
+      removeFavorite(movie.imdbID);
+    } else {
+      addFavorite(movie);
+    }
   };
+
+  if (compact) {
+    return (
+      <div
+        onClick={() => navigate(`/movie/${movie.imdbID}`)}
+        className="group relative aspect-[3/4] rounded-lg overflow-hidden cursor-pointer"
+      >
+        <img
+          src={movie.poster_path}
+          alt={movie.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={(e) => {
+            const img = e.target as HTMLImageElement;
+            img.src = 'https://via.placeholder.com/300x450?text=No+Poster';
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute top-2 right-2">
+          <button
+            onClick={handleFavorite}
+            className="p-2 rounded-full glass hover:bg-white/20 transition-colors"
+          >
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                isLiked ? 'fill-red-500 text-red-500' : 'text-white'
+              }`}
+            />
+          </button>
+        </div>
+        <div className="absolute bottom-0 left-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+          <p className="text-sm font-semibold line-clamp-2">{movie.title}</p>
+          {movie.imdb_rating > 0 && (
+            <div className="flex items-center gap-1 mt-1">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs">{movie.imdb_rating}/10</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`movie-card movie-card--${variant}`}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => e.key === 'Enter' && handleClick()}
+      onClick={() => navigate(`/movie/${movie.imdbID}`)}
+      className="glass group cursor-pointer overflow-hidden hover:bg-white/20 transition-colors"
     >
-      <div className="movie-card__poster-wrap">
-        {!imgLoaded && <div className="movie-card__poster-skeleton skeleton-pulse" />}
+      <div className="relative aspect-[3/4] overflow-hidden">
         <img
-          className={`movie-card__poster ${imgLoaded ? 'loaded' : ''}`}
-          src={posterUrl(movie.poster_path, movie.imdb_id)}
+          src={movie.poster_path}
           alt={movie.title}
-          loading="lazy"
-          onLoad={() => setImgLoaded(true)}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = '/no-poster.svg';
-            setImgLoaded(true);
+            const img = e.target as HTMLImageElement;
+            img.src = 'https://via.placeholder.com/300x450?text=No+Poster';
           }}
         />
-        {/* Gradient overlay */}
-        <div className="movie-card__poster-overlay" />
-
-        {/* Rating */}
-        {movie.vote_average > 0 && (
-          <div className="movie-card__rating">
-            <span className="movie-card__star">★</span>
-            {movie.vote_average.toFixed(1)}
-          </div>
-        )}
-
-        {/* Type badge */}
-        {(movie.is_serial || movie.type === 'anime') && (
-          <span className="movie-card__type">
-            {movie.type === 'anime' ? 'Аниме' : 'Сериал'}
-          </span>
-        )}
-
-        {/* Fav button */}
-        <button
-          className={`movie-card__fav ${favorite ? 'active' : ''} ${heartAnim ? 'animate' : ''}`}
-          onClick={handleFavorite}
-          aria-label={favorite ? 'Убрать из избранного' : 'Добавить в избранное'}
-        >
-          {favorite ? '❤️' : '🤍'}
-        </button>
       </div>
-
-      <div className="movie-card__info">
-        <p className="movie-card__title">{movie.title}</p>
-        <p className="movie-card__year">
-          {movie.release_date ? movie.release_date.slice(0, 4) : '—'}
-        </p>
+      <div className="p-4">
+        <h3 className="font-semibold line-clamp-2">{movie.title}</h3>
+        <p className="text-xs text-gray-400 mt-1">{movie.release_date}</p>
+        <div className="flex items-center justify-between mt-3">
+          {movie.imdb_rating > 0 && (
+            <div className="flex items-center gap-1">
+              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+              <span className="text-sm">{movie.imdb_rating.toFixed(1)}</span>
+            </div>
+          )}
+          <button
+            onClick={handleFavorite}
+            className="p-2 hover:bg-white/20 rounded transition-colors"
+          >
+            <Heart
+              className={`w-5 h-5 ${
+                isLiked ? 'fill-red-500 text-red-500' : 'text-white'
+              }`}
+            />
+          </button>
+        </div>
       </div>
     </div>
   );
 };
-
-export default MovieCard;
