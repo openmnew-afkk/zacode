@@ -58,7 +58,7 @@
   --ease-out:    cubic-bezier(0,0,0.2,1);
 
   /* ── TabBar height ── */
-  --tabbar-h: calc(49px + env(safe-area-inset-bottom, 0px));
+  --tabbar-h: calc(52px + max(env(safe-area-inset-bottom), 8px) + 8px);
 }
 
 /* ── Reset ── */

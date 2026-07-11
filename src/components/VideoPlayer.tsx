@@ -1,177 +1,200 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import type { WatchOption } from '../api/players';
 import { useTelegram } from '../hooks/useTelegram';
 import './VideoPlayer.css';
 
-export interface PlayerSource {
-  label: string;
-  url: string;
-  type: string;
-  lang?: 'ru' | 'en';
-}
-
 interface VideoPlayerProps {
-  url: string;
-  sources?: PlayerSource[];
+  options: WatchOption[];
   initialIndex?: number;
   onClose: () => void;
   title?: string;
   poster?: string;
 }
 
-const LOAD_TIMEOUT_MS = 9000;
+const LOAD_TIMEOUT_MS = 14000;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
-  url,
-  sources = [],
+  options,
   initialIndex = 0,
   onClose,
   title,
   poster,
 }) => {
   const { haptic, openLink } = useTelegram();
-  const allSources: PlayerSource[] = sources.length > 0
-    ? sources
-    : [{ label: 'Плеер', url, type: 'embed' }];
+  const iframeOptions = options.filter((o) => o.type === 'iframe');
+  const externalOptions = options.filter((o) => o.type !== 'iframe');
 
-  const [srcIndex, setSrcIndex] = useState(initialIndex);
-  const [phase, setPhase] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [progress, setProgress] = useState(0);
+  const [activeIdx, setActiveIdx] = useState(Math.min(initialIndex, Math.max(0, iframeOptions.length - 1)));
+  const [phase, setPhase] = useState<'loading' | 'ready' | 'failed'>('loading');
+  const [showPicker, setShowPicker] = useState(false);
+  const [showSites, setShowSites] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const progressRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const activeSource = allSources[srcIndex];
+  const activeSource = iframeOptions[activeIdx];
 
-  const clearTimers = useCallback(() => {
+  const clearTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
-    if (progressRef.current) clearInterval(progressRef.current);
     timerRef.current = null;
-    progressRef.current = null;
   }, []);
 
-  const tryNextSource = useCallback(() => {
-    clearTimers();
-    if (srcIndex < allSources.length - 1) {
-      setSrcIndex((i) => i + 1);
+  const tryNext = useCallback(() => {
+    clearTimer();
+    if (activeIdx < iframeOptions.length - 1) {
+      setActiveIdx((i) => i + 1);
       setPhase('loading');
-      setProgress(0);
     } else {
-      setPhase('error');
+      setPhase('failed');
+      setShowSites(true);
     }
-  }, [srcIndex, allSources.length, clearTimers]);
+  }, [activeIdx, iframeOptions.length, clearTimer]);
 
   useEffect(() => {
+    if (!activeSource || showSites) return;
     setPhase('loading');
-    setProgress(0);
-    clearTimers();
-
-    const start = Date.now();
-    progressRef.current = setInterval(() => {
-      const elapsed = Date.now() - start;
-      setProgress(Math.min(92, (elapsed / LOAD_TIMEOUT_MS) * 92));
-    }, 120);
-
-    timerRef.current = setTimeout(() => {
-      tryNextSource();
-    }, LOAD_TIMEOUT_MS);
-
-    return clearTimers;
-  }, [srcIndex, activeSource.url, clearTimers, tryNextSource]);
+    clearTimer();
+    timerRef.current = setTimeout(tryNext, LOAD_TIMEOUT_MS);
+    return clearTimer;
+  }, [activeSource?.url, showSites]);
 
   const handleLoad = () => {
-    clearTimers();
-    setProgress(100);
-    setTimeout(() => setPhase('ready'), 200);
+    clearTimer();
+    setPhase('ready');
   };
 
-  const switchSource = (i: number) => {
-    haptic('light');
-    setSrcIndex(i);
-  };
-
-  const openExternal = () => {
+  const selectSource = (idx: number) => {
     haptic('medium');
-    openLink(activeSource.url);
+    setActiveIdx(idx);
+    setPhase('loading');
+    setShowPicker(false);
+    setShowSites(false);
   };
+
+  const openExternal = (opt: WatchOption) => {
+    haptic('medium');
+    openLink(opt.url);
+  };
+
+  // Если только внешние
+  if (iframeOptions.length === 0) {
+    return (
+      <div className="vp-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="vp-modal vp-modal--sites">
+          <div className="vp-header">
+            <button className="vp-close" onClick={onClose} aria-label="Закрыть">✕</button>
+            <span className="vp-header__title">{title}</span>
+          </div>
+          <div className="vp-sites-panel">
+            <p className="vp-sites-panel__hint">Откройте фильм на одной из площадок</p>
+            <div className="vp-sites-list">
+              {externalOptions.map((opt) => (
+                <button key={opt.id} className="vp-site-row" onClick={() => openExternal(opt)}>
+                  <span className="vp-site-row__flag">{opt.flag}</span>
+                  <div className="vp-site-row__text">
+                    <span className="vp-site-row__name">{opt.label}</span>
+                    <span className="vp-site-row__sub">{opt.sublabel}</span>
+                  </div>
+                  <span className="vp-site-row__arrow">›</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="vp-overlay">
+    <div className="vp-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="vp-modal">
-        <div className="vp-topbar">
-          <button className="vp-close" onClick={onClose} aria-label="Закрыть">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-              <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <span className="vp-topbar__title">{title || 'Просмотр'}</span>
-          <button className="vp-external" onClick={openExternal} aria-label="Открыть в браузере">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <path d="M7 3H3v12h12v-4M10 2h6v6M8 10l8-8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+
+        {/* Header */}
+        <div className="vp-header">
+          <button className="vp-close" onClick={onClose} aria-label="Закрыть">✕</button>
+          <span className="vp-header__title" title={title}>{title}</span>
+          <button
+            className="vp-sites-btn"
+            onClick={() => { haptic('light'); setShowSites((s) => !s); setShowPicker(false); }}
+          >
+            🌐
           </button>
         </div>
 
-        <div className="vp-stage">
-          {poster && phase !== 'ready' && (
-            <div
-              className="vp-stage__poster"
-              style={{ backgroundImage: `url(${poster})` }}
-            />
-          )}
-
-          {phase === 'loading' && (
-            <div className="vp-stage__loader">
-              <div className="vp-stage__play-ring">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-                  <path d="M10 7l12 7-12 7V7z" fill="currentColor"/>
-                </svg>
+        {/* Iframe stage */}
+        {!showSites && (
+          <div className="vp-stage">
+            {poster && phase !== 'ready' && (
+              <div className="vp-stage__bg" style={{ backgroundImage: `url(${poster})` }} />
+            )}
+            {phase === 'loading' && (
+              <div className="vp-stage__overlay">
+                <div className="vp-spinner" />
+                <p className="vp-stage__label">
+                  {activeSource?.flag} {activeSource?.provider}
+                  {activeSource?.label !== activeSource?.provider ? ` · ${activeSource?.label}` : ''}
+                </p>
+                <p className="vp-stage__sub">Загрузка плеера…</p>
               </div>
-              <p className="vp-stage__status">Подключаем {activeSource.label.replace(/^🇷🇺 |^🇬🇧 /, '')}…</p>
-              <div className="vp-stage__bar">
-                <div className="vp-stage__bar-fill" style={{ width: `${progress}%` }} />
+            )}
+            {phase === 'failed' && (
+              <div className="vp-stage__overlay">
+                <p className="vp-stage__fail-icon">😕</p>
+                <p className="vp-stage__label">Плеер не отвечает</p>
+                <button className="vp-stage__sites-btn" onClick={() => setShowSites(true)}>
+                  Открыть на сайте →
+                </button>
               </div>
+            )}
+            {activeSource && (
+              <iframe
+                key={activeSource.url}
+                className={`vp-iframe ${phase === 'ready' ? 'vp-iframe--visible' : ''}`}
+                src={activeSource.url}
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                allowFullScreen
+                referrerPolicy="no-referrer"
+                title={title}
+                onLoad={handleLoad}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Sites panel */}
+        {showSites && (
+          <div className="vp-sites-panel">
+            <p className="vp-sites-panel__hint">Откройте на одной из площадок</p>
+            <div className="vp-sites-list">
+              {externalOptions.map((opt) => (
+                <button key={opt.id} className="vp-site-row" onClick={() => openExternal(opt)}>
+                  <span className="vp-site-row__flag">{opt.flag}</span>
+                  <div className="vp-site-row__text">
+                    <span className="vp-site-row__name">{opt.label}</span>
+                    <span className="vp-site-row__sub">{opt.sublabel}</span>
+                  </div>
+                  <span className="vp-site-row__arrow">›</span>
+                </button>
+              ))}
             </div>
-          )}
+            <button className="vp-sites-panel__back" onClick={() => setShowSites(false)}>
+              ← Назад к плееру
+            </button>
+          </div>
+        )}
 
-          {phase === 'error' && (
-            <div className="vp-stage__error">
-              <div className="vp-stage__error-icon">📡</div>
-              <p>Не удалось загрузить в приложении</p>
-              <span>Откройте во внешнем браузере — там обычно работает</span>
-              <button className="vp-stage__error-btn" onClick={openExternal}>
-                Открыть в браузере
-              </button>
-              <button className="vp-stage__retry-btn" onClick={() => { setSrcIndex(0); setPhase('loading'); }}>
-                Попробовать снова
-              </button>
-            </div>
-          )}
-
-          {phase !== 'error' && (
-            <iframe
-              key={activeSource.url}
-              className={`vp-iframe ${phase === 'ready' ? 'vp-iframe--visible' : ''}`}
-              src={activeSource.url}
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture; gyroscope; accelerometer"
-              allowFullScreen
-              referrerPolicy="no-referrer"
-              title={title || 'Плеер'}
-              onLoad={handleLoad}
-            />
-          )}
-        </div>
-
-        {allSources.length > 1 && (
-          <div className="vp-dubbing">
-            <span className="vp-dubbing__label">Озвучка</span>
-            <div className="vp-dubbing__list">
-              {allSources.map((src, i) => (
+        {/* Dubbing picker — красивые чипы снизу */}
+        {!showSites && iframeOptions.length > 1 && (
+          <div className="vp-dubs">
+            <p className="vp-dubs__label">Озвучка:</p>
+            <div className="vp-dubs__row">
+              {iframeOptions.map((opt, i) => (
                 <button
-                  key={src.url}
-                  className={`vp-dubbing__chip ${i === srcIndex ? 'active' : ''} ${src.lang === 'en' ? 'en' : 'ru'}`}
-                  onClick={() => switchSource(i)}
+                  key={opt.id}
+                  className={`vp-dub-chip ${i === activeIdx ? 'vp-dub-chip--active' : ''}`}
+                  onClick={() => selectSource(i)}
                 >
-                  <span className="vp-dubbing__flag">{src.lang === 'en' ? '🇬🇧' : '🇷🇺'}</span>
-                  {src.label.replace(/^🇷🇺 |^🇬🇧 /, '')}
+                  <span className="vp-dub-chip__flag">{opt.flag || (opt.lang === 'ru' ? '🇷🇺' : '🌐')}</span>
+                  <span className="vp-dub-chip__name">{opt.label}</span>
+                  {opt.sublabel && <span className="vp-dub-chip__sub">{opt.sublabel}</span>}
                 </button>
               ))}
             </div>

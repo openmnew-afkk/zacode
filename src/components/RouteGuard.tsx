@@ -1,23 +1,16 @@
 import React, { useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-/* Сбрасываем маршрут на главную при каждом холодном запуске приложения */
+/* Сбрасываем маршрут на главную при каждом запуске */
 const RouteGuard: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
-    const bootKey = 'tc_boot';
-    const alreadyBooted = sessionStorage.getItem(bootKey);
-
-    if (!alreadyBooted) {
-      sessionStorage.setItem(bootKey, '1');
-      if (location.pathname !== '/') {
-        navigate('/', { replace: true });
-      }
-      window.scrollTo(0, 0);
-    }
-  }, [navigate, location.pathname]);
+    // Всегда открываемся на главной — HashRouter сам посебе хранит '#/'
+    navigate('/', { replace: true });
+    window.scrollTo(0, 0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 };

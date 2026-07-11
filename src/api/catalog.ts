@@ -4,63 +4,14 @@
  */
 
 import type { Movie, CatalogResponse, MovieDetail, Genre } from '../types';
+import { resolveWatchOptions, type WatchOption } from './players';
 
 // OMDb API key — получи свой бесплатно на https://www.omdbapi.com/apikey.aspx
 const OMDB_KEY = '4a3b711b';
 const OMDB_BASE = 'https://www.omdbapi.com';
 
-/* ===== Источники для плеера — 3 RU + 1 EN ===== */
-export interface PlayerSourceDef {
-  label: string;
-  lang: 'ru' | 'en';
-  buildUrl: (imdbId: string, season?: number, episode?: number) => string;
-}
-
-export const PLAYER_SOURCES: PlayerSourceDef[] = [
-  {
-    label: 'Collaps',
-    lang: 'ru',
-    buildUrl: (id) => `https://api.initem.ws/embed/movie/${id}`,
-  },
-  {
-    label: 'Bazon',
-    lang: 'ru',
-    buildUrl: (id) => `https://bazon.cc/embed/movie/${id}`,
-  },
-  {
-    label: '2Embed RU',
-    lang: 'ru',
-    buildUrl: (id) => `https://www.2embed.cc/embed/${id}?lang=ru`,
-  },
-  {
-    label: 'VidSrc',
-    lang: 'en',
-    buildUrl: (id) => `https://vidsrc.cc/v2/embed/movie/${id}`,
-  },
-];
-
-export const PLAYER_SOURCES_TV: PlayerSourceDef[] = [
-  {
-    label: 'Collaps',
-    lang: 'ru',
-    buildUrl: (id, s = 1, e = 1) => `https://api.initem.ws/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    label: 'Bazon',
-    lang: 'ru',
-    buildUrl: (id, s = 1, e = 1) => `https://bazon.cc/embed/tv/${id}/${s}/${e}`,
-  },
-  {
-    label: '2Embed RU',
-    lang: 'ru',
-    buildUrl: (id, s = 1, e = 1) => `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}&lang=ru`,
-  },
-  {
-    label: 'VidSrc',
-    lang: 'en',
-    buildUrl: (id, s = 1, e = 1) => `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-  },
-];
+/* Плееры — см. players.ts */
+export type { WatchOption } from './players';
 
 /* ===== Изображения ===== */
 const posterFallback = './no-poster.svg';
@@ -330,37 +281,44 @@ export const getMovieDetail = async (id: string | number): Promise<MovieDetail> 
   throw new Error('Фильм не найден');
 };
 
-export interface PlayerSource { label: string; url: string; type: string; lang: 'ru' | 'en'; }
-
 export const getPlayerUrl = async (
   id: string | number,
-  _title: string,
+  title: string,
   isSerial = false,
   season = 1,
   episode = 1,
-): Promise<PlayerSource[]> => {
+): Promise<WatchOption[]> => {
   const sid = String(id);
   const numId = parseInt(sid);
 
   let imdbId: string | null = null;
+  let movieTitle = title;
+  let year: string | undefined;
 
   const byNum = BUILTIN_ALL.find(m => m.id === numId);
-  if (byNum?.imdb_id) imdbId = byNum.imdb_id;
-  else if (sid.startsWith('tt')) imdbId = sid;
-  else {
+  if (byNum?.imdb_id) {
+    imdbId = byNum.imdb_id;
+    movieTitle = byNum.title;
+    year = byNum.release_date?.slice(0, 4);
+  } else if (sid.startsWith('tt')) {
+    imdbId = sid;
+  } else {
     const byImdb = BUILTIN_ALL.find(m => m.imdb_id === sid);
-    if (byImdb?.imdb_id) imdbId = byImdb.imdb_id;
+    if (byImdb?.imdb_id) {
+      imdbId = byImdb.imdb_id;
+      movieTitle = byImdb.title;
+      year = byImdb.release_date?.slice(0, 4);
+    }
   }
 
-  if (!imdbId) return [];
-
-  const defs = isSerial ? PLAYER_SOURCES_TV : PLAYER_SOURCES;
-  return defs.map(src => ({
-    label: src.lang === 'ru' ? `🇷🇺 ${src.label}` : `🇬🇧 ${src.label}`,
-    url: src.buildUrl(imdbId, season, episode),
-    type: 'embed',
-    lang: src.lang,
-  }));
+  return resolveWatchOptions({
+    imdbId: imdbId || '',
+    title: movieTitle,
+    year,
+    isSerial,
+    season,
+    episode,
+  });
 };
 
 export const getGenres = async (): Promise<Genre[]> => [

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getPlayerUrl, posterUrl, backdropUrl } from '../api/catalog';
-import type { PlayerSource } from '../api/catalog';
+import type { WatchOption } from '../api/players';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store/useStore';
 import VideoPlayer from '../components/VideoPlayer';
 import type { MovieDetail } from '../types';
 import './MovieDetailPage.css';
+
 
 const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,7 +18,7 @@ const MovieDetailPage: React.FC = () => {
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [playerSources, setPlayerSources] = useState<PlayerSource[]>([]);
+  const [playerOptions, setPlayerOptions] = useState<WatchOption[]>([]);
   const [selectedSource, setSelectedSource] = useState(0);
   const [showPlayer, setShowPlayer] = useState(false);
   const [heartAnim, setHeartAnim] = useState(false);
@@ -57,11 +58,11 @@ const MovieDetailPage: React.FC = () => {
   useEffect(() => {
     if (!movie) return;
     getPlayerUrl(movieId, movie.title, isSerial, seasonNum, activeEpisode)
-      .then((sources) => {
-        setPlayerSources(sources);
+      .then((opts) => {
+        setPlayerOptions(opts);
         setSelectedSource(0);
       })
-      .catch(() => setPlayerSources([]));
+      .catch(() => setPlayerOptions([]));
   }, [movie, movieId, isSerial, seasonNum, activeEpisode]);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ const MovieDetailPage: React.FC = () => {
   const handleWatch = async (sourceIndex = selectedSource) => {
     haptic('medium');
     if (movie) addToHistory(movie);
-    if (playerSources.length === 0) {
+    if (playerOptions.length === 0) {
       setError('Источники воспроизведения не найдены.');
       return;
     }
@@ -206,7 +207,7 @@ const MovieDetailPage: React.FC = () => {
           <button
             className={`detail-actions__watch ${watchLoading ? 'loading' : ''}`}
             onClick={() => handleWatch()}
-            disabled={watchLoading || playerSources.length === 0}
+            disabled={watchLoading || playerOptions.length === 0}
           >
             {watchLoading ? (
               <span className="detail-actions__spinner" />
@@ -240,14 +241,14 @@ const MovieDetailPage: React.FC = () => {
           </button>
         </div>
 
-        {playerSources.length > 0 && (
+        {playerOptions.length > 0 && (
           <div className="watch-sources">
             <div className="watch-sources__header">
               <h3 className="watch-sources__title">Где смотреть</h3>
               <span className="watch-sources__hint">Выберите озвучку</span>
             </div>
             <div className="watch-sources__grid">
-              {playerSources.map((src, i) => (
+              {playerOptions.map((src, i) => (
                 <button
                   key={src.url}
                   className={`watch-source-card ${i === selectedSource ? 'watch-source-card--active' : ''} watch-source-card--${src.lang}`}
@@ -363,10 +364,9 @@ const MovieDetailPage: React.FC = () => {
         )}
       </div>
 
-      {showPlayer && playerSources.length > 0 && (
+      {showPlayer && playerOptions.length > 0 && (
         <VideoPlayer
-          url={playerSources[selectedSource].url}
-          sources={playerSources}
+          options={playerOptions}
           initialIndex={selectedSource}
           onClose={() => setShowPlayer(false)}
           title={movie.title}
