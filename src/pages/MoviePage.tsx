@@ -128,17 +128,17 @@ export const MoviePage: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Сезоны</h3>
               <div className="flex gap-2 overflow-x-auto pb-4 scrollbar-hide">
-                {Array.from({ length: movie.seasons }).map((_, i) => (
+                {(Array.isArray(movie.seasons) ? movie.seasons : []).map((s: any) => (
                   <button
-                    key={i + 1}
-                    onClick={() => handleSeasonChange(i + 1)}
+                    key={s.season_number}
+                    onClick={() => handleSeasonChange(s.season_number)}
                     className={`flex-shrink-0 px-4 py-2 rounded-lg transition-colors ${
-                      selectedSeason === i + 1
+                      selectedSeason === s.season_number
                         ? 'glass bg-primary-600/40'
                         : 'glass hover:bg-white/10'
                     }`}
                   >
-                    Сезон {i + 1}
+                    Сезон {s.season_number}
                   </button>
                 ))}
               </div>

@@ -1,3 +1,5 @@
+/* ===== Все типы приложения ===== */
+
 export interface Movie {
   id: string;
   imdbID: string;
@@ -19,12 +21,27 @@ export interface Movie {
   countries: string[];
   popularity: number;
   adult: boolean;
+  quality?: string;
 }
 
 export interface MovieDetail extends Movie {
   plot: string;
-  seasons?: number;
+  seasons?: Season[];
   episodes?: number;
+}
+
+export interface Season {
+  id: number;
+  season_number: number;
+  episodes_count: number;
+  episodes: Episode[];
+}
+
+export interface Episode {
+  id: number;
+  episode: number;
+  title: string;
+  season: number;
 }
 
 export interface WatchOption {
@@ -32,11 +49,32 @@ export interface WatchOption {
   label: string;
   sublabel: string;
   url: string;
-  type: 'iframe' | 'direct';
+  type: 'iframe' | 'direct' | 'external' | 'telegram';
   lang: 'en' | 'ru';
   provider: string;
   flag: string;
   quality?: string;
+}
+
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface WatchHistoryItem {
+  movie: Movie;
+  watchedAt: number;
+}
+
+export type AppTheme = 'dark' | 'light';
+
+export interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+  photo_url?: string;
 }
 
 export interface CatalogResponse {

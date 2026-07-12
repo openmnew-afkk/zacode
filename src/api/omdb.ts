@@ -102,7 +102,14 @@ function toMovieDetail(item: OMDBDetail): MovieDetail {
     directors,
     countries,
     overview: item.Plot || '',
-    seasons: item.totalSeasons ? parseInt(item.totalSeasons) : undefined,
+    seasons: item.totalSeasons
+      ? Array.from({ length: parseInt(item.totalSeasons) || 0 }, (_, i) => ({
+          id: i + 1,
+          season_number: i + 1,
+          episodes_count: 0,
+          episodes: [],
+        }))
+      : undefined,
   };
 }
 

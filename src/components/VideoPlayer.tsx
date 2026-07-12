@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import type { WatchOption } from '../api/players';
+import type { WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import './VideoPlayer.css';
 

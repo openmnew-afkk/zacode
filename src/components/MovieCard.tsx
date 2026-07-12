@@ -105,3 +105,4 @@ export const MovieCard: React.FC<MovieCardProps> = ({ movie, compact = false }) 
     </div>
   );
 };
+export default MovieCard;

@@ -2,8 +2,26 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store/useStore';
-import { posterUrl, getPlayerPattern, setPlayerPattern, getTmdbKey, setTmdbKey, checkTmdb, hasTmdbKey } from '../api/catalog';
 import './ProfilePage.css';
+
+/* ── Хелперы (заменяют удалённые функции catalog.ts) ── */
+const getPlayerPattern = () => localStorage.getItem('tc_player_pattern') || '';
+const setPlayerPattern = (v: string) => localStorage.setItem('tc_player_pattern', v);
+const getTmdbKey = () => localStorage.getItem('tc_tmdb_key') || '';
+const setTmdbKey = (v: string) => localStorage.setItem('tc_tmdb_key', v);
+const checkTmdb = async () => {
+  const key = getTmdbKey();
+  if (!key) return 'idle';
+  try {
+    const r = await fetch(`https://api.themoviedb.org/3/configuration?api_key=${key}`);
+    return r.ok ? 'ok' : 'err';
+  } catch { return 'err'; }
+};
+const posterUrl = (p: string, imdbId?: string) => {
+  if (p && p.startsWith('http')) return p;
+  if (imdbId?.startsWith('tt')) return `https://img.omdbapi.com/?i=${imdbId}&h=400&apikey=4a3b711b`;
+  return 'https://via.placeholder.com/80x120?text=?';
+};
 
 /* ===== Страница профиля ===== */
 
@@ -86,7 +104,7 @@ const ProfilePage: React.FC = () => {
               >
                 <img
                   className="history-item__poster"
-                  src={posterUrl(item.movie.poster_path, item.movie.imdb_id)}
+                  src={posterUrl(item.movie.poster_path, item.movie.imdbID)}
                   alt={item.movie.title}
                 />
                 <div className="history-item__info">
@@ -199,8 +217,8 @@ const ProfilePage: React.FC = () => {
             <button className="source-card__btn source-card__btn--ghost" onClick={async () => {
               setTmdbStatus('checking');
               const res = await checkTmdb();
-              setTmdbStatus(res.ok ? 'ok' : 'err');
-              setTmdbMsg(res.message);
+              setTmdbStatus(res === 'ok' ? 'ok' : 'err');
+              setTmdbMsg(res === 'ok' ? 'Ключ работает ✓' : 'Ключ не работает ✗');
             }}>{tmdbStatus === 'checking' ? '…' : 'Проверить'}</button>
           </div>
           {tmdbMsg && <p className="source-card__status">{tmdbMsg}</p>}

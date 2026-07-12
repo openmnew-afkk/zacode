@@ -7,8 +7,8 @@ interface AppState {
   // Избранное
   favorites: Movie[];
   addFavorite: (movie: Movie) => void;
-  removeFavorite: (movieId: number) => void;
-  isFavorite: (movieId: number) => boolean;
+  removeFavorite: (movieId: string) => void;
+  isFavorite: (movieId: string) => boolean;
   clearFavorites: () => void;
 
   // История просмотров
@@ -51,13 +51,13 @@ export const useStore = create<AppState>((set, get) => ({
     set({ favorites: updated });
   },
 
-  removeFavorite: (movieId: number) => {
+  removeFavorite: (movieId: string) => {
     const updated = get().favorites.filter((m) => m.id !== movieId);
     saveToStorage('tc_favorites', updated);
     set({ favorites: updated });
   },
 
-  isFavorite: (movieId: number) => {
+  isFavorite: (movieId: string) => {
     return get().favorites.some((m) => m.id === movieId);
   },
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import MovieCard from '../components/MovieCard';
 import SkeletonCard from '../components/SkeletonCard';
-import { searchCatalog, getCatalog, getGenres } from '../api/catalog';
+import { searchMovies, getTrendingMovies } from '../api/omdb';
 import type { Movie, Genre } from '../types';
 import './SearchPage.css';
 
@@ -22,8 +22,12 @@ const SearchPage: React.FC = () => {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Жанры не загружаем — у OMDb нет API жанров, используем статику
   useEffect(() => {
-    getGenres().then(setGenres).catch(console.error);
+    setGenres([
+      { id: 1, name: 'Боевик' }, { id: 2, name: 'Триллер' }, { id: 3, name: 'Комедия' },
+      { id: 4, name: 'Драма' }, { id: 5, name: 'Фантастика' }, { id: 6, name: 'Ужасы' },
+    ]);
   }, []);
 
   const fetchMovies = useCallback(
@@ -31,12 +35,11 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       try {
         let result;
-        const genre = selectedGenres.length > 0 ? String(selectedGenres[0]) : undefined;
-        const year = selectedYear ? String(selectedYear) : undefined;
         if (query.trim()) {
-          result = await searchCatalog(query.trim(), pageNum, searchType);
+          result = await searchMovies(query.trim(), pageNum, searchType);
         } else {
-          result = await getCatalog({ page: pageNum, type: searchType || undefined });
+          const movies = await getTrendingMovies();
+          result = { results: movies, total_pages: 1, total_results: movies.length, ok: true, page: 1 };
         }
         setMovies((prev) => (reset ? result.results : [...prev, ...result.results]));
         setTotalPages(result.total_pages);
@@ -172,7 +175,7 @@ const SearchPage: React.FC = () => {
       {/* ── Results ── */}
       <div className="search-results">
         {movies.map((movie) => (
-          <MovieCard key={`${movie.id}-${movie.kinopoisk_id}`} movie={movie} variant="grid" />
+          <MovieCard key={movie.id} movie={movie} compact={false} />
         ))}
         {loading &&
           Array.from({ length: 6 }).map((_, i) => (
