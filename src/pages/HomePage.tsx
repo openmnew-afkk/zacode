@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Heart, Clock, Film, Tv, Star } from 'lucide-react';
-import { getAllTrending, getTopRated, getNowPlaying, getOnTheAir } from '../api/movies';
+import { getAllTrending } from '../api/catalog';
 import { useStore } from '../store';
 import type { Movie } from '../types';
 import './HomePage.css';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getMovieDetail } from '../api/movies';
+import { getMovieDetail } from '../api/catalog';
 import { getWatchOptions } from '../api/players';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchMovies } from '../api/movies';
+import { searchMovies } from '../api/catalog';
 import type { Movie } from '../types';
 import './SearchPage.css';
 
