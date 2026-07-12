@@ -243,3 +243,55 @@ export async function getPopularByGenre(genreId: number, page = 1): Promise<Cata
     return { ok: false, page, results: [], total_pages: 0, total_results: 0 };
   }
 }
+/* Discover: пейджинг фильмов */
+export async function discoverMovies(opts: {
+  page?: number;
+  sort_by?: string;
+  with_genres?: string;
+  year?: string;
+} = {}): Promise<CatalogResponse> {
+  try {
+    const data = await tmdb<any>('/discover/movie', {
+      page: opts.page || 1,
+      sort_by: opts.sort_by || 'popularity.desc',
+      with_genres: opts.with_genres || '',
+      primary_release_year: opts.year || '',
+      'vote_count.gte': 50,
+      include_adult: false,
+    });
+    return {
+      ok: true,
+      page: data.page || 1,
+      results: (data.results || []).map((i: any) => toMovie(i, 'movie')),
+      total_pages: Math.min(data.total_pages || 1, 500),
+      total_results: data.total_results || 0,
+    };
+  } catch {
+    return { ok: false, page: 1, results: [], total_pages: 0, total_results: 0 };
+  }
+}
+
+/* Discover: пейджинг сериалов */
+export async function discoverSeries(opts: {
+  page?: number;
+  sort_by?: string;
+  with_genres?: string;
+} = {}): Promise<CatalogResponse> {
+  try {
+    const data = await tmdb<any>('/discover/tv', {
+      page: opts.page || 1,
+      sort_by: opts.sort_by || 'popularity.desc',
+      with_genres: opts.with_genres || '',
+      'vote_count.gte': 50,
+    });
+    return {
+      ok: true,
+      page: data.page || 1,
+      results: (data.results || []).map((i: any) => toMovie(i, 'tv')),
+      total_pages: Math.min(data.total_pages || 1, 500),
+      total_results: data.total_results || 0,
+    };
+  } catch {
+    return { ok: false, page: 1, results: [], total_pages: 0, total_results: 0 };
+  }
+}
