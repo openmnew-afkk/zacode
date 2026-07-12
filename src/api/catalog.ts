@@ -57,8 +57,8 @@ function toMovie(item: any, mediaType?: string): Movie {
   const date = isSerial ? (item.first_air_date || '') : (item.release_date || '');
 
   return {
-    id: String(item.id),
-    imdbID: `tt${item.id}`,
+    id: String(item.id),          // TMDB numeric ID (реальный)
+    imdbID: item.imdb_id || item.external_ids?.imdb_id || '', // реальный IMDB ID если есть
     title,
     original_title: origTitle,
     overview: item.overview || '',
@@ -99,8 +99,12 @@ function toMovieDetail(item: any, isSerial: boolean): MovieDetail {
     episodes: [],
   }));
 
+  // Реальный IMDB ID из external_ids
+  const realImdbId = item.external_ids?.imdb_id || movie.imdbID || '';
+
   return {
     ...movie,
+    imdbID: realImdbId,          // ← реальный tt0468569 и т.д.
     plot: item.overview || '',
     overview: item.overview || '',
     runtime: item.runtime || null,

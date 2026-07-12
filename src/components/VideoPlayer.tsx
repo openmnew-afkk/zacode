@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import type { WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import './VideoPlayer.css';
@@ -10,8 +10,6 @@ interface VideoPlayerProps {
   title?: string;
   poster?: string;
 }
-
-const LOAD_TIMEOUT_MS = 10000;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
   options,
@@ -25,176 +23,171 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const iframeOpts = options.filter((o) => o.type === 'iframe');
   const externalOpts = options.filter((o) => o.type !== 'iframe');
 
-  const startIdx = Math.min(initialIndex, Math.max(0, iframeOpts.length - 1));
-  const [activeIdx, setActiveIdx] = useState(startIdx);
-  const [phase, setPhase] = useState<'loading' | 'ready' | 'failed'>('loading');
-  const [showSites, setShowSites] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeIdx, setActiveIdx] = useState(Math.min(initialIndex, Math.max(0, iframeOpts.length - 1)));
+  const [loaded, setLoaded] = useState(false);
+  const [showSources, setShowSources] = useState(false);
+  const [errored, setErrored] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const active = iframeOpts[activeIdx];
 
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
-  }, []);
+  // Сброс при смене источника
+  const switchTo = useCallback((idx: number) => {
+    haptic('light');
+    setActiveIdx(idx);
+    setLoaded(false);
+    setErrored(false);
+    setShowSources(false);
+  }, [haptic]);
 
   const tryNext = useCallback(() => {
-    clearTimer();
     if (activeIdx < iframeOpts.length - 1) {
-      setActiveIdx((i) => i + 1);
-      setPhase('loading');
+      switchTo(activeIdx + 1);
     } else {
-      setPhase('failed');
-      setShowSites(true);
+      setErrored(true);
+      setShowSources(true);
     }
-  }, [activeIdx, iframeOpts.length, clearTimer]);
+  }, [activeIdx, iframeOpts.length, switchTo]);
 
+  // Блокируем скролл страницы пока плеер открыт
   useEffect(() => {
-    if (!active || showSites) return;
-    setPhase('loading');
-    clearTimer();
-    const id = setTimeout(tryNext, LOAD_TIMEOUT_MS);
-    timerRef.current = id;
-    return () => clearTimeout(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active?.url, showSites]);
-
-  const handleLoad = () => { clearTimer(); setPhase('ready'); };
-
-  const selectSource = (idx: number) => {
-    if (idx === activeIdx) return;
-    haptic('medium');
-    setActiveIdx(idx);
-    setPhase('loading');
-  };
-
-  const openExternal = (opt: WatchOption) => {
-    haptic('medium');
-    openLink(opt.url);
-  };
-
-  const hasSites = externalOpts.length > 0;
-
-  if (options.length === 0) {
-    return (
-      <div className="vp-root">
-        <button className="vp-close" onClick={onClose}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
-          </svg>
-        </button>
-        <div className="vp-loading" style={{ position: 'absolute', inset: 0, zIndex: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-          <p style={{ fontSize: 40 }}>😕</p>
-          <p className="vp-loading__src">Нет доступных плееров</p>
-          <button className="vp-loading__skip" onClick={onClose}>Закрыть</button>
-        </div>
-      </div>
-    );
-  }
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   return (
-    <div className="vp-root">
-      <button className="vp-close" onClick={onClose} aria-label="Закрыть">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-          <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
-        </svg>
-      </button>
-
-      {hasSites && (
-        <button
-          className={`vp-sites-toggle ${showSites ? 'vp-sites-toggle--active' : ''}`}
-          onClick={() => { haptic('light'); setShowSites((s) => !s); }}
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="9" cy="9" r="7.5" stroke="currentColor" strokeWidth="1.5"/>
-            <path d="M9 1.5C9 1.5 6 5 6 9s3 7.5 3 7.5M9 1.5C9 1.5 12 5 12 9s-3 7.5-3 7.5M1.5 9h15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+    <div className="vp" role="dialog" aria-label="Видеоплеер">
+      {/* ── Header ── */}
+      <div className="vp-header">
+        <button className="vp-header__close" onClick={onClose} aria-label="Закрыть">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <path d="M5 5l12 12M17 5L5 17" stroke="#fff" strokeWidth="2" strokeLinecap="round"/>
           </svg>
-          <span>Сайты</span>
         </button>
-      )}
-
-      {/* Iframe */}
-      {!showSites && active && (
-        <>
-          {poster && phase !== 'ready' && (
-            <div className="vp-bg" style={{ backgroundImage: `url(${poster})` }} />
-          )}
-
-          {phase === 'loading' && (
-            <div className="vp-loading">
-              <div className="vp-loading__ring" />
-              <p className="vp-loading__src">{active.flag || '🌐'} {active.provider}</p>
-              <p className="vp-loading__label">Загрузка плеера...</p>
-              {activeIdx < iframeOpts.length - 1 && (
-                <button className="vp-loading__skip" onClick={tryNext}>Следующий →</button>
-              )}
-            </div>
-          )}
-
-          {phase === 'failed' && (
-            <div className="vp-loading">
-              <p style={{ fontSize: 40 }}>😕</p>
-              <p className="vp-loading__src">Плеер не отвечает</p>
-              <button className="vp-loading__skip" onClick={() => setShowSites(true)}>Открыть на сайте →</button>
-            </div>
-          )}
-
-          <iframe
-            key={active.url}
-            className={`vp-iframe ${phase === 'ready' ? 'vp-iframe--visible' : ''}`}
-            src={active.url}
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-            allowFullScreen
-            referrerPolicy="no-referrer"
-            title={title}
-            onLoad={handleLoad}
-          />
-        </>
-      )}
-
-      {/* Сайты */}
-      {showSites && (
-        <div className="vp-sites">
-          <p className="vp-sites__title">Где смотреть</p>
-          <p className="vp-sites__sub">Откроется в Telegram / браузере</p>
-          <div className="vp-sites__list">
-            {options.map((opt) => (
-              <button key={opt.id} className="vp-site-item" onClick={() => openExternal(opt)}>
-                <span className="vp-site-item__icon">{opt.flag}</span>
-                <div className="vp-site-item__info">
-                  <span className="vp-site-item__name">{opt.label}</span>
-                  <span className="vp-site-item__sub">{opt.sublabel}</span>
-                </div>
-                <span className="vp-site-item__arrow">→</span>
-              </button>
-            ))}
-          </div>
-          {iframeOpts.length > 0 && (
-            <button className="vp-sites__back" onClick={() => setShowSites(false)}>← Вернуться к плееру</button>
-          )}
-        </div>
-      )}
-
-      {/* Чипы источников */}
-      {!showSites && iframeOpts.length > 1 && (
-        <div className="vp-dubs">
-          <div className="vp-dubs__chips">
-            {iframeOpts.map((opt, i) => (
-              <button
-                key={opt.id}
-                className={`vp-chip ${i === activeIdx ? 'vp-chip--active' : ''}`}
-                onClick={() => selectSource(i)}
-              >
-                <span>{opt.flag || '🌐'}</span>
-                <span className="vp-chip__name">{opt.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="vp-title-bar">
-        <span className="vp-title-bar__text">{title}</span>
+        <span className="vp-header__title">{title || 'Плеер'}</span>
+        <button
+          className={`vp-header__sources ${showSources ? 'active' : ''}`}
+          onClick={() => { haptic('light'); setShowSources(s => !s); }}
+        >
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <circle cx="10" cy="4" r="1.5" fill="currentColor"/>
+            <circle cx="10" cy="10" r="1.5" fill="currentColor"/>
+            <circle cx="10" cy="16" r="1.5" fill="currentColor"/>
+          </svg>
+        </button>
       </div>
+
+      {/* ── Iframe ── */}
+      <div className="vp-frame-wrap">
+        {!loaded && !errored && (
+          <div className="vp-loading">
+            <div className="vp-loading__spinner" />
+            <p className="vp-loading__label">Загрузка плеера…</p>
+            {active && <p className="vp-loading__src">{active.flag} {active.label}</p>}
+          </div>
+        )}
+
+        {errored && (
+          <div className="vp-error">
+            <div className="vp-error__icon">📡</div>
+            <p className="vp-error__title">Нет доступных источников</p>
+            <p className="vp-error__sub">Попробуйте открыть на внешнем сайте</p>
+          </div>
+        )}
+
+        {active && !errored && (
+          <iframe
+            ref={iframeRef}
+            key={active.url}
+            src={active.url}
+            className="vp-frame"
+            allowFullScreen
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            referrerPolicy="no-referrer"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+            onLoad={() => setLoaded(true)}
+            onError={tryNext}
+          />
+        )}
+      </div>
+
+      {/* ── Панель выбора источника ── */}
+      {showSources && (
+        <div className="vp-sources">
+          <div className="vp-sources__inner">
+            <div className="vp-sources__section-label">Встроенный плеер</div>
+            <div className="vp-sources__list">
+              {iframeOpts.map((opt, i) => (
+                <button
+                  key={opt.id}
+                  className={`vp-src-btn ${i === activeIdx ? 'active' : ''}`}
+                  onClick={() => switchTo(i)}
+                >
+                  <span className="vp-src-btn__flag">{opt.flag}</span>
+                  <span className="vp-src-btn__info">
+                    <span className="vp-src-btn__name">{opt.label}</span>
+                    <span className="vp-src-btn__sub">{opt.sublabel}</span>
+                  </span>
+                  {opt.quality && <span className="vp-src-btn__q">{opt.quality}</span>}
+                  {i === activeIdx && (
+                    <span className="vp-src-btn__check">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {externalOpts.length > 0 && (
+              <>
+                <div className="vp-sources__section-label">Внешние сайты</div>
+                <div className="vp-sources__list">
+                  {externalOpts.map((opt) => (
+                    <button
+                      key={opt.id}
+                      className="vp-src-btn vp-src-btn--ext"
+                      onClick={() => {
+                        haptic('medium');
+                        openLink(opt.url);
+                      }}
+                    >
+                      <span className="vp-src-btn__flag">{opt.flag}</span>
+                      <span className="vp-src-btn__info">
+                        <span className="vp-src-btn__name">{opt.label}</span>
+                        <span className="vp-src-btn__sub">{opt.sublabel}</span>
+                      </span>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="vp-src-btn__ext-ico">
+                        <path d="M3 11L11 3M11 3H6M11 3v5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Нижние чипы источника (когда панель закрыта) ── */}
+      {!showSources && iframeOpts.length > 1 && (
+        <div className="vp-chips">
+          {iframeOpts.slice(0, 5).map((opt, i) => (
+            <button
+              key={opt.id}
+              className={`vp-chip ${i === activeIdx ? 'active' : ''}`}
+              onClick={() => switchTo(i)}
+            >
+              {opt.flag} {opt.label}
+            </button>
+          ))}
+          {iframeOpts.length > 5 && (
+            <button
+              className="vp-chip vp-chip--more"
+              onClick={() => setShowSources(true)}
+            >
+              +{iframeOpts.length - 5}
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 };

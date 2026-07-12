@@ -1,41 +1,47 @@
-/* ===== MovieDetailPage — чистый и красивый ===== */
+/* ===== MovieDetailPage ===== */
 
-.dp { position: relative; min-height: 100vh; }
+.dp { position: relative; min-height: 100vh; padding-bottom: 100px; }
 
 /* ── Фон ── */
 .dp-bg {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 340px;
+  height: 380px;
   overflow: hidden;
+  pointer-events: none;
 }
 .dp-bg__img {
   width: 100%; height: 100%;
   object-fit: cover;
+  filter: blur(2px) brightness(0.55);
 }
 .dp-bg__grad {
   position: absolute; inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(8,8,16,0.2) 0%,
-    rgba(8,8,16,0.6) 50%,
-    rgba(8,8,16,1) 100%
+    rgba(8,8,18,0.15) 0%,
+    rgba(8,8,18,0.7) 50%,
+    rgba(8,8,18,1) 100%
   );
 }
 
-/* ── Назад ── */
+/* ── Кнопка назад ── */
 .dp-back {
-  position: absolute;
-  top: max(env(safe-area-inset-top,10px),10px);
-  left: 12px;
+  position: relative;
   z-index: 10;
-  width: 40px; height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: max(env(safe-area-inset-top,12px),12px) 0 0 12px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.45);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255,255,255,0.12);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff; cursor: pointer;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border: 1.5px solid rgba(255,255,255,0.1);
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.15s;
 }
 .dp-back:active { transform: scale(0.9); }
 
@@ -45,17 +51,35 @@
   z-index: 2;
   display: flex;
   gap: 16px;
-  padding: 200px 16px 0;
+  padding: 16px 16px 0;
+  min-height: 200px;
 }
 
+.dp-hero__poster-wrap {
+  flex-shrink: 0;
+  position: relative;
+}
 .dp-hero__poster {
-  width: 130px;
-  height: 195px;
+  width: 120px;
+  height: 180px;
   border-radius: 14px;
   object-fit: cover;
-  flex-shrink: 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+.dp-hero__score {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(251,191,36,0.95);
+  color: #000;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .dp-hero__info {
@@ -64,81 +88,75 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  gap: 6px;
-  padding-bottom: 4px;
+  gap: 8px;
 }
-
 .dp-hero__title {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 800;
   line-height: 1.2;
   color: #fff;
+  word-break: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-
 .dp-hero__orig {
-  font-size: 12px;
-  color: rgba(255,255,255,0.4);
-  margin: 0;
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.38);
+  margin: -4px 0 0;
 }
 
-/* Рейтинг */
-.dp-rating {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(251,191,36,0.12);
-  border: 1px solid rgba(251,191,36,0.25);
-  border-radius: 8px;
-  padding: 3px 10px;
-  width: fit-content;
-}
-.dp-rating__star { color: #fbbf24; font-size: 12px; }
-.dp-rating__val  { color: #fbbf24; font-size: 14px; font-weight: 800; }
-.dp-rating__src  { color: rgba(251,191,36,0.6); font-size: 10px; font-weight: 600; margin-left: 2px; }
-
-/* Мета */
+/* Мета-инфо */
 .dp-meta {
   display: flex;
-  gap: 8px;
   flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
 }
 .dp-meta span {
   font-size: 11px;
   color: rgba(255,255,255,0.45);
   font-weight: 500;
 }
-.dp-meta__serial {
+.dp-meta--serial {
+  background: rgba(6,182,212,0.12);
+  border: 1px solid rgba(6,182,212,0.25);
   color: rgba(6,182,212,0.9) !important;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 700 !important;
+}
+.dp-meta--quality {
+  background: rgba(251,191,36,0.1);
+  border: 1px solid rgba(251,191,36,0.2);
+  color: rgba(251,191,36,0.8) !important;
+  padding: 2px 8px;
+  border-radius: 10px;
   font-weight: 700 !important;
 }
 
 /* Жанры */
 .dp-genres {
   display: flex;
-  gap: 6px;
   flex-wrap: wrap;
+  gap: 5px;
 }
 .dp-genre {
   font-size: 10px;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 20px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.45);
 }
 
-/* ── Кнопки ── */
+/* ── Кнопки действий ── */
 .dp-actions {
-  position: relative;
-  z-index: 2;
   display: flex;
-  gap: 12px;
-  padding: 20px 16px 0;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .dp-watch {
@@ -146,46 +164,53 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 16px 24px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  gap: 8px;
+  padding: 13px 20px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 800;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+  box-shadow: 0 4px 18px rgba(124,58,237,0.4);
   transition: transform 0.15s, box-shadow 0.15s;
 }
 .dp-watch:active {
   transform: scale(0.97);
-  box-shadow: 0 2px 10px rgba(124,58,237,0.25);
+  box-shadow: 0 2px 8px rgba(124,58,237,0.25);
 }
+.dp-watch--loading { opacity: 0.75; }
+.dp-watch__spinner {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: #fff;
+  animation: dp-spin 0.7s linear infinite;
+}
+@keyframes dp-spin { to { transform: rotate(360deg); } }
 
 .dp-fav {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
   cursor: pointer;
+  transition: all 0.15s;
   flex-shrink: 0;
-  transition: transform 0.15s, background 0.15s;
 }
-.dp-fav--active {
-  background: rgba(244,114,182,0.15);
+.dp-fav--on {
+  background: rgba(244,114,182,0.12);
   border-color: rgba(244,114,182,0.3);
 }
-.dp-fav--anim { animation: fav-bounce 0.4s cubic-bezier(0.34,1.56,0.64,1); }
-@keyframes fav-bounce {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.3); }
-  100% { transform: scale(1); }
+.dp-fav--anim { animation: dp-heart 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes dp-heart {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.3); }
 }
 
 /* ── Секции ── */
@@ -195,16 +220,15 @@
   padding: 20px 16px 0;
 }
 .dp-section__title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 700;
   color: #fff;
   margin-bottom: 12px;
 }
-
 .dp-desc {
   font-size: 13.5px;
   line-height: 1.65;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.58);
   margin: 0;
 }
 
@@ -213,63 +237,62 @@
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  padding-bottom: 12px;
+  padding-bottom: 14px;
   scrollbar-width: none;
+  margin: 0 -4px;
+  padding-left: 4px;
 }
 .dp-seasons::-webkit-scrollbar { display: none; }
 
-.dp-season {
-  min-width: 44px;
-  height: 38px;
+.dp-season-btn {
+  flex-shrink: 0;
+  min-width: 52px;
+  height: 40px;
   border-radius: 12px;
-  background: rgba(255,255,255,0.06);
-  border: 1.5px solid rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.5);
-  font-size: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1.5px solid rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.45);
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  flex-shrink: 0;
   transition: all 0.18s;
 }
-.dp-season--active {
-  background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(37,99,235,0.25));
+.dp-season-btn.active {
+  background: rgba(124,58,237,0.2);
   border-color: rgba(124,58,237,0.5);
-  color: #fff;
-  box-shadow: 0 0 12px rgba(124,58,237,0.2);
+  color: #c4b5fd;
 }
 
 /* ── Эпизоды ── */
 .dp-episodes {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
-.dp-episode {
+.dp-ep {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 11px 13px;
+  border-radius: 13px;
   background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.05);
   cursor: pointer;
   transition: background 0.15s, transform 0.12s;
   text-align: left;
   width: 100%;
+  color: #fff;
 }
-.dp-episode:active {
+.dp-ep:active { transform: scale(0.98); background: rgba(124,58,237,0.12); }
+.dp-ep.active {
   background: rgba(124,58,237,0.12);
-  transform: scale(0.98);
-}
-.dp-episode--active {
-  background: rgba(124,58,237,0.12);
-  border-color: rgba(124,58,237,0.3);
+  border-color: rgba(124,58,237,0.28);
 }
 
-.dp-episode__num {
-  width: 32px;
-  height: 32px;
+.dp-ep__num {
+  width: 34px;
+  height: 34px;
   border-radius: 10px;
   background: rgba(255,255,255,0.06);
   display: flex;
@@ -280,57 +303,58 @@
   color: rgba(255,255,255,0.5);
   flex-shrink: 0;
 }
-.dp-episode--active .dp-episode__num {
-  background: linear-gradient(135deg, #7c3aed, #2563eb);
+.dp-ep.active .dp-ep__num {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
   color: #fff;
 }
-
-.dp-episode__title {
+.dp-ep__label {
   flex: 1;
   font-size: 13px;
   font-weight: 500;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.65);
 }
-
-.dp-episode__play {
-  font-size: 11px;
-  color: rgba(255,255,255,0.25);
+.dp-ep__play {
+  color: rgba(255,255,255,0.2);
+  flex-shrink: 0;
 }
-.dp-episode--active .dp-episode__play { color: #7c3aed; }
+.dp-ep.active .dp-ep__play { color: #7c3aed; }
 
-/* ── Детали (страна, режиссёр, актёры) ── */
-.dp-details {
-  padding-bottom: 24px;
-}
+/* ── Детали фильма ── */
+.dp-details { padding-bottom: 4px; }
 
-.dp-detail-row {
+.dp-row {
   display: flex;
   gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid rgba(255,255,255,0.04);
   font-size: 13px;
-  color: rgba(255,255,255,0.6);
-  line-height: 1.5;
+  align-items: flex-start;
 }
-
-.dp-detail-row__label {
+.dp-row__label {
   min-width: 80px;
-  color: rgba(255,255,255,0.3);
-  font-weight: 600;
-  flex-shrink: 0;
+  color: rgba(255,255,255,0.28);
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-top: 1px;
+}
+.dp-row__val { color: rgba(255,255,255,0.62); line-height: 1.4; }
+.dp-row__imdb {
+  font-family: monospace;
+  color: rgba(255,180,0,0.6);
+  font-size: 11px;
 }
 
 /* ── Скелетон ── */
 .dp-skeleton {
   display: flex;
   gap: 16px;
-  padding: 240px 16px 0;
+  padding: max(env(safe-area-inset-top,60px),60px) 16px 0;
 }
 .dp-skeleton__poster {
-  width: 130px;
-  height: 195px;
-  border-radius: 14px;
-  flex-shrink: 0;
+  width: 120px; height: 180px;
+  border-radius: 14px; flex-shrink: 0;
 }
 .dp-skeleton__info {
   flex: 1;
@@ -339,9 +363,25 @@
   gap: 12px;
   justify-content: flex-end;
 }
-.dp-skeleton__title { height: 28px; border-radius: 8px; width: 80%; }
-.dp-skeleton__meta  { height: 16px; border-radius: 6px; width: 60%; }
-.dp-skeleton__btn   { height: 52px; border-radius: 14px; width: 100%; }
+.dp-skeleton__line {
+  border-radius: 8px;
+}
+
+/* Skeleton pulse */
+.skeleton-pulse {
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0.04) 25%,
+    rgba(255,255,255,0.08) 50%,
+    rgba(255,255,255,0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-wave 1.5s ease-in-out infinite;
+}
+@keyframes skeleton-wave {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
 /* ── Ошибка ── */
 .dp--error {
@@ -349,18 +389,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 70vh;
   gap: 12px;
   text-align: center;
-  padding: 20px;
+  padding: 24px;
 }
-.dp--error p { font-size: 16px; color: rgba(255,255,255,0.6); }
-.dp--error button {
+.dp-error-icon { font-size: 52px; }
+.dp--error p { font-size: 16px; color: rgba(255,255,255,0.55); }
+.dp-error-btn {
+  margin-top: 8px;
   padding: 12px 28px;
   border-radius: 14px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  color: #fff;
+  background: rgba(124,58,237,0.15);
+  border: 1px solid rgba(124,58,237,0.3);
+  color: #c4b5fd;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
