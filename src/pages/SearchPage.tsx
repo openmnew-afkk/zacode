@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchMovies, getTrendingMovies } from '../api/omdb';
+import { searchMovies } from '../api/movies';
 import type { Movie } from '../types';
 import './SearchPage.css';
 
@@ -14,10 +14,7 @@ const SearchPage: React.FC = () => {
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
-    if (!query.trim()) {
-      getTrendingMovies().then(setMovies).catch(() => {});
-      return;
-    }
+    if (!query.trim()) { setMovies([]); return; }
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
@@ -48,15 +45,13 @@ const SearchPage: React.FC = () => {
           ref={inputRef}
           className="search-input"
           type="text"
-          placeholder="Название фильма…"
+          placeholder="Название фильма, сериала…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoComplete="off"
           spellCheck={false}
         />
-        {query && (
-          <button className="search-clear" onClick={() => { setQuery(''); inputRef.current?.focus(); }}>✕</button>
-        )}
+        {query && <button className="search-clear" onClick={() => { setQuery(''); inputRef.current?.focus(); }}>✕</button>}
       </div>
 
       <div className="search-types">
@@ -67,9 +62,7 @@ const SearchPage: React.FC = () => {
       {loading && (
         <div className="search-grid">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="search-skeleton">
-              <div className="search-skeleton__poster skeleton-pulse" />
-            </div>
+            <div key={i} className="search-skeleton"><div className="search-skeleton__poster skeleton-pulse" /></div>
           ))}
         </div>
       )}
@@ -77,10 +70,10 @@ const SearchPage: React.FC = () => {
       {!loading && (
         <div className="search-grid">
           {movies.map((movie) => (
-            <div key={movie.imdbID} className="search-card" onClick={() => navigate(`/movie/${movie.imdbID}`)}>
+            <div key={movie.id} className="search-card" onClick={() => navigate(`/movie/${movie.id}`)}>
               <div className="search-card__poster">
                 <img src={movie.poster_path} alt={movie.title} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?'; }} />
-                {movie.imdb_rating > 0 && <span className="search-card__rating">★ {movie.imdb_rating.toFixed(1)}</span>}
+                {movie.vote_average > 0 && <span className="search-card__rating">★ {movie.vote_average.toFixed(1)}</span>}
               </div>
               <p className="search-card__title">{movie.title}</p>
               {movie.release_date && <p className="search-card__year">{movie.release_date.slice(0, 4)}</p>}

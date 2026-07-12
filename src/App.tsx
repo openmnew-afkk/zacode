@@ -16,24 +16,23 @@ function App() {
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
-    document.body.classList.add('dark');
+    document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top, 44px)');
+    document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
   }, []);
 
   const handleSplashDone = () => setShowSplash(false);
 
   return (
-    <div className="app-root">
+    <div className="app-root" style={{ paddingTop: 'var(--sat)' }}>
       {showSplash && <SplashPage onDone={handleSplashDone} />}
 
-      <div className="app-main" key={location.pathname}>
-        <Routes location={location}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/movie/:id" element={<MovieDetailPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-        </Routes>
-      </div>
+      <Routes location={location}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/movie/:id" element={<MovieDetailPage />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+      </Routes>
 
       <TabBar />
     </div>

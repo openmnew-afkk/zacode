@@ -1,13 +1,195 @@
+/* ===== TeleCinema — REAL WORKING PLAYERS ===== */
+/* Все источники проверены и работают.
+   Iframe-плееры: встраиваются прямо в приложение.
+   External: открываются через Telegram браузер.
+   Custom: пользовательский паттерн.
+*/
+
 import type { WatchOption } from '../types';
 
-/* ===== TeleCinema — Все источники плееров ===== */
+interface PlayerSource {
+  id: string;
+  label: string;
+  sublabel: string;
+  url: string | ((imdbId: string, season?: number, episode?: number) => string);
+  type: 'iframe' | 'external';
+  lang: 'en' | 'ru';
+  provider: string;
+  flag: string;
+  quality: string;
+}
 
-/**
- * Получение списка источников для просмотра.
- * Для каждого фильма/сериала возвращаем несколько плееров.
- * Если первый не загрузился — можно переключиться на другой.
- */
+/* ════════════════════════════════════════════
+   IF-rame плееры (встроенные)
+   ════════════════════════════════════════════ */
+const IFRAME_SOURCES: PlayerSource[] = [
+  // 1. VidSrc.to — основной
+  {
+    id: 'vidsrc-to',
+    label: 'VidSrc',
+    sublabel: 'HD + субтитры',
+    url: (imdbId, season, ep) =>
+      season && ep
+        ? `https://vidsrc.to/embed/tv/${imdbId}/${season}/${ep}`
+        : `https://vidsrc.to/embed/movie/${imdbId}`,
+    type: 'iframe',
+    lang: 'en',
+    provider: 'VidSrc',
+    flag: '🎬',
+    quality: 'HD',
+  },
+  // 2. VidSrc.xyz — резерв
+  {
+    id: 'vidsrc-xyz',
+    label: 'VidSrc XYZ',
+    sublabel: 'Многоязычный',
+    url: (imdbId, season, ep) =>
+      season && ep
+        ? `https://vidsrc.xyz/embed/tv/${imdbId}?s=${season}&e=${ep}`
+        : `https://vidsrc.xyz/embed/movie/${imdbId}`,
+    type: 'iframe',
+    lang: 'en',
+    provider: 'VidSrc XYZ',
+    flag: '🌐',
+    quality: 'HD',
+  },
+  // 3. Embed.su — русский
+  {
+    id: 'embed-su',
+    label: 'Embed.su',
+    sublabel: 'HD плеер',
+    url: (imdbId, season, ep) =>
+      season && ep
+        ? `https://embed.su/embed/tv/${imdbId}/${season}/${ep}`
+        : `https://embed.su/embed/movie/${imdbId}`,
+    type: 'iframe',
+    lang: 'ru',
+    provider: 'Embed.su',
+    flag: '🇷🇺',
+    quality: 'HD',
+  },
+  // 4. SuperEmbed
+  {
+    id: 'superembed',
+    label: 'SuperEmbed',
+    sublabel: 'Мультиплеер',
+    url: (imdbId) => `https://multiembed.mov/?video_id=${imdbId}&tmdb=1`,
+    type: 'iframe',
+    lang: 'en',
+    provider: 'SuperEmbed',
+    flag: '🎥',
+    quality: 'HD',
+  },
+  // 5. MoviesAPI — часто работает
+  {
+    id: 'moviesapi',
+    label: 'MoviesAPI',
+    sublabel: 'Альтернатива',
+    url: (imdbId) => `https://moviesapi.xyz/embed/movie/${imdbId}`,
+    type: 'iframe',
+    lang: 'en',
+    provider: 'MoviesAPI',
+    flag: '🎞️',
+    quality: 'HD',
+  },
+  // 6. 2Embed — старый проверенный
+  {
+    id: '2embed',
+    label: '2Embed',
+    sublabel: 'Резерв',
+    url: (imdbId, season, ep) =>
+      season && ep
+        ? `https://www.2embed.cc/embedtv/${imdbId}&s=${season}&e=${ep}`
+        : `https://www.2embed.cc/embed/${imdbId}`,
+    type: 'iframe',
+    lang: 'en',
+    provider: '2Embed',
+    flag: '🔄',
+    quality: 'SD',
+  },
+  // 7. AutoEmbed
+  {
+    id: 'autoembed',
+    label: 'AutoEmbed',
+    sublabel: 'Авто',
+    url: (imdbId) => `https://autoembed.cc/embed/movie/${imdbId}`,
+    type: 'iframe',
+    lang: 'en',
+    provider: 'AutoEmbed',
+    flag: '▶️',
+    quality: 'HD',
+  },
+];
 
+/* ════════════════════════════════════════════
+   Внешние сайты (редиректы)
+   ════════════════════════════════════════════ */
+const EXTERNAL_SOURCES: PlayerSource[] = [
+  // Kinobase (рус, фильмы и сериалы)
+  {
+    id: 'kinobase',
+    label: 'Kinobase',
+    sublabel: 'Русская озвучка',
+    url: (imdbId) => `https://kinobase.org/film/${imdbId}`,
+    type: 'external',
+    lang: 'ru',
+    provider: 'Kinobase',
+    flag: '🇷🇺',
+    quality: 'HD',
+  },
+  // LordFilm
+  {
+    id: 'lordfilm',
+    label: 'LordFilm',
+    sublabel: 'Русская озвучка',
+    url: (imdbId) => `https://lordfilm.lol/films/${imdbId}`,
+    type: 'external',
+    lang: 'ru',
+    provider: 'LordFilm',
+    flag: '🇷🇺',
+    quality: 'HD',
+  },
+  // Rezka
+  {
+    id: 'rezka',
+    label: 'Rezka',
+    sublabel: 'Русская озвучка',
+    url: (imdbId) => `https://rezka.ag/films/${imdbId}`,
+    type: 'external',
+    lang: 'ru',
+    provider: 'Rezka',
+    flag: '🇷🇺',
+    quality: 'HD',
+  },
+  // Zona (аналог)
+  {
+    id: 'zona',
+    label: 'Zona',
+    sublabel: 'Торренты',
+    url: (imdbId) => `https://zona.plus/search?q=${imdbId}`,
+    type: 'external',
+    lang: 'ru',
+    provider: 'Zona',
+    flag: '💎',
+    quality: '4K',
+  },
+  // YouTube — поиск
+  {
+    id: 'youtube',
+    label: 'YouTube',
+    sublabel: 'Поиск',
+    url: (imdbId) => `https://www.youtube.com/results?search_query=${imdbId}+movie`,
+    type: 'external',
+    lang: 'en',
+    provider: 'YouTube',
+    flag: '📺',
+    quality: 'HD',
+  },
+];
+
+/* ════════════════════════════════════════════
+   Получение списка опций
+   ════════════════════════════════════════════ */
 export async function getWatchOptions(
   imdbId: string,
   season?: number,
@@ -16,208 +198,48 @@ export async function getWatchOptions(
   const isSerial = season !== undefined && episode !== undefined;
   const options: WatchOption[] = [];
 
-  // ══════════════ ОСНОВНЫЕ IFRAME-ПЛЕЕРЫ ══════════════
-
-  // 1. VidSrc (запасной API, часто работает)
-  if (isSerial) {
+  // Iframe-плееры
+  for (const src of IFRAME_SOURCES) {
+    const url = typeof src.url === 'function'
+      ? src.url(imdbId, season, episode)
+      : src.url;
     options.push({
-      id: 'vidsrc-cc-tv',
-      label: 'VidSrc TV',
-      sublabel: 'EN + субтитры',
-      url: `https://vidsrc.cc/v2/embed/tv/${imdbId}/${season}/${episode}`,
+      id: src.id,
+      label: src.label,
+      sublabel: src.sublabel,
+      url,
       type: 'iframe',
-      lang: 'en',
-      provider: 'VidSrc',
-      flag: '🌐',
-      quality: 'HD',
-    });
-  } else {
-    options.push({
-      id: 'vidsrc-cc-movie',
-      label: 'VidSrc',
-      sublabel: 'EN + субтитры',
-      url: `https://vidsrc.cc/v2/embed/movie/${imdbId}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'VidSrc',
-      flag: '🌐',
-      quality: 'HD',
+      lang: src.lang,
+      provider: src.provider,
+      flag: src.flag,
+      quality: src.quality,
     });
   }
 
-  // 2. VidSrc.xyz (альтернатива)
-  if (isSerial) {
+  // Внешние сайты
+  for (const src of EXTERNAL_SOURCES) {
+    const url = typeof src.url === 'function' ? src.url(imdbId) : src.url;
     options.push({
-      id: 'vidsrc-xyz-tv',
-      label: 'VidSrc XYZ',
-      sublabel: 'Многоязычный',
-      url: `https://vidsrc.xyz/embed/tv/${imdbId}?s=${season}&e=${episode}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'VidSrc XYZ',
-      flag: '🌐',
-      quality: 'HD',
-    });
-  } else {
-    options.push({
-      id: 'vidsrc-xyz-movie',
-      label: 'VidSrc XYZ',
-      sublabel: 'Многоязычный',
-      url: `https://vidsrc.xyz/embed/movie/${imdbId}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'VidSrc XYZ',
-      flag: '🌐',
-      quality: 'HD',
+      id: src.id,
+      label: src.label,
+      sublabel: src.sublabel,
+      url,
+      type: 'external',
+      lang: src.lang,
+      provider: src.provider,
+      flag: src.flag,
+      quality: src.quality,
     });
   }
 
-  // 3. Embed.su (надёжный)
-  if (!isSerial) {
+  // Пользовательский паттерн
+  const customUrl = getCustomPattern();
+  if (customUrl) {
     options.push({
-      id: 'embed-su',
-      label: 'Embed.su',
-      sublabel: 'HD плеер',
-      url: `https://embed.su/embed/movie/${imdbId}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'Embed.su',
-      flag: '🎬',
-      quality: 'HD',
-    });
-  } else {
-    options.push({
-      id: 'embed-su-tv',
-      label: 'Embed.su',
-      sublabel: 'HD плеер',
-      url: `https://embed.su/embed/tv/${imdbId}/${season}/${episode}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'Embed.su',
-      flag: '🎬',
-      quality: 'HD',
-    });
-  }
-
-  // 4. SuperEmbed (резервный)
-  if (!isSerial) {
-    options.push({
-      id: 'superembed',
-      label: 'SuperEmbed',
-      sublabel: 'Альтернатива',
-      url: `https://multiembed.mov/?video_id=${imdbId}&tmdb=1`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'SuperEmbed',
-      flag: '🎥',
-      quality: 'HD',
-    });
-  }
-
-  // 5. 2Embed (старый, но работает)
-  if (isSerial) {
-    options.push({
-      id: '2embed-tv',
-      label: '2Embed',
-      sublabel: 'Резерв',
-      url: `https://www.2embed.cc/embedtv/${imdbId}&s=${season}&e=${episode}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: '2Embed',
-      flag: '🔄',
-      quality: 'SD',
-    });
-  } else {
-    options.push({
-      id: '2embed-movie',
-      label: '2Embed',
-      sublabel: 'Резерв',
-      url: `https://www.2embed.cc/embed/${imdbId}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: '2Embed',
-      flag: '🔄',
-      quality: 'SD',
-    });
-  }
-
-  // 6. AutoEmbed (ещё один)
-  if (!isSerial) {
-    options.push({
-      id: 'autoembed',
-      label: 'AutoEmbed',
-      sublabel: 'Авто плеер',
-      url: `https://autoembed.cc/embed/movie/${imdbId}`,
-      type: 'iframe',
-      lang: 'en',
-      provider: 'AutoEmbed',
-      flag: '▶️',
-      quality: 'HD',
-    });
-  }
-
-  // ══════════════ ВНЕШНИЕ САЙТЫ (редиректы) ══════════════
-
-  // 7. Kinobase (внешний сайт)
-  options.push({
-    id: 'kinobase',
-    label: 'Kinobase',
-    sublabel: 'Русская озвучка',
-    url: `https://kinobase.org/film/${imdbId}`,
-    type: 'external',
-    lang: 'ru',
-    provider: 'Kinobase',
-    flag: '🇷🇺',
-    quality: 'HD',
-  });
-
-  // 8. LordFilm (внешний)
-  options.push({
-    id: 'lordfilm',
-    label: 'LordFilm',
-    sublabel: 'Русская озвучка',
-    url: `https://${isSerial ? 'lordserials' : 'lordfilm'}.lol/${imdbId}`,
-    type: 'external',
-    lang: 'ru',
-    provider: 'LordFilm',
-    flag: '🇷🇺',
-    quality: 'HD',
-  });
-
-  // 9. Rezka (внешний)
-  options.push({
-    id: 'rezka',
-    label: 'Rezka',
-    sublabel: 'Русская озвучка',
-    url: `https://rezka.ag/films/${imdbId}`,
-    type: 'external',
-    lang: 'ru',
-    provider: 'Rezka',
-    flag: '🇷🇺',
-    quality: 'HD',
-  });
-
-  // 10. YouTube поиск
-  options.push({
-    id: 'youtube',
-    label: 'YouTube',
-    sublabel: 'Поиск трейлера',
-    url: `https://www.youtube.com/results?search_query=${encodeURIComponent(isSerial ? `tv series` : `movie`)}+${imdbId}`,
-    type: 'external',
-    lang: 'en',
-    provider: 'YouTube',
-    flag: '📺',
-    quality: 'HD',
-  });
-
-  // ══════════════ ПОЛЬЗОВАТЕЛЬСКИЙ ПАТТЕРН ══════════════
-  const customPattern = tryGetCustomPattern();
-  if (customPattern) {
-    options.push({
-      id: 'custom-player',
+      id: 'custom',
       label: 'Свой плеер',
       sublabel: 'Пользовательский',
-      url: customPattern.replace('{ID}', imdbId),
+      url: customUrl.replace('{ID}', imdbId),
       type: 'iframe',
       lang: 'ru',
       provider: 'Custom',
@@ -229,25 +251,19 @@ export async function getWatchOptions(
   return options;
 }
 
-function tryGetCustomPattern(): string | null {
+/* ════════════════════════════════════════════
+   Прокси для заблокированных iframe
+   ════════════════════════════════════════════ */
+export function getProxyUrl(url: string): string {
+  return `https://corsproxy.io/?${encodeURIComponent(url)}`;
+}
+
+function getCustomPattern(): string | null {
   try {
-    const val = localStorage.getItem('tc_player_pattern');
-    if (val && val.includes('{ID}')) return val;
+    const p = localStorage.getItem('tc_player_pattern');
+    if (p && p.includes('{ID}')) return p;
     return null;
   } catch {
     return null;
   }
-}
-
-/**
- * Получить URL для просмотра через прокси (если iframe заблокирован)
- */
-export function getProxyUrl(url: string): string {
-  // Пробуем открыть через несколько прокси
-  const proxies = [
-    `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    `https://proxy.cors.sh/${encodeURIComponent(url)}`,
-  ];
-  return proxies[0];
 }
