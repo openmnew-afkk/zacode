@@ -1,4 +1,4 @@
-/* ===== Все типы приложения ===== */
+/* ===== TeleCinema — Все типы приложения ===== */
 
 export interface Movie {
   id: string;

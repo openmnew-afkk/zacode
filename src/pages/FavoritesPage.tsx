@@ -1,41 +1,41 @@
 import React from 'react';
-import { Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../store';
-import { MovieCard } from '../components/MovieCard';
+import './FavoritesPage.css';
 
-export const FavoritesPage: React.FC = () => {
+const FavoritesPage: React.FC = () => {
+  const navigate = useNavigate();
   const { favorites } = useStore();
 
   return (
-    <div className="min-h-screen pb-20">
-      <header className="sticky top-0 z-50 glass-lg border-b border-white/10 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <Heart className="w-8 h-8 fill-red-500 text-red-500" />
-            Избранное
-          </h1>
-        </div>
-      </header>
+    <div className="fav-page page">
+      <div className="fav-header">
+        <h1 className="fav-header__title">❤️ Избранное</h1>
+        <p className="fav-header__sub">{favorites.length} {favorites.length === 1 ? 'фильм' : favorites.length < 5 ? 'фильма' : 'фильмов'}</p>
+      </div>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {favorites.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <Heart className="w-16 h-16 text-gray-600" />
-            <p className="text-xl text-gray-400">Избранное пусто</p>
-            <p className="text-gray-500 text-center max-w-md">
-              Добавляйте фильмы и сериалы в избранное, нажимая на иконку сердечка
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {favorites.map((movie) => (
-                <MovieCard key={movie.imdbID} movie={movie} compact />
-              ))}
+      {favorites.length === 0 ? (
+        <div className="fav-empty">
+          <span className="fav-empty__icon">💔</span>
+          <p className="fav-empty__title">Избранное пусто</p>
+          <p className="fav-empty__sub">Добавляйте фильмы сердечком</p>
+        </div>
+      ) : (
+        <div className="fav-grid">
+          {favorites.map((movie) => (
+            <div key={movie.imdbID} className="fav-card" onClick={() => navigate(`/movie/${movie.imdbID}`)}>
+              <div className="fav-card__poster">
+                <img src={movie.poster_path} alt={movie.title} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?'; }} />
+                {movie.imdb_rating > 0 && <span className="fav-card__rating">★ {movie.imdb_rating.toFixed(1)}</span>}
+              </div>
+              <p className="fav-card__title">{movie.title}</p>
+              {movie.release_date && <p className="fav-card__year">{movie.release_date.slice(0, 4)}</p>}
             </div>
-          </>
-        )}
-      </main>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
+
+export default FavoritesPage;

@@ -1,83 +1,101 @@
-import { create } from 'zustand';
-import type { Movie } from '../types';
+/* ===== TeleCinema — Единый store ===== */
 
-interface StoreState {
+import { create } from 'zustand';
+import type { Movie, WatchHistoryItem, AppTheme } from '../types';
+
+/* ── localStorage helpers ── */
+
+const load = <T>(key: string, fallback: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const save = (key: string, value: unknown) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // ignore
+  }
+};
+
+/* ── State Interface ── */
+
+interface AppState {
+  /* Избранное */
   favorites: Movie[];
-  history: Movie[];
   addFavorite: (movie: Movie) => void;
   removeFavorite: (id: string) => void;
   isFavorite: (id: string) => boolean;
+  clearFavorites: () => void;
+
+  /* История просмотров */
+  watchHistory: WatchHistoryItem[];
   addToHistory: (movie: Movie) => void;
   clearHistory: () => void;
+
+  /* Тема */
+  theme: AppTheme;
+  toggleTheme: () => void;
+  setTheme: (theme: AppTheme) => void;
 }
 
-const useLocalStorage = () => {
-  return {
-    getItem: (key: string) => {
-      try {
-        return localStorage.getItem(key);
-      } catch {
-        return null;
-      }
-    },
-    setItem: (key: string, value: string) => {
-      try {
-        localStorage.setItem(key, value);
-      } catch {
-        // ignore
-      }
-    },
-  };
-};
+export const useStore = create<AppState>((set, get) => ({
+  /* ═══ Избранное ═══ */
+  favorites: load<Movie[]>('tc_favorites', []),
 
-export const useStore = create<StoreState>((set, get) => {
-  const storage = useLocalStorage();
-  
-  const savedFavorites = storage.getItem('telecinema-favorites');
-  const savedHistory = storage.getItem('telecinema-history');
-  
-  const initialFavorites: Movie[] = savedFavorites ? JSON.parse(savedFavorites) : [];
-  const initialHistory: Movie[] = savedHistory ? JSON.parse(savedHistory) : [];
-  
-  return {
-    favorites: initialFavorites,
-    history: initialHistory,
-    
-    addFavorite: (movie: Movie) => {
-      set((state) => {
-        if (state.favorites.some((m) => m.imdbID === movie.imdbID)) {
-          return state;
-        }
-        const newFavorites = [...state.favorites, movie];
-        storage.setItem('telecinema-favorites', JSON.stringify(newFavorites));
-        return { favorites: newFavorites };
-      });
-    },
-    
-    removeFavorite: (id: string) => {
-      set((state) => {
-        const newFavorites = state.favorites.filter((m) => m.imdbID !== id);
-        storage.setItem('telecinema-favorites', JSON.stringify(newFavorites));
-        return { favorites: newFavorites };
-      });
-    },
-    
-    isFavorite: (id: string) => {
-      return get().favorites.some((m) => m.imdbID === id);
-    },
-    
-    addToHistory: (movie: Movie) => {
-      set((state) => {
-        const filtered = state.history.filter((m) => m.imdbID !== movie.imdbID);
-        const newHistory = [movie, ...filtered].slice(0, 50);
-        storage.setItem('telecinema-history', JSON.stringify(newHistory));
-        return { history: newHistory };
-      });
-    },
-    
-    clearHistory: () => {
-      storage.setItem('telecinema-history', '[]');
-      set({ history: [] });
-    },
-  };
-});
+  addFavorite: (movie: Movie) => {
+    const updated = [...get().favorites, movie];
+    save('tc_favorites', updated);
+    set({ favorites: updated });
+  },
+
+  removeFavorite: (id: string) => {
+    const updated = get().favorites.filter((m) => m.imdbID !== id);
+    save('tc_favorites', updated);
+    set({ favorites: updated });
+  },
+
+  isFavorite: (id: string) => {
+    return get().favorites.some((m) => m.imdbID === id);
+  },
+
+  clearFavorites: () => {
+    save('tc_favorites', []);
+    set({ favorites: [] });
+  },
+
+  /* ═══ История ═══ */
+  watchHistory: load<WatchHistoryItem[]>('tc_history', []),
+
+  addToHistory: (movie: Movie) => {
+    const filtered = get().watchHistory.filter((h) => h.movie.imdbID !== movie.imdbID);
+    const updated = [{ movie, watchedAt: Date.now() }, ...filtered].slice(0, 50);
+    save('tc_history', updated);
+    set({ watchHistory: updated });
+  },
+
+  clearHistory: () => {
+    save('tc_history', []);
+    set({ watchHistory: [] });
+  },
+
+  /* ═══ Тема ═══ */
+  theme: load<AppTheme>('tc_theme', 'dark'),
+
+  toggleTheme: () => {
+    const newTheme = get().theme === 'dark' ? 'light' : 'dark';
+    save('tc_theme', newTheme);
+    set({ theme: newTheme });
+    document.documentElement.setAttribute('data-theme', newTheme);
+  },
+
+  setTheme: (theme: AppTheme) => {
+    save('tc_theme', theme);
+    set({ theme });
+    document.documentElement.setAttribute('data-theme', theme);
+  },
+}));

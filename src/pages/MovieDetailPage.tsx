@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail } from '../api/omdb';
 import { getWatchOptions } from '../api/players';
-import type { WatchOption, MovieDetail } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
-import { useStore } from '../store/useStore';
+import { useStore } from '../store';
 import VideoPlayer from '../components/VideoPlayer';
+import type { WatchOption, MovieDetail } from '../types';
 import './MovieDetailPage.css';
 
 const MovieDetailPage: React.FC = () => {
@@ -23,25 +23,25 @@ const MovieDetailPage: React.FC = () => {
   const [activeSeason, setActiveSeason] = useState(1);
 
   const imdbId = id || '';
-  const favorite = movie ? isFavorite(movie.id) : false;
+  const favorite = movie ? isFavorite(movie.imdbID) : false;
 
-  // Загрузка деталей
   useEffect(() => {
-    if (!imdbId) return;
+    if (!imdbId) { setLoading(false); return; }
+    let cancelled = false;
     setLoading(true);
     setMovie(null);
     setError(null);
-    getMovieDetail(imdbId)
-      .then((data) => {
-        if (!data) { setError('Фильм не найден'); return; }
-        setMovie(data);
-        window.scrollTo(0, 0);
-      })
-      .catch(() => setError('Не удалось загрузить'))
-      .finally(() => setLoading(false));
+
+    getMovieDetail(imdbId).then((data) => {
+      if (cancelled) return;
+      if (!data) { setError('Фильм не найден'); return; }
+      setMovie(data);
+    }).catch(() => { if (!cancelled) setError('Не удалось загрузить'); })
+    .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
   }, [imdbId]);
 
-  // Загрузка источников воспроизведения
   useEffect(() => {
     if (!movie) return;
     const isSerial = movie.is_serial || (movie.seasons?.length || 0) > 0;
@@ -52,7 +52,6 @@ const MovieDetailPage: React.FC = () => {
     }
   }, [movie, imdbId, activeSeason]);
 
-  // Кнопка назад Telegram
   useEffect(() => {
     const cleanup = showBackButton?.(() => {
       if (showPlayer) setShowPlayer(false);
@@ -72,12 +71,11 @@ const MovieDetailPage: React.FC = () => {
     setHeartAnim(true);
     setTimeout(() => setHeartAnim(false), 400);
     if (movie) {
-      if (favorite) removeFavorite(movie.id);
+      if (favorite) removeFavorite(movie.imdbID);
       else addFavorite(movie);
     }
   };
 
-  // ── Загрузка ──
   if (loading) {
     return (
       <div className="dp page">
@@ -105,28 +103,31 @@ const MovieDetailPage: React.FC = () => {
   const seasons = movie.seasons || [];
   const isSerial = movie.is_serial || seasons.length > 0;
   const poster = movie.poster_path || 'https://via.placeholder.com/300x450?text=No+Poster';
+  const backdrop = movie.backdrop_path || poster;
 
   return (
     <div className="dp page">
       {/* Фон */}
       <div className="dp-bg">
-        <img src={poster} alt="" className="dp-bg__img" />
+        <img src={backdrop} alt="" className="dp-bg__img" loading="lazy" />
         <div className="dp-bg__grad" />
       </div>
 
-      {/* Назад */}
+      {/* Кнопка назад */}
       <button className="dp-back" onClick={() => navigate(-1)} aria-label="Назад">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M13 4l-6 6 6 6" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
       </button>
 
-      {/* Постер + инфо */}
+      {/* Hero секция */}
       <div className="dp-hero">
-        <img className="dp-hero__poster" src={poster} alt={movie.title} />
-
+        <img className="dp-hero__poster" src={poster} alt={movie.title} loading="lazy" />
         <div className="dp-hero__info">
           <h1 className="dp-hero__title">{movie.title}</h1>
+          {movie.original_title && movie.original_title !== movie.title && (
+            <p className="dp-hero__orig">{movie.original_title}</p>
+          )}
 
           {movie.imdb_rating > 0 && (
             <div className="dp-rating">
@@ -142,15 +143,17 @@ const MovieDetailPage: React.FC = () => {
             {isSerial && <span className="dp-meta__serial">Сериал</span>}
           </div>
 
-          <div className="dp-genres">
-            {movie.genres?.slice(0, 3).map((g, i) => (
-              <span key={i} className="dp-genre">{g}</span>
-            ))}
-          </div>
+          {movie.genres && movie.genres.length > 0 && (
+            <div className="dp-genres">
+              {movie.genres.slice(0, 3).map((g, i) => (
+                <span key={i} className="dp-genre">{g}</span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Кнопки */}
+      {/* Кнопки действий */}
       <div className="dp-actions">
         <button className="dp-watch" onClick={handleWatch}>
           <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -174,7 +177,7 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Сезоны (если сериал) */}
+      {/* Сезоны */}
       {isSerial && seasons.length > 0 && (
         <div className="dp-section">
           <h3 className="dp-section__title">Сезоны</h3>
@@ -192,7 +195,30 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Подробности */}
+      {/* Эпизоды (если сериал) */}
+      {isSerial && (
+        <div className="dp-section">
+          <h3 className="dp-section__title">Сезон {activeSeason} — Эпизоды</h3>
+          <div className="dp-episodes">
+            {Array.from({ length: 13 }).map((_, i) => (
+              <button
+                key={i}
+                className="dp-episode"
+                onClick={() => {
+                  setShowPlayer(true);
+                  getWatchOptions(imdbId, activeSeason, i + 1).then(setPlayerOptions);
+                }}
+              >
+                <span className="dp-episode__num">{i + 1}</span>
+                <span className="dp-episode__title">Эпизод {i + 1}</span>
+                <span className="dp-episode__play">▶</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Детали */}
       <div className="dp-section dp-details">
         {movie.countries?.length > 0 && (
           <div className="dp-detail-row">

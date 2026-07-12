@@ -1,71 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
-import { useStore } from '../store/useStore';
+import { useStore } from '../store';
+import type { Movie } from '../types';
 import './ProfilePage.css';
-
-/* ── Хелперы (заменяют удалённые функции catalog.ts) ── */
-const getPlayerPattern = () => localStorage.getItem('tc_player_pattern') || '';
-const setPlayerPattern = (v: string) => localStorage.setItem('tc_player_pattern', v);
-const getTmdbKey = () => localStorage.getItem('tc_tmdb_key') || '';
-const setTmdbKey = (v: string) => localStorage.setItem('tc_tmdb_key', v);
-const checkTmdb = async () => {
-  const key = getTmdbKey();
-  if (!key) return 'idle';
-  try {
-    const r = await fetch(`https://api.themoviedb.org/3/configuration?api_key=${key}`);
-    return r.ok ? 'ok' : 'err';
-  } catch { return 'err'; }
-};
-const posterUrl = (p: string, imdbId?: string) => {
-  if (p && p.startsWith('http')) return p;
-  if (imdbId?.startsWith('tt')) return `https://img.omdbapi.com/?i=${imdbId}&h=400&apikey=4a3b711b`;
-  return 'https://via.placeholder.com/80x120?text=?';
-};
-
-/* ===== Страница профиля ===== */
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp } = useTelegram();
-  const { favorites, watchHistory, theme, toggleTheme, clearHistory } = useStore();
+  const { favorites, watchHistory, clearHistory } = useStore();
 
-  // Плеер
-  const [showPlayer, setShowPlayer] = useState(false);
-  const [patternInput, setPatternInput] = useState(getPlayerPattern());
-  const [patternMsg, setPatternMsg] = useState('');
+  const showCloseModal = false;
 
-  // TMDB ключ
-  const [showTmdb, setShowTmdb] = useState(false);
-  const [tmdbInput, setTmdbInput] = useState(getTmdbKey());
-  const [tmdbStatus, setTmdbStatus] = useState<'idle' | 'checking' | 'ok' | 'err'>('idle');
-  const [tmdbMsg, setTmdbMsg] = useState('');
-
-  // Модалка закрытия
-  const [showCloseModal, setShowCloseModal] = useState(false);
-
-  const displayName = user
-    ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`
-    : 'Гость';
+  const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Гость';
   const username = user?.username ? `@${user.username}` : '';
-
-  const handleSavePattern = () => {
-    setPlayerPattern(patternInput.trim());
-    setPatternMsg('✓ Паттерн сохранён');
-    setTimeout(() => setPatternMsg(''), 3000);
-  };
 
   return (
     <div className="profile-page page">
-      {/* Профиль */}
+      {/* Шапка */}
       <div className="profile-header">
         <div className="profile-avatar">
           {user?.photo_url ? (
-            <img src={user.photo_url} alt="Аватар" className="profile-avatar__img" />
+            <img src={user.photo_url} alt="" className="profile-avatar__img" />
           ) : (
-            <div className="profile-avatar__placeholder">
-              {displayName[0]?.toUpperCase() || '?'}
-            </div>
+            <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
           )}
         </div>
         <h1 className="profile-name">{displayName}</h1>
@@ -74,13 +32,28 @@ const ProfilePage: React.FC = () => {
 
       {/* Статистика */}
       <div className="profile-stats">
-        <div className="profile-stat-card">
-          <span className="profile-stat-card__value">{watchHistory.length}</span>
-          <span className="profile-stat-card__label">Просмотрено</span>
+        <div className="profile-stat">
+          <span className="profile-stat__value">{watchHistory.length}</span>
+          <span className="profile-stat__label">Просмотрено</span>
         </div>
-        <div className="profile-stat-card">
-          <span className="profile-stat-card__value">{favorites.length}</span>
-          <span className="profile-stat-card__label">В избранном</span>
+        <div className="profile-stat">
+          <span className="profile-stat__value">{favorites.length}</span>
+          <span className="profile-stat__label">В избранном</span>
+        </div>
+      </div>
+
+      {/* Настройки */}
+      <div className="profile-section">
+        <h2 className="profile-section__title">Настройки</h2>
+
+        <div className="profile-setting" onClick={() => navigate('/favorites')}>
+          <span className="profile-setting__label">❤️ Избранное</span>
+          <span className="profile-setting__value">{favorites.length}</span>
+        </div>
+
+        <div className="profile-setting" onClick={() => navigate('/search')}>
+          <span className="profile-setting__label">🔍 Поиск</span>
+          <span className="profile-setting__value">→</span>
         </div>
       </div>
 
@@ -89,168 +62,35 @@ const ProfilePage: React.FC = () => {
         <div className="profile-section__header">
           <h2 className="profile-section__title">История просмотров</h2>
           {watchHistory.length > 0 && (
-            <button className="profile-section__clear" onClick={clearHistory}>
-              Очистить
-            </button>
+            <button className="profile-clear" onClick={clearHistory}>Очистить</button>
           )}
         </div>
         {watchHistory.length > 0 ? (
           <div className="profile-history">
             {watchHistory.map((item) => (
-              <div
-                key={item.movie.id}
-                className="history-item"
-                onClick={() => navigate(`/movie/${item.movie.id}`)}
-              >
+              <div key={item.movie.imdbID} className="history-item" onClick={() => navigate(`/movie/${item.movie.imdbID}`)}>
                 <img
                   className="history-item__poster"
-                  src={posterUrl(item.movie.poster_path, item.movie.imdbID)}
+                  src={item.movie.poster_path || 'https://via.placeholder.com/80x120?text=?'}
                   alt={item.movie.title}
                 />
                 <div className="history-item__info">
                   <p className="history-item__title">{item.movie.title}</p>
-                  <p className="history-item__date">
-                    {new Date(item.watchedAt).toLocaleDateString('ru-RU')}
-                  </p>
+                  <p className="history-item__date">{new Date(item.watchedAt).toLocaleDateString('ru-RU')}</p>
                 </div>
                 <span className="history-item__arrow">›</span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="profile-section__empty">Вы ещё ничего не смотрели</p>
+          <p className="profile-empty">Вы ещё ничего не смотрели</p>
         )}
       </div>
-
-      {/* Настройки */}
-      <div className="profile-section">
-        <h2 className="profile-section__title">Настройки</h2>
-
-        <div className="profile-setting" onClick={toggleTheme}>
-          <span className="profile-setting__label">
-            {theme === 'dark' ? '🌙 Тема' : '☀️ Тема'}
-          </span>
-          <span className="profile-setting__value">
-            {theme === 'dark' ? 'Тёмная' : 'Светлая'}
-          </span>
-        </div>
-
-        {/* Плеер */}
-        <div className="profile-setting" onClick={() => setShowPlayer((v) => !v)}>
-          <span className="profile-setting__label">🎬 Плеер</span>
-          <span className="profile-setting__value">
-            {showPlayer ? '▲' : patternInput ? 'Свой' : 'По умолч.'}
-          </span>
-        </div>
-
-        {showPlayer && (
-          <div className="source-card">
-            <div className="source-card__head">
-              <span className="source-card__name">📺 URL плеера</span>
-              <span className={`source-card__badge ${patternInput ? 'source-card__badge--ok' : 'source-card__badge--idle'}`}>
-                {patternInput ? 'Задан' : 'Kinobase'}
-              </span>
-            </div>
-            <div className="source-card__field">
-              <input
-                className="source-card__input"
-                type="text"
-                placeholder="https://kinobase.org/film/{ID}"
-                value={patternInput}
-                onChange={(e) => setPatternInput(e.target.value)}
-                autoComplete="off"
-                spellCheck={false}
-              />
-            </div>
-            <div className="source-card__field">
-              <button className="source-card__btn" onClick={handleSavePattern}>Сохранить</button>
-              <button className="source-card__btn source-card__btn--ghost" onClick={() => {
-                setPatternInput('');
-                setPlayerPattern('');
-                setPatternMsg('✓ Сброшен на Kinobase');
-              }}>Сбросить</button>
-            </div>
-            {patternMsg && <p className="source-card__status">{patternMsg}</p>}
-            <p className="source-card__hint">
-              <code>{'{ID}'}</code> — IMDb ID фильма (например tt0133093).
-              По умолчанию плеер ищет на <strong>kinobase.org</strong>.
-              YouTube всегда доступен как запасной.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* ===== TMDB ===== */}
-      <div className="profile-setting" onClick={() => setShowTmdb((v) => !v)}>
-        <span className="profile-setting__label">🎬 TMDB API</span>
-        <span className="profile-setting__value">
-          {showTmdb ? '▲' : getTmdbKey() ? 'Задан' : 'Не задан'}
-        </span>
-      </div>
-
-      {showTmdb && (
-        <div className="source-card">
-          <div className="source-card__head">
-            <span className="source-card__name">🔑 Ключ TMDB</span>
-            <span className={`source-card__badge source-card__badge--${tmdbStatus === 'ok' ? 'ok' : tmdbStatus === 'err' ? 'err' : getTmdbKey() ? 'ok' : 'idle'}`}>
-              {tmdbStatus === 'ok' ? 'Онлайн' : tmdbStatus === 'err' ? 'Ошибка' : getTmdbKey() ? 'Задан' : 'Нет ключа'}
-            </span>
-          </div>
-          <div className="source-card__field">
-            <input
-              className="source-card__input"
-              type="text"
-              placeholder="Ваш TMDB API ключ (v3)"
-              value={tmdbInput}
-              onChange={(e) => setTmdbInput(e.target.value)}
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </div>
-          <div className="source-card__field">
-            <button className="source-card__btn" onClick={() => {
-              setTmdbKey(tmdbInput.trim());
-              setTmdbMsg('✓ Ключ сохранён');
-              setTmdbStatus('idle');
-              setTimeout(() => setTmdbMsg(''), 3000);
-            }}>Сохранить</button>
-            <button className="source-card__btn source-card__btn--ghost" onClick={async () => {
-              setTmdbStatus('checking');
-              const res = await checkTmdb();
-              setTmdbStatus(res === 'ok' ? 'ok' : 'err');
-              setTmdbMsg(res === 'ok' ? 'Ключ работает ✓' : 'Ключ не работает ✗');
-            }}>{tmdbStatus === 'checking' ? '…' : 'Проверить'}</button>
-          </div>
-          {tmdbMsg && <p className="source-card__status">{tmdbMsg}</p>}
-          <p className="source-card__hint">
-            TMDB = русские названия, описания, постеры, рейтинги.
-            Ключ бесплатный — <strong>themoviedb.org</strong> → Settings → API.
-            Без ключа используется OMDb (английский).
-          </p>
-        </div>
-      )}
 
       {/* Кнопка закрытия */}
       <div className="profile-close-wrap">
-        <button className="profile-close" onClick={() => setShowCloseModal(true)}>
-          Закрыть приложение
-        </button>
+        <button className="profile-close" onClick={closeApp}>Закрыть приложение</button>
       </div>
-
-      {/* Модалка */}
-      {showCloseModal && (
-        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowCloseModal(false); }}>
-          <div className="modal-box">
-            <div className="modal-box__icon">🚪</div>
-            <h3 className="modal-box__title">Закрыть приложение?</h3>
-            <p className="modal-box__text">История и избранное сохранятся.</p>
-            <div className="modal-box__actions">
-              <button className="modal-box__btn modal-box__btn--cancel" onClick={() => setShowCloseModal(false)}>Остаться</button>
-              <button className="modal-box__btn modal-box__btn--danger" onClick={closeApp}>Закрыть</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

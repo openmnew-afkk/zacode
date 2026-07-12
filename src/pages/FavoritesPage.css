@@ -1,125 +1,101 @@
-/* ===== ULTRA PREMIUM — Избранное ===== */
+/* ===== TeleCinema — Favorites ===== */
 
-.favorites-page {
-  padding: 0 0 110px;
+.fav-page {
+  padding: 20px 20px 100px;
   min-height: 100vh;
 }
 
-/* ── Header ── */
-.favorites-header {
-  padding: max(env(safe-area-inset-top, 0px), 52px) 20px 16px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+.fav-header {
+  margin-bottom: 24px;
 }
 
-.favorites-header__left {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.favorites-header__title {
+.fav-header__title {
   font-family: 'Outfit', 'Inter', sans-serif;
   font-size: 28px;
   font-weight: 900;
-  letter-spacing: -0.03em;
-  margin: 0;
-  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.65) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #fff;
+  margin: 0 0 4px;
 }
 
-.favorites-header__count {
-  font-size: 12px;
-  color: var(--text-3);
-  font-weight: 500;
+.fav-header__sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
 }
 
-.favorites-clear-btn {
-  padding: 7px 14px;
-  border-radius: var(--r-full);
-  border: 1px solid rgba(239,68,68,0.3);
-  background: rgba(239,68,68,0.1);
-  color: rgba(239,68,68,0.85);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-  margin-bottom: 2px;
-}
-
-.favorites-clear-btn:active {
-  background: rgba(239,68,68,0.2);
-  transform: scale(0.95);
-}
-
-/* ── Grid ── */
-.favorites-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  padding: 4px 20px;
-}
-
-/* ── Empty state ── */
-.favorites-empty {
+.fav-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 70vh;
-  padding: 32px;
+  min-height: 50vh;
+  gap: 12px;
   text-align: center;
-  position: relative;
+}
+
+.fav-empty__icon { font-size: 48px; }
+.fav-empty__title { font-size: 18px; font-weight: 700; color: #fff; }
+.fav-empty__sub { font-size: 13px; color: rgba(255,255,255,0.35); }
+
+.fav-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
 }
 
-.favorites-empty__aura {
+@media (min-width: 480px) { .fav-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 768px) { .fav-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1024px) { .fav-grid { grid-template-columns: repeat(5, 1fr); } }
+
+.fav-card {
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+
+.fav-card:active { transform: scale(0.96); }
+
+.fav-card__poster {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+.fav-card__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.fav-card__rating {
   position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(244,114,182,0.12) 0%, transparent 70%);
-  animation: aura-pulse 3s ease-in-out infinite;
-  pointer-events: none;
+  top: 6px;
+  left: 6px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fbbf24;
 }
 
-@keyframes aura-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.2); opacity: 1; }
+.fav-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  padding: 8px 2px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
 }
 
-.favorites-empty__icon {
-  font-size: 56px;
-  position: relative;
-  z-index: 1;
-  animation: heart-float 3s ease-in-out infinite;
-}
-
-@keyframes heart-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.favorites-empty__title {
-  font-family: 'Outfit', 'Inter', sans-serif;
-  font-size: 22px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.02em;
-  position: relative;
-  z-index: 1;
-  margin: 0;
-}
-
-.favorites-empty__sub {
-  font-size: 14px;
-  color: var(--text-3);
-  line-height: 1.65;
-  max-width: 240px;
-  position: relative;
-  z-index: 1;
+.fav-card__year {
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
+  padding: 0 2px;
+  margin-top: 2px;
 }
