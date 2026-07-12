@@ -288,6 +288,7 @@ const MovieDetailPage: React.FC = () => {
       {showPlayer && (
         <VideoPlayer
           options={playerOptions}
+          loadingOptions={sourceLoading}
           onClose={() => setShowPlayer(false)}
           title={movie.title}
           poster={poster}
