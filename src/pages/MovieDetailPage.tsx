@@ -24,17 +24,19 @@ const MovieDetailPage: React.FC = () => {
   const [activeEpisode, setActiveEpisode] = useState(1);
   const [sourceLoading, setSourceLoading] = useState(false);
 
-  const tmdbId = id || '';
+  const compositeId = id || '';
+  // Извлекаем чистый числовой TMDB ID для плееров
+  const tmdbId = compositeId.replace(/^(tv|movie)-/, '');
   const favorite = movie ? isFavorite(movie.id) : false;
 
   /* ── Загрузка деталей фильма ── */
   useEffect(() => {
-    if (!tmdbId) return;
+    if (!compositeId) return;
     setLoading(true);
     setMovie(null);
     setError(null);
     setPlayerOptions([]);
-    getMovieDetail(tmdbId)
+    getMovieDetail(compositeId)
       .then((data) => {
         if (!data) { setError('Фильм не найден'); return; }
         setMovie(data);
@@ -44,7 +46,7 @@ const MovieDetailPage: React.FC = () => {
       })
       .catch(() => setError('Не удалось загрузить'))
       .finally(() => setLoading(false));
-  }, [tmdbId]);
+  }, [compositeId]);
 
   /* ── Загрузка источников ── */
   useEffect(() => {

@@ -56,9 +56,10 @@ function toMovie(item: any, mediaType?: string): Movie {
   const origTitle = isSerial ? (item.original_name || '') : (item.original_title || '');
   const date = isSerial ? (item.first_air_date || '') : (item.release_date || '');
 
+  const typePrefix = isSerial ? 'tv' : 'movie';
   return {
-    id: String(item.id),          // TMDB numeric ID (реальный)
-    imdbID: item.imdb_id || item.external_ids?.imdb_id || '', // реальный IMDB ID если есть
+    id: `${typePrefix}-${item.id}`,   // tv-1396 или movie-278
+    imdbID: item.imdb_id || item.external_ids?.imdb_id || '',
     title,
     original_title: origTitle,
     overview: item.overview || '',
@@ -167,17 +168,31 @@ export async function searchMovies(query: string, page = 1, type?: 'movie' | 'se
   }
 }
 
-export async function getMovieDetail(imdbIdOrId: string): Promise<MovieDetail | null> {
+export async function getMovieDetail(compositeId: string): Promise<MovieDetail | null> {
   try {
-    const id = imdbIdOrId.replace('tt', '');
-    // Пробуем movie
+    // ID формат: "tv-1396" или "movie-278" или просто "278"
+    let type: 'movie' | 'tv' = 'movie';
+    let numId = compositeId;
+
+    if (compositeId.startsWith('tv-')) {
+      type = 'tv';
+      numId = compositeId.slice(3);
+    } else if (compositeId.startsWith('movie-')) {
+      type = 'movie';
+      numId = compositeId.slice(6);
+    } else {
+      numId = compositeId.replace('tt', '');
+    }
+
+    const isSerial = type === 'tv';
+
     try {
-      const data = await getDetail(id, false);
-      return toMovieDetail(data, false);
+      const data = await getDetail(numId, isSerial);
+      return toMovieDetail(data, isSerial);
     } catch {
-      // Пробуем tv
-      const data = await getDetail(id, true);
-      return toMovieDetail(data, true);
+      // Если не нашли — пробуем другой тип
+      const data = await getDetail(numId, !isSerial);
+      return toMovieDetail(data, !isSerial);
     }
   } catch (error) {
     console.error('Detail error:', error);
