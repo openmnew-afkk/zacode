@@ -18,9 +18,9 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           clearInterval(interval);
           return 100;
         }
-        return prev + 2;
+        return prev + 5;
       });
-    }, 60);
+    }, 30);
 
     // Таймер закрытия
     const timer = setTimeout(() => {
@@ -28,8 +28,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       setTimeout(() => {
         setVisible(false);
         onDone?.();
-      }, 800);
-    }, 3500);
+      }, 500);
+    }, 1500);
 
     return () => {
       clearTimeout(timer);
