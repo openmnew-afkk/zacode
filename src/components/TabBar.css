@@ -1,82 +1,140 @@
-/* ===== TeleCinema — PREMIUM TAB BAR ===== */
+/* ===== TabBar — Glassmorphic Premium ===== */
 
 .tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 8000;
-  padding-bottom: env(safe-area-inset-bottom, 8px);
-  background: rgba(8,8,16,0.9);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-top: 1px solid rgba(255,255,255,0.06);
+  z-index: 100;
+  padding: 0 8px max(env(safe-area-inset-bottom, 0px), 6px);
 }
 
 .tab-bar__inner {
   display: flex;
-  align-items: stretch;
-  height: 56px;
-  max-width: 600px;
-  margin: 0 auto;
+  align-items: center;
+  justify-content: space-around;
+  height: 60px;
+  border-radius: 22px;
+  background: rgba(10, 10, 22, 0.75);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 -4px 30px rgba(0, 0, 0, 0.5),
+    0 0 0 0.5px rgba(255, 255, 255, 0.04) inset,
+    0 1px 0 rgba(255, 255, 255, 0.03) inset;
+  margin-bottom: 4px;
 }
 
 .tab-bar__item {
-  flex: 1;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding: 6px 0;
-  border: none;
-  background: none;
-  cursor: pointer;
+  padding: 6px 16px;
+  border-radius: 16px;
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   -webkit-tap-highlight-color: transparent;
-  position: relative;
-  color: rgba(255,255,255,0.35);
-  transition: color 0.2s ease;
+  min-width: 60px;
 }
 
+.tab-bar__item:active {
+  transform: scale(0.88);
+}
+
+/* ── Active state ── */
 .tab-bar__item--active {
-  color: #8b5cf6;
+  color: #c4b5fd;
 }
 
+.tab-bar__item--active::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at center bottom,
+    rgba(139, 92, 246, 0.18) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* ── Glow dot under active icon ── */
+.tab-bar__item--active::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  box-shadow: 0 0 8px 2px rgba(139, 92, 246, 0.6);
+  animation: tab-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tab-glow-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px 2px rgba(139, 92, 246, 0.6); }
+  50%      { opacity: 0.6; box-shadow: 0 0 4px 1px rgba(139, 92, 246, 0.3); }
+}
+
+/* ── Icon ── */
 .tab-bar__icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+  width: 26px;
+  height: 26px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .tab-bar__item--active .tab-bar__icon {
-  transform: scale(1.15);
+  transform: translateY(-1px) scale(1.1);
+  filter: drop-shadow(0 0 6px rgba(139, 92, 246, 0.5));
 }
 
+/* ── Label ── */
 .tab-bar__label {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 9.5px;
+  font-weight: 700;
   letter-spacing: 0.02em;
-  line-height: 1;
+  text-transform: uppercase;
+  transition: all 0.2s;
 }
 
+.tab-bar__item--active .tab-bar__label {
+  background: linear-gradient(135deg, #a78bfa, #38bdf8);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Badge ── */
 .tab-bar__badge {
   position: absolute;
-  top: 4px;
-  right: 50%;
-  transform: translateX(calc(50% + 10px));
+  top: 2px;
+  right: 8px;
   min-width: 16px;
   height: 16px;
-  padding: 0 5px;
+  padding: 0 4px;
   border-radius: 8px;
-  background: #f472b6;
+  background: linear-gradient(135deg, #f472b6, #ec4899);
   color: #fff;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 9px;
+  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(244,114,182,0.4);
+  box-shadow: 0 2px 8px rgba(244, 114, 182, 0.5);
+  animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes badge-pop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
 }
