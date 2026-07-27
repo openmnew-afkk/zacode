@@ -40,7 +40,6 @@ html {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
   overscroll-behavior: none;
-  overflow: hidden;
 }
 
 body {
