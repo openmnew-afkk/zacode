@@ -54,13 +54,13 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   removeFavorite: (id: string) => {
-    const updated = get().favorites.filter((m) => m.imdbID !== id);
+    const updated = get().favorites.filter((m) => m.id !== id);
     save('tc_favorites', updated);
     set({ favorites: updated });
   },
 
   isFavorite: (id: string) => {
-    return get().favorites.some((m) => m.imdbID === id);
+    return get().favorites.some((m) => m.id === id);
   },
 
   clearFavorites: () => {
@@ -72,7 +72,7 @@ export const useStore = create<AppState>((set, get) => ({
   watchHistory: load<WatchHistoryItem[]>('tc_history', []),
 
   addToHistory: (movie: Movie) => {
-    const filtered = get().watchHistory.filter((h) => h.movie.imdbID !== movie.imdbID);
+    const filtered = get().watchHistory.filter((h) => h.movie.id !== movie.id);
     const updated = [{ movie, watchedAt: Date.now() }, ...filtered].slice(0, 50);
     save('tc_history', updated);
     set({ watchHistory: updated });

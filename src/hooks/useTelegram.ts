@@ -87,6 +87,10 @@ export const useTelegram = () => {
       if (typeof tg.disableVerticalSwipes === 'function') {
         try { tg.disableVerticalSwipes(); } catch {}
       }
+      // Подтверждение закрытия
+      if (typeof (tg as any).enableClosingConfirmation === 'function') {
+        try { (tg as any).enableClosingConfirmation(); } catch {}
+      }
       // Цвет хедера под фон приложения
       if (typeof tg.setHeaderColor === 'function') {
         try { tg.setHeaderColor('#08080f'); } catch {}

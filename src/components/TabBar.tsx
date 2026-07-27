@@ -50,6 +50,19 @@ const tabs: TabDef[] = [
     ),
   },
   {
+    path: '/premium',
+    label: 'Premium',
+    icon: (active) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        {active ? (
+          <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7.4L12 16.8 5.7 21.4l2.3-7.4-6-4.6h7.6z" fill="currentColor"/>
+        ) : (
+          <path d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7.4L12 16.8 5.7 21.4l2.3-7.4-6-4.6h7.6z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+        )}
+      </svg>
+    ),
+  },
+  {
     path: '/profile',
     label: 'Профиль',
     icon: (active) => (
@@ -74,6 +87,7 @@ const TabBar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  // Скрываем TabBar на странице фильма
   if (location.pathname.startsWith('/movie/')) return null;
 
   return (
@@ -84,7 +98,7 @@ const TabBar: React.FC = () => {
           return (
             <button
               key={tab.path}
-              className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}`}
+              className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}${tab.path === '/premium' ? ' tab-bar__item--premium' : ''}`}
               onClick={() => navigate(tab.path)}
               aria-label={tab.label}
             >

@@ -39,6 +39,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
+  overscroll-behavior: none;
+  overflow: hidden;
 }
 
 body {
@@ -47,7 +49,10 @@ body {
   color: var(--text);
   min-height: 100%;
   overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  overflow-y: auto;
+  height: 100%;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {

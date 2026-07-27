@@ -5,6 +5,7 @@ import MovieDetailPage from './pages/MovieDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
+import PremiumPage from './pages/PremiumPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 
@@ -16,14 +17,12 @@ function App() {
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
-    document.documentElement.style.setProperty('--sat', 'env(safe-area-inset-top, 44px)');
-    document.documentElement.style.setProperty('--sab', 'env(safe-area-inset-bottom, 0px)');
   }, []);
 
   const handleSplashDone = () => setShowSplash(false);
 
   return (
-    <div className="app-root" style={{ paddingTop: 'var(--sat)' }}>
+    <div className="app-root">
       {showSplash && <SplashPage onDone={handleSplashDone} />}
 
       <Routes location={location}>
@@ -31,6 +30,7 @@ function App() {
         <Route path="/movie/:id" element={<MovieDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/premium" element={<PremiumPage />} />
         <Route path="/profile" element={<ProfilePage />} />
       </Routes>
 

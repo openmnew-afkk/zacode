@@ -138,3 +138,21 @@
   from { transform: scale(0); }
   to   { transform: scale(1); }
 }
+
+/* ── Premium tab golden ── */
+.tab-bar__item--premium.tab-bar__item--active {
+  color: #fbbf24;
+}
+.tab-bar__item--premium.tab-bar__item--active::after {
+  background: #f59e0b;
+  box-shadow: 0 0 8px 2px rgba(245,158,11,0.6);
+}
+.tab-bar__item--premium.tab-bar__item--active .tab-bar__label {
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.tab-bar__item--premium.tab-bar__item--active .tab-bar__icon {
+  filter: drop-shadow(0 0 6px rgba(245,158,11,0.5));
+}
