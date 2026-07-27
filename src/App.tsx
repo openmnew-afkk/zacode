@@ -8,12 +8,14 @@ import SearchPage from './pages/SearchPage';
 import PremiumPage from './pages/PremiumPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
+import { useTelegram } from './hooks/useTelegram';
 
 /* ===== TeleCinema — App ===== */
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
+  const { tg } = useTelegram();
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -22,7 +24,7 @@ function App() {
   const handleSplashDone = () => setShowSplash(false);
 
   return (
-    <div className="app-root">
+    <div className="app-root" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       {showSplash && <SplashPage onDone={handleSplashDone} />}
 
       <Routes location={location}>

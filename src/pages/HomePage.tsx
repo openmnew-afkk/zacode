@@ -174,7 +174,7 @@ const HomePage: React.FC = () => {
 
     const load = async () => {
       try {
-        const [tr, tm, ts, top_m, top_s, np] = await Promise.all([
+        const results = await Promise.allSettled([
           getAllTrending(),
           getTrendingMovies(),
           getTrendingSeries(),
@@ -183,12 +183,15 @@ const HomePage: React.FC = () => {
           getNowPlaying(),
         ]);
         if (!alive) return;
-        setTrending(tr);
-        setTrendMovies(tm);
-        setTrendSeries(ts);
-        setTopMovies(top_m);
-        setTopSeries(top_s);
-        setNowPlaying(np);
+
+        const get = (i: number) => results[i].status === 'fulfilled' ? (results[i] as any).value : [];
+
+        setTrending(get(0));
+        setTrendMovies(get(1));
+        setTrendSeries(get(2));
+        setTopMovies(get(3));
+        setTopSeries(get(4));
+        setNowPlaying(get(5));
       } catch (e) {
         console.error('Home load error:', e);
       } finally {
