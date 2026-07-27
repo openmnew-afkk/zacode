@@ -16,55 +16,38 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onClose,
   title,
 }) => {
-  const allOpts = options;
-  const iframeOpts = allOpts.filter(o => o.type === 'iframe');
-  const linkOpts = allOpts.filter(o => o.type === 'external');
-
+  const iframeOpts = options.filter(o => o.type === 'iframe');
   const [activeIdx, setActiveIdx] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showSources, setShowSources] = useState(false);
-  const [iframeError, setIframeError] = useState(false);
 
   const active = iframeOpts[activeIdx] || null;
 
   const switchTo = (idx: number) => {
     setActiveIdx(idx);
     setLoaded(false);
-    setIframeError(false);
     setShowSources(false);
   };
 
-  // Автоматически пробуем следующий если не загрузился за 12с
+  // Автопропуск через 6 сек если не загрузился
   useEffect(() => {
-    if (!active) return;
-    setIframeError(false);
-    const timeout = setTimeout(() => {
+    if (!active || loaded) return;
+    const t = setTimeout(() => {
       if (!loaded && activeIdx < iframeOpts.length - 1) {
-        setActiveIdx(prev => prev + 1);
-        setLoaded(false);
+        switchTo(activeIdx + 1);
       }
-    }, 15000);
-    return () => clearTimeout(timeout);
-  }, [activeIdx, active?.url]);
+    }, 6000);
+    return () => clearTimeout(t);
+  }, [activeIdx, loaded, active?.url]);
 
-  // Блокируем скролл body
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  const openLink = (url: string) => {
-    // Используем Telegram openLink если доступен
-    if (window.Telegram?.WebApp?.openLink) {
-      window.Telegram.WebApp.openLink(url);
-    } else {
-      window.open(url, '_blank', 'noopener');
-    }
-  };
-
   return (
     <div className="vp">
-      {/* ── Шапка ── */}
+      {/* ── Шапка с большим отступом от Telegram ── */}
       <div className="vp-bar">
         <button className="vp-bar__close" onClick={onClose}>✕</button>
         <span className="vp-bar__title">{title || 'Плеер'}</span>
@@ -79,55 +62,32 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         </button>
       </div>
 
-      {/* ── Dropdown источников ── */}
+      {/* ── Dropdown ── */}
       {showSources && (
-        <div className="vp-dropdown" onClick={() => setShowSources(false)}>
-          <div className="vp-dropdown__scroll" onClick={e => e.stopPropagation()}>
-            {/* Iframe источники */}
-            {iframeOpts.length > 0 && (
-              <div className="vp-dropdown__group">
-                <span className="vp-dropdown__group-title">📺 Плееры</span>
-              </div>
-            )}
-            {iframeOpts.map((opt, i) => (
-              <button
-                key={opt.id}
-                className={`vp-dropdown__item ${i === activeIdx ? 'active' : ''}`}
-                onClick={() => switchTo(i)}
-              >
-                <span className="vp-dropdown__flag">{opt.flag}</span>
-                <div className="vp-dropdown__info">
-                  <span className="vp-dropdown__name">{opt.label}</span>
-                  <span className="vp-dropdown__sub">{opt.sublabel}</span>
-                </div>
-                {i === activeIdx && <span className="vp-dropdown__check">✓</span>}
-              </button>
-            ))}
-
-            {/* Link источники (Rutube и т.д.) */}
-            {linkOpts.length > 0 && (
-              <>
-                <div className="vp-dropdown__group">
-                  <span className="vp-dropdown__group-title">🇷🇺 Русские сервисы</span>
-                </div>
-                {linkOpts.map((opt) => (
-                  <button
-                    key={opt.id}
-                    className="vp-dropdown__item vp-dropdown__item--link"
-                    onClick={() => openLink(opt.url)}
-                  >
-                    <span className="vp-dropdown__flag">{opt.flag}</span>
-                    <div className="vp-dropdown__info">
-                      <span className="vp-dropdown__name">{opt.label}</span>
-                      <span className="vp-dropdown__sub">{opt.sublabel}</span>
-                    </div>
-                    <span className="vp-dropdown__arrow">↗</span>
-                  </button>
-                ))}
-              </>
-            )}
+        <>
+          <div className="vp-overlay" onClick={() => setShowSources(false)} />
+          <div className="vp-dropdown">
+            <div className="vp-dropdown__scroll">
+              {iframeOpts.map((opt, i) => (
+                <button
+                  key={opt.id}
+                  className={`vp-dropdown__item ${i === activeIdx ? 'active' : ''}`}
+                  onClick={() => switchTo(i)}
+                >
+                  <span className="vp-dropdown__flag">{opt.flag}</span>
+                  <div className="vp-dropdown__info">
+                    <span className="vp-dropdown__name">{opt.label}</span>
+                    <span className="vp-dropdown__sub">{opt.sublabel}</span>
+                  </div>
+                  {i === activeIdx && <span className="vp-dropdown__check">✓</span>}
+                </button>
+              ))}
+              {loadingOptions && iframeOpts.length === 0 && (
+                <div className="vp-dropdown__loading">Поиск источников…</div>
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* ── Iframe ── */}
@@ -136,9 +96,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
           <div className="vp-loading">
             <div className="vp-loading__spin" />
             <p>Загрузка · {active.label}</p>
-            <p className="vp-loading__hint">
-              Не грузится? Нажмите ▾ для смены плеера
-            </p>
+            <p className="vp-loading__hint">Авто-переключение через 6 сек</p>
+            <button className="vp-loading__skip" onClick={() => {
+              if (activeIdx < iframeOpts.length - 1) switchTo(activeIdx + 1);
+            }}>
+              Следующий плеер →
+            </button>
           </div>
         )}
 
@@ -147,15 +110,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             key={active.url}
             src={active.url}
             className="vp-iframe"
+            style={{ opacity: loaded ? 1 : 0 }}
             allowFullScreen
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             referrerPolicy="no-referrer"
             onLoad={() => setLoaded(true)}
-            onError={() => setIframeError(true)}
           />
         ) : (
           <div className="vp-loading">
-            <p>🔌 Нет доступных источников</p>
+            <p style={{fontSize:18}}>😕</p>
+            <p>Нет доступных источников</p>
           </div>
         )}
       </div>
