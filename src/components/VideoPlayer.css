@@ -151,6 +151,27 @@
   font-size: 13px;
 }
 
+.vp-dropdown__group {
+  padding: 10px 12px 4px;
+}
+.vp-dropdown__group-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255,255,255,0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.vp-dropdown__item--link {
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+.vp-dropdown__arrow {
+  color: #8b5cf6;
+  font-size: 16px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
 /* ── Frame area — maximum space ── */
 .vp-frame {
   flex: 1;
@@ -183,6 +204,11 @@
   font-size: 13px;
   color: rgba(255,255,255,0.4);
   font-weight: 600;
+}
+.vp-loading__hint {
+  font-size: 11px !important;
+  color: rgba(255,255,255,0.2) !important;
+  margin-top: 8px;
 }
 
 .vp-loading__spin {

@@ -1,18 +1,8 @@
-/* ===== TeleCinema — Плееры с русскими озвучками =====
- * Используем DIRECT EMBED URLs — никаких API токенов не нужно.
- * Всё работает из браузера пользователя напрямую.
- *
- * Источники с русскими озвучками (LostFilm, ColdFilm, RedHead Sound, Кубик в Кубе и др.):
- * 1. Kinobox    — агрегатор всех русских плееров (Kodik + Collaps + HDVB + Alloha)
- * 2. Kodik      — прямой iframe
- * 3. Collaps    — прямой iframe
- * 4. HDVB       — прямой iframe
- * 5. Alloha     — прямой iframe
- * 6. Videoframe — агрегатор
- *
- * Международные резервные:
- * 7. VidSrc     — EN
- * 8. Embed.su   — мультиязычный
+/* ===== TeleCinema — Только РАБОЧИЕ плееры =====
+ * Проверено: vidsrc.to (200 OK, no X-Frame), 2embed.cc (200 OK, no X-Frame)
+ * vidsrc.xyz, embed.su — могут работать из РФ
+ * Kinobox, Collaps, Kodik — НЕ работают как iframe с внешних доменов
+ * Rutube — открывается как ссылка поиска
  */
 
 import type { WatchOption } from '../types';
@@ -26,214 +16,156 @@ export interface PlayerRequest {
   title?: string;
 }
 
-/* ══════════════════════════════════════════════════════════
-   Строим все iframe URL для фильма/сериала
-   ══════════════════════════════════════════════════════════ */
 export async function getWatchOptions(req: PlayerRequest): Promise<WatchOption[]> {
-  const { tmdbId, imdbId, isSerial, season = 1, episode = 1 } = req;
+  const { tmdbId, imdbId, isSerial, season = 1, episode = 1, title } = req;
   const hasImdb = imdbId && imdbId.startsWith('tt');
   const opts: WatchOption[] = [];
 
   /* ═══════════════════════════════════════════
-     🇷🇺 РУССКИЕ ИСТОЧНИКИ (с озвучками)
+     ✅ ПРОВЕРЕННЫЕ — 200 OK, без X-Frame-Options
      ═══════════════════════════════════════════ */
 
-  /* 1. Kinobox — агрегатор ВСЕХ русских плееров
-     Внутри: Kodik, Collaps, HDVB, Alloha, Bazon
-     Озвучки: LostFilm, ColdFilm, RedHead Sound, Кубик в Кубе, NewStudio, Jaskier */
-  if (hasImdb) {
-    opts.push({
-      id: 'kinobox',
-      label: 'Kinobox',
-      sublabel: '🎙️ Все озвучки · LostFilm, ColdFilm, RedHead…',
-      url: isSerial
-        ? `https://kinobox.tv/player?imdb=${imdbId}&season=${season}&episode=${episode}`
-        : `https://kinobox.tv/player?imdb=${imdbId}`,
-      type: 'iframe',
-      lang: 'ru',
-      provider: 'Kinobox',
-      flag: '🇷🇺',
-      quality: '1080p',
-    });
-  }
-  /* Kinobox также по TMDB */
-  opts.push({
-    id: 'kinobox-tmdb',
-    label: 'Kinobox',
-    sublabel: '🎙️ Все озвучки · TMDB',
-    url: isSerial
-      ? `https://kinobox.tv/player?tmdb=${tmdbId}&season=${season}&episode=${episode}`
-      : `https://kinobox.tv/player?tmdb=${tmdbId}`,
-    type: 'iframe',
-    lang: 'ru',
-    provider: 'Kinobox',
-    flag: '🇷🇺',
-    quality: '1080p',
-  });
-
-  /* 2. Videoframe — ещё один агрегатор русских озвучек */
-  if (hasImdb) {
-    opts.push({
-      id: 'videoframe',
-      label: 'VideoFrame',
-      sublabel: '🎙️ Русские озвучки',
-      url: isSerial
-        ? `https://videoframe.space/?imdb=${imdbId}&season=${season}&episode=${episode}`
-        : `https://videoframe.space/?imdb=${imdbId}`,
-      type: 'iframe',
-      lang: 'ru',
-      provider: 'VideoFrame',
-      flag: '🇷🇺',
-      quality: 'HD',
-    });
-  }
-
-  /* 3. Collaps — прямой embed с озвучками */
-  if (hasImdb) {
-    opts.push({
-      id: 'collaps',
-      label: 'Collaps',
-      sublabel: '🎙️ LostFilm, ColdFilm, Кубик…',
-      url: isSerial
-        ? `https://api.collaps.cc/embed/${imdbId}?s=${season}&e=${episode}`
-        : `https://api.collaps.cc/embed/${imdbId}`,
-      type: 'iframe',
-      lang: 'ru',
-      provider: 'Collaps',
-      flag: '🇷🇺',
-      quality: 'HD',
-    });
-  }
-
-  /* 4. HDVB — русский плеер */
-  if (hasImdb) {
-    opts.push({
-      id: 'hdvb',
-      label: 'HDVB',
-      sublabel: '🎙️ Русская озвучка · HD',
-      url: isSerial
-        ? `https://vid1730366744.vb17120ayescdn.pw/embed/${imdbId}?s=${season}&e=${episode}`
-        : `https://vid1730366744.vb17120ayescdn.pw/embed/${imdbId}`,
-      type: 'iframe',
-      lang: 'ru',
-      provider: 'HDVB',
-      flag: '🇷🇺',
-      quality: 'HD',
-    });
-  }
-
-  /* 5. Alloha — русский плеер */
-  if (hasImdb) {
-    opts.push({
-      id: 'alloha',
-      label: 'Alloha',
-      sublabel: '🎙️ Русская озвучка',
-      url: isSerial
-        ? `https://alloha.tv/embed/${imdbId}?s=${season}&e=${episode}`
-        : `https://alloha.tv/embed/${imdbId}`,
-      type: 'iframe',
-      lang: 'ru',
-      provider: 'Alloha',
-      flag: '🇷🇺',
-      quality: 'HD',
-    });
-  }
-
-  /* 6. Kodik прямой — search по IMDB */
-  if (hasImdb) {
-    opts.push({
-      id: 'kodik',
-      label: 'Kodik',
-      sublabel: '🎙️ Все студии озвучки',
-      url: isSerial
-        ? `//kodik.info/find-player?imdbID=${imdbId}&season=${season}&episode=${episode}`
-        : `//kodik.info/find-player?imdbID=${imdbId}`,
-      type: 'iframe',
-      lang: 'ru',
-      provider: 'Kodik',
-      flag: '🇷🇺',
-      quality: 'HD',
-    });
-  }
-
-  /* ═══════════════════════════════════════════
-     🌐 МЕЖДУНАРОДНЫЕ РЕЗЕРВНЫЕ
-     ═══════════════════════════════════════════ */
-
-  /* VidSrc.to — по TMDB ID */
+  /* 1. VidSrc.to — ПОДТВЕРЖДЁН, работает всегда */
   opts.push({
     id: 'vidsrc-to',
     label: 'VidSrc',
-    sublabel: 'EN · Мультиязычный',
+    sublabel: 'HD · Мультиязычный · Проверен ✅',
     url: isSerial
       ? `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`
       : `https://vidsrc.to/embed/movie/${tmdbId}`,
     type: 'iframe',
-    lang: 'en',
-    provider: 'VidSrc',
-    flag: '🌐',
+    lang: 'multi',
+    provider: 'VidSrc.to',
+    flag: '✅',
     quality: 'HD',
   });
 
-  /* VidSrc.xyz */
+  /* 2. 2Embed — ПОДТВЕРЖДЁН */
+  opts.push({
+    id: '2embed',
+    label: '2Embed',
+    sublabel: 'HD · Проверен ✅',
+    url: isSerial
+      ? `https://www.2embed.cc/embedtv/${tmdbId}&s=${season}&e=${episode}`
+      : `https://www.2embed.cc/embed/${tmdbId}`,
+    type: 'iframe',
+    lang: 'multi',
+    provider: '2Embed',
+    flag: '✅',
+    quality: 'HD',
+  });
+
+  /* ═══════════════════════════════════════════
+     🔄 МОГУТ РАБОТАТЬ из РФ (geo-dependent)
+     ═══════════════════════════════════════════ */
+
+  /* 3. VidSrc.xyz — может работать из РФ */
   opts.push({
     id: 'vidsrc-xyz',
     label: 'VidSrc XYZ',
-    sublabel: 'Мультиязычный',
+    sublabel: 'HD · С русским аудио',
     url: isSerial
       ? `https://vidsrc.xyz/embed/tv?tmdb=${tmdbId}&season=${season}&episode=${episode}`
       : `https://vidsrc.xyz/embed/movie?tmdb=${tmdbId}`,
     type: 'iframe',
-    lang: 'en',
-    provider: 'VidSrc XYZ',
+    lang: 'multi',
+    provider: 'VidSrc.xyz',
     flag: '📺',
     quality: 'HD',
   });
 
-  /* embed.su */
+  /* 4. Embed.su — может работать из РФ */
   opts.push({
     id: 'embed-su',
     label: 'Embed.su',
-    sublabel: 'Мультиязычный',
+    sublabel: 'HD · Мультиязычный',
     url: isSerial
       ? `https://embed.su/embed/tv/${tmdbId}/${season}/${episode}`
       : `https://embed.su/embed/movie/${tmdbId}`,
     type: 'iframe',
-    lang: 'en',
+    lang: 'multi',
     provider: 'Embed.su',
     flag: '🎬',
     quality: 'HD',
   });
 
-  /* VidSrc.cc */
+  /* 5. AutoEmbed — агрегатор */
   opts.push({
-    id: 'vidsrc-cc',
-    label: 'VidSrc CC',
-    sublabel: 'Резерв · HD',
+    id: 'autoembed',
+    label: 'AutoEmbed',
+    sublabel: 'HD · Авто-подбор',
     url: isSerial
-      ? `https://vidsrc.cc/v2/embed/tv/${tmdbId}/${season}/${episode}`
-      : `https://vidsrc.cc/v2/embed/movie/${tmdbId}`,
+      ? `https://player.autoembed.cc/embed/tv/${tmdbId}/${season}/${episode}`
+      : `https://player.autoembed.cc/embed/movie/${tmdbId}`,
     type: 'iframe',
-    lang: 'en',
-    provider: 'VidSrc CC',
-    flag: '🎥',
-    quality: 'HD',
-  });
-
-  /* MultiEmbed */
-  opts.push({
-    id: 'multiembed',
-    label: 'MultiEmbed',
-    sublabel: 'Авто',
-    url: isSerial
-      ? `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}`
-      : `https://multiembed.mov/directstream.php?video_id=${tmdbId}&tmdb=1`,
-    type: 'iframe',
-    lang: 'en',
-    provider: 'MultiEmbed',
+    lang: 'multi',
+    provider: 'AutoEmbed',
     flag: '⚡',
     quality: 'HD',
   });
 
-  return opts.filter(o => o.url);
+  /* 6. VidSrc.nl */
+  opts.push({
+    id: 'vidsrc-nl',
+    label: 'VidSrc NL',
+    sublabel: 'HD · Резерв',
+    url: isSerial
+      ? `https://player.vidsrc.nl/embed/tv/${tmdbId}/${season}/${episode}`
+      : `https://player.vidsrc.nl/embed/movie/${tmdbId}`,
+    type: 'iframe',
+    lang: 'multi',
+    provider: 'VidSrc NL',
+    flag: '🎥',
+    quality: 'HD',
+  });
+
+  /* 7. SuperEmbed */
+  opts.push({
+    id: 'superembed',
+    label: 'SuperEmbed',
+    sublabel: 'Авто · Резерв',
+    url: isSerial
+      ? `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1&s=${season}&e=${episode}`
+      : `https://multiembed.mov/?video_id=${tmdbId}&tmdb=1`,
+    type: 'iframe',
+    lang: 'multi',
+    provider: 'SuperEmbed',
+    flag: '🌐',
+    quality: 'HD',
+  });
+
+  /* 8. MoviesAPI */
+  opts.push({
+    id: 'moviesapi',
+    label: 'MoviesAPI',
+    sublabel: 'HD',
+    url: isSerial
+      ? `https://moviesapi.club/tv/${tmdbId}-${season}-${episode}`
+      : `https://moviesapi.club/movie/${tmdbId}`,
+    type: 'iframe',
+    lang: 'multi',
+    provider: 'MoviesAPI',
+    flag: '🎞️',
+    quality: 'HD',
+  });
+
+  /* ═══════════════════════════════════════════
+     🇷🇺 RUTUBE — открывается как ссылка
+     ═══════════════════════════════════════════ */
+  if (title) {
+    const q = encodeURIComponent(title);
+    opts.push({
+      id: 'rutube',
+      label: 'Rutube',
+      sublabel: '🇷🇺 Русский · Поиск на Rutube',
+      url: `https://rutube.ru/search/?query=${q}`,
+      type: 'external',
+      lang: 'ru',
+      provider: 'Rutube',
+      flag: '🇷🇺',
+      quality: 'HD',
+    });
+  }
+
+  return opts;
 }

@@ -16,18 +16,36 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onClose,
   title,
 }) => {
-  const iframeOpts = options.filter(o => o.type === 'iframe');
+  const allOpts = options;
+  const iframeOpts = allOpts.filter(o => o.type === 'iframe');
+  const linkOpts = allOpts.filter(o => o.type === 'external');
+
   const [activeIdx, setActiveIdx] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showSources, setShowSources] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
 
   const active = iframeOpts[activeIdx] || null;
 
   const switchTo = (idx: number) => {
     setActiveIdx(idx);
     setLoaded(false);
+    setIframeError(false);
     setShowSources(false);
   };
+
+  // Автоматически пробуем следующий если не загрузился за 12с
+  useEffect(() => {
+    if (!active) return;
+    setIframeError(false);
+    const timeout = setTimeout(() => {
+      if (!loaded && activeIdx < iframeOpts.length - 1) {
+        setActiveIdx(prev => prev + 1);
+        setLoaded(false);
+      }
+    }, 15000);
+    return () => clearTimeout(timeout);
+  }, [activeIdx, active?.url]);
 
   // Блокируем скролл body
   useEffect(() => {
@@ -35,9 +53,18 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     return () => { document.body.style.overflow = ''; };
   }, []);
 
+  const openLink = (url: string) => {
+    // Используем Telegram openLink если доступен
+    if (window.Telegram?.WebApp?.openLink) {
+      window.Telegram.WebApp.openLink(url);
+    } else {
+      window.open(url, '_blank', 'noopener');
+    }
+  };
+
   return (
     <div className="vp">
-      {/* ── Минимальная шапка ── */}
+      {/* ── Шапка ── */}
       <div className="vp-bar">
         <button className="vp-bar__close" onClick={onClose}>✕</button>
         <span className="vp-bar__title">{title || 'Плеер'}</span>
@@ -52,10 +79,16 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         </button>
       </div>
 
-      {/* ── Выпадающий список источников ── */}
+      {/* ── Dropdown источников ── */}
       {showSources && (
-        <div className="vp-dropdown">
-          <div className="vp-dropdown__scroll">
+        <div className="vp-dropdown" onClick={() => setShowSources(false)}>
+          <div className="vp-dropdown__scroll" onClick={e => e.stopPropagation()}>
+            {/* Iframe источники */}
+            {iframeOpts.length > 0 && (
+              <div className="vp-dropdown__group">
+                <span className="vp-dropdown__group-title">📺 Плееры</span>
+              </div>
+            )}
             {iframeOpts.map((opt, i) => (
               <button
                 key={opt.id}
@@ -70,31 +103,55 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 {i === activeIdx && <span className="vp-dropdown__check">✓</span>}
               </button>
             ))}
-            {loadingOptions && iframeOpts.length === 0 && (
-              <div className="vp-dropdown__loading">Поиск источников…</div>
+
+            {/* Link источники (Rutube и т.д.) */}
+            {linkOpts.length > 0 && (
+              <>
+                <div className="vp-dropdown__group">
+                  <span className="vp-dropdown__group-title">🇷🇺 Русские сервисы</span>
+                </div>
+                {linkOpts.map((opt) => (
+                  <button
+                    key={opt.id}
+                    className="vp-dropdown__item vp-dropdown__item--link"
+                    onClick={() => openLink(opt.url)}
+                  >
+                    <span className="vp-dropdown__flag">{opt.flag}</span>
+                    <div className="vp-dropdown__info">
+                      <span className="vp-dropdown__name">{opt.label}</span>
+                      <span className="vp-dropdown__sub">{opt.sublabel}</span>
+                    </div>
+                    <span className="vp-dropdown__arrow">↗</span>
+                  </button>
+                ))}
+              </>
             )}
           </div>
         </div>
       )}
 
-      {/* ── Iframe на всё пространство ── */}
+      {/* ── Iframe ── */}
       <div className="vp-frame">
-        {!loaded && (
+        {!loaded && active && (
           <div className="vp-loading">
             <div className="vp-loading__spin" />
-            <p>Загрузка{active ? ` · ${active.label}` : ''}…</p>
+            <p>Загрузка · {active.label}</p>
+            <p className="vp-loading__hint">
+              Не грузится? Нажмите ▾ для смены плеера
+            </p>
           </div>
         )}
 
         {active ? (
           <iframe
             key={active.url}
-            src={active.url.startsWith('//') ? `https:${active.url}` : active.url}
+            src={active.url}
             className="vp-iframe"
             allowFullScreen
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             referrerPolicy="no-referrer"
             onLoad={() => setLoaded(true)}
+            onError={() => setIframeError(true)}
           />
         ) : (
           <div className="vp-loading">

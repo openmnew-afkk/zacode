@@ -50,7 +50,7 @@ export interface WatchOption {
   sublabel: string;
   url: string;
   type: 'iframe' | 'direct' | 'external' | 'telegram';
-  lang: 'en' | 'ru';
+  lang: 'en' | 'ru' | 'multi';
   provider: string;
   flag: string;
   quality?: string;
