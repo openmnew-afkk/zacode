@@ -24,8 +24,9 @@
 }
 .hp-header__logo { font-size: 26px; }
 .hp-header__title {
+  font-family: var(--font-display), system-ui, sans-serif;
   font-size: 17px;
-  font-weight: 800;
+  font-weight: 700;
   color: #fff;
   line-height: 1;
 }
@@ -113,9 +114,9 @@
   transition: all 0.18s;
 }
 .hp-tab.active {
-  background: rgba(124,58,237,0.2);
-  border-color: rgba(124,58,237,0.4);
-  color: #c4b5fd;
+  background: rgba(232,184,74,0.18);
+  border-color: rgba(232,184,74,0.4);
+  color: #f0c96a;
 }
 
 /* ── Контент ── */
@@ -173,7 +174,7 @@
 .hp-hero__chip-dot {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #7c3aed;
+  background: #e8b84a;
   animation: dot-pulse 2s ease-in-out infinite;
 }
 @keyframes dot-pulse {
@@ -221,13 +222,13 @@
   gap: 8px;
   padding: 10px 22px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #7c3aed, #4f46e5);
-  color: #fff;
+  background: linear-gradient(135deg, #e8b84a, #d4922a);
+  color: #1a1208;
   font-size: 14px;
   font-weight: 800;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(124,58,237,0.4);
+  box-shadow: 0 4px 16px rgba(232,184,74,0.35);
   transition: transform 0.12s;
 }
 .hp-hero__btn:active { transform: scale(0.96); }
@@ -250,7 +251,7 @@
 .hp-hero__dot.active {
   width: 20px;
   border-radius: 3px;
-  background: #7c3aed;
+  background: #e8b84a;
 }
 
 /* ── Ряд ── */
@@ -315,7 +316,7 @@
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(6,182,212,0.9);
+  background: rgba(226,61,61,0.9);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -350,8 +351,8 @@
 .hp-spinner {
   width: 20px; height: 20px;
   border-radius: 50%;
-  border: 2px solid rgba(124,58,237,0.2);
-  border-top-color: #7c3aed;
+  border: 2px solid rgba(232,184,74,0.2);
+  border-top-color: #e8b84a;
   animation: hp-spin 0.7s linear infinite;
 }
 @keyframes hp-spin { to { transform: rotate(360deg); } }

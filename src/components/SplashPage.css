@@ -1,4 +1,4 @@
-/* ===== TeleCinema — CINEMATIC SPLASH ===== */
+/* ===== КиноЗал — Splash ===== */
 
 .splash {
   position: fixed;
@@ -7,208 +7,155 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: #030308;
+  background: #09080a;
   overflow: hidden;
   transition: opacity 0.8s ease, transform 0.8s ease;
 }
 
 .splash--fade {
   opacity: 0;
-  transform: scale(1.1);
+  transform: scale(1.06);
   pointer-events: none;
 }
 
-/* ── Background orbs ── */
-.splash__bg {
-  position: absolute;
-  inset: 0;
-}
+.splash__bg { position: absolute; inset: 0; }
 
 .splash__orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(100px);
-  opacity: 0.5;
+  opacity: 0.45;
   animation: orb-float 8s ease-in-out infinite;
 }
 
 .splash__orb--1 {
-  width: 600px;
-  height: 600px;
-  top: -20%;
-  left: -15%;
-  background: radial-gradient(circle, rgba(139,92,246,0.4), transparent 70%);
-  animation-delay: 0s;
+  width: 520px; height: 520px;
+  top: -18%; left: -12%;
+  background: radial-gradient(circle, rgba(232,184,74,0.4), transparent 70%);
 }
 
 .splash__orb--2 {
-  width: 500px;
-  height: 500px;
-  bottom: -20%;
-  right: -15%;
-  background: radial-gradient(circle, rgba(6,182,212,0.3), transparent 70%);
+  width: 460px; height: 460px;
+  bottom: -18%; right: -12%;
+  background: radial-gradient(circle, rgba(226,61,61,0.3), transparent 70%);
   animation-delay: -3s;
 }
 
 .splash__orb--3 {
-  width: 400px;
-  height: 400px;
-  top: 50%;
-  left: 50%;
+  width: 360px; height: 360px;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(244,114,182,0.25), transparent 70%);
+  background: radial-gradient(circle, rgba(240,201,106,0.18), transparent 70%);
   animation-delay: -6s;
 }
 
 @keyframes orb-float {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -30px) scale(1.1); }
-  66% { transform: translate(-20px, 20px) scale(0.9); }
+  33% { transform: translate(24px, -24px) scale(1.08); }
+  66% { transform: translate(-16px, 16px) scale(0.94); }
 }
 
-/* ── Grid ── */
 .splash__grid {
   position: absolute;
   inset: 0;
-  background-image: 
-    linear-gradient(rgba(139,92,246,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139,92,246,0.04) 1px, transparent 1px);
-  background-size: 50px 50px;
+  background-image:
+    linear-gradient(rgba(232,184,74,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(232,184,74,0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
 }
 
-/* ── Particles ── */
-.splash__particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.splash__particle {
-  position: absolute;
-  bottom: -10px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #8b5cf6, #06b6d4);
-  box-shadow: 0 0 8px rgba(139,92,246,0.6);
-  animation: particle-rise linear infinite;
-}
-
-@keyframes particle-rise {
-  0% { transform: translateY(0) translateX(0); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 0.4; }
-  100% { transform: translateY(-100vh) translateX(30px); opacity: 0; }
-}
-
-/* ── Content ── */
 .splash__content {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  animation: content-in 1s cubic-bezier(0.34,1.56,0.64,1) both;
+  animation: content-in 0.9s cubic-bezier(0.34,1.4,0.64,1) both;
 }
 
 @keyframes content-in {
-  from { opacity: 0; transform: translateY(50px) scale(0.8); }
+  from { opacity: 0; transform: translateY(36px) scale(0.92); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ── Logo ── */
 .splash__logo {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 128px;
+  height: 128px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .splash__logo-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent, #8b5cf6, #06b6d4, #f472b6, transparent);
-  animation: ring-spin 3s linear infinite;
-  mask: radial-gradient(circle at center, transparent 55px, black 56px, black 72px, transparent 73px);
-  -webkit-mask: radial-gradient(circle at center, transparent 55px, black 56px, black 72px, transparent 73px);
+  background: conic-gradient(from 0deg, transparent, #e8b84a, #e23d3d, #f0c96a, transparent);
+  animation: ring-spin 3.5s linear infinite;
+  mask: radial-gradient(circle at center, transparent 50px, black 51px, black 66px, transparent 67px);
+  -webkit-mask: radial-gradient(circle at center, transparent 50px, black 51px, black 66px, transparent 67px);
 }
 
 @keyframes ring-spin { to { transform: rotate(360deg); } }
 
 .splash__logo-inner {
-  width: 110px;
-  height: 110px;
-  border-radius: 32px;
+  width: 100px;
+  height: 100px;
+  border-radius: 28px;
   background: rgba(255,255,255,0.03);
   border: 1px solid rgba(255,255,255,0.1);
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(20px);
-  box-shadow: 
-    0 20px 60px rgba(139,92,246,0.3),
-    inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow: 0 20px 50px rgba(232,184,74,0.22), inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
 .splash__logo-icon {
-  width: 56px;
-  height: 56px;
-  filter: drop-shadow(0 0 12px rgba(139,92,246,0.5));
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 0 12px rgba(232,184,74,0.45));
 }
 
-/* ── Title ── */
 .splash__title {
-  font-family: 'Outfit', 'Inter', sans-serif;
-  font-size: 52px;
-  font-weight: 900;
-  letter-spacing: -0.04em;
+  font-family: var(--font-display), 'Unbounded', system-ui, sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
   margin: 0 0 8px;
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
-.splash__title-text {
-  color: #fff;
-  text-shadow: 0 4px 30px rgba(0,0,0,0.5);
-}
+.splash__title-text { color: #fff; }
 
 .splash__title-accent {
-  background: linear-gradient(135deg, #a78bfa, #38bdf8, #f472b6);
+  background: linear-gradient(135deg, #e8b84a, #e23d3d);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-size: 200% 200%;
-  animation: gradient-shift 3s ease-in-out infinite;
-}
-
-@keyframes gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .splash__subtitle {
-  font-size: 13px;
-  font-weight: 500;
-  color: rgba(255,255,255,0.35);
-  letter-spacing: 0.2em;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.38);
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
 }
 
-/* ── Progress ── */
-.splash__progress {
-  width: 200px;
-}
+.splash__progress { width: 180px; }
 
 .splash__progress-track {
   width: 100%;
   height: 3px;
   border-radius: 3px;
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.06);
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -216,7 +163,7 @@
 .splash__progress-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, #8b5cf6, #06b6d4, #f472b6);
+  background: linear-gradient(90deg, #e8b84a, #e23d3d, #f0c96a);
   background-size: 200% 100%;
   animation: gradient-slide 2s linear infinite;
   transition: width 0.1s linear;
@@ -229,18 +176,11 @@
 
 .splash__progress-text {
   font-size: 11px;
-  color: rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.28);
   text-align: center;
-  letter-spacing: 0.1em;
-  animation: text-pulse 1.5s ease-in-out infinite;
+  letter-spacing: 0.08em;
 }
 
-@keyframes text-pulse {
-  0%, 100% { opacity: 0.25; }
-  50% { opacity: 0.6; }
-}
-
-/* ── Footer ── */
 .splash__footer {
   position: absolute;
   bottom: max(24px, env(safe-area-inset-bottom, 24px));
@@ -253,6 +193,6 @@
 .splash__footer span {
   font-size: 10px;
   font-weight: 700;
-  color: rgba(255,255,255,0.15);
-  letter-spacing: 0.3em;
+  color: rgba(255,255,255,0.18);
+  letter-spacing: 0.22em;
 }

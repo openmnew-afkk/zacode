@@ -10,7 +10,7 @@
 }
 
 .search-header__title {
-  font-family: 'Outfit', 'Inter', sans-serif;
+  font-family: var(--font-display), system-ui, sans-serif;
   font-size: 28px;
   font-weight: 900;
   color: #fff;
@@ -45,8 +45,8 @@
 }
 
 .search-input:focus {
-  border-color: rgba(139,92,246,0.4);
-  background: rgba(139,92,246,0.06);
+  border-color: rgba(232,184,74,0.4);
+  background: rgba(232,184,74,0.06);
 }
 
 .search-input::placeholder { color: rgba(255,255,255,0.25); }
@@ -90,8 +90,8 @@
 }
 
 .search-type.active {
-  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(6,182,212,0.15));
-  border-color: rgba(139,92,246,0.4);
+  background: linear-gradient(135deg, rgba(232,184,74,0.2), rgba(226,61,61,0.15));
+  border-color: rgba(232,184,74,0.4);
   color: #fff;
 }
 

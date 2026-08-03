@@ -336,8 +336,8 @@ const HomePage: React.FC = () => {
             <div className="hp-header__brand">
               <span className="hp-header__logo">🎬</span>
               <div>
-                <h1 className="hp-header__title">TeleCinema</h1>
-                <span className="hp-header__sub">Миллионы фильмов</span>
+                <h1 className="hp-header__title">КиноЗал</h1>
+                <span className="hp-header__sub">Фильмы и сериалы</span>
               </div>
             </div>
             <div className="hp-header__actions">

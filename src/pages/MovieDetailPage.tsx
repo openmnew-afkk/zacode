@@ -204,7 +204,7 @@ const MovieDetailPage: React.FC = () => {
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
                   d="M17.3 4.4a5 5 0 0 0-7.1 0L10 4.6l-.2-.2A5 5 0 0 0 2.7 11.5l.2.2L10 19l7.1-7.3.2-.2a5 5 0 0 0 0-7.1z"
-                  fill={favorite ? '#f472b6' : 'none'}
+                  fill={favorite ? '#e23d3d' : 'none'}
                   stroke={favorite ? 'none' : 'rgba(255,255,255,0.6)'}
                   strokeWidth="1.7"
                 />
@@ -294,6 +294,14 @@ const MovieDetailPage: React.FC = () => {
           onClose={() => setShowPlayer(false)}
           title={movie.title}
           poster={poster}
+          isSerial={isSerial}
+          season={activeSeason}
+          episode={activeEpisode}
+          maxEpisode={episodesCount || 1}
+          onEpisodeChange={(s, e) => {
+            setActiveSeason(s);
+            setActiveEpisode(e);
+          }}
         />
       )}
     </div>

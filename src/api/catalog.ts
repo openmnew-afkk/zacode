@@ -1,4 +1,4 @@
-/* ===== TeleCinema — TMDB API (миллионы фильмов на русском) ===== */
+/* ===== КиноЗал — TMDB API ===== */
 
 import type { Movie, MovieDetail, CatalogResponse, Season, Genre } from '../types';
 
@@ -8,7 +8,7 @@ const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkYzAwM2FhYmUwZTYwZWYzMjM2MGJ
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
-const FALLBACK_POSTER = 'https://via.placeholder.com/300x450?text=No+Poster';
+const FALLBACK_POSTER = 'https://via.placeholder.com/300x450/1a1612/e8b84a?text=%D0%9D%D0%B5%D1%82+%D0%BF%D0%BE%D1%81%D1%82%D0%B5%D1%80%D0%B0';
 
 /* ════════════ Cache ════════════ */
 const cache = new Map<string, { data: any; time: number }>();
@@ -78,7 +78,7 @@ function toMovie(item: any, mediaType?: string): Movie {
     countries: [],
     popularity: item.popularity || 0,
     adult: item.adult || false,
-    quality: 'HD',
+    quality: 'Full HD',
   };
 }
 

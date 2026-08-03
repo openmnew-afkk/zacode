@@ -1,10 +1,10 @@
-/* ===== TeleCinema — Premium Dark Design System ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* ===== КиноЗал — Design System ===== */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800&display=swap');
 
 :root {
-  --bg:             #080810;
-  --bg-2:           #0c0c18;
-  --bg-3:           #121220;
+  --bg:             #09080a;
+  --bg-2:           #100e0c;
+  --bg-3:           #171410;
   --surface:        rgba(255,255,255,0.04);
   --surface-2:      rgba(255,255,255,0.06);
   --surface-3:      rgba(255,255,255,0.09);
@@ -13,10 +13,10 @@
   --text:           #ffffff;
   --text-2:         rgba(255,255,255,0.72);
   --text-3:         rgba(255,255,255,0.45);
-  --accent:         #8b5cf6;
-  --accent-2:       #06b6d4;
-  --accent-3:       #f472b6;
-  --accent-glow:    rgba(139,92,246,0.35);
+  --accent:         #e8b84a;
+  --accent-2:       #e23d3d;
+  --accent-3:       #f0c96a;
+  --accent-glow:    rgba(232,184,74,0.35);
   --glass-bg:       rgba(255,255,255,0.04);
   --glass-border:   rgba(255,255,255,0.08);
   --glass-blur:     20px;
@@ -29,6 +29,8 @@
   --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
   --ease-smooth: cubic-bezier(0.4,0,0.2,1);
   --tabbar-h: calc(52px + max(env(safe-area-inset-bottom), 8px) + 8px);
+  --font-display: 'Unbounded', system-ui, sans-serif;
+  --font-body: 'Manrope', system-ui, sans-serif;
 }
 
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
@@ -43,7 +45,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
   min-height: 100%;

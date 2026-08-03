@@ -10,7 +10,7 @@ import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import { useTelegram } from './hooks/useTelegram';
 
-/* ===== TeleCinema — App ===== */
+/* ===== КиноЗал — App ===== */
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);

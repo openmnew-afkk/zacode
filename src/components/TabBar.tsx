@@ -51,7 +51,7 @@ const tabs: TabDef[] = [
   },
   {
     path: '/premium',
-    label: 'Premium',
+    label: 'Премиум',
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         {active ? (
