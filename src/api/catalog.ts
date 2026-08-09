@@ -44,7 +44,10 @@ async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Pr
   const cached = getCached<T>(cacheKey);
   if (cached) return cached;
 
-  const rawUrl = url.toString();
+  // URL с api_key для прокси (Bearer не проходит через прокси)
+  const urlWithKey = new URL(url.toString());
+  urlWithKey.searchParams.set('api_key', TMDB_KEY);
+
   const headers: Record<string, string> = {
     'Authorization': `Bearer ${TMDB_TOKEN}`,
     'Content-Type': 'application/json',
@@ -55,16 +58,28 @@ async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Pr
 
   for (const idx of proxyOrder) {
     const proxy = PROXY_URLS[idx];
-    const fetchUrl = proxy ? `${proxy}${encodeURIComponent(rawUrl)}` : rawUrl;
     try {
+      let fetchUrl: string;
+      let fetchHeaders: Record<string, string>;
+
+      if (proxy) {
+        // Через прокси: api_key в URL, без Bearer
+        fetchUrl = `${proxy}${encodeURIComponent(urlWithKey.toString())}`;
+        fetchHeaders = {};
+      } else {
+        // Напрямую: Bearer token
+        fetchUrl = url.toString();
+        fetchHeaders = headers;
+      }
+
       const res = await fetch(fetchUrl, {
-        headers: proxy ? {} : headers, // прокси не передаёт кастомные хедеры
+        headers: fetchHeaders,
         signal: AbortSignal.timeout(8000),
       });
       if (!res.ok) continue;
       const data = await res.json();
       if (data.results !== undefined || data.id !== undefined) {
-        activeProxyIdx = idx; // запоминаем рабочий прокси
+        activeProxyIdx = idx;
         setCache(cacheKey, data);
         return data;
       }
@@ -73,9 +88,8 @@ async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Pr
     }
   }
 
-  // Последняя попытка — с api_key в URL (без Bearer)
-  url.searchParams.set('api_key', TMDB_KEY);
-  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
+  // Последняя попытка — напрямую с api_key
+  const res = await fetch(urlWithKey.toString(), { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`TMDB ${res.status}: ${res.statusText}`);
   const data = await res.json();
   setCache(cacheKey, data);
