@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import type { WatchOption } from '../types';
-import { setPreferredPlayerId } from '../api/players';
 import './VideoPlayer.css';
 
-const LOAD_TIMEOUT_MS = 10000;
+const LOAD_TIMEOUT_MS = 12000;
+
+export type PlayerMode = 'compact' | 'fullscreen';
 
 interface VideoPlayerProps {
   options: WatchOption[];
@@ -16,6 +17,8 @@ interface VideoPlayerProps {
   episode?: number;
   maxEpisode?: number;
   onEpisodeChange?: (season: number, episode: number) => void;
+  /** По умолчанию компактный — встроен в страницу */
+  initialMode?: PlayerMode;
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({
@@ -29,25 +32,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   episode = 1,
   maxEpisode = 1,
   onEpisodeChange,
+  initialMode = 'compact',
 }) => {
   const iframeOpts = options.filter((o) => o.type === 'iframe');
   const [activeIdx, setActiveIdx] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showSources, setShowSources] = useState(false);
   const [countdown, setCountdown] = useState(LOAD_TIMEOUT_MS / 1000);
-  const [chromeVisible, setChromeVisible] = useState(true);
-  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [mode, setMode] = useState<PlayerMode>(initialMode);
+  const frameRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   const active = iframeOpts[activeIdx] || iframeOpts[0] || null;
+  const canPrev = isSerial && episode > 1;
+  const canNext = isSerial && episode < maxEpisode;
+  const isFs = mode === 'fullscreen';
 
   useEffect(() => {
     if (activeIdx >= iframeOpts.length && iframeOpts.length > 0) {
       setActiveIdx(0);
     }
   }, [iframeOpts.length, activeIdx]);
-  const canPrev = isSerial && episode > 1;
-  const canNext = isSerial && episode < maxEpisode;
 
   const switchTo = useCallback((idx: number) => {
     setActiveIdx(idx);
@@ -56,51 +61,38 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     setCountdown(LOAD_TIMEOUT_MS / 1000);
   }, []);
 
-  /* Запомнить выбор и сбросить загрузку при смене серии/URL */
   useEffect(() => {
-    const opt = iframeOpts[activeIdx];
-    if (opt) setPreferredPlayerId(opt.id);
     setLoaded(false);
     setCountdown(LOAD_TIMEOUT_MS / 1000);
   }, [active?.url]);
 
-  const bumpChrome = useCallback(() => {
-    setChromeVisible(true);
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    if (loaded && !showSources) {
-      hideTimer.current = setTimeout(() => setChromeVisible(false), 3500);
-    }
-  }, [loaded, showSources]);
-
-  /* Escape + body lock */
+  /* Блокируем скролл только в fullscreen */
   useEffect(() => {
+    if (!isFs) {
+      document.body.style.overflow = '';
+      return;
+    }
     document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         if (showSources) setShowSources(false);
-        else onClose();
+        else setMode('compact');
       }
     };
     window.addEventListener('keydown', onKey);
-    rootRef.current?.focus();
     return () => {
       document.body.style.overflow = '';
       window.removeEventListener('keydown', onKey);
-      if (hideTimer.current) clearTimeout(hideTimer.current);
     };
-  }, [onClose, showSources]);
+  }, [isFs, showSources]);
 
-  /* Авто-переключение при долгом ожидании */
+  /* Авто-смена источника */
   useEffect(() => {
     if (!active || loaded) return;
     setCountdown(LOAD_TIMEOUT_MS / 1000);
-    const tick = setInterval(() => {
-      setCountdown((c) => Math.max(0, c - 1));
-    }, 1000);
+    const tick = setInterval(() => setCountdown((c) => Math.max(0, c - 1)), 1000);
     const t = setTimeout(() => {
-      if (activeIdx < iframeOpts.length - 1) {
-        switchTo(activeIdx + 1);
-      }
+      if (activeIdx < iframeOpts.length - 1) switchTo(activeIdx + 1);
     }, LOAD_TIMEOUT_MS);
     return () => {
       clearTimeout(t);
@@ -108,58 +100,137 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     };
   }, [activeIdx, loaded, active?.url]);
 
-  useEffect(() => {
-    if (loaded) bumpChrome();
-  }, [loaded, bumpChrome]);
+  const enterNativeFs = async () => {
+    setMode('fullscreen');
+    const el = frameRef.current;
+    try {
+      if (el?.requestFullscreen) await el.requestFullscreen();
+      else if ((el as any)?.webkitRequestFullscreen) (el as any).webkitRequestFullscreen();
+    } catch {
+      /* Telegram WebView может не уметь — остаёмся в CSS fullscreen */
+    }
+  };
+
+  const exitFs = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch { /* ignore */ }
+    setMode('compact');
+  };
 
   useEffect(() => {
-    if (showSources) setChromeVisible(true);
-  }, [showSources]);
+    const onFsChange = () => {
+      if (!document.fullscreenElement && mode === 'fullscreen') {
+        /* остаёмся в css-fullscreen — не сбрасываем автоматически */
+      }
+    };
+    document.addEventListener('fullscreenchange', onFsChange);
+    return () => document.removeEventListener('fullscreenchange', onFsChange);
+  }, [mode]);
 
-  const episodeLabel = isSerial ? `Сезон ${season} · Серия ${episode}` : null;
+  const episodeLabel = isSerial ? `С${season} · Е${episode}` : null;
+
+  const controls = (
+    <>
+      {isSerial && onEpisodeChange && (
+        <div className="vp-dock__eps">
+          <button
+            className="vp-dock__ep-btn"
+            disabled={!canPrev}
+            onClick={() => onEpisodeChange(season, episode - 1)}
+          >
+            ‹ Пред.
+          </button>
+          <span className="vp-dock__ep-label">{episodeLabel}</span>
+          <button
+            className="vp-dock__ep-btn"
+            disabled={!canNext}
+            onClick={() => onEpisodeChange(season, episode + 1)}
+          >
+            След. ›
+          </button>
+        </div>
+      )}
+
+      <div className="vp-dock__chips" role="tablist" aria-label="Источники">
+        {iframeOpts.slice(0, 5).map((opt, i) => (
+          <button
+            key={opt.id}
+            role="tab"
+            aria-selected={i === activeIdx}
+            className={`vp-chip ${i === activeIdx ? 'active' : ''}`}
+            onClick={() => switchTo(i)}
+          >
+            {opt.label}
+          </button>
+        ))}
+        {iframeOpts.length > 5 && (
+          <button className="vp-chip vp-chip--more" onClick={() => setShowSources(true)}>
+            Ещё
+          </button>
+        )}
+      </div>
+    </>
+  );
 
   return (
     <div
-      className={`vp ${chromeVisible || !loaded ? 'vp--chrome' : 'vp--immersive'}`}
+      className={`vp ${isFs ? 'vp--fs' : 'vp--compact'}`}
       ref={rootRef}
-      role="dialog"
-      aria-modal="true"
+      role="region"
       aria-label={title ? `Плеер: ${title}` : 'Плеер'}
-      tabIndex={-1}
-      onPointerDown={bumpChrome}
     >
-      {/* Шапка */}
       <header className="vp-bar">
-        <button className="vp-bar__close" onClick={onClose} aria-label="Закрыть">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
+        <button
+          className="vp-bar__close"
+          onClick={isFs ? () => void exitFs() : onClose}
+          aria-label={isFs ? 'Свернуть' : 'Закрыть'}
+        >
+          {isFs ? (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4 9h10M4 9l3-3M4 9l3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          )}
         </button>
+
         <div className="vp-bar__meta">
           <span className="vp-bar__title">{title || 'Просмотр'}</span>
           {episodeLabel && <span className="vp-bar__ep">{episodeLabel}</span>}
         </div>
+
         <button
           className={`vp-bar__src ${showSources ? 'open' : ''}`}
           onClick={() => setShowSources((v) => !v)}
-          aria-expanded={showSources}
-          aria-haspopup="listbox"
         >
           <span className="vp-bar__src-dot" />
-          {active?.label || 'Источник'}
-          <svg width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden>
-            <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-          </svg>
+          <span className="vp-bar__src-text">{active?.label || 'Источник'}</span>
         </button>
+
+        {isFs ? (
+          <button className="vp-bar__fs" onClick={() => void exitFs()} aria-label="Компактный">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M6 3H3v3M12 3h3v3M6 15H3v-3M12 15h3v-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          </button>
+        ) : (
+          <button className="vp-bar__fs" onClick={() => void enterNativeFs()} aria-label="На весь экран">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M3 6V3h3M12 3h3v3M3 12v3h3M15 12v3h-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          </button>
+        )}
       </header>
 
-      {/* Выбор источника */}
       {showSources && (
         <>
           <div className="vp-scrim" onClick={() => setShowSources(false)} aria-hidden />
           <div className="vp-sheet" role="listbox" aria-label="Источники">
             <div className="vp-sheet__handle" />
-            <p className="vp-sheet__hint">Если не грузится — выбери другой источник</p>
+            <p className="vp-sheet__hint">Промотка и громкость — внутри плеера ниже. Если не грузится — смени источник.</p>
             <div className="vp-sheet__list">
               {iframeOpts.map((opt, i) => (
                 <button
@@ -178,44 +249,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                   {i === activeIdx && <span className="vp-sheet__check">✓</span>}
                 </button>
               ))}
-              {loadingOptions && iframeOpts.length === 0 && (
-                <div className="vp-sheet__loading">Ищем источники…</div>
-              )}
             </div>
           </div>
         </>
       )}
 
-      {/* Кадр */}
-      <div className="vp-frame">
+      {/* Видео-кадр — без наших панелей поверх, чтобы работали seek/fullscreen внутри iframe */}
+      <div className="vp-frame" ref={frameRef}>
         {!loaded && (
           <div className="vp-loading">
-            {poster && (
-              <img src={poster} alt="" className="vp-loading__poster" />
-            )}
+            {poster && <img src={poster} alt="" className="vp-loading__poster" />}
             <div className="vp-loading__veil" />
             <div className="vp-loading__content">
               <div className="vp-loading__spin" />
               <p className="vp-loading__title">
                 {active ? `Загрузка · ${active.label}` : 'Подготовка…'}
               </p>
-              {active && (
-                <p className="vp-loading__hint">
-                  Смена через {countdown} сек
-                </p>
-              )}
+              {active && <p className="vp-loading__hint">Смена через {countdown} сек</p>}
               <div className="vp-loading__actions">
                 {activeIdx < iframeOpts.length - 1 && (
-                  <button
-                    className="vp-btn vp-btn--ghost"
-                    onClick={() => switchTo(activeIdx + 1)}
-                  >
+                  <button className="vp-btn vp-btn--ghost" onClick={() => switchTo(activeIdx + 1)}>
                     Другой источник
                   </button>
                 )}
-                <button className="vp-btn vp-btn--solid" onClick={onClose}>
-                  Закрыть
-                </button>
               </div>
             </div>
           </div>
@@ -229,68 +285,29 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             style={{ opacity: loaded ? 1 : 0 }}
             title={title || 'Видео'}
             allowFullScreen
-            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-            referrerPolicy="no-referrer"
+            allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope"
+            referrerPolicy="origin"
             onLoad={() => setLoaded(true)}
           />
         ) : (
           !loadingOptions && (
             <div className="vp-loading">
               <div className="vp-loading__content">
-                <p className="vp-loading__title">Нет доступных источников</p>
-                <button className="vp-btn vp-btn--solid" onClick={onClose}>
-                  Назад
-                </button>
+                <p className="vp-loading__title">Нет источников</p>
+                <button className="vp-btn vp-btn--solid" onClick={onClose}>Закрыть</button>
               </div>
             </div>
           )
         )}
       </div>
 
-      {/* Нижняя панель */}
       <footer className="vp-dock">
-        {isSerial && onEpisodeChange && (
-          <div className="vp-dock__eps">
-            <button
-              className="vp-dock__ep-btn"
-              disabled={!canPrev}
-              onClick={() => onEpisodeChange(season, episode - 1)}
-              aria-label="Предыдущая серия"
-            >
-              ‹ Пред.
-            </button>
-            <span className="vp-dock__ep-label">
-              С{season} · Е{episode}
-            </span>
-            <button
-              className="vp-dock__ep-btn"
-              disabled={!canNext}
-              onClick={() => onEpisodeChange(season, episode + 1)}
-              aria-label="Следующая серия"
-            >
-              След. ›
-            </button>
-          </div>
-        )}
-
-        <div className="vp-dock__chips" role="tablist" aria-label="Быстрый выбор">
-          {iframeOpts.slice(0, 5).map((opt, i) => (
-            <button
-              key={opt.id}
-              role="tab"
-              aria-selected={i === activeIdx}
-              className={`vp-chip ${i === activeIdx ? 'active' : ''}`}
-              onClick={() => switchTo(i)}
-            >
-              {opt.label}
-            </button>
-          ))}
-          {iframeOpts.length > 5 && (
-            <button className="vp-chip vp-chip--more" onClick={() => setShowSources(true)}>
-              Ещё
-            </button>
-          )}
-        </div>
+        <p className="vp-dock__tip">
+          {isFs
+            ? 'Управление видео — в плеере · «Свернуть» сверху'
+            : 'Жми ▣ чтобы на весь экран · перемотка внутри плеера'}
+        </p>
+        {controls}
       </footer>
     </div>
   );

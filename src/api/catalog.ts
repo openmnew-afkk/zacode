@@ -8,6 +8,14 @@ const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkYzAwM2FhYmUwZTYwZWYzMjM2MGJ
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
+/* Прокси для обхода блокировки TMDB в РФ */
+const PROXY_URLS = [
+  '', // Прямой запрос (без прокси)
+  'https://corsproxy.io/?url=',
+  'https://api.allorigins.win/raw?url=',
+];
+let activeProxyIdx = 0; // запоминаем какой прокси работает
+
 const FALLBACK_POSTER = 'https://via.placeholder.com/300x450/1a1612/e8b84a?text=%D0%9D%D0%B5%D1%82+%D0%BF%D0%BE%D1%81%D1%82%D0%B5%D1%80%D0%B0';
 
 /* ════════════ Cache ════════════ */
@@ -24,7 +32,7 @@ function setCache(key: string, data: any) {
   cache.set(key, { data, time: Date.now() });
 }
 
-/* ════════════ TMDB Request ════════════ */
+/* ════════════ TMDB Request с авто-прокси ════════════ */
 async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Promise<T> {
   const url = new URL(`${TMDB_BASE}${path}`);
   url.searchParams.set('language', 'ru-RU');
@@ -36,13 +44,38 @@ async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Pr
   const cached = getCached<T>(cacheKey);
   if (cached) return cached;
 
-  const res = await fetch(url.toString(), {
-    headers: {
-      'Authorization': `Bearer ${TMDB_TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-  });
+  const rawUrl = url.toString();
+  const headers: Record<string, string> = {
+    'Authorization': `Bearer ${TMDB_TOKEN}`,
+    'Content-Type': 'application/json',
+  };
 
+  // Пробуем начиная с последнего сработавшего прокси
+  const proxyOrder = [activeProxyIdx, ...PROXY_URLS.map((_, i) => i).filter(i => i !== activeProxyIdx)];
+
+  for (const idx of proxyOrder) {
+    const proxy = PROXY_URLS[idx];
+    const fetchUrl = proxy ? `${proxy}${encodeURIComponent(rawUrl)}` : rawUrl;
+    try {
+      const res = await fetch(fetchUrl, {
+        headers: proxy ? {} : headers, // прокси не передаёт кастомные хедеры
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data.results !== undefined || data.id !== undefined) {
+        activeProxyIdx = idx; // запоминаем рабочий прокси
+        setCache(cacheKey, data);
+        return data;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  // Последняя попытка — с api_key в URL (без Bearer)
+  url.searchParams.set('api_key', TMDB_KEY);
+  const res = await fetch(url.toString(), { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`TMDB ${res.status}: ${res.statusText}`);
   const data = await res.json();
   setCache(cacheKey, data);
