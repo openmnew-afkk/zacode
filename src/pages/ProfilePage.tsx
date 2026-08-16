@@ -87,6 +87,16 @@ const ProfilePage: React.FC = () => {
         )}
       </div>
 
+      {/* Админ — только для @MickySauce */}
+      {user?.username === 'MickySauce' && (
+        <div className="profile-section">
+          <div className="profile-setting" onClick={() => navigate('/admin')} style={{background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 14}}>
+            <span className="profile-setting__label">⚙️ Админ панель</span>
+            <span className="profile-setting__value">→</span>
+          </div>
+        </div>
+      )}
+
       {/* Кнопка закрытия */}
       <div className="profile-close-wrap">
         <button className="profile-close" onClick={closeApp}>Закрыть приложение</button>
