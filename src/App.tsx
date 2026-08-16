@@ -6,9 +6,11 @@ import FavoritesPage from './pages/FavoritesPage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import PremiumPage from './pages/PremiumPage';
+import AdminPage from './pages/AdminPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import { useTelegram } from './hooks/useTelegram';
+import { useStore } from './store';
 
 /* ===== КиноЗал — App ===== */
 
@@ -16,9 +18,17 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
   const { tg } = useTelegram();
+  const { setTelegramUsername } = useStore();
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
+    // Получаем Telegram username для проверки админа
+    try {
+      const user = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
+      if (user?.username) {
+        setTelegramUsername(user.username);
+      }
+    } catch {}
   }, []);
 
   const handleSplashDone = () => setShowSplash(false);
@@ -34,6 +44,7 @@ function App() {
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
 
       <TabBar />

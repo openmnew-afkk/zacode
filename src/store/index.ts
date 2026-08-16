@@ -1,28 +1,34 @@
-/* ===== TeleCinema — Единый store ===== */
+/* ===== TeleCinema — Store с премиум и админкой ===== */
 
 import { create } from 'zustand';
 import type { Movie, WatchHistoryItem, AppTheme } from '../types';
 
 /* ── localStorage helpers ── */
-
 const load = <T>(key: string, fallback: T): T => {
   try {
     const stored = localStorage.getItem(key);
     return stored ? JSON.parse(stored) : fallback;
-  } catch {
-    return fallback;
-  }
+  } catch { return fallback; }
 };
 
 const save = (key: string, value: unknown) => {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // ignore
-  }
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
 };
 
-/* ── State Interface ── */
+/* Хеш пароля (SHA-256) */
+async function hashPassword(pass: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pass + '_telecinema_salt_2026');
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Хеш от "Kodik987412365" — предвычислен
+const ADMIN_PASS_HASH = ''; // будет проверяться через hashPassword
+
+/* ── Admin username ── */
+const ADMIN_USERNAMES = ['MickySauce'];
 
 interface AppState {
   /* Избранное */
@@ -32,7 +38,7 @@ interface AppState {
   isFavorite: (id: string) => boolean;
   clearFavorites: () => void;
 
-  /* История просмотров */
+  /* История */
   watchHistory: WatchHistoryItem[];
   addToHistory: (movie: Movie) => void;
   clearHistory: () => void;
@@ -41,61 +47,111 @@ interface AppState {
   theme: AppTheme;
   toggleTheme: () => void;
   setTheme: (theme: AppTheme) => void;
+
+  /* Премиум */
+  isPremium: boolean;
+  setPremium: (val: boolean) => void;
+
+  /* Админ */
+  isAdmin: boolean;
+  adminLogin: (password: string) => Promise<boolean>;
+  adminLogout: () => void;
+
+  /* Telegram */
+  telegramUsername: string;
+  setTelegramUsername: (u: string) => void;
+
+  /* Реклама */
+  adsEnabled: boolean;
+  setAdsEnabled: (val: boolean) => void;
+
+  /* Объявления */
+  announcement: string;
+  setAnnouncement: (text: string) => void;
 }
 
 export const useStore = create<AppState>((set, get) => ({
   /* ═══ Избранное ═══ */
   favorites: load<Movie[]>('tc_favorites', []),
-
   addFavorite: (movie: Movie) => {
     const updated = [...get().favorites, movie];
     save('tc_favorites', updated);
     set({ favorites: updated });
   },
-
   removeFavorite: (id: string) => {
     const updated = get().favorites.filter((m) => m.id !== id);
     save('tc_favorites', updated);
     set({ favorites: updated });
   },
-
-  isFavorite: (id: string) => {
-    return get().favorites.some((m) => m.id === id);
-  },
-
-  clearFavorites: () => {
-    save('tc_favorites', []);
-    set({ favorites: [] });
-  },
+  isFavorite: (id: string) => get().favorites.some((m) => m.id === id),
+  clearFavorites: () => { save('tc_favorites', []); set({ favorites: [] }); },
 
   /* ═══ История ═══ */
   watchHistory: load<WatchHistoryItem[]>('tc_history', []),
-
   addToHistory: (movie: Movie) => {
     const filtered = get().watchHistory.filter((h) => h.movie.id !== movie.id);
     const updated = [{ movie, watchedAt: Date.now() }, ...filtered].slice(0, 50);
     save('tc_history', updated);
     set({ watchHistory: updated });
   },
-
-  clearHistory: () => {
-    save('tc_history', []);
-    set({ watchHistory: [] });
-  },
+  clearHistory: () => { save('tc_history', []); set({ watchHistory: [] }); },
 
   /* ═══ Тема ═══ */
   theme: load<AppTheme>('tc_theme', 'dark'),
-
   toggleTheme: () => {
     const newTheme = get().theme === 'dark' ? 'light' : 'dark';
     save('tc_theme', newTheme);
     set({ theme: newTheme });
     document.documentElement.setAttribute('data-theme', newTheme);
   },
-
   setTheme: (theme: AppTheme) => {
     save('tc_theme', theme);
     set({ theme });
     document.documentElement.setAttribute('data-theme', theme);
   },
+
+  /* ═══ Премиум ═══ */
+  isPremium: load<boolean>('tc_premium', false),
+  setPremium: (val: boolean) => { save('tc_premium', val); set({ isPremium: val }); },
+
+  /* ═══ Админ ═══ */
+  isAdmin: load<boolean>('tc_admin', false),
+  adminLogin: async (password: string) => {
+    const hash = await hashPassword(password);
+    const correctHash = await hashPassword('Kodik987412365');
+    const username = get().telegramUsername;
+    const isAdminUser = ADMIN_USERNAMES.includes(username);
+
+    if (hash === correctHash) {
+      save('tc_admin', true);
+      set({ isAdmin: true });
+      // Админ @MickySauce всегда премиум
+      if (isAdminUser) {
+        save('tc_premium', true);
+        set({ isPremium: true });
+      }
+      return true;
+    }
+    return false;
+  },
+  adminLogout: () => { save('tc_admin', false); set({ isAdmin: false }); },
+
+  /* ═══ Telegram ═══ */
+  telegramUsername: '',
+  setTelegramUsername: (u: string) => {
+    set({ telegramUsername: u });
+    // Автоматически давать премиум админу
+    if (ADMIN_USERNAMES.includes(u)) {
+      save('tc_premium', true);
+      set({ isPremium: true });
+    }
+  },
+
+  /* ═══ Реклама ═══ */
+  adsEnabled: load<boolean>('tc_ads', true),
+  setAdsEnabled: (val: boolean) => { save('tc_ads', val); set({ adsEnabled: val }); },
+
+  /* ═══ Объявления ═══ */
+  announcement: load<string>('tc_announcement', ''),
+  setAnnouncement: (text: string) => { save('tc_announcement', text); set({ announcement: text }); },
 }));
