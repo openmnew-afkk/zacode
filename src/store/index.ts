@@ -28,7 +28,7 @@ async function hashPassword(pass: string): Promise<string> {
 const ADMIN_PASS_HASH = ''; // будет проверяться через hashPassword
 
 /* ── Admin username ── */
-const ADMIN_USERNAMES = ['MickySauce'];
+const ADMIN_USERNAMES = ['MikySauce'];
 
 interface AppState {
   /* Избранное */
@@ -125,7 +125,7 @@ export const useStore = create<AppState>((set, get) => ({
     if (hash === correctHash) {
       save('tc_admin', true);
       set({ isAdmin: true });
-      // Админ @MickySauce всегда премиум
+      // Админ @MikySauce всегда премиум
       if (isAdminUser) {
         save('tc_premium', true);
         set({ isPremium: true });

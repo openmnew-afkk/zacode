@@ -68,7 +68,7 @@ const ProfilePage: React.FC = () => {
         {watchHistory.length > 0 ? (
           <div className="profile-history">
             {watchHistory.map((item) => (
-              <div key={item.movie.imdbID} className="history-item" onClick={() => navigate(`/movie/${item.movie.imdbID}`)}>
+              <div key={item.movie.id} className="history-item" onClick={() => navigate(`/movie/${item.movie.id}`)}>
                 <img
                   className="history-item__poster"
                   src={item.movie.poster_path || 'https://via.placeholder.com/80x120?text=?'}
@@ -87,8 +87,8 @@ const ProfilePage: React.FC = () => {
         )}
       </div>
 
-      {/* Админ — только для @MickySauce */}
-      {user?.username === 'MickySauce' && (
+      {/* Админ — только для @MikySauce */}
+      {user?.username === 'MikySauce' && (
         <div className="profile-section">
           <div className="profile-setting" onClick={() => navigate('/admin')} style={{background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 14}}>
             <span className="profile-setting__label">⚙️ Админ панель</span>
