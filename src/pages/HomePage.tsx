@@ -164,6 +164,8 @@ const HomePage: React.FC = () => {
 
   const [loadingMain, setLoadingMain] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   const go = (id: string) => navigate(`/movie/${id}`);
 
@@ -171,6 +173,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     let alive = true;
     setLoadingMain(true);
+    setLoadError(false);
 
     const load = async () => {
       try {
@@ -186,14 +189,20 @@ const HomePage: React.FC = () => {
 
         const get = (i: number) => results[i].status === 'fulfilled' ? (results[i] as any).value : [];
 
-        setTrending(get(0));
-        setTrendMovies(get(1));
-        setTrendSeries(get(2));
-        setTopMovies(get(3));
-        setTopSeries(get(4));
-        setNowPlaying(get(5));
+        const tr = get(0), tm = get(1), ts = get(2), top_m = get(3), top_s = get(4), np = get(5);
+        setTrending(tr);
+        setTrendMovies(tm);
+        setTrendSeries(ts);
+        setTopMovies(top_m);
+        setTopSeries(top_s);
+        setNowPlaying(np);
+
+        // Если ВСЕ пустые — ошибка загрузки
+        const total = tr.length + tm.length + ts.length + top_m.length + top_s.length + np.length;
+        if (total === 0) setLoadError(true);
       } catch (e) {
         console.error('Home load error:', e);
+        if (alive) setLoadError(true);
       } finally {
         if (alive) setLoadingMain(false);
       }
@@ -209,7 +218,7 @@ const HomePage: React.FC = () => {
     });
 
     return () => { alive = false; };
-  }, []);
+  }, [retryCount]);
 
   /* Поиск */
   useEffect(() => {
@@ -253,6 +262,29 @@ const HomePage: React.FC = () => {
     if (tab === 'home') {
       return (
         <>
+          {/* Ошибка загрузки */}
+          {loadError && !loadingMain && trending.length === 0 && (
+            <div className="hp-error">
+              <p style={{fontSize: 40, marginBottom: 12}}>😕</p>
+              <p style={{fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 6}}>Не удалось загрузить</p>
+              <p style={{fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16}}>Проверьте интернет или попробуйте VPN</p>
+              <button
+                style={{padding: '10px 28px', borderRadius: 12, background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)', color: '#c4b5fd', fontWeight: 700, fontSize: 14, cursor: 'pointer'}}
+                onClick={() => setRetryCount(c => c + 1)}
+              >
+                🔄 Повторить
+              </button>
+            </div>
+          )}
+
+          {/* Загрузка */}
+          {loadingMain && trending.length === 0 && (
+            <div className="hp-error">
+              <div className="hp-spinner" />
+              <p style={{fontSize: 14, color: 'rgba(255,255,255,0.4)', marginTop: 12}}>Загрузка каталога…</p>
+            </div>
+          )}
+
           <Hero movies={heroMovies} onWatch={go} />
           {favorites.length > 0 && (
             <Row title="Мои избранные" icon="❤️" movies={favorites.slice(0, 20)} onMovieClick={go} />
