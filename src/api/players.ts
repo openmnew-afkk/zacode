@@ -72,6 +72,75 @@ function isRuZone(cc: string): boolean {
   return ['RU', 'BY', 'AM', 'KZ', 'KG', 'UZ', 'TJ', 'AZ'].includes(cc);
 }
 
+/* ═══ Прокси для русских плееров (обход гео-блока при VPN) ═══
+ * Настраивается в админке или через переменную окружения VITE_RU_PROXY.
+ * Код прокси — в папке /proxy этого репозитория (деплой на российский VPS).
+ */
+const RU_PROXY_KEY = 'tc_ru_proxy';
+
+/** Прокси по умолчанию из переменных окружения (задаётся при сборке) */
+function defaultRuProxy(): string {
+  try {
+    const env = (import.meta as any).env || {};
+    return String(env.VITE_RU_PROXY || '').trim();
+  } catch { return ''; }
+}
+
+export function getRuProxy(): string {
+  try { return localStorage.getItem(RU_PROXY_KEY) ?? defaultRuProxy(); }
+  catch { return defaultRuProxy(); }
+}
+
+/** Сохранить адрес прокси ('' = сбросить на дефолт из env) */
+export function setRuProxy(url: string): void {
+  const clean = url.trim().replace(/\/+$/, '');
+  try {
+    if (clean) localStorage.setItem(RU_PROXY_KEY, clean);
+    else localStorage.removeItem(RU_PROXY_KEY);
+  } catch {}
+}
+
+/**
+ * Проверка прокси: пингуем корень (сервер отвечает статусом) и пробуем
+ * реальный проход до kodikapi.com — так проверяется и связность, и обход гео.
+ */
+export async function testRuProxy(
+  base?: string
+): Promise<{ ok: boolean; message: string }> {
+  const p = (base !== undefined ? base : getRuProxy()).trim().replace(/\/+$/, '');
+  if (!p) return { ok: false, message: '❌ Адрес не задан' };
+  if (!/^https?:\/\//i.test(p)) return { ok: false, message: '❌ Нужен URL вида https://…' };
+
+  // 1. Сервер вообще доступен?
+  try {
+    const res = await fetch(p + '/', { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return { ok: false, message: `⚠️ Сервер ответил HTTP ${res.status}` };
+    const text = await res.text().catch(() => '');
+    if (text && !/RU-Proxy/i.test(text)) {
+      return { ok: false, message: '⚠️ По этому адресу не RU-Proxy' };
+    }
+  } catch {
+    return { ok: false, message: '❌ Сервер недоступен (таймаут/DNS/CORS)' };
+  }
+
+  // 2. Проход до российского плеер-провайдера работает?
+  try {
+    const target = encodeURIComponent('https://kodikapi.com/');
+    const res = await fetch(`${p}/?url=${target}`, { signal: AbortSignal.timeout(10000) });
+    if (res.ok) return { ok: true, message: '✅ Прокси работает! Русские озвучки будут доступны с VPN' };
+    return { ok: false, message: `⚠️ Прокси доступен, но upstream вернул HTTP ${res.status}` };
+  } catch {
+    return { ok: false, message: '⚠️ Сервер жив, но запрос через ?url= не прошёл' };
+  }
+}
+
+/** Завернуть URL российского плеера в прокси (если настроен) */
+function viaProxy(url: string): string {
+  const p = getRuProxy().replace(/\/+$/, '');
+  if (!p) return url;
+  return `${p}?url=${encodeURIComponent(url)}`;
+}
+
 /* ═══ Kodik API — поиск конкретных озвучек ═══ */
 const KODIK_TOKENS = [
   '447d179e875efe44217f20d1ee2146e2',
@@ -135,7 +204,7 @@ async function fetchKodik(imdbId: string, isSerial: boolean, s: number, e: numbe
         opts.push({
           id: `kodik-${seen.size}`, label: tr,
           sublabel: `Kodik · ${item.quality || 'HD'}`,
-          url: link, type: 'iframe', lang: 'ru',
+          url: viaProxy(link), type: 'iframe', lang: 'ru',
           provider: 'Kodik', flag, quality: item.quality || 'HD',
         });
       }
@@ -158,40 +227,41 @@ export async function getWatchOptions(req: PlayerRequest): Promise<WatchOption[]
   const kodikP = hasImdb ? fetchKodik(imdbId!, isSerial, s, e) : Promise.resolve([]);
   const countryP = detectCountry();
 
-  /* ── 🇷🇺 Российские плееры (работают только с IP РФ/СНГ) ── */
+  /* ── 🇷🇺 Российские плееры (работают с IP РФ/СНГ или через прокси) ── */
+  const hasProxy = !!getRuProxy();
   const ruEmbeds: WatchOption[] = [];
 
   if (hasImdb) {
     ruEmbeds.push({
       id: 'collaps', label: 'Collaps',
-      sublabel: '🇷🇺 Все озвучки · Выбор внутри',
-      url: isSerial
+      sublabel: hasProxy ? '🇷🇺 Через прокси · Все озвучки' : '🇷🇺 Все озвучки · Выбор внутри',
+      url: viaProxy(isSerial
         ? `https://api.collaps.cc/embed/${imdbId}?s=${s}&e=${e}`
-        : `https://api.collaps.cc/embed/${imdbId}`,
+        : `https://api.collaps.cc/embed/${imdbId}`),
       type: 'iframe', lang: 'ru', provider: 'Collaps', flag: '🇷🇺', quality: 'HD',
     });
     ruEmbeds.push({
       id: 'kodik-direct', label: 'Kodik',
-      sublabel: '🇷🇺 Все озвучки · Авто',
-      url: isSerial
+      sublabel: hasProxy ? '🇷🇺 Через прокси · Авто' : '🇷🇺 Все озвучки · Авто',
+      url: viaProxy(isSerial
         ? `https://kodik.info/find-player?imdbID=${imdbId}&season=${s}&episode=${e}`
-        : `https://kodik.info/find-player?imdbID=${imdbId}`,
+        : `https://kodik.info/find-player?imdbID=${imdbId}`),
       type: 'iframe', lang: 'ru', provider: 'Kodik', flag: '🇷🇺', quality: 'HD',
     });
     ruEmbeds.push({
       id: 'videoframe', label: 'VideoFrame',
-      sublabel: '🇷🇺 Русская озвучка',
-      url: isSerial
+      sublabel: hasProxy ? '🇷🇺 Через прокси' : '🇷🇺 Русская озвучка',
+      url: viaProxy(isSerial
         ? `https://videoframe.space/embed/${imdbId}?s=${s}&e=${e}`
-        : `https://videoframe.space/embed/${imdbId}`,
+        : `https://videoframe.space/embed/${imdbId}`),
       type: 'iframe', lang: 'ru', provider: 'VideoFrame', flag: '🇷🇺', quality: 'HD',
     });
     ruEmbeds.push({
       id: 'videocdn', label: 'VideoCDN',
-      sublabel: '🇷🇺 Русская озвучка',
-      url: isSerial
+      sublabel: hasProxy ? '🇷🇺 Через прокси' : '🇷🇺 Русская озвучка',
+      url: viaProxy(isSerial
         ? `https://cdn.videocdn.tv/api/short?imdb_id=${imdbId}&season=${s}&episode=${e}`
-        : `https://cdn.videocdn.tv/api/short?imdb_id=${imdbId}`,
+        : `https://cdn.videocdn.tv/api/short?imdb_id=${imdbId}`),
       type: 'iframe', lang: 'ru', provider: 'VideoCDN', flag: '🇷🇺', quality: 'HD',
     });
   }
@@ -219,6 +289,28 @@ export async function getWatchOptions(req: PlayerRequest): Promise<WatchOption[]
     type: 'iframe', lang: 'multi', provider: 'VidSrc', flag: '🌐', quality: 'HD',
   });
 
+  // MultiEmbed — глобальный, иногда есть русская дорожка
+  if (hasImdb) {
+    globalEmbeds.push({
+      id: 'multiembed', label: 'MultiEmbed',
+      sublabel: '🌐 Альтернативный сервер',
+      url: isSerial
+        ? `https://multiembed.mov/?video_id=${imdbId}&s=${s}&e=${e}`
+        : `https://multiembed.mov/?video_id=${imdbId}`,
+      type: 'iframe', lang: 'multi', provider: 'MultiEmbed', flag: '🌐', quality: 'HD',
+    });
+  }
+
+  // 2Embed — глобальный, стабильно доступен
+  globalEmbeds.push({
+    id: '2embed', label: '2Embed',
+    sublabel: '🌐 Работает везде',
+    url: isSerial
+      ? `https://www.2embed.cc/embedtv/${tmdbId}&s=${s}&e=${e}`
+      : `https://www.2embed.cc/embed/${tmdbId}`,
+    type: 'iframe', lang: 'multi', provider: '2Embed', flag: '🌐', quality: 'HD',
+  });
+
   // Ждём Kodik и регион
   const [kodikOpts, country] = await Promise.all([kodikP, countryP]);
   const ruFirst = isRuZone(country);
@@ -234,9 +326,11 @@ export async function getWatchOptions(req: PlayerRequest): Promise<WatchOption[]
     return [...ruEmbeds, ...globalEmbeds];
   }
 
-  // Зарубежный IP (VPN): глобальные с русской дорожкой → озвучки Kodik → русские плееры
+  // Зарубежный IP (VPN):
+  // VidSrc RU → озвучки Kodik (через прокси если есть) → глобальные → русские плееры
+  const globalsRest = globalEmbeds.slice(1);
   if (kodikOpts.length > 0) {
-    return [...globalEmbeds.slice(0, 1), ...kodikOpts, ...withoutKodikDirect(ruEmbeds), ...globalEmbeds.slice(1)];
+    return [globalEmbeds[0], ...kodikOpts, ...globalsRest, ...withoutKodikDirect(ruEmbeds)];
   }
   return [...globalEmbeds, ...ruEmbeds];
 }

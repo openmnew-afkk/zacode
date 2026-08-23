@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../store';
 import { useNavigate } from 'react-router-dom';
+import { getRuProxy, setRuProxy, testRuProxy } from '../api/players';
 import './AdminPage.css';
 
 const AdminPage: React.FC = () => {
@@ -11,6 +12,33 @@ const AdminPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const [locked, setLocked] = useState(false);
+
+  /* ── RU-Proxy (обход гео-блока русских плееров при VPN) ── */
+  const [proxyUrl, setProxyUrl] = useState<string>(() => getRuProxy());
+  const [proxyStatus, setProxyStatus] = useState<{ ok: boolean; message: string } | null>(null);
+  const [proxyTesting, setProxyTesting] = useState(false);
+  const [proxySaved, setProxySaved] = useState(false);
+
+  const handleProxySave = () => {
+    setRuProxy(proxyUrl);
+    setProxyUrl(getRuProxy()); // нормализованный адрес
+    setProxySaved(true);
+    setTimeout(() => setProxySaved(false), 2000);
+  };
+
+  const handleProxyTest = async () => {
+    setProxyTesting(true);
+    setProxyStatus(null);
+    const result = await testRuProxy(proxyUrl);
+    setProxyStatus(result);
+    setProxyTesting(false);
+  };
+
+  const handleProxyClear = () => {
+    setRuProxy('');
+    setProxyUrl('');
+    setProxyStatus(null);
+  };
 
   const handleLogin = async () => {
     if (locked) return;
@@ -92,6 +120,46 @@ const AdminPage: React.FC = () => {
               <span className="admin__stat-value">{adsEnabled ? '📺 Вкл' : '🚫 Выкл'}</span>
             </div>
           </div>
+        </section>
+
+        {/* RU-Proxy — обход гео-блока русских плееров */}
+        <section className="admin__section">
+          <h2 className="admin__section-title">🌍 RU-Proxy · Русские озвучки с VPN</h2>
+          <p className="admin__hint">
+            Прокси на российском VPS (<code>proxy/server.js</code>). Пользователи
+            с зарубежным IP (VPN) смогут смотреть Kodik / Collaps / VideoCDN.
+            Пусто = русские плееры только для РФ/СНГ.
+          </p>
+          <input
+            className="admin__proxy-input"
+            type="url"
+            placeholder="https://ru-proxy.example.com"
+            value={proxyUrl}
+            onChange={e => { setProxyUrl(e.target.value); setProxyStatus(null); }}
+            spellCheck={false}
+            autoComplete="off"
+          />
+          <div className="admin__actions">
+            <button className="admin__action-btn" onClick={handleProxySave} disabled={proxySaved}>
+              {proxySaved ? '✅ Сохранено' : '💾 Сохранить'}
+            </button>
+            <button className="admin__action-btn" onClick={handleProxyTest} disabled={proxyTesting || !proxyUrl.trim()}>
+              {proxyTesting ? '⏳ Проверяю…' : '🔍 Проверить'}
+            </button>
+            {proxyUrl && (
+              <button className="admin__action-btn admin__action-btn--danger" onClick={handleProxyClear}>
+                🗑️ Сбросить
+              </button>
+            )}
+          </div>
+          {proxyStatus && (
+            <p className={`admin__proxy-status ${proxyStatus.ok ? 'ok' : 'fail'}`}>
+              {proxyStatus.message}
+            </p>
+          )}
+          {!proxyStatus && getRuProxy() && (
+            <p className="admin__proxy-status ok">🟢 Активен: {getRuProxy()}</p>
+          )}
         </section>
 
         {/* Реклама */}
