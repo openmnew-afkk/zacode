@@ -333,7 +333,45 @@ export async function discoverMovies(opts: {
   }
 }
 
-/* Discover: пейджинг сериалов */
+/* ════════════ КиноИИ: умный подбор ════════════ */
+
+export interface SmartDiscoverOpts {
+  mediaType: 'movie' | 'tv';
+  /** TMDB жанры */
+  genres?: number[];
+  minRuntime?: number;
+  maxRuntime?: number;
+  yearFrom?: number;
+  yearTo?: number;
+  /** Если не задан — случайная страница 1..3 для разнообразия подборок */
+  page?: number;
+}
+
+export async function smartDiscover(opts: SmartDiscoverOpts): Promise<Movie[]> {
+  try {
+    const dateKey = opts.mediaType === 'movie' ? 'primary_release_date' : 'first_air_date';
+    const data = await tmdb<any>(`/discover/${opts.mediaType}`, {
+      with_genres: (opts.genres || []).join(','),
+      'vote_count.gte': opts.mediaType === 'movie' ? 300 : 200,
+      'with_runtime.lte': opts.maxRuntime,
+      'with_runtime.gte': opts.minRuntime,
+      [`${dateKey}.gte`]: opts.yearFrom ? `${opts.yearFrom}-01-01` : '',
+      [`${dateKey}.lte`]: opts.yearTo ? `${opts.yearTo}-12-31` : '',
+      sort_by: 'popularity.desc',
+      include_adult: false,
+      page: opts.page ?? 1 + Math.floor(Math.random() * 3),
+    });
+    return (data.results || []).map((i: any) => toMovie(i, opts.mediaType));
+  } catch { return []; }
+}
+
+/** Рекомендации TMDB по конкретному фильму/сериалу (для персонализации) */
+export async function getRecommendations(id: string, mediaType: 'movie' | 'tv'): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>(`/${mediaType}/${id}/recommendations`, { page: 1 });
+    return (data.results || []).map((i: any) => toMovie(i, mediaType));
+  } catch { return []; }
+}
 export async function discoverSeries(opts: {
   page?: number;
   sort_by?: string;

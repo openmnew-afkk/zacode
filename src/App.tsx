@@ -7,7 +7,9 @@ import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import PremiumPage from './pages/PremiumPage';
 import AdminPage from './pages/AdminPage';
+import AiPickPage from './pages/AiPickPage';
 import TabBar from './components/TabBar';
+import AiFab from './components/AiFab';
 import SplashPage from './components/SplashPage';
 import { useTelegram } from './hooks/useTelegram';
 import { useStore } from './store';
@@ -45,9 +47,11 @@ function App() {
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/ai" element={<AiPickPage />} />
       </Routes>
 
       <TabBar />
+      <AiFab />
     </div>
   );
 }

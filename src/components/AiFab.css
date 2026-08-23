@@ -1,0 +1,19 @@
+/* ===== Плавающая кнопка КиноИИ ===== */
+.ai-fab {
+  position: fixed;
+  right: 14px;
+  bottom: calc(var(--tabbar-h) + 14px);
+  width: 54px; height: 54px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: linear-gradient(135deg, #8b5cf6, #e8b84a);
+  color: #fff; z-index: 90;
+  box-shadow: 0 6px 22px rgba(139,92,246,0.45), 0 2px 8px rgba(0,0,0,0.35);
+  transition: transform 0.15s var(--ease-spring);
+  animation: ai-fab-in 0.4s var(--ease-spring) both;
+}
+.ai-fab:active { transform: scale(0.88) rotate(-8deg); }
+
+@keyframes ai-fab-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.6); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
