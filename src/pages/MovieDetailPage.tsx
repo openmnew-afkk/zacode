@@ -52,7 +52,10 @@ const MovieDetailPage: React.FC = () => {
   useEffect(() => {
     if (!movie) return;
     setSourceLoading(true);
+    // Очищаем старые источники, чтобы при смене серии не играл предыдущий эпизод
+    setPlayerOptions([]);
     const isSerial = movie.is_serial || (movie.seasons?.length ?? 0) > 0;
+    let cancelled = false;
     getWatchOptions({
       tmdbId,
       imdbId: movie.imdbID || undefined,
@@ -61,9 +64,10 @@ const MovieDetailPage: React.FC = () => {
       episode: isSerial ? activeEpisode : undefined,
       title: movie.title,
     })
-      .then(setPlayerOptions)
-      .catch(() => setPlayerOptions([]))
-      .finally(() => setSourceLoading(false));
+      .then((opts) => { if (!cancelled) setPlayerOptions(opts); })
+      .catch(() => { if (!cancelled) setPlayerOptions([]); })
+      .finally(() => { if (!cancelled) setSourceLoading(false); });
+    return () => { cancelled = true; };
   }, [movie, tmdbId, activeSeason, activeEpisode]);
 
   /* ── Кнопка назад Telegram ── */

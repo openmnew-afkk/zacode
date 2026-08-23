@@ -53,6 +53,18 @@
   margin: 0;
 }
 
+/* Премиум бейдж */
+.profile-premium-badge {
+  margin-top: 10px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f5d67b;
+  background: linear-gradient(135deg, rgba(232,184,74,0.18), rgba(139,92,246,0.15));
+  border: 1px solid rgba(232,184,74,0.35);
+}
+
 /* Stats */
 .profile-stats {
   display: flex;

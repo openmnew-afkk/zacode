@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import './PremiumPage.css';
@@ -20,7 +20,10 @@ const ROULETTE_LABELS = ['3 дня', '5 дней', '7 дней', '3 дня', '5 
 
 const PremiumPage: React.FC = () => {
   const { haptic } = useTelegram();
-  const { isPremium, setPremium, telegramUsername } = useStore();
+  const {
+    isPremium, setPremium, activatePremiumDays, activatePremiumForever,
+    premiumExpiry, telegramUsername,
+  } = useStore();
   const [selectedPlan, setSelectedPlan] = useState<'month' | 'year'>('year');
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -35,7 +38,21 @@ const PremiumPage: React.FC = () => {
   const wheelRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = telegramUsername === 'MikySauce';
-  const isFirstPurchase = !localStorage.getItem('tc_first_purchase_done');
+  const [isFirstPurchase] = useState(() => {
+    try { return !localStorage.getItem('tc_first_purchase_done'); } catch { return true; }
+  });
+
+  /* Остаток дней премиума */
+  const daysLeft = premiumExpiry
+    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
+    : null;
+
+  /* Проверка истечения срока — в useEffect, а не во время рендера */
+  useEffect(() => {
+    if (isPremium && premiumExpiry && Date.now() > premiumExpiry) {
+      setPremium(false);
+    }
+  }, [isPremium, premiumExpiry, setPremium]);
 
   const handleSpin = () => {
     if (spinning || rouletteUsed) return;
@@ -61,12 +78,8 @@ const PremiumPage: React.FC = () => {
       setRouletteResult(prizeDays);
       setRouletteUsed(true);
       try { localStorage.setItem('tc_roulette_used', 'true'); } catch {}
-      // Активируем премиум на N дней
-      setPremium(true);
-      try {
-        const expiry = Date.now() + prizeDays * 24 * 60 * 60 * 1000;
-        localStorage.setItem('tc_premium_expiry', String(expiry));
-      } catch {}
+      // Активируем премиум на N дней (с продлением, если уже активен)
+      activatePremiumDays(prizeDays);
       haptic('heavy');
     }, 4000);
   };
@@ -74,7 +87,7 @@ const PremiumPage: React.FC = () => {
   const handleSubscribe = () => {
     haptic('medium');
     if (isAdmin) {
-      setPremium(true);
+      activatePremiumForever();
       setSuccessMsg('👑 Премиум активирован навсегда!');
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 3000);
@@ -92,16 +105,6 @@ const PremiumPage: React.FC = () => {
   const yearPrice = isFirstPurchase ? 1600 : 2400;
   const yearMonthly = Math.round(yearPrice / 12);
 
-  if (isPremium && !isAdmin) {
-    // Проверяем не истёк ли пробный период
-    try {
-      const expiry = Number(localStorage.getItem('tc_premium_expiry') || 0);
-      if (expiry > 0 && Date.now() > expiry) {
-        setPremium(false);
-      }
-    } catch {}
-  }
-
   if (isPremium) {
     return (
       <div className="pm page">
@@ -109,7 +112,13 @@ const PremiumPage: React.FC = () => {
         <div className="pm-content">
           <div className="pm-crown"><span className="pm-crown__icon">👑</span><div className="pm-crown__ring" /></div>
           <h1 className="pm-title">Премиум <span>активен</span></h1>
-          <p className="pm-subtitle">Все функции разблокированы</p>
+          <p className="pm-subtitle">
+            {isAdmin
+              ? '👑 Администратор · бессрочно'
+              : daysLeft
+                ? `Осталось дней: ${daysLeft}`
+                : 'Бессрочный доступ'}
+          </p>
           <div className="pm-active-features">
             <div className="pm-active-item">✅ LostFilm, RedHeadSound, ColdFilm</div>
             <div className="pm-active-item">✅ Без рекламы</div>

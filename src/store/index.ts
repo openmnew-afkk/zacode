@@ -24,11 +24,27 @@ async function hashPassword(pass: string): Promise<string> {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-// Хеш от "Kodik987412365" — предвычислен
-const ADMIN_PASS_HASH = ''; // будет проверяться через hashPassword
-
 /* ── Admin username ── */
 const ADMIN_USERNAMES = ['MikySauce'];
+
+/* ── Премиум: срок действия ── */
+const PREMIUM_EXPIRY_KEY = 'tc_premium_expiry';
+
+/** Премиум активен = флаг стоит И (нет срока ИЛИ срок не истёк) */
+function computePremium(flag: boolean): { isPremium: boolean; expiry: number | null } {
+  let expiry: number | null = null;
+  try {
+    const raw = localStorage.getItem(PREMIUM_EXPIRY_KEY);
+    if (raw) expiry = Number(raw);
+  } catch {}
+  if (!flag) return { isPremium: false, expiry };
+  if (expiry && Date.now() > expiry) {
+    // Истёк — снимаем
+    try { localStorage.removeItem('tc_premium'); } catch {}
+    return { isPremium: false, expiry };
+  }
+  return { isPremium: true, expiry };
+}
 
 interface AppState {
   /* Избранное */
@@ -50,7 +66,13 @@ interface AppState {
 
   /* Премиум */
   isPremium: boolean;
+  /** Срок окончания премиума (timestamp) или null = бессрочно */
+  premiumExpiry: number | null;
   setPremium: (val: boolean) => void;
+  /** Активировать премиум на N дней (рулетка/промо) */
+  activatePremiumDays: (days: number) => void;
+  /** Активировать бессрочный премиум (админ/оплата) */
+  activatePremiumForever: () => void;
 
   /* Админ */
   isAdmin: boolean;
@@ -111,8 +133,37 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   /* ═══ Премиум ═══ */
-  isPremium: load<boolean>('tc_premium', false),
-  setPremium: (val: boolean) => { save('tc_premium', val); set({ isPremium: val }); },
+  ...(() => {
+    const state = computePremium(load<boolean>('tc_premium', false));
+    return { isPremium: state.isPremium, premiumExpiry: state.expiry };
+  })(),
+  setPremium: (val: boolean) => {
+    save('tc_premium', val);
+    if (!val) {
+      try { localStorage.removeItem(PREMIUM_EXPIRY_KEY); } catch {}
+      set({ isPremium: false, premiumExpiry: null });
+    } else {
+      set({ isPremium: true });
+    }
+  },
+  activatePremiumDays: (days: number) => {
+    // Если премиум уже активен — продлеваем от текущего срока
+    const current = get().premiumExpiry;
+    const base = current && current > Date.now() ? current : Date.now();
+    const expiry = base + days * 24 * 60 * 60 * 1000;
+    try {
+      localStorage.setItem(PREMIUM_EXPIRY_KEY, String(expiry));
+      localStorage.setItem('tc_premium', 'true');
+    } catch {}
+    set({ isPremium: true, premiumExpiry: expiry });
+  },
+  activatePremiumForever: () => {
+    try {
+      localStorage.setItem('tc_premium', 'true');
+      localStorage.removeItem(PREMIUM_EXPIRY_KEY);
+    } catch {}
+    set({ isPremium: true, premiumExpiry: null });
+  },
 
   /* ═══ Админ ═══ */
   isAdmin: load<boolean>('tc_admin', false),
@@ -127,8 +178,7 @@ export const useStore = create<AppState>((set, get) => ({
       set({ isAdmin: true });
       // Админ @MikySauce всегда премиум
       if (isAdminUser) {
-        save('tc_premium', true);
-        set({ isPremium: true });
+        get().activatePremiumForever();
       }
       return true;
     }
@@ -137,13 +187,13 @@ export const useStore = create<AppState>((set, get) => ({
   adminLogout: () => { save('tc_admin', false); set({ isAdmin: false }); },
 
   /* ═══ Telegram ═══ */
-  telegramUsername: '',
+  telegramUsername: load<string>('tc_username', ''),
   setTelegramUsername: (u: string) => {
+    save('tc_username', u);
     set({ telegramUsername: u });
     // Автоматически давать премиум админу
     if (ADMIN_USERNAMES.includes(u)) {
-      save('tc_premium', true);
-      set({ isPremium: true });
+      get().activatePremiumForever();
     }
   },
 

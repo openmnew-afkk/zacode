@@ -3,6 +3,17 @@ import type { WatchOption } from '../types';
 import './VideoPlayer.css';
 
 const LOAD_TIMEOUT_MS = 12000;
+const DUB_PREF_KEY = 'tc_dub_pref';
+
+/** Запомнить выбранную озвучку */
+const savePreferredDub = (label: string) => {
+  try { localStorage.setItem(DUB_PREF_KEY, label); } catch {}
+};
+
+/** Получить запомненную озвучку */
+const getPreferredDub = (): string => {
+  try { return localStorage.getItem(DUB_PREF_KEY) || ''; } catch { return ''; }
+};
 
 export type PlayerMode = 'compact' | 'fullscreen';
 
@@ -48,6 +59,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const canNext = isSerial && episode < maxEpisode;
   const isFs = mode === 'fullscreen';
 
+  /* Группировка: озвучки Kodik отдельно от остальных плееров */
+  const dubs = iframeOpts.filter((o) => o.provider === 'Kodik');
+  const others = iframeOpts.filter((o) => o.provider !== 'Kodik');
+
   useEffect(() => {
     if (activeIdx >= iframeOpts.length && iframeOpts.length > 0) {
       setActiveIdx(0);
@@ -55,11 +70,27 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   }, [iframeOpts.length, activeIdx]);
 
   const switchTo = useCallback((idx: number) => {
+    // Запоминаем выбор озвучки — применим при смене серий
+    const opt = iframeOpts[idx];
+    if (opt?.provider === 'Kodik' && opt.label) savePreferredDub(opt.label);
     setActiveIdx(idx);
     setLoaded(false);
     setShowSources(false);
     setCountdown(LOAD_TIMEOUT_MS / 1000);
-  }, []);
+  }, [iframeOpts]);
+
+  /* При смене серии/сезона восстанавливаем запомненную озвучку */
+  useEffect(() => {
+    if (iframeOpts.length === 0) return;
+    const pref = getPreferredDub();
+    if (!pref) return;
+    const idx = iframeOpts.findIndex((o) => o.label === pref);
+    if (idx > 0) {
+      setActiveIdx(idx);
+      setLoaded(false);
+      setCountdown(LOAD_TIMEOUT_MS / 1000);
+    }
+  }, [iframeOpts]);
 
   useEffect(() => {
     setLoaded(false);
@@ -161,12 +192,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             className={`vp-chip ${i === activeIdx ? 'active' : ''}`}
             onClick={() => switchTo(i)}
           >
-            {opt.label}
+            <span className="vp-chip__flag">{opt.flag}</span> {opt.label}
           </button>
         ))}
         {iframeOpts.length > 5 && (
           <button className="vp-chip vp-chip--more" onClick={() => setShowSources(true)}>
-            Ещё
+            Ещё {iframeOpts.length - 5}
           </button>
         )}
       </div>
@@ -225,37 +256,84 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
         )}
       </header>
 
-      {showSources && (
-        <>
-          <div className="vp-scrim" onClick={() => setShowSources(false)} aria-hidden />
-          <div className="vp-sheet" role="listbox" aria-label="Источники">
-            <div className="vp-sheet__handle" />
-            <p className="vp-sheet__hint">Промотка и громкость — внутри плеера ниже. Если не грузится — смени источник.</p>
-            <div className="vp-sheet__list">
-              {iframeOpts.map((opt, i) => (
-                <button
-                  key={opt.id}
-                  role="option"
-                  aria-selected={i === activeIdx}
-                  className={`vp-sheet__item ${i === activeIdx ? 'active' : ''}`}
-                  onClick={() => switchTo(i)}
-                >
-                  <span className="vp-sheet__flag">{opt.flag}</span>
-                  <span className="vp-sheet__info">
-                    <span className="vp-sheet__name">{opt.label}</span>
-                    <span className="vp-sheet__sub">{opt.sublabel}</span>
-                  </span>
-                  {opt.quality && <span className="vp-sheet__q">{opt.quality}</span>}
-                  {i === activeIdx && <span className="vp-sheet__check">✓</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
+       {showSources && (
+         <>
+           <div className="vp-scrim" onClick={() => setShowSources(false)} aria-hidden />
+           <div className="vp-sheet" role="listbox" aria-label="Источники">
+             <div className="vp-sheet__handle" />
+             <p className="vp-sheet__hint">
+               Найдено источников: {iframeOpts.length} · Промотка и громкость — внутри плеера
+             </p>
+             <div className="vp-sheet__list">
+               {/* Озвучки (Kodik API) */}
+               {dubs.length > 0 && (
+                 <>
+                   <p className="vp-sheet__group-title">🎙️ Русские озвучки</p>
+                   {dubs.map((opt) => {
+                     const i = iframeOpts.indexOf(opt);
+                     return (
+                       <button
+                         key={opt.id}
+                         role="option"
+                         aria-selected={i === activeIdx}
+                         className={`vp-sheet__item ${i === activeIdx ? 'active' : ''}`}
+                         onClick={() => switchTo(i)}
+                       >
+                         <span className="vp-sheet__flag">{opt.flag}</span>
+                         <span className="vp-sheet__info">
+                           <span className="vp-sheet__name">{opt.label}</span>
+                           <span className="vp-sheet__sub">{opt.sublabel}</span>
+                         </span>
+                         {opt.quality && <span className="vp-sheet__q">{opt.quality}</span>}
+                         {i === activeIdx && <span className="vp-sheet__check">✓</span>}
+                       </button>
+                     );
+                   })}
+                 </>
+               )}
+               {/* Остальные плееры */}
+               {others.length > 0 && (
+                 <>
+                   <p className="vp-sheet__group-title">📺 Плееры</p>
+                   {others.map((opt) => {
+                     const i = iframeOpts.indexOf(opt);
+                     return (
+                       <button
+                         key={opt.id}
+                         role="option"
+                         aria-selected={i === activeIdx}
+                         className={`vp-sheet__item ${i === activeIdx ? 'active' : ''}`}
+                         onClick={() => switchTo(i)}
+                       >
+                         <span className="vp-sheet__flag">{opt.flag}</span>
+                         <span className="vp-sheet__info">
+                           <span className="vp-sheet__name">{opt.label}</span>
+                           <span className="vp-sheet__sub">{opt.sublabel}</span>
+                         </span>
+                         {opt.quality && <span className="vp-sheet__q">{opt.quality}</span>}
+                         {i === activeIdx && <span className="vp-sheet__check">✓</span>}
+                       </button>
+                     );
+                   })}
+                 </>
+               )}
+             </div>
+           </div>
+         </>
+       )}
 
       {/* Видео-кадр — без наших панелей поверх, чтобы работали seek/fullscreen внутри iframe */}
       <div className="vp-frame" ref={frameRef}>
+        {/* Оверлей загрузки новых источников при смене серии */}
+        {loadingOptions && (
+          <div className="vp-loading vp-loading--overlay">
+            <div className="vp-loading__content">
+              <div className="vp-loading__spin" />
+              <p className="vp-loading__title">Ищем озвучки…</p>
+            </div>
+          </div>
+        )}
+
         {!loaded && (
           <div className="vp-loading">
             {poster && <img src={poster} alt="" className="vp-loading__poster" />}

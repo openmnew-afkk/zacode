@@ -8,12 +8,17 @@ import './ProfilePage.css';
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp } = useTelegram();
-  const { favorites, watchHistory, clearHistory } = useStore();
+  const { favorites, watchHistory, clearHistory, isPremium, premiumExpiry } = useStore();
 
   const showCloseModal = false;
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Гость';
   const username = user?.username ? `@${user.username}` : '';
+
+  /* Остаток дней премиума */
+  const daysLeft = premiumExpiry
+    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
+    : null;
 
   return (
     <div className="profile-page page">
@@ -28,6 +33,11 @@ const ProfilePage: React.FC = () => {
         </div>
         <h1 className="profile-name">{displayName}</h1>
         {username && <p className="profile-username">{username}</p>}
+        {isPremium && (
+          <div className="profile-premium-badge">
+            👑 Премиум{daysLeft ? ` · ${daysLeft} дн.` : ' · бессрочно'}
+          </div>
+        )}
       </div>
 
       {/* Статистика */}
@@ -54,6 +64,17 @@ const ProfilePage: React.FC = () => {
         <div className="profile-setting" onClick={() => navigate('/search')}>
           <span className="profile-setting__label">🔍 Поиск</span>
           <span className="profile-setting__value">→</span>
+        </div>
+
+        <div
+          className="profile-setting"
+          onClick={() => navigate('/premium')}
+          style={{ background: 'rgba(139,92,246,0.08)', borderRadius: 14 }}
+        >
+          <span className="profile-setting__label">
+            {isPremium ? '👑 Мой Премиум' : '👑 Подключить Премиум'}
+          </span>
+          <span className="profile-setting__value">{isPremium ? '✓' : '→'}</span>
         </div>
       </div>
 
