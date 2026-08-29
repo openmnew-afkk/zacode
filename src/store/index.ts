@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import type { Movie, WatchHistoryItem, AppTheme } from '../types';
+import type { BackendConfig, Requisites, Prices } from '../api/backend';
 
 /* ── localStorage helpers ── */
 const load = <T>(key: string, fallback: T): T => {
@@ -90,7 +91,25 @@ interface AppState {
   /* Объявления */
   announcement: string;
   setAnnouncement: (text: string) => void;
+
+  /* ═══ Мини-бэкенд (центральный конфиг) ═══ */
+  /** Реквизиты оплаты премиума (задаёт админ) */
+  requisites: Requisites;
+  /** Цены (задаёт админ) */
+  prices: Prices;
+  /** Список модераторов */
+  moderators: string[];
+  /** Роль пользователя: admin / moderator / null */
+  role: 'admin' | 'moderator' | null;
+  setRole: (role: 'admin' | 'moderator' | null) => void;
+  /** Применить конфиг с сервера (реклама, объявления, реквизиты, премия) */
+  applyBackendConfig: (cfg: BackendConfig, myName: string) => void;
+  /** Активировать премиум с сервера (без записи в localStorage) */
+  applyRemotePremium: (expiry: number | null) => void;
 }
+
+const DEFAULT_REQUISITES: Requisites = { card: '', sbp: '', crypto: '', note: '' };
+const DEFAULT_PRICES: Prices = { month: 199, monthFirst: 99, year: 2400, yearFirst: 1600 };
 
 export const useStore = create<AppState>((set, get) => ({
   /* ═══ Избранное ═══ */
@@ -176,6 +195,7 @@ export const useStore = create<AppState>((set, get) => ({
     if (hash === correctHash) {
       save('tc_admin', true);
       set({ isAdmin: true });
+      get().setRole('admin');
       // Админ @MikySauce всегда премиум
       if (isAdminUser) {
         get().activatePremiumForever();
@@ -184,7 +204,7 @@ export const useStore = create<AppState>((set, get) => ({
     }
     return false;
   },
-  adminLogout: () => { save('tc_admin', false); set({ isAdmin: false }); },
+  adminLogout: () => { save('tc_admin', false); set({ isAdmin: false }); get().setRole(null); },
 
   /* ═══ Telegram ═══ */
   telegramUsername: load<string>('tc_username', ''),
@@ -204,4 +224,39 @@ export const useStore = create<AppState>((set, get) => ({
   /* ═══ Объявления ═══ */
   announcement: load<string>('tc_announcement', ''),
   setAnnouncement: (text: string) => { save('tc_announcement', text); set({ announcement: text }); },
+
+  /* ═══ Мини-бэкенд (центральный конфиг) ═══ */
+  requisites: { ...DEFAULT_REQUISITES },
+  prices: { ...DEFAULT_PRICES },
+  moderators: [],
+  role: load<'admin' | 'moderator' | null>('tc_role', null),
+  setRole: (role) => { save('tc_role', role); set({ role }); },
+  applyRemotePremium: (expiry) => {
+    // Премиум с сервера: только в state (не в localStorage) —
+    // при следующем запуске конфиг подтянется заново
+    if (expiry === null || expiry > Date.now()) {
+      set({ isPremium: true, premiumExpiry: expiry });
+    }
+  },
+  applyBackendConfig: (cfg, myName) => {
+    const patch: Partial<AppState> = {
+      adsEnabled: cfg.adsEnabled,
+      announcement: cfg.announcement || load<string>('tc_announcement', ''),
+      requisites: { ...DEFAULT_REQUISITES, ...(cfg.requisites || {}) },
+      prices: { ...DEFAULT_PRICES, ...(cfg.prices || {}) },
+      moderators: cfg.moderators || [],
+    };
+    set(patch as AppState);
+
+    /* Мой премиум на сервере? (по username или имени) */
+    const n = myName.trim().replace(/^@/, '').toLowerCase();
+    if (n) {
+      const grant = (cfg.premiumGrants || []).find(
+        (g) => g.username?.toLowerCase() === n || g.name?.toLowerCase() === n
+      );
+      if (grant && (grant.forever || (grant.expiry && grant.expiry > Date.now()))) {
+        get().applyRemotePremium(grant.forever ? null : grant.expiry);
+      }
+    }
+  },
 }));

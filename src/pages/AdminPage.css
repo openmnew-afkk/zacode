@@ -38,3 +38,15 @@
 .admin__proxy-status { margin: 10px 0 0; font-size: 13px; line-height: 1.4; word-break: break-all; }
 .admin__proxy-status.ok { color: #4ade80; }
 .admin__proxy-status.fail { color: #f87171; }
+/* Списки (гранты, модераторы, платежи) */
+.admin__row { margin-bottom: 10px; }
+.admin__select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #fff; font-size: 14px; outline: none; }
+.admin__select option { background: #1a1625; }
+.admin__list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.admin__list-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 12px; }
+.admin__list-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.admin__list-name { color: #fff; font-size: 14px; font-weight: 600; }
+.admin__list-sub { color: rgba(255,255,255,0.4); font-size: 11px; }
+.admin__list-actions { display: flex; align-items: center; gap: 8px; }
+.admin__list-remove { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3); color: #f87171; width: 28px; height: 28px; border-radius: 50%; font-size: 13px; cursor: pointer; flex-shrink: 0; }
+.admin__list-btn { background: rgba(139,92,246,0.15); border: 1px solid rgba(139,92,246,0.35); color: #c4b5fd; padding: 6px 10px; border-radius: 10px; font-size: 12px; cursor: pointer; white-space: nowrap; }

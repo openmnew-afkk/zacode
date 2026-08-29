@@ -13,6 +13,7 @@ import AiFab from './components/AiFab';
 import SplashPage from './components/SplashPage';
 import { useTelegram } from './hooks/useTelegram';
 import { useStore } from './store';
+import { fetchConfig } from './api/backend';
 
 /* ===== КиноЗал — App ===== */
 
@@ -20,17 +21,26 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
   const { tg } = useTelegram();
-  const { setTelegramUsername } = useStore();
+  const { setTelegramUsername, applyBackendConfig } = useStore();
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
     // Получаем Telegram username для проверки админа
+    let myName = '';
     try {
       const user = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
       if (user?.username) {
         setTelegramUsername(user.username);
+        myName = user.username;
+      } else if (user?.first_name) {
+        myName = user.first_name;
       }
     } catch {}
+
+    // Центральный конфиг с мини-бэкенда (реклама, объявления, премия, реквизиты)
+    fetchConfig().then((cfg) => {
+      if (cfg) applyBackendConfig(cfg, myName);
+    });
   }, []);
 
   const handleSplashDone = () => setShowSplash(false);

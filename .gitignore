@@ -30,3 +30,4 @@ Thumbs.db
 .codex/
 .cursor/
 .agents/
+proxy/data.json

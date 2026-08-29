@@ -419,3 +419,28 @@
   font-weight: 600;
   cursor: pointer;
 }
+
+/* ── Тост избранного ── */
+.dp-fav-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(20, 16, 32, 0.92);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 20px;
+  border-radius: 14px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  z-index: 150;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.dp-fav-toast--show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

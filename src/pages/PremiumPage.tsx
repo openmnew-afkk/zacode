@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
+import { claimPremium, getApiBase } from '../api/backend';
 import './PremiumPage.css';
 import './PremiumRoulette.css';
 
@@ -22,11 +23,17 @@ const PremiumPage: React.FC = () => {
   const { haptic } = useTelegram();
   const {
     isPremium, setPremium, activatePremiumDays, activatePremiumForever,
-    premiumExpiry, telegramUsername,
+    premiumExpiry, telegramUsername, requisites, prices, applyRemotePremium,
   } = useStore();
   const [selectedPlan, setSelectedPlan] = useState<'month' | 'year'>('year');
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+
+  /* Оплата по реквизитам */
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payName, setPayName] = useState(telegramUsername);
+  const [payMsg, setPayMsg] = useState('');
+  const [payLoading, setPayLoading] = useState(false);
 
   // Рулетка
   const [spinning, setSpinning] = useState(false);
@@ -93,16 +100,37 @@ const PremiumPage: React.FC = () => {
       setTimeout(() => setShowSuccess(false), 3000);
       return;
     }
-    if (isFirstPurchase) {
-      try { localStorage.setItem('tc_first_purchase_done', 'true'); } catch {}
-    }
-    setSuccessMsg('💳 Оплата будет доступна в ближайшее время!');
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 4000);
+    /* Оплата по реквизитам */
+    setPayName(telegramUsername || payName);
+    setPayMsg('');
+    setShowPayModal(true);
   };
 
-  const monthPrice = isFirstPurchase ? 99 : 199;
-  const yearPrice = isFirstPurchase ? 1600 : 2400;
+  /* «Я оплатил» → авто-активация премиума на сервере */
+  const handlePaid = async () => {
+    if (!payName.trim()) {
+      setPayMsg('❌ Укажите ваше имя или @username');
+      return;
+    }
+    setPayLoading(true);
+    setPayMsg('⏳ Проверяю оплату…');
+    const res = await claimPremium(payName.trim().replace(/^@/, ''), selectedPlan);
+    setPayLoading(false);
+    setPayMsg(res.message || '');
+    if (res.ok && res.activated) {
+      // Премиум активирован на сервере — включаем локально
+      if (res.expiry) {
+        applyRemotePremium(res.expiry);
+      } else {
+        activatePremiumDays(selectedPlan === 'year' ? 365 : 30);
+      }
+      haptic('heavy');
+      setTimeout(() => setShowPayModal(false), 2500);
+    }
+  };
+
+  const monthPrice = isFirstPurchase ? (prices.monthFirst ?? 99) : (prices.month ?? 199);
+  const yearPrice = isFirstPurchase ? (prices.yearFirst ?? 1600) : (prices.year ?? 2400);
   const yearMonthly = Math.round(yearPrice / 12);
 
   if (isPremium) {
@@ -241,6 +269,67 @@ const PremiumPage: React.FC = () => {
             ? '13 месяцев за цену 12 · Отмена в любой момент'
             : 'Первые 3 дня бесплатно · Отмена в любой момент'}
         </p>
+
+        {/* Модалка оплаты по реквизитам */}
+        {showPayModal && (
+          <div className="pm-pay-overlay" onClick={() => !payLoading && setShowPayModal(false)}>
+            <div className="pm-pay" onClick={(e) => e.stopPropagation()}>
+              <h2 className="pm-pay__title">
+                💳 Оплата · {selectedPlan === 'year' ? `${yearPrice} ₽ / год` : `${monthPrice} ₽ / мес`}
+              </h2>
+              <div className="pm-pay__req">
+                {requisites.card && (
+                  <div className="pm-pay__row" onClick={() => navigator.clipboard?.writeText(requisites.card)}>
+                    <span className="pm-pay__label">💳 Карта</span>
+                    <span className="pm-pay__value">{requisites.card} 📋</span>
+                  </div>
+                )}
+                {requisites.sbp && (
+                  <div className="pm-pay__row" onClick={() => navigator.clipboard?.writeText(requisites.sbp)}>
+                    <span className="pm-pay__label">🏦 СБП</span>
+                    <span className="pm-pay__value">{requisites.sbp} 📋</span>
+                  </div>
+                )}
+                {requisites.crypto && (
+                  <div className="pm-pay__row" onClick={() => navigator.clipboard?.writeText(requisites.crypto)}>
+                    <span className="pm-pay__label">🪙 Крипта</span>
+                    <span className="pm-pay__value">{requisites.crypto} 📋</span>
+                  </div>
+                )}
+                {requisites.note && <p className="pm-pay__note">{requisites.note}</p>}
+                {!requisites.card && !requisites.sbp && !requisites.crypto && (
+                  <p className="pm-pay__note">
+                    Реквизиты пока не заданы — напишите админу: {getApiBase() ? '' : 'и попросите настроить API-сервер'}
+                  </p>
+                )}
+              </div>
+
+              <p className="pm-pay__hint">
+                1. Оплатите выбранную сумму по реквизитам выше<br />
+                2. Укажите ваше имя/@username и нажмите «Я оплатил»
+              </p>
+
+              <input
+                className="pm-pay__input"
+                type="text"
+                placeholder="Ваше имя или @username"
+                value={payName}
+                onChange={e => { setPayName(e.target.value); setPayMsg(''); }}
+                spellCheck={false}
+                autoComplete="off"
+              />
+
+              <button className="pm-pay__btn" onClick={handlePaid} disabled={payLoading}>
+                {payLoading ? '⏳ Проверяю…' : '✅ Я оплатил'}
+              </button>
+              {payMsg && <p className="pm-pay__msg">{payMsg}</p>}
+
+              <button className="pm-pay__cancel" onClick={() => setShowPayModal(false)} disabled={payLoading}>
+                Отмена
+              </button>
+            </div>
+          </div>
+        )}
 
         {showSuccess && (
           <div className="pm-success"><span>✓</span> {successMsg}</div>

@@ -198,3 +198,48 @@
 /* ── Active Premium ── */
 .pm-active-features { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; width: 100%; max-width: 340px; }
 .pm-active-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 14px 18px; color: rgba(255,255,255,0.8); font-size: 14px; font-weight: 600; }
+
+/* ── Модалка оплаты по реквизитам ── */
+.pm-pay-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: pmPayFade 0.2s ease;
+}
+@keyframes pmPayFade { from { opacity: 0; } to { opacity: 1; } }
+.pm-pay {
+  width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
+  background: linear-gradient(180deg, #1d1733, #141020);
+  border-radius: 24px 24px 0 0; padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  animation: pmPaySlide 0.25s ease;
+}
+@keyframes pmPaySlide { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.pm-pay__title { color: #fff; font-size: 18px; font-weight: 800; margin: 0 0 16px; text-align: center; }
+.pm-pay__req { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.pm-pay__row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.25);
+  border-radius: 12px; padding: 12px 14px; cursor: pointer;
+}
+.pm-pay__row:active { background: rgba(139,92,246,0.2); }
+.pm-pay__label { color: rgba(255,255,255,0.5); font-size: 12px; flex-shrink: 0; }
+.pm-pay__value { color: #fff; font-size: 14px; font-weight: 700; word-break: break-all; text-align: right; }
+.pm-pay__note { color: rgba(255,255,255,0.45); font-size: 12px; line-height: 1.5; margin: 4px 0; }
+.pm-pay__hint { color: rgba(255,255,255,0.5); font-size: 12px; line-height: 1.6; margin: 0 0 12px; }
+.pm-pay__input {
+  width: 100%; box-sizing: border-box; padding: 14px 16px; border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.06);
+  color: #fff; font-size: 15px; outline: none; margin-bottom: 12px;
+}
+.pm-pay__input:focus { border-color: rgba(139,92,246,0.6); }
+.pm-pay__btn {
+  width: 100%; padding: 15px; border-radius: 14px; border: none;
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff;
+  font-size: 16px; font-weight: 800; cursor: pointer;
+}
+.pm-pay__btn:disabled { opacity: 0.5; }
+.pm-pay__msg { color: #c4b5fd; font-size: 13px; text-align: center; margin: 10px 0 0; }
+.pm-pay__cancel {
+  width: 100%; margin-top: 12px; padding: 12px; border-radius: 12px;
+  background: none; border: none; color: rgba(255,255,255,0.4); font-size: 14px; cursor: pointer;
+}

@@ -20,6 +20,8 @@ const MovieDetailPage: React.FC = () => {
   const [playerOptions, setPlayerOptions] = useState<WatchOption[]>([]);
   const [showPlayer, setShowPlayer] = useState(false);
   const [heartAnim, setHeartAnim] = useState(false);
+  const [favToast, setFavToast] = useState('');
+  const [favToastVisible, setFavToastVisible] = useState(false);
   const [activeSeason, setActiveSeason] = useState(1);
   const [activeEpisode, setActiveEpisode] = useState(1);
   const [sourceLoading, setSourceLoading] = useState(false);
@@ -93,8 +95,17 @@ const MovieDetailPage: React.FC = () => {
     setHeartAnim(true);
     setTimeout(() => setHeartAnim(false), 400);
     if (movie) {
-      if (favorite) removeFavorite(movie.id);
-      else addFavorite(movie);
+      if (favorite) {
+        removeFavorite(movie.id);
+        setFavToast('Удалено из избранного 💔');
+        haptic('medium');
+      } else {
+        addFavorite(movie);
+        setFavToast('Добавлено в избранное ❤️');
+        haptic('heavy');
+      }
+      setFavToastVisible(true);
+      setTimeout(() => setFavToastVisible(false), 1800);
     }
   };
 
@@ -250,6 +261,11 @@ const MovieDetailPage: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* ── Тост избранного ── */}
+      <div className={`dp-fav-toast ${favToastVisible ? 'dp-fav-toast--show' : ''}`}>
+        {favToast}
       </div>
 
       {movie.overview && (

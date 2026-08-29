@@ -7,54 +7,104 @@ import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, closeApp } = useTelegram();
-  const { favorites, watchHistory, clearHistory, isPremium, premiumExpiry } = useStore();
-
-  const showCloseModal = false;
+  const { user, closeApp, haptic } = useTelegram();
+  const {
+    favorites, watchHistory, clearHistory, isPremium, premiumExpiry,
+    adsEnabled, setAdsEnabled, theme, setTheme, role, telegramUsername,
+  } = useStore();
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Гость';
-  const username = user?.username ? `@${user.username}` : '';
+  const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
 
   /* Остаток дней премиума */
   const daysLeft = premiumExpiry
     ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
     : null;
 
+  const isAdminUser = user?.username === 'MikySauce' || role === 'admin' || role === 'moderator';
+
   return (
     <div className="profile-page page">
-      {/* Шапка */}
-      <div className="profile-header">
-        <div className="profile-avatar">
-          {user?.photo_url ? (
-            <img src={user.photo_url} alt="" className="profile-avatar__img" />
-          ) : (
-            <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
-          )}
+      {/* ── Шапка профиля ── */}
+      {isPremium ? (
+        /* 👑 Премиум-профиль — золотая карточка */
+        <div className="profile-header profile-header--premium">
+          <div className="profile-premium-shine" />
+          <div className="profile-avatar profile-avatar--premium">
+            {user?.photo_url ? (
+              <img src={user.photo_url} alt="" className="profile-avatar__img" />
+            ) : (
+              <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
+            )}
+            <span className="profile-avatar__crown">👑</span>
+          </div>
+          <h1 className="profile-name profile-name--premium">{displayName}</h1>
+          {username && <p className="profile-username">{username}</p>}
+          <div className="profile-premium-badge profile-premium-badge--gold">
+            ✨ PREMIUM{daysLeft ? ` · ${daysLeft} дн.` : ' · ♾️ БЕССРОЧНО'}
+          </div>
+          <div className="profile-perks">
+            <span className="profile-perk">🔥 LostFilm</span>
+            <span className="profile-perk">🚫 Без рекламы</span>
+            <span className="profile-perk">📺 4K</span>
+          </div>
         </div>
-        <h1 className="profile-name">{displayName}</h1>
-        {username && <p className="profile-username">{username}</p>}
+      ) : (
+        /* Обычный профиль — просто и аккуратно */
+        <div className="profile-header">
+          <div className="profile-avatar">
+            {user?.photo_url ? (
+              <img src={user.photo_url} alt="" className="profile-avatar__img" />
+            ) : (
+              <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
+            )}
+          </div>
+          <h1 className="profile-name">{displayName}</h1>
+          {username && <p className="profile-username">{username}</p>}
+          <div className="profile-premium-badge">Базовый профиль</div>
+        </div>
+      )}
+
+      {/* Статистика */}
+      <div className="profile-stats">
+        <div className="profile-stat" onClick={() => navigate('/favorites')}>
+          <span className="profile-stat__value">{watchHistory.length}</span>
+          <span className="profile-stat__label">Просмотрено</span>
+        </div>
+        <div className="profile-stat" onClick={() => navigate('/favorites')}>
+          <span className="profile-stat__value">{favorites.length}</span>
+          <span className="profile-stat__label">В избранном</span>
+        </div>
         {isPremium && (
-          <div className="profile-premium-badge">
-            👑 Премиум{daysLeft ? ` · ${daysLeft} дн.` : ' · бессрочно'}
+          <div className="profile-stat profile-stat--premium">
+            <span className="profile-stat__value">👑</span>
+            <span className="profile-stat__label">Премиум</span>
           </div>
         )}
       </div>
 
-      {/* Статистика */}
-      <div className="profile-stats">
-        <div className="profile-stat">
-          <span className="profile-stat__value">{watchHistory.length}</span>
-          <span className="profile-stat__label">Просмотрено</span>
-        </div>
-        <div className="profile-stat">
-          <span className="profile-stat__value">{favorites.length}</span>
-          <span className="profile-stat__label">В избранном</span>
-        </div>
-      </div>
-
       {/* Настройки */}
       <div className="profile-section">
-        <h2 className="profile-section__title">Настройки</h2>
+        <h2 className="profile-section__title">⚙️ Настройки</h2>
+
+        {/* Тема */}
+        <div
+          className="profile-setting"
+          onClick={() => { haptic('light'); setTheme(theme === 'dark' ? 'light' : 'dark'); }}
+        >
+          <span className="profile-setting__label">
+            {theme === 'dark' ? '🌙 Тёмная тема' : '☀️ Светлая тема'}
+          </span>
+          <span className="profile-setting__value">→</span>
+        </div>
+
+        {/* Реклама */}
+        <div className="profile-setting" onClick={() => { haptic('light'); setAdsEnabled(!adsEnabled); }}>
+          <span className="profile-setting__label">
+            {adsEnabled ? '📺 Реклама включена' : '🚫 Реклама выключена'}
+          </span>
+          <span className="profile-setting__value">{adsEnabled ? 'Вкл' : 'Выкл'}</span>
+        </div>
 
         <div className="profile-setting" onClick={() => navigate('/favorites')}>
           <span className="profile-setting__label">❤️ Избранное</span>
@@ -67,9 +117,9 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div
-          className="profile-setting"
+          className={`profile-setting ${isPremium ? 'profile-setting--premium' : ''}`}
           onClick={() => navigate('/premium')}
-          style={{ background: 'rgba(139,92,246,0.08)', borderRadius: 14 }}
+          style={isPremium ? undefined : { background: 'rgba(139,92,246,0.08)', borderRadius: 14 }}
         >
           <span className="profile-setting__label">
             {isPremium ? '👑 Мой Премиум' : '👑 Подключить Премиум'}
@@ -108,11 +158,17 @@ const ProfilePage: React.FC = () => {
         )}
       </div>
 
-      {/* Админ — только для @MikySauce */}
-      {user?.username === 'MikySauce' && (
+      {/* Админ/модератор */}
+      {isAdminUser && (
         <div className="profile-section">
-          <div className="profile-setting" onClick={() => navigate('/admin')} style={{background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 14}}>
-            <span className="profile-setting__label">⚙️ Админ панель</span>
+          <div
+            className="profile-setting"
+            onClick={() => navigate('/admin')}
+            style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 14 }}
+          >
+            <span className="profile-setting__label">
+              {role === 'moderator' && user?.username !== 'MikySauce' ? '🛡 Панель модератора' : '⚙️ Админ панель'}
+            </span>
             <span className="profile-setting__value">→</span>
           </div>
         </div>
