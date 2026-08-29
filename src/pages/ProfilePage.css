@@ -273,11 +273,6 @@
   border: 1.5px solid rgba(255,215,0,0.7);
   box-shadow: 0 0 24px rgba(255,215,0,0.22);
 }
-.profile-avatar__crown {
-  position: absolute; top: -9px; right: -6px;
-  font-size: 17px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
-}
 .profile-name--premium {
   background: linear-gradient(92deg, #ffd97a, #fff6d8 50%, #ffd97a);
   background-size: 200% auto;
@@ -296,14 +291,6 @@
   font-size: 11px;
   padding: 7px 16px;
   box-shadow: 0 4px 18px rgba(255,215,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15);
-}
-.profile-perks { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
-.profile-perk {
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  color: rgba(255,255,255,0.85);
-  font-size: 11px; font-weight: 600;
-  padding: 5px 10px; border-radius: 20px;
 }
 .profile-stat--premium {
   border: 1px solid rgba(255,215,0,0.25);

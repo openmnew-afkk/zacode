@@ -18,9 +18,9 @@ import { fetchConfig } from './api/backend';
 /* ===== КиноЗал — App ===== */
 
 function App() {
-  // Сплэш показываем один раз за сессию — потом сразу главная
+  // Сплэш показываем ОДИН РАЗ за всё время (первый запуск) — дальше сразу главная
   const [showSplash, setShowSplash] = useState(() => {
-    try { return sessionStorage.getItem('tc_splash_shown') !== '1'; } catch { return true; }
+    try { return localStorage.getItem('tc_splash_seen') !== '1'; } catch { return false; }
   });
   const location = useLocation();
   const { tg } = useTelegram();
@@ -53,7 +53,7 @@ function App() {
   }, [theme]);
 
   const handleSplashDone = () => {
-    try { sessionStorage.setItem('tc_splash_shown', '1'); } catch {}
+    try { localStorage.setItem('tc_splash_seen', '1'); } catch {}
     setShowSplash(false);
   };
 

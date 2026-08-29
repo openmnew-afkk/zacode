@@ -36,7 +36,6 @@ const ProfilePage: React.FC = () => {
             ) : (
               <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
             )}
-            <span className="profile-avatar__crown">👑</span>
           </div>
           <h1 className="profile-name profile-name--premium">{displayName}</h1>
           {username && <p className="profile-username">{username}</p>}
