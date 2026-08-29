@@ -18,13 +18,22 @@ import { fetchConfig } from './api/backend';
 /* ===== КиноЗал — App ===== */
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  // Сплэш показываем один раз за сессию — потом сразу главная
+  const [showSplash, setShowSplash] = useState(() => {
+    try { return sessionStorage.getItem('tc_splash_shown') !== '1'; } catch { return true; }
+  });
   const location = useLocation();
   const { tg } = useTelegram();
-  const { setTelegramUsername, applyBackendConfig } = useStore();
+  const { setTelegramUsername, applyBackendConfig, theme } = useStore();
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
+    // Светлая/тёмная тема
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      tg?.setHeaderColor?.(theme === 'light' ? '#f4f2ee' : '#08080f');
+      tg?.setBottomBarColor?.(theme === 'light' ? '#f4f2ee' : '#08080f');
+    } catch {}
     // Получаем Telegram username для проверки админа
     let myName = '';
     try {
@@ -41,9 +50,12 @@ function App() {
     fetchConfig().then((cfg) => {
       if (cfg) applyBackendConfig(cfg, myName);
     });
-  }, []);
+  }, [theme]);
 
-  const handleSplashDone = () => setShowSplash(false);
+  const handleSplashDone = () => {
+    try { sessionStorage.setItem('tc_splash_shown', '1'); } catch {}
+    setShowSplash(false);
+  };
 
   return (
     <div className="app-root" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>

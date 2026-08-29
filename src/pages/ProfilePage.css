@@ -234,56 +234,68 @@
 
 .profile-close:active { background: rgba(244,114,182,0.12); }
 
-/* ═══ 👑 Премиум-профиль ═══ */
+/* ═══ 👑 Премиум-профиль (топ UX/UI) ═══ */
 .profile-header--premium {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(160deg, rgba(139,92,246,0.18), rgba(255,183,77,0.12) 55%, rgba(139,92,246,0.1));
-  border: 1px solid rgba(255,183,77,0.35);
-  border-radius: 24px;
-  padding: 28px 18px;
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(232,184,74,0.14), transparent 60%),
+    linear-gradient(180deg, rgba(139,92,246,0.10), rgba(255,255,255,0.03));
+  border-radius: 28px;
+  padding: 30px 18px 26px;
   margin-bottom: 20px;
-  box-shadow: 0 8px 32px rgba(139,92,246,0.25);
+  isolation: isolate;
+}
+/* Тонкая золотая градиентная рамка */
+.profile-header--premium::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  padding: 1px;
+  background: linear-gradient(160deg, rgba(255,215,0,0.55), rgba(255,215,0,0.06) 40%, rgba(139,92,246,0.35));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 .profile-premium-shine {
   position: absolute; top: 0; left: -80%;
-  width: 60%; height: 100%;
-  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.08), transparent);
-  animation: profileShine 3.5s ease-in-out infinite;
+  width: 55%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: profileShine 4.5s ease-in-out infinite;
+  pointer-events: none;
 }
 @keyframes profileShine {
-  0% { left: -80%; } 60%, 100% { left: 130%; }
+  0% { left: -80%; } 55%, 100% { left: 140%; }
 }
 .profile-avatar--premium {
-  position: relative;
-  border: 2px solid rgba(255,183,77,0.8);
-  box-shadow: 0 0 18px rgba(255,183,77,0.4);
+  border: 1.5px solid rgba(255,215,0,0.7);
+  box-shadow: 0 0 24px rgba(255,215,0,0.22);
 }
 .profile-avatar__crown {
-  position: absolute; top: -14px; right: -10px;
-  font-size: 22px;
-  filter: drop-shadow(0 2px 6px rgba(255,183,77,0.6));
-  animation: crownFloat 2.5s ease-in-out infinite;
-}
-@keyframes crownFloat {
-  0%, 100% { transform: translateY(0) rotate(-6deg); }
-  50% { transform: translateY(-4px) rotate(6deg); }
+  position: absolute; top: -9px; right: -6px;
+  font-size: 17px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
 }
 .profile-name--premium {
-  background: linear-gradient(90deg, #ffd97a, #fff2c2, #ffd97a);
+  background: linear-gradient(92deg, #ffd97a, #fff6d8 50%, #ffd97a);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: goldText 3s linear infinite;
+  animation: goldText 4s linear infinite;
 }
 @keyframes goldText { to { background-position: 200% center; } }
 .profile-premium-badge--gold {
-  background: linear-gradient(135deg, #b8860b, #ffd700, #b8860b);
-  color: #1a1400 !important;
+  background: linear-gradient(135deg, rgba(255,215,0,0.16), rgba(255,215,0,0.28));
+  border: 1px solid rgba(255,215,0,0.45);
+  color: #ffe9a8 !important;
   font-weight: 800;
-  letter-spacing: 1px;
-  box-shadow: 0 4px 16px rgba(255,215,0,0.35);
+  letter-spacing: 0.12em;
+  font-size: 11px;
+  padding: 7px 16px;
+  box-shadow: 0 4px 18px rgba(255,215,0,0.12), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 .profile-perks { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
 .profile-perk {
@@ -293,9 +305,13 @@
   font-size: 11px; font-weight: 600;
   padding: 5px 10px; border-radius: 20px;
 }
-.profile-stat--premium { border: 1px solid rgba(255,183,77,0.3); background: rgba(255,183,77,0.06); cursor: pointer; }
+.profile-stat--premium {
+  border: 1px solid rgba(255,215,0,0.25);
+  background: linear-gradient(180deg, rgba(255,215,0,0.08), rgba(255,215,0,0.02));
+  cursor: pointer;
+}
 .profile-setting--premium {
-  background: rgba(255,183,77,0.06) !important;
-  border: 1px solid rgba(255,183,77,0.3);
+  background: linear-gradient(180deg, rgba(255,215,0,0.07), rgba(255,215,0,0.02)) !important;
+  border: 1px solid rgba(255,215,0,0.3);
   border-radius: 14px;
 }

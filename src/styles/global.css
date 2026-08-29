@@ -114,3 +114,183 @@ button {
   outline-offset: 2px;
   border-radius: var(--r-sm);
 }
+
+/* ═══════════════════════════════════════════════
+   ☀️ СВЕТЛАЯ ТЕМА
+   ═══════════════════════════════════════════════ */
+[data-theme='light'] {
+  --bg:           #f4f2ee;
+  --bg-2:         #eceae4;
+  --bg-3:         #e3e0d8;
+  --surface:      rgba(20,16,8,0.04);
+  --surface-2:    rgba(20,16,8,0.06);
+  --surface-3:    rgba(20,16,8,0.09);
+  --border:       rgba(20,16,8,0.10);
+  --border-light: rgba(20,16,8,0.16);
+  --text:         #1c1810;
+  --text-2:       rgba(28,24,16,0.72);
+  --text-3:       rgba(28,24,16,0.45);
+  --accent:       #c8932a;
+  --accent-2:     #d43c3c;
+  --accent-3:     #b07f1e;
+  --accent-glow:  rgba(200,147,42,0.3);
+  --glass-bg:     rgba(255,255,255,0.6);
+  --glass-border: rgba(20,16,8,0.08);
+}
+
+[data-theme='light'] body,
+[data-theme='light'] .app-root { color: var(--text); }
+
+[data-theme='light'] .tab-bar__inner {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(20,16,8,0.08);
+  box-shadow: 0 -4px 24px rgba(20,16,8,0.08);
+}
+[data-theme='light'] .tab-bar__item { color: rgba(28,24,16,0.4); }
+
+[data-theme='light'] .hp-header__title,
+[data-theme='light'] .dp-hero__title,
+[data-theme='light'] .fav-header__title,
+[data-theme='light'] .profile-name,
+[data-theme='light'] .pm-title,
+[data-theme='light'] .admin__title,
+[data-theme='light'] .search-header,
+[data-theme='light'] .hp-row__title,
+[data-theme='light'] .hp-card__title,
+[data-theme='light'] .search-card p,
+[data-theme='light'] .fav-card__title,
+[data-theme='light'] .history-item__title,
+[data-theme='light'] .pm-pay__title,
+[data-theme='light'] .pm-pay__value,
+[data-theme='light'] .admin__section-title,
+[data-theme='light'] .admin__stat-value,
+[data-theme='light'] .admin__list-name,
+[data-theme='light'] .profile-setting__label,
+[data-theme='light'] .profile-section__title,
+[data-theme='light'] .dp-section__title,
+[data-theme='light'] .dp-row__val,
+[data-theme='light'] .pm-feature__title { color: var(--text); }
+
+[data-theme='light'] .hp-header__sub,
+[data-theme='light'] .profile-username,
+[data-theme='light'] .profile-setting__value,
+[data-theme='light'] .history-item__date,
+[data-theme='light'] .fav-card__year,
+[data-theme='light'] .admin__desc,
+[data-theme='light'] .admin__hint,
+[data-theme='light'] .admin__stat-label,
+[data-theme='light'] .admin__list-sub,
+[data-theme='light'] .pm-subtitle,
+[data-theme='light'] .pm-feature__desc,
+[data-theme='light'] .pm-terms,
+[data-theme='light'] .pm-plan__per,
+[data-theme='light'] .dp-hero__orig,
+[data-theme='light'] .dp-row__label,
+[data-theme='light'] .pm-pay__label,
+[data-theme='light'] .pm-pay__hint,
+[data-theme='light'] .pm-pay__note { color: var(--text-3); }
+
+[data-theme='light'] .profile-setting,
+[data-theme='light'] .profile-section,
+[data-theme='light'] .profile-stat,
+[data-theme='light'] .history-item,
+[data-theme='light'] .admin__section,
+[data-theme='light'] .admin__stat,
+[data-theme='light'] .admin__list-item,
+[data-theme='light'] .pm-feature,
+[data-theme='light'] .pm-plan,
+[data-theme='light'] .pm-active-item,
+[data-theme='light'] .pm-roulette,
+[data-theme='light'] .fav-empty,
+[data-theme='light'] .pm-pay,
+[data-theme='light'] .pm-pay__row,
+[data-theme='light'] .hp-searchbar,
+[data-theme='light'] .search-input-wrap,
+[data-theme='light'] .dp-season-btn,
+[data-theme='light'] .dp-ep,
+[data-theme='light'] .dp-genre,
+[data-theme='light'] .dp-row {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+[data-theme='light'] .profile-header--premium {
+  background:
+    radial-gradient(120% 90% at 50% -20%, rgba(200,147,42,0.12), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.4));
+}
+[data-theme='light'] .profile-name--premium {
+  background: linear-gradient(92deg, #a5761b, #6b5210 50%, #a5761b);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+[data-theme='light'] .profile-premium-badge--gold {
+  background: linear-gradient(135deg, rgba(200,147,42,0.14), rgba(200,147,42,0.24));
+  border-color: rgba(200,147,42,0.5);
+  color: #7a5a12 !important;
+}
+
+[data-theme='light'] .pm-badge {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(239,68,68,0.08));
+}
+[data-theme='light'] .pm-badge__text {
+  background: linear-gradient(135deg, #b07f1e, #c05621);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme='light'] .pm-plan.active,
+[data-theme='light'] .dp-season-btn.active,
+[data-theme='light'] .dp-ep.active {
+  background: rgba(200,147,42,0.14);
+  border-color: rgba(200,147,42,0.5);
+  color: var(--text);
+}
+
+[data-theme='light'] .admin__input,
+[data-theme='light'] .admin__proxy-input,
+[data-theme='light'] .admin__textarea,
+[data-theme='light'] .admin__select,
+[data-theme='light'] .pm-pay__input {
+  background: rgba(255,255,255,0.8);
+  border-color: var(--border-light);
+  color: var(--text);
+}
+[data-theme='light'] .admin__input::placeholder,
+[data-theme='light'] .admin__proxy-input::placeholder,
+[data-theme='light'] .admin__textarea::placeholder,
+[data-theme='light'] .pm-pay__input::placeholder { color: var(--text-3); }
+[data-theme='light'] .admin__select option { background: #fff; color: var(--text); }
+
+[data-theme='light'] .admin__toggle input { background: rgba(20,16,8,0.14); }
+[data-theme='light'] .admin__back,
+[data-theme='light'] .pm-pay__cancel { color: var(--text-3); }
+[data-theme='light'] .dp-fav-toast {
+  background: rgba(255,255,255,0.95);
+  color: var(--text);
+  border-color: rgba(200,147,42,0.4);
+  box-shadow: 0 8px 24px rgba(20,16,8,0.15);
+}
+[data-theme='light'] .pm-pay-overlay { background: rgba(28,24,16,0.4); }
+
+[data-theme='light'] .hp-card__year,
+[data-theme='light'] .hp-card__badge,
+[data-theme='light'] .dp-meta,
+[data-theme='light'] .dp-meta span { color: var(--text-2); }
+[data-theme='light'] .dp-genre {
+  background: var(--surface-2);
+  color: var(--text-2);
+}
+[data-theme='light'] .dp-watch {
+  background: linear-gradient(135deg, #c8932a, #b07f1e);
+  color: #fff;
+}
+[data-theme='light'] .pm-subscribe,
+[data-theme='light'] .pm-pay__btn,
+[data-theme='light'] .admin__btn {
+  background: linear-gradient(135deg, #c8932a, #a5761b);
+  color: #fff;
+}

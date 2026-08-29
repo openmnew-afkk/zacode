@@ -41,12 +41,7 @@ const ProfilePage: React.FC = () => {
           <h1 className="profile-name profile-name--premium">{displayName}</h1>
           {username && <p className="profile-username">{username}</p>}
           <div className="profile-premium-badge profile-premium-badge--gold">
-            ✨ PREMIUM{daysLeft ? ` · ${daysLeft} дн.` : ' · ♾️ БЕССРОЧНО'}
-          </div>
-          <div className="profile-perks">
-            <span className="profile-perk">🔥 LostFilm</span>
-            <span className="profile-perk">🚫 Без рекламы</span>
-            <span className="profile-perk">📺 4K</span>
+            ✨ PREMIUM{daysLeft ? ` · ${daysLeft} дн.` : ' · ♾️'}
           </div>
         </div>
       ) : (

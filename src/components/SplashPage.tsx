@@ -26,8 +26,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       setTimeout(() => {
         setVisible(false);
         onDone?.();
-      }, 500);
-    }, 1500);
+      }, 450);
+    }, 1100);
 
     return () => {
       clearTimeout(timer);
@@ -45,6 +45,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         <div className="splash__orb splash__orb--3" />
       </div>
 
+      <div className="splash__sweep" />
+      <div className="splash__grain" />
       <div className="splash__grid" />
 
       <div className="splash__content">

@@ -138,7 +138,7 @@ const PremiumPage: React.FC = () => {
       <div className="pm page">
         <div className="pm-bg"><div className="pm-bg__orb pm-bg__orb--1" /><div className="pm-bg__orb pm-bg__orb--2" /></div>
         <div className="pm-content">
-          <div className="pm-crown"><span className="pm-crown__icon">👑</span><div className="pm-crown__ring" /></div>
+          <div className="pm-badge"><span className="pm-badge__icon">👑</span><span className="pm-badge__text">PREMIUM</span></div>
           <h1 className="pm-title">Премиум <span>активен</span></h1>
           <p className="pm-subtitle">
             {isAdmin
@@ -164,7 +164,7 @@ const PremiumPage: React.FC = () => {
       <div className="pm-bg"><div className="pm-bg__orb pm-bg__orb--1" /><div className="pm-bg__orb pm-bg__orb--2" /></div>
 
       <div className="pm-content">
-        <div className="pm-crown"><span className="pm-crown__icon">👑</span><div className="pm-crown__ring" /></div>
+        <div className="pm-badge"><span className="pm-badge__icon">👑</span><span className="pm-badge__text">PREMIUM</span></div>
 
         <h1 className="pm-title">КиноЗал<span>Премиум</span></h1>
         <p className="pm-subtitle">Кино без границ и рекламы</p>
