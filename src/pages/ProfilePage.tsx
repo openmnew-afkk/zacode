@@ -10,7 +10,7 @@ const ProfilePage: React.FC = () => {
   const { user, closeApp, haptic } = useTelegram();
   const {
     favorites, watchHistory, clearHistory, isPremium, premiumExpiry,
-    adsEnabled, setAdsEnabled, theme, setTheme, role, telegramUsername,
+    theme, setTheme, role, telegramUsername,
   } = useStore();
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Гость';
@@ -92,14 +92,7 @@ const ProfilePage: React.FC = () => {
           <span className="profile-setting__value">→</span>
         </div>
 
-        {/* Реклама */}
-        <div className="profile-setting" onClick={() => { haptic('light'); setAdsEnabled(!adsEnabled); }}>
-          <span className="profile-setting__label">
-            {adsEnabled ? '📺 Реклама включена' : '🚫 Реклама выключена'}
-          </span>
-          <span className="profile-setting__value">{adsEnabled ? 'Вкл' : 'Выкл'}</span>
-        </div>
-
+        {/* Реклама управляется только из админ-панели */}
         <div className="profile-setting" onClick={() => navigate('/favorites')}>
           <span className="profile-setting__label">❤️ Избранное</span>
           <span className="profile-setting__value">{favorites.length}</span>

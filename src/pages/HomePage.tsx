@@ -5,16 +5,46 @@ import {
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
 } from '../api/catalog';
 import { useStore } from '../store';
+import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
 import './HomePage.css';
 
 /* ──────────────────────────────────────────────────────── */
-/*  Мини-карточка фильма                                   */
+/*  Мини-карточка фильма (с длинным нажатием → превью)     */
 /* ──────────────────────────────────────────────────────── */
-const Card: React.FC<{ movie: Movie; onClick: () => void }> = ({ movie, onClick }) => {
+const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movie) => void }> = ({ movie, onClick, onLongPress }) => {
   const [err, setErr] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longFired = useRef(false);
+
+  const startPress = () => {
+    if (!onLongPress) return;
+    longFired.current = false;
+    timer.current = setTimeout(() => {
+      longFired.current = true;
+      onLongPress(movie);
+    }, 450);
+  };
+  const clearPress = () => {
+    if (timer.current) { clearTimeout(timer.current); timer.current = null; }
+  };
+  const handleClick = () => {
+    if (longFired.current) { longFired.current = false; return; }
+    onClick();
+  };
+
   return (
-    <div className="hp-card" onClick={onClick}>
+    <div
+      className={`hp-card${onLongPress ? ' hp-card--pressable' : ''}`}
+      onClick={handleClick}
+      onTouchStart={startPress}
+      onTouchEnd={clearPress}
+      onTouchMove={clearPress}
+      onMouseDown={startPress}
+      onMouseUp={clearPress}
+      onMouseLeave={clearPress}
+      onContextMenu={e => { if (onLongPress) e.preventDefault(); }}
+    >
       <div className="hp-card__img-wrap">
         <img
           src={err ? 'https://via.placeholder.com/200x300?text=?' : movie.poster_path}
@@ -42,7 +72,8 @@ const Row: React.FC<{
   movies: Movie[];
   loading?: boolean;
   onMovieClick: (id: string) => void;
-}> = ({ title, icon, movies, loading, onMovieClick }) => {
+  onMovieLongPress?: (m: Movie) => void;
+}> = ({ title, icon, movies, loading, onMovieClick, onMovieLongPress }) => {
   if (!loading && movies.length === 0) return null;
   return (
     <div className="hp-row">
@@ -56,7 +87,7 @@ const Row: React.FC<{
               </div>
             ))
           : movies.map((m) => (
-              <Card key={m.id} movie={m} onClick={() => onMovieClick(m.id)} />
+              <Card key={m.id} movie={m} onClick={() => onMovieClick(m.id)} onLongPress={onMovieLongPress} />
             ))
         }
       </div>
@@ -146,11 +177,18 @@ const GENRES_MOVIES = [
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { favorites } = useStore();
+  const { favorites, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
+  const { haptic } = useTelegram();
   const [tab, setTab] = useState('home');
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<Movie | null>(null);
+
+  const openPreview = useCallback((m: Movie) => {
+    haptic('medium');
+    setPreview(m);
+  }, [haptic]);
 
   // Данные для каждой секции
   const [trending, setTrending] = useState<Movie[]>([]);
@@ -253,7 +291,7 @@ const HomePage: React.FC = () => {
             <div className="hp-empty">🔍 Введите название фильма или сериала</div>
           )}
           <div className="hp-grid">
-            {searchResults.map(m => <Card key={m.id} movie={m} onClick={() => go(m.id)} />)}
+            {searchResults.map(m => <Card key={m.id} movie={m} onClick={() => go(m.id)} onLongPress={openPreview} />)}
           </div>
         </div>
       );
@@ -286,15 +324,12 @@ const HomePage: React.FC = () => {
           )}
 
           <Hero movies={heroMovies} onWatch={go} />
-          {favorites.length > 0 && (
-            <Row title="Мои избранные" icon="❤️" movies={favorites.slice(0, 20)} onMovieClick={go} />
-          )}
-          <Row title="Тренды недели" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} />
-          <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} />
-          <Row title="Топ фильмов всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} />
-          <Row title="Лучшие сериалы" icon="📺" movies={topSeries} loading={loadingMain} onMovieClick={go} />
+          <Row title="Тренды недели" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Топ фильмов всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие сериалы" icon="📺" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           {GENRES_MOVIES.map(g => (
-            <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} />
+            <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           ))}
         </>
       );
@@ -303,11 +338,11 @@ const HomePage: React.FC = () => {
     if (tab === 'movies') {
       return (
         <>
-          <Row title="Тренды — Фильмы" icon="🔥" movies={trendMovies} loading={loadingMain} onMovieClick={go} />
-          <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} />
-          <Row title="Лучшие фильмы" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} />
+          <Row title="Тренды — Фильмы" icon="🔥" movies={trendMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие фильмы" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           {GENRES_MOVIES.map(g => (
-            <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} />
+            <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           ))}
         </>
       );
@@ -316,8 +351,8 @@ const HomePage: React.FC = () => {
     if (tab === 'series') {
       return (
         <>
-          <Row title="Тренды — Сериалы" icon="🔥" movies={trendSeries} loading={loadingMain} onMovieClick={go} />
-          <Row title="Топ сериалов" icon="🏆" movies={topSeries} loading={loadingMain} onMovieClick={go} />
+          <Row title="Тренды — Сериалы" icon="🔥" movies={trendSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Топ сериалов" icon="🏆" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -325,8 +360,8 @@ const HomePage: React.FC = () => {
     if (tab === 'top') {
       return (
         <>
-          <Row title="Лучшие фильмы всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} />
-          <Row title="Лучшие сериалы" icon="🏆" movies={topSeries} loading={loadingMain} onMovieClick={go} />
+          <Row title="Лучшие фильмы всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие сериалы" icon="🏆" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -334,8 +369,8 @@ const HomePage: React.FC = () => {
     if (tab === 'new') {
       return (
         <>
-          <Row title="Новинки в кино" icon="🆕" movies={nowPlaying} loading={loadingMain} onMovieClick={go} />
-          <Row title="Тренды" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} />
+          <Row title="Новинки в кино" icon="🆕" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Тренды" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -345,6 +380,14 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="hp page">
+      {/* ── Объявление / реклама (только для пользователей без премиума) ── */}
+      {!isPremium && adsEnabled && announcement.trim() && (
+        <div className="hp-ad">
+          <span className="hp-ad__icon">📢</span>
+          <span className="hp-ad__text">{announcement}</span>
+        </div>
+      )}
+
       {/* ── Шапка ── */}
       <div className="hp-header">
         {showSearch ? (
@@ -405,6 +448,54 @@ const HomePage: React.FC = () => {
       <div className="hp-content">
         {renderContent()}
       </div>
+
+      {/* ── Быстрое превью (длинное нажатие на карточку) ── */}
+      {preview && (
+        <div className="hp-preview-overlay" onClick={() => setPreview(null)}>
+          <div className="hp-preview" onClick={e => e.stopPropagation()}>
+            <div className="hp-preview__top">
+              <img
+                className="hp-preview__poster"
+                src={preview.poster_path}
+                alt={preview.title}
+                onError={e => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+              />
+              <div className="hp-preview__info">
+                <h3 className="hp-preview__title">{preview.title}</h3>
+                <div className="hp-preview__meta">
+                  {preview.vote_average > 0 && <span className="hp-preview__rating">★ {preview.vote_average.toFixed(1)}</span>}
+                  {preview.release_date && <span>{preview.release_date.slice(0, 4)}</span>}
+                  <span>{preview.is_serial ? 'Сериал' : 'Фильм'}</span>
+                </div>
+                {preview.overview && (
+                  <p className="hp-preview__desc">
+                    {preview.overview.length > 220 ? `${preview.overview.slice(0, 220)}…` : preview.overview}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="hp-preview__actions">
+              <button
+                className="hp-preview__btn hp-preview__btn--primary"
+                onClick={() => { setPreview(null); navigate(`/movie/${preview.id}`); }}
+              >
+                ▶ Открыть
+              </button>
+              <button
+                className={`hp-preview__btn hp-preview__btn--fav ${isFavorite(preview.id) ? 'active' : ''}`}
+                onClick={() => {
+                  haptic('medium');
+                  if (isFavorite(preview.id)) removeFavorite(preview.id);
+                  else addFavorite(preview);
+                }}
+              >
+                {isFavorite(preview.id) ? '❤️ В избранном' : '🤍 В избранное'}
+              </button>
+            </div>
+            <button className="hp-preview__close" onClick={() => setPreview(null)}>✕</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
