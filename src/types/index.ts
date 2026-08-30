@@ -66,7 +66,7 @@ export interface WatchHistoryItem {
   watchedAt: number;
 }
 
-export type AppTheme = 'dark' | 'light';
+export type AppTheme = 'dark' | 'violet';
 
 export interface TelegramUser {
   id: number;

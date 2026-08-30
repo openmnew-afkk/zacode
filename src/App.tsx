@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
@@ -23,16 +23,29 @@ function App() {
     try { return localStorage.getItem('tc_splash_seen') !== '1'; } catch { return false; }
   });
   const location = useLocation();
+  const navigate = useNavigate();
   const { tg } = useTelegram();
   const { setTelegramUsername, applyBackendConfig, theme } = useStore();
 
+  /* При входе всегда открываем главную (Telegram может вернуть последний URL) */
   useEffect(() => {
-    document.documentElement.classList.add('dark');
-    // Светлая/тёмная тема
-    document.documentElement.setAttribute('data-theme', theme);
+    if (location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Тема: тёмная (по умолчанию) или неоновая фиолетово-розовая
+    if (theme === 'violet') {
+      document.documentElement.setAttribute('data-theme', 'violet');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
     try {
-      tg?.setHeaderColor?.(theme === 'light' ? '#f4f2ee' : '#08080f');
-      tg?.setBottomBarColor?.(theme === 'light' ? '#f4f2ee' : '#08080f');
+      const bgColor = theme === 'violet' ? '#0e0618' : '#08080f';
+      tg?.setHeaderColor?.(bgColor);
+      tg?.setBottomBarColor?.(bgColor);
     } catch {}
     // Получаем Telegram username для проверки админа
     let myName = '';

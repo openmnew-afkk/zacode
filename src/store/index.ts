@@ -138,9 +138,13 @@ export const useStore = create<AppState>((set, get) => ({
   clearHistory: () => { save('tc_history', []); set({ watchHistory: [] }); },
 
   /* ═══ Тема ═══ */
-  theme: load<AppTheme>('tc_theme', 'dark'),
+  theme: (() => {
+    const t = load<AppTheme>('tc_theme', 'dark');
+    // Старая светлая тема удалена — сбрасываем на тёмную
+    return t === 'violet' ? 'violet' : 'dark';
+  })(),
   toggleTheme: () => {
-    const newTheme = get().theme === 'dark' ? 'light' : 'dark';
+    const newTheme = get().theme === 'dark' ? 'violet' : 'dark';
     save('tc_theme', newTheme);
     set({ theme: newTheme });
     document.documentElement.setAttribute('data-theme', newTheme);

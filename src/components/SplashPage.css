@@ -1,4 +1,4 @@
-/* ===== КиноЗал — Splash (кинематографичный) ===== */
+/* ===== КиноЗал — Splash (неон) ===== */
 
 .splash {
   position: fixed;
@@ -7,65 +7,16 @@
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  background: #09080a;
+  background: radial-gradient(140% 100% at 50% 0%, #1d0f33 0%, #0e0618 55%, #08030f 100%);
   overflow: hidden;
   transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.4,0,0.2,1), filter 0.55s ease;
 }
 
 .splash--fade {
   opacity: 0;
-  transform: scale(1.08);
-  filter: blur(6px);
+  transform: scale(1.1);
+  filter: blur(8px);
   pointer-events: none;
-}
-
-/* Кинематографичные «шторки» как в кинотеатре */
-.splash::before,
-.splash::after {
-  content: '';
-  position: absolute;
-  left: 0; right: 0;
-  height: 0;
-  background: #000;
-  z-index: 5;
-  animation: curtain 1.1s cubic-bezier(0.7, 0, 0.3, 1) both;
-}
-.splash::before { top: 0; }
-.splash::after { bottom: 0; animation-name: curtain-b; }
-@keyframes curtain { from { height: 12vh; } to { height: 0; } }
-@keyframes curtain-b { from { height: 12vh; } to { height: 0; } }
-
-/* Световой луч-свип */
-.splash__sweep {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background: linear-gradient(105deg, transparent 30%, rgba(232,184,74,0.07) 46%, rgba(255,255,255,0.1) 50%, rgba(232,184,74,0.07) 54%, transparent 70%);
-  background-size: 300% 100%;
-  animation: sweep 1.2s ease-in-out both;
-}
-@keyframes sweep {
-  from { background-position: 120% 0; }
-  to { background-position: -60% 0; }
-}
-
-/* Зерно плёнки */
-.splash__grain {
-  position: absolute;
-  inset: -50%;
-  z-index: 4;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  animation: grain 0.6s steps(4) infinite;
-}
-@keyframes grain {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-3%, 2%); }
-  50% { transform: translate(2%, -3%); }
-  75% { transform: translate(-2%, -2%); }
-  100% { transform: translate(0, 0); }
 }
 
 .splash__bg { position: absolute; inset: 0; }
@@ -73,49 +24,85 @@
 .splash__orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
-  opacity: 0.45;
-  animation: orb-float 8s ease-in-out infinite;
+  filter: blur(90px);
+  opacity: 0.55;
+  animation: orb-float 7s ease-in-out infinite;
 }
 
 .splash__orb--1 {
-  width: 520px; height: 520px;
-  top: -18%; left: -12%;
-  background: radial-gradient(circle, rgba(232,184,74,0.4), transparent 70%);
+  width: 480px; height: 480px;
+  top: -16%; left: -10%;
+  background: radial-gradient(circle, rgba(168,85,247,0.45), transparent 70%);
 }
 
 .splash__orb--2 {
-  width: 460px; height: 460px;
-  bottom: -18%; right: -12%;
-  background: radial-gradient(circle, rgba(226,61,61,0.3), transparent 70%);
-  animation-delay: -3s;
+  width: 440px; height: 440px;
+  bottom: -16%; right: -10%;
+  background: radial-gradient(circle, rgba(236,72,153,0.4), transparent 70%);
+  animation-delay: -2.5s;
 }
 
 .splash__orb--3 {
-  width: 360px; height: 360px;
+  width: 320px; height: 320px;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(240,201,106,0.18), transparent 70%);
-  animation-delay: -6s;
+  background: radial-gradient(circle, rgba(240,171,252,0.16), transparent 70%);
+  animation-delay: -5s;
 }
 
 @keyframes orb-float {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(24px, -24px) scale(1.08); }
-  66% { transform: translate(-16px, 16px) scale(0.94); }
+  33% { transform: translate(26px, -26px) scale(1.1); }
+  66% { transform: translate(-18px, 18px) scale(0.92); }
+}
+
+/* Звёздное поле */
+.splash__stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 20%, rgba(240,171,252,0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 30% 65%, rgba(255,255,255,0.7) 50%, transparent 51%),
+    radial-gradient(2px 2px at 48% 15%, rgba(192,132,252,0.8) 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 40%, rgba(255,255,255,0.6) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 82% 70%, rgba(240,171,252,0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 22% 85%, rgba(192,132,252,0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 58% 90%, rgba(255,255,255,0.5) 50%, transparent 51%);
+  animation: twinkle 2.2s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Неоновый свип */
+.splash__sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 30%, rgba(192,132,252,0.1) 46%, rgba(244,114,182,0.16) 50%, rgba(192,132,252,0.1) 54%, transparent 70%);
+  background-size: 300% 100%;
+  animation: sweep 1.2s ease-in-out both;
+}
+
+@keyframes sweep {
+  from { background-position: 120% 0; }
+  to { background-position: -60% 0; }
 }
 
 .splash__grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(232,184,74,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(232,184,74,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(192,132,252,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(192,132,252,0.05) 1px, transparent 1px);
   background-size: 48px 48px;
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 70%);
 }
-
 .splash__content {
   position: relative;
   z-index: 2;
@@ -140,14 +127,16 @@
   margin-bottom: 28px;
 }
 
+/* Вращающееся неоновое кольцо */
 .splash__logo-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent, #e8b84a, #e23d3d, #f0c96a, transparent);
-  animation: ring-spin 3.5s linear infinite;
+  background: conic-gradient(from 0deg, transparent, #a855f7, #ec4899, #f0abfc, transparent);
+  animation: ring-spin 2.8s linear infinite;
   mask: radial-gradient(circle at center, transparent 50px, black 51px, black 66px, transparent 67px);
   -webkit-mask: radial-gradient(circle at center, transparent 50px, black 51px, black 66px, transparent 67px);
+  filter: drop-shadow(0 0 10px rgba(236,72,153,0.55));
 }
 
 @keyframes ring-spin { to { transform: rotate(360deg); } }
@@ -156,19 +145,19 @@
   width: 100px;
   height: 100px;
   border-radius: 28px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(168,85,247,0.07);
+  border: 1px solid rgba(192,132,252,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
   backdrop-filter: blur(20px);
-  box-shadow: 0 20px 50px rgba(232,184,74,0.22), inset 0 1px 0 rgba(255,255,255,0.1);
+  box-shadow: 0 20px 50px rgba(236,72,153,0.28), inset 0 1px 0 rgba(255,255,255,0.12);
 }
 
 .splash__logo-icon {
   width: 52px;
   height: 52px;
-  filter: drop-shadow(0 0 12px rgba(232,184,74,0.45));
+  filter: drop-shadow(0 0 12px rgba(236,72,153,0.55));
 }
 
 .splash__title {
@@ -181,19 +170,28 @@
   gap: 2px;
 }
 
-.splash__title-text { color: #fff; }
-
-.splash__title-accent {
-  background: linear-gradient(135deg, #e8b84a, #e23d3d);
+.splash__title-text {
+  background: linear-gradient(135deg, #ffffff, #f3e8ff);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+.splash__title-accent {
+  background: linear-gradient(135deg, #a855f7, #ec4899, #f0abfc);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: neon-shift 2.5s linear infinite;
+}
+
+@keyframes neon-shift { to { background-position: 200% center; } }
+
 .splash__subtitle {
   font-size: 12px;
   font-weight: 600;
-  color: rgba(255,255,255,0.38);
+  color: rgba(240,225,255,0.4);
   letter-spacing: 0.16em;
   text-transform: uppercase;
   margin-bottom: 40px;
@@ -205,7 +203,7 @@
   width: 100%;
   height: 3px;
   border-radius: 3px;
-  background: rgba(255,255,255,0.06);
+  background: rgba(192,132,252,0.12);
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -213,10 +211,11 @@
 .splash__progress-fill {
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, #e8b84a, #e23d3d, #f0c96a);
+  background: linear-gradient(90deg, #a855f7, #ec4899, #f0abfc);
   background-size: 200% 100%;
   animation: gradient-slide 2s linear infinite;
   transition: width 0.1s linear;
+  box-shadow: 0 0 8px rgba(236,72,153,0.6);
 }
 
 @keyframes gradient-slide {
@@ -226,7 +225,7 @@
 
 .splash__progress-text {
   font-size: 11px;
-  color: rgba(255,255,255,0.28);
+  color: rgba(240,225,255,0.3);
   text-align: center;
   letter-spacing: 0.08em;
 }
@@ -243,6 +242,6 @@
 .splash__footer span {
   font-size: 10px;
   font-weight: 700;
-  color: rgba(255,255,255,0.18);
+  color: rgba(240,171,252,0.25);
   letter-spacing: 0.22em;
 }

@@ -45,8 +45,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         <div className="splash__orb splash__orb--3" />
       </div>
 
+      <div className="splash__stars" />
       <div className="splash__sweep" />
-      <div className="splash__grain" />
       <div className="splash__grid" />
 
       <div className="splash__content">
@@ -58,12 +58,12 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
               <path d="M28 24l16 8-16 8V24z" fill="url(#grad2)"/>
               <defs>
                 <linearGradient id="grad1" x1="10" y1="16" x2="54" y2="48">
-                  <stop stopColor="#e8b84a"/>
-                  <stop offset="1" stopColor="#e23d3d"/>
+                  <stop stopColor="#c084fc"/>
+                  <stop offset="1" stopColor="#ec4899"/>
                 </linearGradient>
                 <linearGradient id="grad2" x1="28" y1="24" x2="44" y2="40">
-                  <stop stopColor="#f0c96a"/>
-                  <stop offset="1" stopColor="#e23d3d"/>
+                  <stop stopColor="#f0abfc"/>
+                  <stop offset="1" stopColor="#ec4899"/>
                 </linearGradient>
               </defs>
             </svg>

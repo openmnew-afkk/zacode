@@ -84,10 +84,10 @@ const ProfilePage: React.FC = () => {
         {/* Тема */}
         <div
           className="profile-setting"
-          onClick={() => { haptic('light'); setTheme(theme === 'dark' ? 'light' : 'dark'); }}
+          onClick={() => { haptic('light'); setTheme(theme === 'dark' ? 'violet' : 'dark'); }}
         >
           <span className="profile-setting__label">
-            {theme === 'dark' ? '🌙 Тёмная тема' : '☀️ Светлая тема'}
+            {theme === 'dark' ? '🌙 Тёмная тема' : '💜 Неоновая тема'}
           </span>
           <span className="profile-setting__value">→</span>
         </div>
