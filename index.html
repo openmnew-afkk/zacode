@@ -9,13 +9,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>КиноЗал</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
       html, body { background: #09080a; margin: 0; padding: 0; }
     </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#09080a;color:rgba(255,255,255,0.5);font-family:-apple-system,BlinkMacSystemFont,sans-serif"><div style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(232,184,74,0.2);border-top-color:#e8b84a;animation:shellspin 0.8s linear infinite"></div><span style="font-size:13px;letter-spacing:0.06em">Загрузка КиноЗала…</span></div></div>
+    <style>@keyframes shellspin{to{transform:rotate(360deg)}}</style>
+    <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

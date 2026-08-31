@@ -8,14 +8,6 @@ const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkYzAwM2FhYmUwZTYwZWYzMjM2MGJ
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
-/* Прокси для обхода блокировки TMDB в РФ */
-const PROXY_URLS = [
-  '', // Прямой запрос (без прокси)
-  'https://corsproxy.io/?url=',
-  'https://api.allorigins.win/raw?url=',
-];
-let activeProxyIdx = 0; // запоминаем какой прокси работает
-
 const FALLBACK_POSTER = 'https://via.placeholder.com/300x450/1a1612/e8b84a?text=%D0%9D%D0%B5%D1%82+%D0%BF%D0%BE%D1%81%D1%82%D0%B5%D1%80%D0%B0';
 
 /* ════════════ Cache ════════════ */
@@ -32,7 +24,35 @@ function setCache(key: string, data: any) {
   cache.set(key, { data, time: Date.now() });
 }
 
-/* ════════════ TMDB Request с авто-прокси ════════════ */
+/* ════════════ TMDB Request — гонка прокси параллельно ════════════
+ * TMDB заблокирован у части провайдеров РФ, поэтому запрашиваем
+ * НАПРЯЖУЮ и через несколько CORS-прокси ОДНОВРЕМЕННО — кто первый
+ * ответит, тот и победил. Плюс localStorage-кэш на 24 часа: если
+ * сеть совсем не работает, показываем последний загруженный каталог.
+ */
+const PROXY_MAKERS: Array<(u: string) => { u: string; h: Record<string, string> }> = [
+  // Напрямую: Bearer-токен (работает без блокировок)
+  (u) => ({ u, h: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'Content-Type': 'application/json' } }),
+  // CORS-прокси (api_key в URL, без Bearer)
+  (u) => ({ u: `https://corsproxy.io/?url=${encodeURIComponent(u)}`, h: {} }),
+  (u) => ({ u: `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, h: {} }),
+  (u) => ({ u: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, h: {} }),
+  (u) => ({ u: `https://cors.eu.org/${u}`, h: {} }),
+];
+
+function lsCacheGet<T>(key: string, maxAge: number): T | null {
+  try {
+    const raw = localStorage.getItem('tc_tmdb_' + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.d && Date.now() - parsed.t < maxAge) return parsed.d as T;
+  } catch {}
+  return null;
+}
+function lsCacheSet(key: string, data: unknown) {
+  try { localStorage.setItem('tc_tmdb_' + key, JSON.stringify({ t: Date.now(), d: data })); } catch {}
+}
+
 async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Promise<T> {
   const url = new URL(`${TMDB_BASE}${path}`);
   url.searchParams.set('language', 'ru-RU');
@@ -44,56 +64,40 @@ async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Pr
   const cached = getCached<T>(cacheKey);
   if (cached) return cached;
 
-  // URL с api_key для прокси (Bearer не проходит через прокси)
+  /* Офлайн-кэш на 24 часа — отдаём сразу, пока сеть не ответила */
+  const stale = lsCacheGet<T>(cacheKey, 24 * 60 * 60 * 1000);
+  if (stale) {
+    setCache(cacheKey, stale);
+    return stale;
+  }
+
   const urlWithKey = new URL(url.toString());
   urlWithKey.searchParams.set('api_key', TMDB_KEY);
 
-  const headers: Record<string, string> = {
-    'Authorization': `Bearer ${TMDB_TOKEN}`,
-    'Content-Type': 'application/json',
-  };
-
-  // Пробуем начиная с последнего сработавшего прокси
-  const proxyOrder = [activeProxyIdx, ...PROXY_URLS.map((_, i) => i).filter(i => i !== activeProxyIdx)];
-
-  for (const idx of proxyOrder) {
-    const proxy = PROXY_URLS[idx];
-    try {
-      let fetchUrl: string;
-      let fetchHeaders: Record<string, string>;
-
-      if (proxy) {
-        // Через прокси: api_key в URL, без Bearer
-        fetchUrl = `${proxy}${encodeURIComponent(urlWithKey.toString())}`;
-        fetchHeaders = {};
-      } else {
-        // Напрямую: Bearer token
-        fetchUrl = url.toString();
-        fetchHeaders = headers;
-      }
-
-      const res = await fetch(fetchUrl, {
-        headers: fetchHeaders,
-        signal: AbortSignal.timeout(8000),
-      });
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data.results !== undefined || data.id !== undefined) {
-        activeProxyIdx = idx;
-        setCache(cacheKey, data);
-        return data;
-      }
-    } catch {
-      continue;
+  try {
+    const data = await Promise.any(
+      PROXY_MAKERS.map((make) =>
+        fetch(make(urlWithKey.toString()).u, {
+          headers: make(urlWithKey.toString()).h,
+          signal: AbortSignal.timeout(7000),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        })
+      )
+    );
+    setCache(cacheKey, data);
+    lsCacheSet(cacheKey, data);
+    return data as T;
+  } catch {
+    /* Всё недоступно — последний шанс: устаревший кэш (7 дней) */
+    const older = lsCacheGet<T>(cacheKey, 7 * 24 * 60 * 60 * 1000);
+    if (older) {
+      setCache(cacheKey, older);
+      return older;
     }
+    throw new Error('TMDB unavailable');
   }
-
-  // Последняя попытка — напрямую с api_key
-  const res = await fetch(urlWithKey.toString(), { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) throw new Error(`TMDB ${res.status}: ${res.statusText}`);
-  const data = await res.json();
-  setCache(cacheKey, data);
-  return data;
 }
 
 /* ════════════ Converter ════════════ */
