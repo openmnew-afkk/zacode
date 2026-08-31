@@ -18,10 +18,8 @@ import { fetchConfig } from './api/backend';
 /* ===== КиноЗал — App ===== */
 
 function App() {
-  // Сплэш показываем ОДИН РАЗ за всё время (первый запуск) — дальше сразу главная
-  const [showSplash, setShowSplash] = useState(() => {
-    try { return localStorage.getItem('tc_splash_seen') !== '1'; } catch { return false; }
-  });
+  // Красивая заставка при каждом входе (быстрая, ~1 сек), главная грузится под ней
+  const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const { tg } = useTelegram();
@@ -65,10 +63,7 @@ function App() {
     });
   }, [theme]);
 
-  const handleSplashDone = () => {
-    try { localStorage.setItem('tc_splash_seen', '1'); } catch {}
-    setShowSplash(false);
-  };
+  const handleSplashDone = () => setShowSplash(false);
 
   return (
     <div className="app-root" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>

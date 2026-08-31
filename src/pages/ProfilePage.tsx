@@ -87,7 +87,7 @@ const ProfilePage: React.FC = () => {
           onClick={() => { haptic('light'); setTheme(theme === 'dark' ? 'violet' : 'dark'); }}
         >
           <span className="profile-setting__label">
-            {theme === 'dark' ? '🌙 Тёмная тема' : '💜 Неоновая тема'}
+            {theme === 'dark' ? '🌙 Тёмная тема' : '💗 Розовая (для девочек)'}
           </span>
           <span className="profile-setting__value">→</span>
         </div>

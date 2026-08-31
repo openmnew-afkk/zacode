@@ -398,6 +398,69 @@ button {
   border-color: rgba(236,72,153,0.3);
 }
 
+/* Табы категорий на главной */
+[data-theme='violet'] .hp-tab {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-3);
+}
+[data-theme='violet'] .hp-tab.active {
+  background: rgba(236,72,153,0.15);
+  border-color: rgba(236,72,153,0.5);
+  color: #f0abfc;
+  box-shadow: 0 0 14px rgba(236,72,153,0.15);
+}
+
+/* Кнопка «Смотреть» на Hero — неоновая капсула */
+[data-theme='violet'] .hp-hero__btn {
+  background: var(--btn-grad);
+  color: #fff;
+  border-radius: var(--btn-r);
+  box-shadow: var(--btn-glow);
+}
+
+/* Скелетоны и спиннер без белых выступов */
+[data-theme='violet'] {
+  --surface-4: rgba(192,132,252,0.22);
+}
+[data-theme='violet'] .hp-spinner {
+  border-color: rgba(168,85,247,0.2);
+  border-top-color: #ec4899;
+}
+[data-theme='violet'] .hp-card__title { color: var(--text); }
+[data-theme='violet'] .hp-card__year,
+[data-theme='violet'] .hp-row__title { color: var(--text); }
+[data-theme='violet'] .hp-error p { color: var(--text-2) !important; }
+[data-theme='violet'] .hp-empty,
+[data-theme='violet'] .hp-error { background: var(--surface); border-color: var(--border); }
+[data-theme='violet'] .hp-searchbar__input { color: var(--text); }
+[data-theme='violet'] .hp-header__btn { background: var(--surface); border-color: var(--border); }
+[data-theme='violet'] .hp-header__btn:active { background: var(--surface-2); }
+[data-theme='violet'] .hp-header__avatar--placeholder {
+  background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(236,72,153,0.25));
+  color: #f0abfc;
+}
+[data-theme='violet'] .hp-preview { border-color: var(--border-light); }
+[data-theme='violet'] .hp-preview__title { color: var(--text); }
+[data-theme='violet'] .hp-preview__meta,
+[data-theme='violet'] .hp-preview__desc { color: var(--text-3); }
+[data-theme='violet'] .hp-preview__rating { color: #f0abfc; }
+[data-theme='violet'] .hp-preview__btn--fav {
+  background: var(--surface);
+  border-color: var(--border-light);
+  color: var(--text-2);
+}
+[data-theme='violet'] .hp-preview__close {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-3);
+}
+[data-theme='violet'] .search-card p,
+[data-theme='violet'] .fav-card__title { color: var(--text); }
+[data-theme='violet'] .fav-card__year,
+[data-theme='violet'] .fav-header__sub { color: var(--text-3); }
+[data-theme='violet'] .tab-bar__badge { background: linear-gradient(135deg, #ec4899, #a855f7); }
+
 /* ═══════════════════════════════════════════════
    ✨ ПОЛИРОВКА (обе темы)
    ═══════════════════════════════════════════════ */

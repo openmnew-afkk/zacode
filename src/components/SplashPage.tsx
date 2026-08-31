@@ -26,8 +26,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       setTimeout(() => {
         setVisible(false);
         onDone?.();
-      }, 450);
-    }, 1100);
+      }, 420);
+    }, 950);
 
     return () => {
       clearTimeout(timer);

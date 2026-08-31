@@ -102,26 +102,48 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
   const [idx, setIdx] = useState(0);
   const [fading, setFading] = useState(false);
   const heroMovies = movies.filter(m => m.backdrop_path && !m.backdrop_path.includes('placeholder')).slice(0, 8);
+  const touchX = useRef<number | null>(null);
 
-  const next = useCallback(() => {
+  const goTo = useCallback((next: number) => {
     setFading(true);
     setTimeout(() => {
-      setIdx(i => (i + 1) % Math.max(heroMovies.length, 1));
+      setIdx(next);
       setFading(false);
-    }, 250);
-  }, [heroMovies.length]);
+    }, 220);
+  }, []);
+
+  const next = useCallback(() => {
+    goTo((idx + 1) % Math.max(heroMovies.length, 1));
+  }, [idx, heroMovies.length, goTo]);
+
+  const prev = useCallback(() => {
+    goTo((idx - 1 + heroMovies.length) % Math.max(heroMovies.length, 1));
+  }, [idx, heroMovies.length, goTo]);
 
   useEffect(() => {
     if (heroMovies.length <= 1) return;
-    const t = setInterval(next, 6000);
+    const t = setInterval(() => {
+      setIdx(i => (i + 1) % heroMovies.length);
+    }, 6000);
     return () => clearInterval(t);
-  }, [heroMovies.length, next]);
+  }, [heroMovies.length]);
 
   const m = heroMovies[idx];
   if (!m) return null;
 
   return (
-    <div className="hp-hero" onClick={() => onWatch(m.id)}>
+    <div
+      className="hp-hero"
+      onClick={() => onWatch(m.id)}
+      onTouchStart={e => { touchX.current = e.touches[0].clientX; }}
+      onTouchEnd={e => {
+        if (touchX.current === null || heroMovies.length <= 1) return;
+        const dx = e.changedTouches[0].clientX - touchX.current;
+        if (dx < -45) next();
+        else if (dx > 45) prev();
+        touchX.current = null;
+      }}
+    >
       <div className={`hp-hero__bg ${fading ? 'fading' : ''}`} style={{ backgroundImage: `url(${m.backdrop_path})` }} />
       <div className="hp-hero__overlay" />
       <div className={`hp-hero__content ${fading ? 'fading' : ''}`}>
@@ -140,10 +162,11 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
         </button>
       </div>
       {heroMovies.length > 1 && (
-        <div className="hp-hero__dots">
-          {heroMovies.map((_, i) => (
-            <button key={i} className={`hp-hero__dot ${i === idx ? 'active' : ''}`} onClick={e => { e.stopPropagation(); setIdx(i); }} />
-          ))}
+        <div className="hp-hero__pager">
+          <div className="hp-hero__progress">
+            <div key={idx} className="hp-hero__progress-fill" />
+          </div>
+          <span className="hp-hero__counter">{idx + 1} / {heroMovies.length}</span>
         </div>
       )}
     </div>
@@ -177,6 +200,7 @@ const GENRES_MOVIES = [
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: tgUser } = useTelegram();
   const { favorites, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
   const { haptic } = useTelegram();
   const [tab, setTab] = useState('home');
@@ -422,11 +446,14 @@ const HomePage: React.FC = () => {
                   <path d="M13.5 13.5l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
                 </svg>
               </button>
-              <button className="hp-header__btn" onClick={() => navigate('/profile')}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <circle cx="10" cy="7" r="4" stroke="currentColor" strokeWidth="1.7"/>
-                  <path d="M3 18c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
-                </svg>
+              <button className="hp-header__btn hp-header__btn--avatar" onClick={() => navigate('/profile')}>
+                {tgUser?.photo_url ? (
+                  <img src={tgUser.photo_url} alt="" className="hp-header__avatar" />
+                ) : (
+                  <span className="hp-header__avatar hp-header__avatar--placeholder">
+                    {(tgUser?.first_name || 'Г')[0]?.toUpperCase()}
+                  </span>
+                )}
               </button>
             </div>
           </>
