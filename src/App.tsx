@@ -25,6 +25,12 @@ function App() {
   const { tg } = useTelegram();
   const { setTelegramUsername, applyBackendConfig, theme } = useStore();
 
+  /* Страховка: заставка скрывается максимум через 3.5с, что бы ни случилось */
+  useEffect(() => {
+    const t = setTimeout(() => setShowSplash(false), 3500);
+    return () => clearTimeout(t);
+  }, []);
+
   /* При входе всегда открываем главную (Telegram может вернуть последний URL) */
   useEffect(() => {
     if (location.pathname !== '/') {
