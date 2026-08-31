@@ -17,6 +17,15 @@ import { fetchConfig } from './api/backend';
 
 /* ===== КиноЗал — App ===== */
 
+/* Сброс скролла при переходе на другую страницу */
+const ScrollToTop: React.FC = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 function App() {
   // Красивая заставка при каждом входе (быстрая, ~1 сек), главная грузится под ней
   const [showSplash, setShowSplash] = useState(true);
@@ -74,6 +83,8 @@ function App() {
   return (
     <div className="app-root" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       {showSplash && <SplashPage onDone={handleSplashDone} />}
+
+      <ScrollToTop />
 
       <Routes location={location}>
         <Route path="/" element={<HomePage />} />

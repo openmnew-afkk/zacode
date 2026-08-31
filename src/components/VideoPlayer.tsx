@@ -163,7 +163,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 
   const controls = (
     <>
-      {isSerial && onEpisodeChange && (
+      {/* Кнопки серий показываем только когда известно количество серий */}
+      {isSerial && onEpisodeChange && maxEpisode > 1 && (
         <div className="vp-dock__eps">
           <button
             className="vp-dock__ep-btn"

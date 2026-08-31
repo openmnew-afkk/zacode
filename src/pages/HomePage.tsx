@@ -496,7 +496,7 @@ const HomePage: React.FC = () => {
                 </div>
                 {preview.overview && (
                   <p className="hp-preview__desc">
-                    {preview.overview.length > 220 ? `${preview.overview.slice(0, 220)}…` : preview.overview}
+                    {preview.overview.length > 320 ? `${preview.overview.slice(0, 320)}…` : preview.overview}
                   </p>
                 )}
               </div>
