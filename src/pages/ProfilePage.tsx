@@ -7,7 +7,7 @@ import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, closeApp, haptic } = useTelegram();
+  const { user, closeApp, haptic, tg } = useTelegram();
   const {
     favorites, watchHistory, clearHistory, isPremium, premiumExpiry,
     theme, setTheme, role, telegramUsername,
@@ -161,10 +161,12 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      {/* Кнопка закрытия */}
-      <div className="profile-close-wrap">
-        <button className="profile-close" onClick={closeApp}>Закрыть приложение</button>
-      </div>
+      {/* Кнопка закрытия — только внутри Telegram (в браузере она ничего не делает) */}
+      {tg && (
+        <div className="profile-close-wrap">
+          <button className="profile-close" onClick={closeApp}>Закрыть приложение</button>
+        </div>
+      )}
     </div>
   );
 };

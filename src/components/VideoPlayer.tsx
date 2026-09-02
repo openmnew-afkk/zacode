@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import type { WatchOption } from '../types';
 import './VideoPlayer.css';
 
@@ -45,7 +45,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   onEpisodeChange,
   initialMode = 'compact',
 }) => {
-  const iframeOpts = options.filter((o) => o.type === 'iframe');
+  /* Мемоизация: без неё эффекты срабатывают на каждый рендер
+     и сбрасывают выбор озвучки обратно к запомненной */
+  const iframeOpts = useMemo(() => options.filter((o) => o.type === 'iframe'), [options]);
   const [activeIdx, setActiveIdx] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [showSources, setShowSources] = useState(false);
@@ -60,8 +62,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   const isFs = mode === 'fullscreen';
 
   /* Группировка: озвучки Kodik отдельно от остальных плееров */
-  const dubs = iframeOpts.filter((o) => o.provider === 'Kodik');
-  const others = iframeOpts.filter((o) => o.provider !== 'Kodik');
+  const dubs = useMemo(() => iframeOpts.filter((o) => o.provider === 'Kodik'), [iframeOpts]);
+  const others = useMemo(() => iframeOpts.filter((o) => o.provider !== 'Kodik'), [iframeOpts]);
 
   useEffect(() => {
     if (activeIdx >= iframeOpts.length && iframeOpts.length > 0) {
@@ -73,14 +75,22 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
     // Запоминаем выбор озвучки — применим при смене серий
     const opt = iframeOpts[idx];
     if (opt?.provider === 'Kodik' && opt.label) savePreferredDub(opt.label);
+    manualPick.current = true; // запрет авто-возврата к запомненной
     setActiveIdx(idx);
     setLoaded(false);
     setShowSources(false);
     setCountdown(LOAD_TIMEOUT_MS / 1000);
   }, [iframeOpts]);
 
-  /* При смене серии/сезона восстанавливаем запомненную озвучку */
+  /* При смене серии/сезона восстанавливаем запомненную озвучку.
+     ВАЖНО: только при реальной смене серии, а не на каждом рендере */
+  const epKeyRef = useRef<string>('');
+  const manualPick = useRef(false);
   useEffect(() => {
+    const key = `${season}:${episode}:${iframeOpts.length}`;
+    if (epKeyRef.current === key) return; // серия не менялась — ничего не делаем
+    epKeyRef.current = key;
+    manualPick.current = false;
     if (iframeOpts.length === 0) return;
     const pref = getPreferredDub();
     if (!pref) return;
@@ -90,7 +100,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       setLoaded(false);
       setCountdown(LOAD_TIMEOUT_MS / 1000);
     }
-  }, [iframeOpts]);
+  }, [iframeOpts, season, episode]);
 
   useEffect(() => {
     setLoaded(false);
