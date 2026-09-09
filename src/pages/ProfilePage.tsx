@@ -104,6 +104,15 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div
+          className="profile-setting"
+          onClick={() => navigate('/sport')}
+          style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14 }}
+        >
+          <span className="profile-setting__label">⚽ СпортАнализ · прогнозы матчей</span>
+          <span className="profile-setting__value">→</span>
+        </div>
+
+        <div
           className={`profile-setting ${isPremium ? 'profile-setting--premium' : ''}`}
           onClick={() => navigate('/premium')}
           style={isPremium ? undefined : { background: 'rgba(139,92,246,0.08)', borderRadius: 14 }}

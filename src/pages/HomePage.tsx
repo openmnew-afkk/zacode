@@ -158,7 +158,7 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
           {m.release_date && <span>{m.release_date.slice(0, 4)}</span>}
         </div>
         <button className="hp-hero__btn" onClick={e => { e.stopPropagation(); onWatch(m.id); }}>
-          ▶ Смотреть
+          Открыть
         </button>
       </div>
       {heroMovies.length > 1 && (
@@ -201,7 +201,11 @@ const GENRES_MOVIES = [
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user: tgUser } = useTelegram();
-  const { favorites, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
+  const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
+  const watching = Object.values(tracked)
+    .filter((t) => t.status === 'watching')
+    .sort((a, b) => b.addedAt - a.addedAt)
+    .map((t) => t.movie);
   const { haptic } = useTelegram();
   const [tab, setTab] = useState('home');
   const [query, setQuery] = useState('');
@@ -348,6 +352,9 @@ const HomePage: React.FC = () => {
           )}
 
           <Hero movies={heroMovies} onWatch={go} />
+          {watching.length > 0 && (
+            <Row title="Продолжаю смотреть" icon="👀" movies={watching} onMovieClick={go} onMovieLongPress={openPreview} />
+          )}
           <Row title="Тренды недели" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Топ фильмов всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />

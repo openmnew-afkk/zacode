@@ -100,6 +100,31 @@ async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Pr
   }
 }
 
+/* ════════════ Трейлеры (официальные YouTube-ролики) ════════════ */
+export async function getTrailer(tmdbId: string, isSerial: boolean): Promise<string | null> {
+  const type = isSerial ? 'tv' : 'movie';
+  const pickKey = (data: any): string | null => {
+    const vids: any[] = data?.results || [];
+    const yt = vids.filter((v) => v.site === 'YouTube');
+    const pick =
+      yt.find((v) => v.type === 'Trailer' && v.official) ||
+      yt.find((v) => v.type === 'Trailer') ||
+      yt.find((v) => v.type === 'Teaser') ||
+      yt[0];
+    return pick ? `https://www.youtube.com/embed/${pick.key}?rel=0` : null;
+  };
+  try {
+    const ru = await tmdb<any>(`/${type}/${tmdbId}/videos`, { language: 'ru-RU' });
+    const key = pickKey(ru);
+    if (key) return key;
+  } catch {}
+  try {
+    const en = await tmdb<any>(`/${type}/${tmdbId}/videos`, { language: 'en-US' });
+    return pickKey(en);
+  } catch {}
+  return null;
+}
+
 /* ════════════ Converter ════════════ */
 function toMovie(item: any, mediaType?: string): Movie {
   const isSerial = mediaType === 'tv' || item.media_type === 'tv' || !!item.first_air_date;

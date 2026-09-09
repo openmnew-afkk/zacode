@@ -1,35 +1,50 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getMovieDetail } from '../api/catalog';
-import { getWatchOptions } from '../api/players';
-import type { WatchOption, MovieDetail } from '../types';
+import { getMovieDetail, getTrailer } from '../api/catalog';
+import type { MovieDetail, WatchStatus } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
-import VideoPlayer from '../components/VideoPlayer';
 import './MovieDetailPage.css';
+
+/* Статусы дневника */
+const STATUSES: Array<{ id: WatchStatus; label: string; icon: string }> = [
+  { id: 'want', label: 'Буду смотреть', icon: '🔖' },
+  { id: 'watching', label: 'Смотрю', icon: '▶️' },
+  { id: 'watched', label: 'Просмотрено', icon: '✅' },
+  { id: 'dropped', label: 'Брошено', icon: '🚫' },
+];
+
+/* Легальные сервисы для поиска, где посмотреть */
+const whereToWatch = (title: string) => [
+  { name: 'JustWatch', icon: '🔎', url: `https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(title)}` },
+  { name: 'Кинопоиск', icon: '🎬', url: `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(title)}` },
+  { name: 'Okko', icon: '🟠', url: `https://okko.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Иви', icon: '📺', url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}` },
+  { name: 'Netflix', icon: '🅽', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
+  { name: 'YouTube', icon: '▶️', url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}` },
+];
 
 const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { showBackButton, haptic } = useTelegram();
-  const { isFavorite, addFavorite, removeFavorite, addToHistory } = useStore();
+  const { showBackButton, haptic, openLink } = useTelegram();
+  const {
+    addFavorite, removeFavorite, addToHistory,
+    setTrackedStatus, setPersonalRating, getStatus, getRating,
+  } = useStore();
 
   const [movie, setMovie] = useState<MovieDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [playerOptions, setPlayerOptions] = useState<WatchOption[]>([]);
-  const [showPlayer, setShowPlayer] = useState(false);
-  const [heartAnim, setHeartAnim] = useState(false);
   const [favToast, setFavToast] = useState('');
   const [favToastVisible, setFavToastVisible] = useState(false);
-  const [activeSeason, setActiveSeason] = useState(1);
-  const [activeEpisode, setActiveEpisode] = useState(1);
-  const [sourceLoading, setSourceLoading] = useState(false);
+  const [status, setStatusState] = useState<WatchStatus | null>(null);
+  const [rating, setRatingState] = useState<number | null>(null);
+  const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
+  const [showTrailer, setShowTrailer] = useState(false);
 
   const compositeId = id || '';
-  // Извлекаем чистый числовой TMDB ID для плееров
   const tmdbId = compositeId.replace(/^(tv|movie)-/, '');
-  const favorite = movie ? isFavorite(movie.id) : false;
 
   /* ── Загрузка деталей фильма ── */
   useEffect(() => {
@@ -37,84 +52,75 @@ const MovieDetailPage: React.FC = () => {
     setLoading(true);
     setMovie(null);
     setError(null);
-    setPlayerOptions([]);
+    setShowTrailer(false);
+    setTrailerUrl(null);
     getMovieDetail(compositeId)
       .then((data) => {
         if (!data) { setError('Фильм не найден'); return; }
         setMovie(data);
-        setActiveSeason(1);
-        setActiveEpisode(1);
+        setStatusState(getStatus(data.id));
+        setRatingState(getRating(data.id));
         window.scrollTo(0, 0);
       })
       .catch(() => setError('Не удалось загрузить'))
       .finally(() => setLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [compositeId]);
 
-  /* ── Загрузка источников ── */
+  /* ── Трейлер (официальный YouTube) ── */
   useEffect(() => {
     if (!movie) return;
-    setSourceLoading(true);
-    // Очищаем старые источники, чтобы при смене серии не играл предыдущий эпизод
-    setPlayerOptions([]);
     const isSerial = movie.is_serial || (movie.seasons?.length ?? 0) > 0;
-    let cancelled = false;
-    getWatchOptions({
-      tmdbId,
-      imdbId: movie.imdbID || undefined,
-      isSerial,
-      season: isSerial ? activeSeason : undefined,
-      episode: isSerial ? activeEpisode : undefined,
-      title: movie.title,
-    })
-      .then((opts) => { if (!cancelled) setPlayerOptions(opts); })
-      .catch(() => { if (!cancelled) setPlayerOptions([]); })
-      .finally(() => { if (!cancelled) setSourceLoading(false); });
-    return () => { cancelled = true; };
-  }, [movie, tmdbId, activeSeason, activeEpisode]);
+    getTrailer(tmdbId, isSerial).then((url) => setTrailerUrl(url));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [movie, tmdbId]);
 
   /* ── Кнопка назад Telegram ── */
   useEffect(() => {
     const cleanup = showBackButton?.(() => {
-      if (showPlayer) setShowPlayer(false);
+      if (showTrailer) setShowTrailer(false);
       else navigate(-1);
     });
     return cleanup;
-  }, [showBackButton, navigate, showPlayer]);
+  }, [showBackButton, navigate, showTrailer]);
 
-  const handleWatch = () => {
+  const handleStatus = (s: WatchStatus) => {
+    if (!movie) return;
     haptic('medium');
-    if (movie) addToHistory(movie);
-    setShowPlayer(true);
-    requestAnimationFrame(() => {
-      document.getElementById('player')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+    const newStatus = status === s ? null : s;
+    setTrackedStatus(movie, newStatus);
+    setStatusState(newStatus);
+    if (newStatus === 'watched') addToHistory(movie);
+  };
+
+  const handleRate = (r: number) => {
+    if (!movie) return;
+    haptic('light');
+    if (!status) {
+      setTrackedStatus(movie, 'watched');
+      setStatusState('watched');
+      addToHistory(movie);
+    }
+    setPersonalRating(movie.id, r);
+    setRatingState(r);
   };
 
   const handleFav = () => {
     haptic('light');
-    setHeartAnim(true);
-    setTimeout(() => setHeartAnim(false), 400);
     if (movie) {
-      if (favorite) {
-        removeFavorite(movie.id);
-        setFavToast('Удалено из избранного 💔');
+      if (status) {
+        setTrackedStatus(movie, null);
+        setFavToast('Убрано из списков 💔');
         haptic('medium');
       } else {
-        addFavorite(movie);
-        setFavToast('Добавлено в избранное ❤️');
+        setTrackedStatus(movie, 'want');
+        setFavToast('Добавлено в «Буду смотреть» 🔖');
         haptic('heavy');
       }
+      setStatusState(getStatus(movie.id));
       setFavToastVisible(true);
       setTimeout(() => setFavToastVisible(false), 1800);
     }
-  };
-
-  const handleEpisodeWatch = (season: number, episode: number) => {
-    setActiveSeason(season);
-    setActiveEpisode(episode);
-    haptic('medium');
-    if (movie) addToHistory(movie);
-    setShowPlayer(true);
   };
 
   /* ── Skeleton ── */
@@ -144,68 +150,37 @@ const MovieDetailPage: React.FC = () => {
     );
   }
 
-  const seasons = movie.seasons || [];
-  const isSerial = movie.is_serial || seasons.length > 0;
+  const isSerial = movie.is_serial || (movie.seasons?.length ?? 0) > 0;
   const poster = movie.poster_path;
   const backdrop = movie.backdrop_path || poster;
-
-  /* Эпизоды текущего сезона */
-  const currentSeason = seasons.find(s => s.season_number === activeSeason);
-  const episodesCount = currentSeason?.episodes_count || 0;
+  const inList = status !== null;
+  const whereLinks = whereToWatch(movie.title);
 
   return (
     <div className="dp page">
-      {/* Компактный плеер сверху — страница остаётся доступной */}
-      {showPlayer && (
-        <div className="dp-player-slot" id="player">
-          <VideoPlayer
-            options={playerOptions}
-            loadingOptions={sourceLoading}
-            onClose={() => setShowPlayer(false)}
-            title={movie.title}
-            poster={poster}
-            isSerial={isSerial}
-            season={activeSeason}
-            episode={activeEpisode}
-            maxEpisode={episodesCount || 1}
-            initialMode="compact"
-            onEpisodeChange={(s, e) => {
-              setActiveSeason(s);
-              setActiveEpisode(e);
-            }}
-          />
-        </div>
-      )}
-
       {/* ── Фон ── */}
-      {!showPlayer && (
-        <div className="dp-bg">
-          <img src={backdrop} alt="" className="dp-bg__img" />
-          <div className="dp-bg__grad" />
-        </div>
-      )}
+      <div className="dp-bg">
+        <img src={backdrop} alt="" className="dp-bg__img" />
+        <div className="dp-bg__grad" />
+      </div>
 
       {/* ── Кнопка назад ── */}
-      {!showPlayer && (
-        <button className="dp-back" onClick={() => navigate(-1)} aria-label="Назад">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M14 5l-7 6 7 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </button>
-      )}
+      <button className="dp-back" onClick={() => navigate(-1)} aria-label="Назад">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M14 5l-7 6 7 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
 
       {/* ── Hero ── */}
-      <div className={`dp-hero ${showPlayer ? 'dp-hero--with-player' : ''}`}>
-        {!showPlayer && (
-          <div className="dp-hero__poster-wrap">
-            <img className="dp-hero__poster" src={poster} alt={movie.title} />
-            {movie.vote_average > 0 && (
-              <div className="dp-hero__score">
-                <span>★</span> {movie.vote_average.toFixed(1)}
-              </div>
-            )}
-          </div>
-        )}
+      <div className="dp-hero">
+        <div className="dp-hero__poster-wrap">
+          <img className="dp-hero__poster" src={poster} alt={movie.title} />
+          {movie.vote_average > 0 && (
+            <div className="dp-hero__score">
+              <span>★</span> {movie.vote_average.toFixed(1)}
+            </div>
+          )}
+        </div>
 
         <div className="dp-hero__info">
           <h1 className="dp-hero__title">{movie.title}</h1>
@@ -217,7 +192,6 @@ const MovieDetailPage: React.FC = () => {
             {movie.release_date && <span>{movie.release_date.slice(0, 4)}</span>}
             {movie.runtime ? <span>{movie.runtime} мин</span> : null}
             {isSerial && <span className="dp-meta--serial">Сериал</span>}
-            {movie.quality && <span className="dp-meta--quality">{movie.quality}</span>}
           </div>
 
           <div className="dp-genres">
@@ -228,33 +202,31 @@ const MovieDetailPage: React.FC = () => {
 
           <div className="dp-actions">
             <button
-              className={`dp-watch ${sourceLoading ? 'dp-watch--loading' : ''}`}
-              onClick={handleWatch}
+              className="dp-watch"
+              onClick={() => {
+                if (!trailerUrl) return;
+                haptic('medium');
+                setShowTrailer(true);
+              }}
+              disabled={!trailerUrl}
+              style={!trailerUrl ? { opacity: 0.5 } : undefined}
             >
-              {sourceLoading ? (
-                <span className="dp-watch__spinner" />
-              ) : (
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
-                </svg>
-              )}
-              {showPlayer
-                ? 'Смотрим'
-                : isSerial
-                  ? `Смотреть С${activeSeason}:Е${activeEpisode}`
-                  : 'Смотреть'}
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
+              </svg>
+              {trailerUrl ? 'Трейлер' : 'Трейлер не найден'}
             </button>
 
             <button
-              className={`dp-fav ${favorite ? 'dp-fav--on' : ''} ${heartAnim ? 'dp-fav--anim' : ''}`}
+              className={`dp-fav ${inList ? 'dp-fav--on' : ''}`}
               onClick={handleFav}
-              aria-label="Избранное"
+              aria-label="Буду смотреть"
             >
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path
                   d="M17.3 4.4a5 5 0 0 0-7.1 0L10 4.6l-.2-.2A5 5 0 0 0 2.7 11.5l.2.2L10 19l7.1-7.3.2-.2a5 5 0 0 0 0-7.1z"
-                  fill={favorite ? '#e23d3d' : 'none'}
-                  stroke={favorite ? 'none' : 'rgba(255,255,255,0.6)'}
+                  fill={inList ? '#e23d3d' : 'none'}
+                  stroke={inList ? 'none' : 'rgba(255,255,255,0.6)'}
                   strokeWidth="1.7"
                 />
               </svg>
@@ -263,7 +235,7 @@ const MovieDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Тост избранного ── */}
+      {/* ── Тост ── */}
       <div className={`dp-fav-toast ${favToastVisible ? 'dp-fav-toast--show' : ''}`}>
         {favToast}
       </div>
@@ -274,38 +246,73 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {isSerial && seasons.length > 0 && (
-        <div className="dp-section">
-          <h3 className="dp-section__title">Сезоны</h3>
-          <div className="dp-seasons">
-            {seasons.map((s) => (
-              <button
-                key={s.id}
-                className={`dp-season-btn ${s.season_number === activeSeason ? 'active' : ''}`}
-                onClick={() => { setActiveSeason(s.season_number); setActiveEpisode(1); }}
-              >
-                С{s.season_number}
-              </button>
-            ))}
-          </div>
+      {/* ── Дневник: статусы ── */}
+      <div className="dp-section">
+        <h3 className="dp-section__title">Мой дневник</h3>
+        <div className="dp-statuses">
+          {STATUSES.map((s) => (
+            <button
+              key={s.id}
+              className={`dp-status ${status === s.id ? 'active' : ''}`}
+              onClick={() => handleStatus(s.id)}
+            >
+              <span className="dp-status__icon">{s.icon}</span>
+              <span className="dp-status__label">{s.label}</span>
+            </button>
+          ))}
+        </div>
 
-          {episodesCount > 0 && (
-            <div className="dp-episodes">
-              {Array.from({ length: episodesCount }, (_, i) => i + 1).map((ep) => (
+        {/* Личная оценка 1-10 */}
+        {status === 'watched' && (
+          <div className="dp-rate">
+            <p className="dp-rate__title">Моя оценка</p>
+            <div className="dp-rate__stars">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => (
                 <button
-                  key={ep}
-                  className={`dp-ep ${ep === activeEpisode ? 'active' : ''}`}
-                  onClick={() => handleEpisodeWatch(activeSeason, ep)}
+                  key={r}
+                  className={`dp-rate__star ${rating && r <= rating ? 'on' : ''}`}
+                  onClick={() => handleRate(r)}
                 >
-                  <span className="dp-ep__num">{ep}</span>
-                  <span className="dp-ep__label">Серия {ep}</span>
-                  <svg className="dp-ep__play" width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <path d="M3 2l9 5-9 5V2z" fill="currentColor"/>
-                  </svg>
+                  {r}
                 </button>
               ))}
             </div>
-          )}
+            {rating !== null && <p className="dp-rate__value">Моя оценка: {rating}/10</p>}
+          </div>
+        )}
+      </div>
+
+      {/* ── Где посмотреть (легальные сервисы) ── */}
+      <div className="dp-section">
+        <h3 className="dp-section__title">Где посмотреть</h3>
+        <p className="dp-where__hint">Поиск по легальным сервисам</p>
+        <div className="dp-where">
+          {whereLinks.map((s) => (
+            <button
+              key={s.name}
+              className="dp-where__item"
+              onClick={() => { haptic('light'); openLink(s.url); }}
+            >
+              <span className="dp-where__icon">{s.icon}</span>
+              <span className="dp-where__name">{s.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Плеер трейлера ── */}
+      {showTrailer && trailerUrl && (
+        <div className="dp-trailer-overlay" onClick={() => setShowTrailer(false)}>
+          <div className="dp-trailer" onClick={(e) => e.stopPropagation()}>
+            <iframe
+              src={trailerUrl}
+              className="dp-trailer__frame"
+              title="Трейлер"
+              allowFullScreen
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+            />
+            <button className="dp-trailer__close" onClick={() => setShowTrailer(false)}>✕ Закрыть</button>
+          </div>
         </div>
       )}
 

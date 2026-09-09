@@ -99,3 +99,40 @@
   padding: 0 2px;
   margin-top: 2px;
 }
+/* ── Вкладки списков ── */
+.fav-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 14px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.fav-tabs::-webkit-scrollbar { display: none; }
+.fav-tab {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.fav-tab.active {
+  background: rgba(232,184,74,0.16);
+  border-color: rgba(232,184,74,0.45);
+  color: #f0c96a;
+}
+.fav-tab__count {
+  background: rgba(232,184,74,0.2);
+  color: #f0c96a;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 8px;
+}

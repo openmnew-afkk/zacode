@@ -38,13 +38,32 @@ const tabs: TabDef[] = [
   },
   {
     path: '/favorites',
-    label: 'Избранное',
+    label: 'Списки',
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         {active ? (
           <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
         ) : (
           <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z" stroke="currentColor" strokeWidth="1.6"/>
+        )}
+      </svg>
+    ),
+  },
+  {
+    path: '/sport',
+    label: 'Спорт',
+    icon: (active) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        {active ? (
+          <>
+            <circle cx="12" cy="12" r="9" fill="currentColor"/>
+            <path d="M12 3a15 15 0 0 1 0 18M3.5 9h17M3.5 15h17M12 3a15 15 0 0 0 0 18" stroke="#0a0a0f" strokeWidth="1.3" fill="none"/>
+          </>
+        ) : (
+          <>
+            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6"/>
+            <path d="M12 3a15 15 0 0 1 0 18M3.5 9h17M3.5 15h17M12 3a15 15 0 0 0 0 18" stroke="currentColor" strokeWidth="1.1"/>
+          </>
         )}
       </svg>
     ),

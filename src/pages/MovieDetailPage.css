@@ -444,3 +444,136 @@
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ── Дневник: статусы ── */
+.dp-statuses {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+.dp-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 4px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  transition: all 0.18s var(--ease-smooth);
+}
+.dp-status:active { transform: scale(0.93); }
+.dp-status__icon { font-size: 20px; }
+.dp-status__label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  line-height: 1.2;
+}
+.dp-status.active {
+  background: rgba(232,184,74,0.14);
+  border-color: rgba(232,184,74,0.45);
+}
+.dp-status.active .dp-status__label { color: #f0c96a; }
+
+/* ── Личная оценка 1-10 ── */
+.dp-rate { margin-top: 14px; }
+.dp-rate__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 8px;
+}
+.dp-rate__stars { display: flex; gap: 5px; flex-wrap: wrap; }
+.dp-rate__star {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.5);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dp-rate__star:active { transform: scale(0.88); }
+.dp-rate__star.on {
+  background: rgba(232,184,74,0.18);
+  border-color: rgba(232,184,74,0.5);
+  color: #f0c96a;
+}
+.dp-rate__value {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f0c96a;
+  margin: 8px 0 0;
+}
+
+/* ── Где посмотреть ── */
+.dp-where__hint {
+  font-size: 11.5px;
+  color: rgba(255,255,255,0.35);
+  margin: -6px 0 10px;
+}
+.dp-where {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.dp-where__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 11px 4px;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dp-where__item:active { transform: scale(0.93); background: rgba(255,255,255,0.08); }
+.dp-where__icon { font-size: 19px; }
+.dp-where__name {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.65);
+}
+
+/* ── Трейлер (YouTube, легально) ── */
+.dp-trailer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: hpPreviewFade 0.2s ease;
+}
+.dp-trailer {
+  width: 100%;
+  max-width: 560px;
+}
+.dp-trailer__frame {
+  width: 100%;
+  aspect-ratio: 16/9;
+  border: none;
+  border-radius: 16px;
+  background: #000;
+}
+.dp-trailer__close {
+  margin-top: 12px;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}

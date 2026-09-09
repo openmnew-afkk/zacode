@@ -6,14 +6,14 @@ import './PremiumPage.css';
 import './PremiumRoulette.css';
 
 const features = [
-  { icon: '🔥', title: 'LostFilm озвучка', desc: 'Эксклюзивная озвучка LostFilm' },
-  { icon: '🔴', title: 'RedHeadSound', desc: 'Профессиональный перевод' },
-  { icon: '❄️', title: 'ColdFilm', desc: 'Озвучка ColdFilm' },
-  { icon: '🚫', title: 'Без рекламы', desc: 'Без прерываний и баннеров' },
-  { icon: '⬇️', title: 'Скачивание', desc: 'Офлайн просмотр' },
-  { icon: '📺', title: 'Full HD / 4K', desc: 'Максимальное качество' },
-  { icon: '🎬', title: 'Ранний доступ', desc: 'Новинки за 24ч раньше' },
-  { icon: '👨‍👩‍👧‍👦', title: '5 устройств', desc: 'Телефон, планшет, ТВ' },
+  { icon: '📊', title: 'Статистика', desc: 'Графики твоих просмотров' },
+  { icon: '📅', title: 'Календарь релизов', desc: 'Уведомления о новинках' },
+  { icon: '🚫', title: 'Без рекламы', desc: 'Ничего лишнего' },
+  { icon: '🔖', title: 'Списки без лимитов', desc: 'Сколько угодно коллекций' },
+  { icon: '🤖', title: 'ИИ-рекомендации', desc: 'Умный подбор под вкус' },
+  { icon: '👑', title: 'Золотой профиль', desc: 'Эксклюзивный дизайн' },
+  { icon: '⚡', title: 'Ранний доступ', desc: 'Новые фичи первыми' },
+  { icon: '❤️', title: 'Поддержка проекта', desc: 'Помогаешь развитию' },
 ];
 
 const ROULETTE_PRIZES = [3, 5, 7, 3, 5, 3, 7, 3]; // дни бесплатного премиума
@@ -148,11 +148,11 @@ const PremiumPage: React.FC = () => {
                 : 'Бессрочный доступ'}
           </p>
           <div className="pm-active-features">
-            <div className="pm-active-item">✅ LostFilm, RedHeadSound, ColdFilm</div>
+            <div className="pm-active-item">✅ Статистика и графики</div>
+            <div className="pm-active-item">✅ Календарь релизов</div>
             <div className="pm-active-item">✅ Без рекламы</div>
-            <div className="pm-active-item">✅ Скачивание</div>
-            <div className="pm-active-item">✅ Full HD / 4K</div>
-            <div className="pm-active-item">✅ Ранний доступ к новинкам</div>
+            <div className="pm-active-item">✅ ИИ-рекомендации</div>
+            <div className="pm-active-item">✅ Золотой профиль</div>
           </div>
         </div>
       </div>

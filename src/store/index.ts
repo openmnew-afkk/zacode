@@ -1,7 +1,7 @@
 /* ===== TeleCinema — Store с премиум и админкой ===== */
 
 import { create } from 'zustand';
-import type { Movie, WatchHistoryItem, AppTheme } from '../types';
+import type { Movie, WatchHistoryItem, AppTheme, WatchStatus, TrackedItem } from '../types';
 import type { BackendConfig, Requisites, Prices } from '../api/backend';
 
 /* ── localStorage helpers ── */
@@ -59,6 +59,15 @@ interface AppState {
   watchHistory: WatchHistoryItem[];
   addToHistory: (movie: Movie) => void;
   clearHistory: () => void;
+
+  /* ═══ Дневник киномана: статусы и личные оценки ═══ */
+  tracked: Record<string, TrackedItem>;
+  /** Установить статус (повторный тап по тому же — снять) */
+  setTrackedStatus: (movie: Movie, status: WatchStatus | null) => void;
+  /** Личная оценка 1-10 */
+  setPersonalRating: (id: string, rating: number) => void;
+  getStatus: (id: string) => WatchStatus | null;
+  getRating: (id: string) => number | null;
 
   /* Тема */
   theme: AppTheme;
@@ -136,6 +145,33 @@ export const useStore = create<AppState>((set, get) => ({
     set({ watchHistory: updated });
   },
   clearHistory: () => { save('tc_history', []); set({ watchHistory: [] }); },
+
+  /* ═══ Дневник киномана ═══ */
+  tracked: load<Record<string, TrackedItem>>('tc_tracked', {}),
+  setTrackedStatus: (movie, status) => {
+    const t = { ...get().tracked };
+    if (!status || t[movie.id]?.status === status) {
+      delete t[movie.id];
+    } else {
+      t[movie.id] = {
+        movie,
+        status,
+        rating: t[movie.id]?.rating ?? null,
+        addedAt: t[movie.id]?.addedAt ?? Date.now(),
+      };
+    }
+    save('tc_tracked', t);
+    set({ tracked: t });
+  },
+  setPersonalRating: (id, rating) => {
+    const t = { ...get().tracked };
+    if (!t[id]) return;
+    t[id] = { ...t[id], rating };
+    save('tc_tracked', t);
+    set({ tracked: t });
+  },
+  getStatus: (id) => get().tracked[id]?.status ?? null,
+  getRating: (id) => get().tracked[id]?.rating ?? null,
 
   /* ═══ Тема ═══ */
   theme: (() => {

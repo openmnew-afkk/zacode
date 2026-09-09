@@ -68,6 +68,16 @@ export interface WatchHistoryItem {
 
 export type AppTheme = 'dark' | 'violet';
 
+/* Статусы просмотра (дневник киномана) */
+export type WatchStatus = 'want' | 'watching' | 'watched' | 'dropped';
+
+export interface TrackedItem {
+  movie: Movie;
+  status: WatchStatus;
+  rating: number | null; // личная оценка 1-10
+  addedAt: number;
+}
+
 export interface TelegramUser {
   id: number;
   first_name: string;
