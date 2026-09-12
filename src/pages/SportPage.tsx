@@ -17,7 +17,7 @@ const STRATEGIES: Array<{ id: BettingStrategy; label: string; icon: string }> = 
   { id: 'value', label: 'Value', icon: '💎' },
 ];
 
-const confidenceColor = (c: number) => c >= 80 ? '#4ade80' : c >= 65 ? '#f0c96a' : c >= 50 ? '#fb923c' : '#f87171';
+const confidenceColor = (c: number) => c >= 80 ? '#00e07b' : c >= 65 ? '#a3e635' : c >= 50 ? '#facc15' : '#f87171';
 const dangerIcon = (l: string) => l === 'low' ? '🟢' : l === 'medium' ? '🟡' : '🔴';
 
 const SportPage: React.FC = () => {
@@ -129,6 +129,18 @@ const SportPage: React.FC = () => {
                   <span className="sp-match__conf" style={{ color: confidenceColor(m.analysis.confidence) }}>
                     {m.analysis.confidence}%
                   </span>
+                </div>
+                <div className="sp-odds-row sp-match__odds">
+                  {([['1', m.odds['1'], 'П1'], ['X', m.odds['X'], 'X'], ['2', m.odds['2'], 'П2']] as Array<[string, number, string]>).map(([sel, odds, label]) => (
+                    <button
+                      key={sel}
+                      className={`sp-odd ${picks.find((p) => p.id === m.id)?.sel === sel ? 'picked' : ''}`}
+                      onClick={(e) => { e.stopPropagation(); togglePick(m, sel, odds); }}
+                    >
+                      <span className="sp-odd__label">{label}</span>
+                      <span className="sp-odd__val">{odds}</span>
+                    </button>
+                  ))}
                 </div>
                 {m.analysis.valueBets.length > 0 && (
                   <div className="sp-match__value">

@@ -50,8 +50,22 @@ const tabs: TabDef[] = [
     ),
   },
   {
+    path: '/music',
+    label: 'Музыка',
+    icon: (active) => (
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        {active ? (
+          <><path d="M9 18V6l11-2v12" fill="currentColor"/><circle cx="7" cy="18" r="2.6" fill="currentColor"/><circle cx="18" cy="16" r="2.6" fill="currentColor"/></>
+        ) : (
+          <><path d="M9 18V6l11-2v12" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><circle cx="7" cy="18" r="2.6" stroke="currentColor" strokeWidth="1.6"/><circle cx="18" cy="16" r="2.6" stroke="currentColor" strokeWidth="1.6"/></>
+        )}
+      </svg>
+    ),
+  },
+  {
     path: '/sport',
     label: 'Спорт',
+    // Только для @MikySauce — фильтруется в visibleTabs
     icon: (active) => (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
         {active ? (
@@ -99,7 +113,11 @@ const tabs: TabDef[] = [
 const TabBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { favorites } = useStore();
+  const { favorites, telegramUsername } = useStore();
+
+  /* Спорт-раздел — только для админа @MikySauce */
+  const isOwner = telegramUsername === 'MikySauce';
+  const visibleTabs = isOwner ? tabs : tabs.filter((t) => t.path !== '/sport');
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
@@ -112,7 +130,7 @@ const TabBar: React.FC = () => {
   return (
     <nav className="tab-bar">
       <div className="tab-bar__inner">
-        {tabs.map((tab) => {
+        {visibleTabs.map((tab) => {
           const active = isActive(tab.path);
           return (
             <button

@@ -1,0 +1,153 @@
+/* ===== Музыка ===== */
+
+.mu { padding: 0 0 calc(100px + 80px); min-height: 100vh; }
+
+.mu-header { padding: 16px 16px 4px; }
+.mu-header__brand { display: flex; align-items: center; gap: 10px; }
+.mu-header__logo {
+  width: 42px; height: 42px; border-radius: 13px;
+  background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(168,85,247,0.15));
+  border: 1px solid rgba(236,72,153,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.mu-header__title { font-size: 19px; font-weight: 800; color: #fff; margin: 0; }
+.mu-header__sub { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 600; }
+
+.mu-search {
+  display: flex; gap: 8px; margin: 10px 16px 12px;
+}
+.mu-search__input {
+  flex: 1; padding: 11px 14px; border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: #fff; font-size: 14px; outline: none;
+}
+.mu-search__input::placeholder { color: rgba(255,255,255,0.3); }
+.mu-search__input:focus { border-color: rgba(236,72,153,0.5); }
+.mu-search__btn {
+  width: 44px; border-radius: 14px;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  border: none; color: #fff; font-size: 16px; cursor: pointer;
+}
+
+.mu-list { padding: 0 16px; }
+
+.mu-spinner {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid rgba(236,72,153,0.15);
+  border-top-color: #ec4899;
+  animation: mu-spin 0.75s linear infinite;
+  margin-bottom: 10px;
+}
+@keyframes mu-spin { to { transform: rotate(360deg); } }
+
+.mu-empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 60px 20px; color: rgba(255,255,255,0.4);
+  font-size: 14px; text-align: center;
+}
+.mu-empty__icon { font-size: 40px; margin-bottom: 10px; }
+.mu-empty__sub { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 4px; }
+
+.mu-track {
+  display: flex; align-items: center; gap: 11px;
+  padding: 9px 10px; border-radius: 14px;
+  margin-bottom: 5px; cursor: pointer;
+  transition: background 0.15s;
+}
+.mu-track:active { background: rgba(255,255,255,0.06); }
+.mu-track.active { background: rgba(236,72,153,0.1); }
+.mu-track__art {
+  width: 46px; height: 46px; border-radius: 11px;
+  object-fit: cover; flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+}
+.mu-track__art--ph {
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.mu-track__info { flex: 1; min-width: 0; }
+.mu-track__title {
+  font-size: 13.5px; font-weight: 700; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 0;
+}
+.mu-track.active .mu-track__title { color: #f9a8d4; }
+.mu-track__artist {
+  font-size: 11.5px; color: rgba(255,255,255,0.4);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 2px 0 0;
+}
+.mu-track__btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: #fff; flex-shrink: 0;
+}
+.mu-track__btn.playing {
+  background: rgba(236,72,153,0.2);
+  border-color: rgba(236,72,153,0.45);
+  color: #f9a8d4;
+}
+
+/* Мини-плеер */
+.mu-player {
+  position: fixed;
+  left: 10px; right: 10px;
+  bottom: calc(var(--tabbar-h, 70px) + 8px);
+  z-index: 150;
+  background: rgba(24, 16, 34, 0.95);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(236,72,153,0.3);
+  border-radius: 18px;
+  padding: 11px 14px 9px;
+  box-shadow: 0 10px 34px rgba(236,72,153,0.2);
+}
+.mu-player__top { display: flex; align-items: center; gap: 11px; }
+.mu-player__art {
+  width: 44px; height: 44px; border-radius: 11px;
+  object-fit: cover; flex-shrink: 0;
+}
+.mu-player__meta { flex: 1; min-width: 0; }
+.mu-player__title {
+  font-size: 13px; font-weight: 800; color: #fff;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 0;
+}
+.mu-player__artist {
+  font-size: 11px; color: rgba(255,255,255,0.4);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: 2px 0 0;
+}
+.mu-player__controls { display: flex; gap: 4px; align-items: center; }
+.mu-player__controls button {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff; font-size: 13px; cursor: pointer;
+}
+.mu-player__play {
+  background: linear-gradient(135deg, #ec4899, #a855f7) !important;
+  border: none !important;
+  font-size: 14px !important;
+}
+.mu-player__bar {
+  height: 4px; border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  margin-top: 10px; cursor: pointer;
+  overflow: hidden;
+}
+.mu-player__progress {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, #ec4899, #a855f7);
+  box-shadow: 0 0 8px rgba(236,72,153,0.5);
+}
+.mu-player__time {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: rgba(255,255,255,0.35);
+  margin-top: 4px;
+}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer } from '../api/catalog';
-import type { MovieDetail, WatchStatus } from '../types';
+import { buildForeignWatchOptions, isRestrictedContent, switchSourceUrl } from '../api/watch';
+import type { MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import './MovieDetailPage.css';
@@ -19,6 +20,7 @@ const whereToWatch = (title: string) => [
   { name: 'JustWatch', icon: '🔎', url: `https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(title)}` },
   { name: 'Кинопоиск', icon: '🎬', url: `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(title)}` },
   { name: 'Okko', icon: '🟠', url: `https://okko.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Wink', icon: '🟣', url: `https://wink.ru/search?q=${encodeURIComponent(title)}` },
   { name: 'Иви', icon: '📺', url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}` },
   { name: 'Netflix', icon: '🅽', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
   { name: 'YouTube', icon: '▶️', url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}` },
@@ -42,6 +44,9 @@ const MovieDetailPage: React.FC = () => {
   const [rating, setRatingState] = useState<number | null>(null);
   const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
+  const [showWatch, setShowWatch] = useState(false);
+  const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
+  const [watchIdx, setWatchIdx] = useState(0);
 
   const compositeId = id || '';
   const tmdbId = compositeId.replace(/^(tv|movie)-/, '');
@@ -155,6 +160,9 @@ const MovieDetailPage: React.FC = () => {
   const backdrop = movie.backdrop_path || poster;
   const inList = status !== null;
   const whereLinks = whereToWatch(movie.title);
+  /* РФ/СНГ контент → только ссылки, зарубежный → плеер доступен */
+  const restricted = isRestrictedContent(movie.countries);
+  const canWatch = !restricted;
 
   return (
     <div className="dp page">
@@ -201,21 +209,38 @@ const MovieDetailPage: React.FC = () => {
           </div>
 
           <div className="dp-actions">
-            <button
-              className="dp-watch"
-              onClick={() => {
-                if (!trailerUrl) return;
-                haptic('medium');
-                setShowTrailer(true);
-              }}
-              disabled={!trailerUrl}
-              style={!trailerUrl ? { opacity: 0.5 } : undefined}
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
-              </svg>
-              {trailerUrl ? 'Трейлер' : 'Трейлер не найден'}
-            </button>
+            {canWatch ? (
+              <button
+                className="dp-watch"
+                onClick={() => {
+                  haptic('medium');
+                  setWatchOptions(buildForeignWatchOptions(tmdbId, isSerial));
+                  setWatchIdx(0);
+                  setShowWatch(true);
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
+                </svg>
+                Смотреть
+              </button>
+            ) : (
+              <button
+                className="dp-watch"
+                onClick={() => {
+                  if (!trailerUrl) return;
+                  haptic('medium');
+                  setShowTrailer(true);
+                }}
+                disabled={!trailerUrl}
+                style={!trailerUrl ? { opacity: 0.5 } : undefined}
+              >
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
+                </svg>
+                Трейлер
+              </button>
+            )}
 
             <button
               className={`dp-fav ${inList ? 'dp-fav--on' : ''}`}
@@ -243,6 +268,20 @@ const MovieDetailPage: React.FC = () => {
       {movie.overview && (
         <div className="dp-section">
           <p className="dp-desc">{movie.overview}</p>
+        </div>
+      )}
+
+      {/* ── Плашка запрета для РФ/СНГ контента ── */}
+      {restricted && (
+        <div className="dp-ban">
+          <span className="dp-ban__icon">🔒</span>
+          <div className="dp-ban__text">
+            <b>Онлайн-показ ограничен</b>
+            <span>
+              {isSerial ? 'Сериал' : 'Фильм'} российского/СНГ производства недоступен
+              к просмотру в приложении. Смотрите на легальных площадках ниже.
+            </span>
+          </div>
         </div>
       )}
 
@@ -285,7 +324,9 @@ const MovieDetailPage: React.FC = () => {
       {/* ── Где посмотреть (легальные сервисы) ── */}
       <div className="dp-section">
         <h3 className="dp-section__title">Где посмотреть</h3>
-        <p className="dp-where__hint">Поиск по легальным сервисам</p>
+        <p className="dp-where__hint">
+          {restricted ? 'Легальные площадки для этого тайтла' : 'Поиск по легальным сервисам'}
+        </p>
         <div className="dp-where">
           {whereLinks.map((s) => (
             <button
@@ -312,6 +353,47 @@ const MovieDetailPage: React.FC = () => {
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
             />
             <button className="dp-trailer__close" onClick={() => setShowTrailer(false)}>✕ Закрыть</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Плеер (зарубежный контент, рус. озвучка) ── */}
+      {showWatch && watchOptions.length > 0 && (
+        <div className="dp-trailer-overlay" onClick={() => setShowWatch(false)}>
+          <div className="dp-trailer" onClick={(e) => e.stopPropagation()}>
+            <div className="dp-watch-bar">
+              <span className="dp-watch-bar__title">
+                {watchOptions[watchIdx]?.flag} {watchOptions[watchIdx]?.label} · {movie.title}
+              </span>
+              <button className="dp-watch-bar__close" onClick={() => setShowWatch(false)}>✕</button>
+            </div>
+            <iframe
+              key={watchOptions[watchIdx]?.url}
+              src={watchOptions[watchIdx]?.url}
+              className="dp-trailer__frame"
+              title="Просмотр"
+              allowFullScreen
+              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+              referrerPolicy="origin"
+            />
+            <div className="dp-watch-sources">
+              {watchOptions.map((o, i) => (
+                <button
+                  key={o.id}
+                  className={`dp-watch-src ${i === watchIdx ? 'active' : ''}`}
+                  onClick={() => setWatchIdx(i)}
+                >
+                  {o.flag} {o.label}
+                </button>
+              ))}
+            </div>
+            {isSerial && (
+              <div className="dp-watch-eps">
+                <button className="dp-watch-ep" onClick={() => { haptic('light'); setWatchIdx((i) => i); }}>
+                  Сезон/серия выбираются внутри плеера
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

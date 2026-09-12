@@ -100,6 +100,37 @@
   margin-top: 2px;
 }
 /* ── Вкладки списков ── */
+/* Статистика дневника */
+.fav-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0 16px 12px;
+}
+.fav-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 11px 6px;
+  border-radius: 15px;
+  background: linear-gradient(160deg, rgba(232,184,74,0.08), rgba(232,184,74,0.03));
+  border: 1px solid rgba(232,184,74,0.15);
+}
+.fav-stat__val {
+  font-size: 19px;
+  font-weight: 900;
+  color: #f0c96a;
+  font-variant-numeric: tabular-nums;
+}
+.fav-stat__label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .fav-tabs {
   display: flex;
   gap: 6px;
@@ -135,4 +166,27 @@
   font-weight: 800;
   padding: 1px 6px;
   border-radius: 8px;
+}
+
+.fav-card__meta {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255,255,255,0.4);
+  padding: 3px 2px 0;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fav-card__myrating {
+  position: absolute;
+  bottom: 5px;
+  left: 4px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: rgba(232,184,74,0.85);
+  color: #1a1208;
+  font-size: 9.5px;
+  font-weight: 800;
 }

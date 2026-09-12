@@ -16,6 +16,12 @@ export const ESPN_LEAGUES: LeagueDef[] = [
   { code: 'ita.1', name: 'Серия А' },
   { code: 'fra.1', name: 'Лига 1' },
   { code: 'uefa.champions', name: 'Лига Чемпионов' },
+  { code: 'uefa.europa', name: 'Лига Европы' },
+  { code: 'rus.1', name: 'РПЛ' },
+  { code: 'por.1', name: 'Примейра' },
+  { code: 'ned.1', name: 'Эредивизи' },
+  { code: 'tur.1', name: 'Суперлига' },
+  { code: 'usa.1', name: 'MLS' },
 ];
 
 // ---------- Конвертация коэффициентов ----------

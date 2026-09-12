@@ -577,3 +577,79 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+/* ── Плашка запрета (РФ/СНГ контент) ── */
+.dp-ban {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin: 4px 16px 12px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: rgba(226,61,61,0.08);
+  border: 1px solid rgba(226,61,61,0.3);
+}
+.dp-ban__icon { font-size: 20px; flex-shrink: 0; }
+.dp-ban__text { display: flex; flex-direction: column; gap: 3px; }
+.dp-ban__text b { color: #ff8a8a; font-size: 13.5px; font-weight: 800; }
+.dp-ban__text span { color: rgba(255,255,255,0.5); font-size: 12px; line-height: 1.5; }
+
+/* ── Плеер просмотра (зарубежный контент) ── */
+.dp-watch-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.dp-watch-bar__title {
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dp-watch-bar__close {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.dp-watch-sources {
+  display: flex;
+  gap: 7px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.dp-watch-src {
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.65);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.dp-watch-src.active {
+  background: rgba(232,184,74,0.16);
+  border-color: rgba(232,184,74,0.5);
+  color: #f0c96a;
+}
+.dp-watch-eps { margin-top: 10px; }
+.dp-watch-ep {
+  width: 100%;
+  padding: 10px;
+  border-radius: 11px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.4);
+  font-size: 11.5px;
+  cursor: default;
+}

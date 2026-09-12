@@ -4,6 +4,7 @@ import HomePage from './pages/HomePage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import SportPage from './pages/SportPage';
+import MusicPage from './pages/MusicPage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import PremiumPage from './pages/PremiumPage';
@@ -43,6 +44,13 @@ function App() {
 
   /* При входе всегда открываем главную (Telegram может вернуть последний URL) */
   useEffect(() => {
+    // Спорт-раздел только для @MikySauce
+    const user = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
+    const username = user?.username || '';
+    if (location.pathname === '/sport' && username !== 'MikySauce') {
+      navigate('/', { replace: true });
+      return;
+    }
     if (location.pathname !== '/') {
       navigate('/', { replace: true });
     }
@@ -93,6 +101,7 @@ function App() {
         <Route path="/search" element={<SearchPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/sport" element={<SportPage />} />
+        <Route path="/music" element={<MusicPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />
