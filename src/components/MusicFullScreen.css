@@ -1,0 +1,431 @@
+/* ===== MusicFullScreen - Overlay Player ===== */
+
+.mu-full-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  opacity: 0;
+  backdrop-filter: blur(0);
+  transition: 
+    opacity 0.3s ease,
+    backdrop-filter 0.4s ease;
+  overflow: hidden;
+}
+
+.mu-full-overlay.visible {
+  opacity: 1;
+  backdrop-filter: blur(8px);
+}
+
+.mu-full-overlay.closing {
+  opacity: 0;
+  backdrop-filter: blur(0);
+}
+
+.mu-full-overlay__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  filter: brightness(0.4) saturate(1.2) contrast(1.1);
+  transition: transform 0.6s ease;
+}
+
+.mu-full-overlay.visible .mu-full-overlay__bg {
+  transform: scale(1.05);
+}
+
+.mu-full-overlay__shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(15, 8, 24, 0.85) 0%, 
+    rgba(15, 8, 24, 0.92) 50%,
+    rgba(15, 8, 24, 0.95) 100%
+  );
+}
+
+/* Центрированная панель */
+.mu-full-overlay__panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+  opacity: 0;
+  transform: translate(-50%, -40px);
+  transition: 
+    opacity 0.4s ease 0.1s,
+    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s;
+}
+
+.mu-full-overlay.visible .mu-full-overlay__panel,
+.mu-full-overlay.closing .mu-full-overlay__panel {
+  opacity: 1;
+  transform: translate(-50%, -50%);
+}
+
+.mu-full-overlay.closing .mu-full-overlay__panel {
+  opacity: 0;
+  transform: translate(-50%, -40px);
+}
+
+/* Верхняя панель */
+.mu-full-overlay__topbar {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mu-full-overlay__btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 17px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(8px);
+}
+
+.mu-full-overlay__btn:hover {
+  background: rgba(23ec4899, 0.15);
+  border-color: rgba(23ec4899, 0.4);
+  color: #f9a8d4;
+  box-shadow: 0 0 16px rgba(23ec4899, 0.35);
+}
+
+.mu-full-overlay__btn:active {
+  transform: scale(0.92);
+}
+
+.mu-full-overlay__btn.on {
+  background: rgba(23ec4899, 0.25);
+  border-color: rgba(23ec4899, 0.5);
+  color: #f9a8d4;
+  box-shadow: 0 0 12px rgba(23ec4899, 0.45);
+}
+
+/* Кнопка лайка */
+.mu-full__like {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 18px;
+}
+
+.mu-full__like.on {
+  background: rgba(23ec4899, 0.2);
+  border-color: rgba(23ec4899, 0.5);
+  color: #f9a8d4;
+  box-shadow: 0 0 14px rgba(23ec4899, 0.4);
+}
+
+/* Артворк с анимацией */
+.mu-full-overlay__art {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  margin: 18px 0 22px;
+  position: relative;
+  box-shadow: 
+    0 24px 70px rgba(168, 85, 247, 0.4),
+    0 0 0 8px rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.mu-full__art {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.mu-full__art--ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  font-size: 70px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.mu-full__art-wrap.playing::after {
+  content: '';
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  border: 2px solid rgba(23ec4899, 0.4);
+  animation: muPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes muPulse {
+  0%, 100% { 
+    transform: scale(1); 
+    opacity: 0.7; 
+  }
+  50% { 
+    transform: scale(1.08); 
+    opacity: 0.3; 
+  }
+}
+
+/* Заголовок и исполнитель */
+.mu-full__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  text-align: center;
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mu-full__artist {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 5px 0 0;
+  text-align: center;
+}
+
+/* Эквалайзер */
+.mu-eq {
+  display: flex;
+  align-items: flex-end;
+  gap: 3.5px;
+  height: 22px;
+  margin: 14px 0 4px;
+}
+
+.mu-eq span {
+  width: 3.5px;
+  height: 8px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f472b6, #a855f7);
+  opacity: 0.25;
+}
+
+.mu-eq.on span {
+  animation: muEq 0.8s ease-in-out infinite alternate;
+}
+
+.mu-eq.on span:nth-child(odd) {
+  animation-delay: 0.05s;
+}
+
+@keyframes muEq {
+  from { 
+    height: 6px; 
+    opacity: 0.4; 
+  }
+  to { 
+    height: 22px; 
+    opacity: 1; 
+  }
+}
+
+/* Ползунок позиции */
+.mu-full-overlay__seek-container {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.mu-full__time-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  font-variant-numeric: tabular-nums;
+  min-width: 36px;
+  text-align: center;
+}
+
+.mu-full__seek-wrapper {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mu-full__seek {
+  width: 100%;
+  height: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(90deg, 
+    rgba(23ec4899, 0.8) 0%, 
+    rgba(168, 85, 247, 0.8) 50%, 
+    rgba(23ec4899, 0.8) 100%
+  );
+  background-size: var(--progress, 0%) 100%;
+  background-repeat: no-repeat;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.mu-full__seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 
+    0 0 0 3px rgba(23ec4899, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.2s ease;
+}
+
+.mu-full__seek::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 
+    0 0 0 4px rgba(23ec4899, 0.5),
+    0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.mu-full__seek:focus {
+  outline: none;
+}
+
+.mu-full__seek:hover {
+  opacity: 0.8;
+}
+
+/* Управление воспроизведением */
+.mu-full-overlay__controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.mu-full-overlay__btn--play.mu-full__play {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  border: none;
+  font-size: 24px;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(23ec4899, 0.45);
+  transition: all 0.25s ease;
+}
+
+.mu-full-overlay__btn--play.mu-full__play:hover {
+  box-shadow: 0 14px 36px rgba(23ec4899, 0.6);
+  transform: scale(1.08) !important;
+}
+
+.mu-full-overlay__btn--play.mu-full__play:active {
+  transform: scale(0.92) !important;
+}
+
+.mu-full-overlay__btn--prev,
+.mu-full-overlay__btn--next {
+  width: 46px;
+  height: 46px;
+}
+
+/* Дополнительные элементы управления */
+.mu-full-overlay__extra {
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.mu-full-overlay__volume {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 120px;
+}
+
+.mu-full__volume-seek {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.mu-full__volume-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(23ec4899, 0.7);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 6px rgba(23ec4899, 0.5);
+}
+
+.mu-full-overlay__queue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mu-full-overlay__queue:hover {
+  color: #f9a8d4;
+}
+
+/* Анимация появления элементов */
+.mu-full-overlay.visible .mu-full-overlay__btn,
+.mu-full-overlay.visible .mu-full__title,
+.mu-full-overlay.visible .mu-full__artist,
+.mu-full-overlay.visible .mu-eq,
+.mu-full-overlay.visible .mu-full__seek-wrapper,
+.mu-full-overlay.visible .mu-full-overlay__controls,
+.mu-full-overlay.visible .mu-full-overlay__extra {
+  animation: muFullFadeSlide 0.5s ease forwards;
+  opacity: 0;
+}
+
+.mu-full-overlay.visible .mu-full-overlay__btn { animation-delay: 0.1s; }
+.mu-full-overlay.visible .mu-full__title { animation-delay: 0.15s; }
+.mu-full-overlay.visible .mu-full__artist { animation-delay: 0.2s; }
+.mu-full-overlay.visible .mu-eq { animation-delay: 0.25s; }
+.mu-full-overlay.visible .mu-full__seek-wrapper { animation-delay: 0.3s; }
+.mu-full-overlay.visible .mu-full-overlay__controls { animation-delay: 0.35s; }
+.mu-full-overlay.visible .mu-full-overlay__extra { animation-delay: 0.4s; }
+
+@keyframes muFullFadeSlide {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

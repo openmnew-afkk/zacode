@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
+import {
+  PlayIcon, PauseIcon, NextIcon, PrevIcon, ShuffleIcon, RepeatIcon,
+  HeartIcon, MusicNoteIcon, ChevronDownIcon
+} from '../components/MusicIcons';
 import './MusicPage.css';
 
 interface Track {
@@ -36,6 +40,46 @@ const mapTrack = (t: any, host: string): Track => ({
   streamUrl: `${host}/v1/tracks/${t.id}/stream?app_name=${APP_NAME}`,
 });
 
+// Демо-данные для fallback
+const MOCK_TRACKS: Track[] = [
+  {
+    id: 'mock-1',
+    title: 'Midnight Dreams',
+    artist: 'Luna Vibe',
+    artwork: '',
+    duration: 180,
+    plays: 1250000,
+    streamUrl: '',
+  },
+  {
+    id: 'mock-2',
+    title: 'Neon Nights',
+    artist: 'Synthwave Collective',
+    artwork: '',
+    duration: 210,
+    plays: 980000,
+    streamUrl: '',
+  },
+  {
+    id: 'mock-3',
+    title: 'Digital Love',
+    artist: 'Cyber Beats',
+    artwork: '',
+    duration: 195,
+    plays: 870000,
+    streamUrl: '',
+  },
+  {
+    id: 'mock-4',
+    title: 'Crimson Sky',
+    artist: 'Velvet Echo',
+    artwork: '',
+    duration: 240,
+    plays: 760000,
+    streamUrl: '',
+  },
+];
+
 const MusicPage: React.FC = () => {
   const { haptic } = useTelegram();
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -56,7 +100,7 @@ const MusicPage: React.FC = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
-  useEffect(() => {
+    useEffect(() => {
     let cancelled = false;
     (async () => {
       let host = HOSTS_FALLBACK[0];
@@ -70,8 +114,18 @@ const MusicPage: React.FC = () => {
         const res = await fetch(`${host}/v1/tracks/trending?app_name=${APP_NAME}&limit=40`, { signal: AbortSignal.timeout(9000) });
         const json = await res.json();
         if (cancelled) return;
-        setTracks((json?.data ?? []).map((t: any) => mapTrack(t, host)));
-      } catch {}
+        // Если API вернул данные, используем их
+        const fetchedTracks = (json?.data ?? []).map((t: any) => mapTrack(t, host));
+        if (fetchedTracks.length > 0) {
+          setTracks(fetchedTracks);
+        } else {
+          // Fallback: используем демо-данные
+          setTracks(MOCK_TRACKS);
+        }
+      } catch {
+        // Если запрос не удался, используем демо-данные
+        setTracks(MOCK_TRACKS);
+      }
       if (!cancelled) setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -166,7 +220,7 @@ const MusicPage: React.FC = () => {
     <div className="mu page">
       <div className="mu-header">
         <div className="mu-header__brand">
-          <span className="mu-header__logo">🎵</span>
+          <span className="mu-header__logo"><MusicNoteIcon size={24} /></span>
           <div>
             <h1 className="mu-header__title">Музыка</h1>
             <span className="mu-header__sub">Онлайн-плеер · стриминг</span>
@@ -218,7 +272,7 @@ const MusicPage: React.FC = () => {
         {list.map((t) => (
           <div key={t.id} className={`mu-track ${current?.id === t.id ? 'active' : ''}`} onClick={() => play(t)}>
             {t.artwork && <img src={t.artwork} alt="" className="mu-track__art" loading="lazy" />}
-            {!t.artwork && <span className="mu-track__art mu-track__art--ph">🎵</span>}
+            {!t.artwork && <span className="mu-track__art mu-track__art--ph"><MusicNoteIcon size={24} /></span>}
             <div className="mu-track__info">
               <p className="mu-track__title">{t.title}</p>
               <p className="mu-track__artist">{t.artist} · ▶ {fmtPlays(t.plays)}</p>
@@ -241,15 +295,15 @@ const MusicPage: React.FC = () => {
           <div className="mu-player__main" onClick={() => { setExpanded(true); haptic('light'); }}>
             {current.artwork
               ? <img src={current.artwork} alt="" className="mu-player__art" />
-              : <span className="mu-player__art mu-player__art--ph">🎵</span>}
+              : <span className="mu-player__art mu-player__art--ph"><MusicNoteIcon size={24} /></span>}
             <div className="mu-player__meta">
               <p className="mu-player__title">{current.title}</p>
               <p className="mu-player__artist">{current.artist}</p>
             </div>
-            <div className="mu-player__controls">
-              <button onClick={(e) => { e.stopPropagation(); prevTrack(); }}>⏮</button>
-              <button className="mu-player__play" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>{playing ? '⏸' : '▶'}</button>
-              <button onClick={(e) => { e.stopPropagation(); nextTrack(); }}>⏭</button>
+                        <div className="mu-player__controls">
+              <button onClick={(e) => { e.stopPropagation(); prevTrack(); }}><PrevIcon size={22} /></button>
+              <button className="mu-player__play" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>{playing ? <PauseIcon size={24} /> : <PlayIcon size={24} active={!playing} />}</button>
+              <button onClick={(e) => { e.stopPropagation(); nextTrack(); }}><NextIcon size={22} /></button>
             </div>
           </div>
           <div className="mu-player__bar">
@@ -267,20 +321,20 @@ const MusicPage: React.FC = () => {
           <div className="mu-full__bg" style={{ backgroundImage: current.artwork ? `url(${current.artwork})` : undefined }} />
           <div className="mu-full__shade" />
           <div className="mu-full__panel" onClick={(e) => e.stopPropagation()}>
-            <div className="mu-full__topbar">
-              <button className="mu-full__collapse" onClick={() => { setExpanded(false); haptic('light'); }}>⌄</button>
+                        <div className="mu-full__topbar">
+              <button className="mu-full__collapse" onClick={() => { setExpanded(false); haptic('light'); }}><ChevronDownIcon size={20} /></button>
               <button
                 className={`mu-full__like ${isLiked(current) ? 'on' : ''}`}
                 onClick={() => toggleLike(current)}
               >
-                {isLiked(current) ? '❤️' : '🤍'}
+                <HeartIcon size={20} filled={isLiked(current)} />
               </button>
             </div>
 
-            <div className={`mu-full__art-wrap ${playing ? 'playing' : ''}`}>
+                        <div className={`mu-full__art-wrap ${playing ? 'playing' : ''}`}>
               {current.artwork
                 ? <img src={current.artwork} alt="" className="mu-full__art" />
-                : <span className="mu-full__art mu-full__art--ph">🎵</span>}
+                : <span className="mu-full__art mu-full__art--ph"><MusicNoteIcon size={40} /></span>}
             </div>
 
             <p className="mu-full__title">{current.title}</p>
@@ -307,18 +361,18 @@ const MusicPage: React.FC = () => {
               <span>{fmtTime(duration || current.duration)}</span>
             </div>
 
-            <div className="mu-full__controls">
+                        <div className="mu-full__controls">
               <button
                 className={shuffle ? 'on' : ''}
                 onClick={() => { setShuffle(!shuffle); haptic('light'); }}
-              >🔀</button>
-              <button onClick={prevTrack}>⏮</button>
-              <button className="mu-full__play" onClick={togglePlay}>{playing ? '⏸' : '▶'}</button>
-              <button onClick={nextTrack}>⏭</button>
+              ><ShuffleIcon size={20} active={shuffle} /></button>
+              <button onClick={prevTrack}><PrevIcon size={22} /></button>
+              <button className="mu-full__play" onClick={togglePlay}>{playing ? <PauseIcon size={24} /> : <PlayIcon size={24} active={!playing} />}</button>
+              <button onClick={nextTrack}><NextIcon size={22} /></button>
               <button
                 className={repeat ? 'on' : ''}
                 onClick={() => { setRepeat(!repeat); haptic('light'); }}
-              >🔁</button>
+              ><RepeatIcon size={20} active={repeat} /></button>
             </div>
           </div>
         </div>
