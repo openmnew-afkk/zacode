@@ -14,8 +14,12 @@ interface Track {
 
 const APP_NAME = 'KinoZal';
 const HOSTS_FALLBACK = ['https://discoveryprovider.audius.co', 'https://audius-discovery-1.altego.net'];
+const LIKED_KEY = 'tc_mu_liked';
+
+type Tab = 'trending' | 'liked';
 
 const fmtTime = (s: number) => {
+  if (!s || !isFinite(s)) return '0:00';
   const m = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, '0')}`;
@@ -38,14 +42,19 @@ const MusicPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [searching, setSearching] = useState(false);
+  const [tab, setTab] = useState<Tab>('trending');
+  const [liked, setLiked] = useState<Track[]>(() => {
+    try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); } catch { return []; }
+  });
   const [current, setCurrent] = useState<Track | null>(null);
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [shuffle, setShuffle] = useState(false);
+  const [repeat, setRepeat] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
-  /* Резолв хоста Audius + тренды */
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -67,6 +76,18 @@ const MusicPage: React.FC = () => {
     return () => { cancelled = true; };
   }, []);
 
+  const isLiked = (t: Track | null) => !!t && liked.some((l) => l.id === t.id);
+
+  const toggleLike = (t: Track) => {
+    haptic('light');
+    setLiked((prev) => {
+      const has = prev.some((l) => l.id === t.id);
+      const next = has ? prev.filter((l) => l.id !== t.id) : [{ ...t }, ...prev];
+      try { localStorage.setItem(LIKED_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
@@ -81,6 +102,10 @@ const MusicPage: React.FC = () => {
   };
 
   const play = (t: Track) => {
+    if (current?.id === t.id && audioRef.current) {
+      togglePlay();
+      return;
+    }
     haptic('medium');
     if (audioRef.current) audioRef.current.pause();
     setCurrent(t);
@@ -89,7 +114,7 @@ const MusicPage: React.FC = () => {
     setDuration(t.duration);
     setTimeout(() => {
       audioRef.current?.play().catch(() => setPlaying(false));
-    }, 50);
+    }, 60);
   };
 
   const togglePlay = () => {
@@ -101,29 +126,40 @@ const MusicPage: React.FC = () => {
   };
 
   const nextTrack = () => {
+    const list = tracks.length ? tracks : liked;
     if (!current) return;
-    const idx = tracks.findIndex((t) => t.id === current.id);
-    const next = tracks[(idx + 1) % tracks.length];
+    haptic('light');
+    if (shuffle) {
+      const others = list.filter((t) => t.id !== current.id);
+      if (others.length) play(others[Math.floor(Math.random() * others.length)]);
+      return;
+    }
+    const idx = list.findIndex((t) => t.id === current.id);
+    const next = list[(idx + 1) % list.length];
     if (next) play(next);
   };
   const prevTrack = () => {
+    const list = tracks.length ? tracks : liked;
     if (!current) return;
-    const idx = tracks.findIndex((t) => t.id === current.id);
-    const prev = tracks[(idx - 1 + tracks.length) % tracks.length];
+    haptic('light');
+    const idx = list.findIndex((t) => t.id === current.id);
+    const prev = list[(idx - 1 + list.length) % list.length];
     if (prev) play(prev);
   };
 
   const onTimeUpdate = () => {
     const a = audioRef.current;
-    if (a && a.duration) setProgress((a.currentTime / a.duration) * 100);
+    if (a && a.duration) setProgress(a.currentTime);
   };
   const onEnded = () => nextTrack();
-  const seek = (e: React.MouseEvent<HTMLDivElement>) => {
+  const seekTo = (e: React.ChangeEvent<HTMLInputElement>) => {
     const a = audioRef.current;
     if (!a || !a.duration) return;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    a.currentTime = ((e.clientX - rect.left) / rect.width) * a.duration;
+    a.currentTime = Number(e.target.value);
+    setProgress(a.currentTime);
   };
+
+  const list = tab === 'liked' ? liked : tracks;
 
   return (
     <div className="mu page">
@@ -137,69 +173,114 @@ const MusicPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mu-search">
-        <input
-          className="mu-search__input"
-          placeholder="Поиск трека или артиста…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-        <button className="mu-search__btn" onClick={handleSearch}>
-          {searching ? '⏳' : '🔍'}
+      {/* Вкладки: Популярное / Понравилось */}
+      <div className="mu-tabs">
+        <button className={`mu-tab ${tab === 'trending' ? 'active' : ''}`} onClick={() => { setTab('trending'); haptic('light'); }}>
+          🔥 Популярное
+        </button>
+        <button className={`mu-tab ${tab === 'liked' ? 'active' : ''}`} onClick={() => { setTab('liked'); haptic('light'); }}>
+          ❤️ Понравилось{liked.length > 0 && <span className="mu-tab__count">{liked.length}</span>}
         </button>
       </div>
 
+      {tab === 'trending' && (
+        <div className="mu-search">
+          <input
+            className="mu-search__input"
+            placeholder="Поиск трека или артиста…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          />
+          <button className="mu-search__btn" onClick={handleSearch}>
+            {searching ? '⏳' : '🔍'}
+          </button>
+        </div>
+      )}
+
       <div className="mu-list">
-        {loading && (
+        {loading && tab === 'trending' && (
           <div className="mu-empty">
             <div className="mu-spinner" />
             <p>Загружаю музыку…</p>
           </div>
         )}
-        {!loading && tracks.length === 0 && (
+        {!loading && list.length === 0 && (
           <div className="mu-empty">
-            <span className="mu-empty__icon">🎧</span>
-            <p>Ничего не нашлось</p>
-            <p className="mu-empty__sub">Попробуй другой запрос</p>
+            <span className="mu-empty__icon">{tab === 'liked' ? '💜' : '🎧'}</span>
+            <p>{tab === 'liked' ? 'Пока нет понравившихся' : 'Ничего не нашлось'}</p>
+            <p className="mu-empty__sub">
+              {tab === 'liked' ? 'Жми ♥ на треке — он появится здесь' : 'Попробуй другой запрос'}
+            </p>
           </div>
         )}
-        {!loading && tracks.map((t) => (
+        {list.map((t) => (
           <div key={t.id} className={`mu-track ${current?.id === t.id ? 'active' : ''}`} onClick={() => play(t)}>
             {t.artwork && <img src={t.artwork} alt="" className="mu-track__art" loading="lazy" />}
             {!t.artwork && <span className="mu-track__art mu-track__art--ph">🎵</span>}
             <div className="mu-track__info">
               <p className="mu-track__title">{t.title}</p>
-              <p className="mu-track__artist">{t.artist} · ▶ {fmtPlays(t.plays)} · {fmtTime(t.duration)}</p>
+              <p className="mu-track__artist">{t.artist} · ▶ {fmtPlays(t.plays)}</p>
             </div>
-            <span className={`mu-track__btn ${current?.id === t.id && playing ? 'playing' : ''}`}>
-              {current?.id === t.id && playing ? '⏸' : '▶'}
-            </span>
+            <button
+              className={`mu-like ${isLiked(t) ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleLike(t); }}
+              aria-label="Понравилось"
+            >
+              {isLiked(t) ? '❤️' : '🤍'}
+            </button>
+            <span className="mu-track__dur">{fmtTime(t.duration)}</span>
           </div>
         ))}
       </div>
 
-      {/* Мини-плеер */}
+      {/* Полноценный плеер */}
       {current && (
         <div className="mu-player">
-          <div className="mu-player__top">
-            {current.artwork && <img src={current.artwork} alt="" className="mu-player__art" />}
+          <div className="mu-player__main">
+            {current.artwork
+              ? <img src={current.artwork} alt="" className="mu-player__art" />
+              : <span className="mu-player__art mu-player__art--ph">🎵</span>}
             <div className="mu-player__meta">
               <p className="mu-player__title">{current.title}</p>
               <p className="mu-player__artist">{current.artist}</p>
             </div>
-            <div className="mu-player__controls">
-              <button onClick={prevTrack}>⏮</button>
-              <button className="mu-player__play" onClick={togglePlay}>{playing ? '⏸' : '▶'}</button>
-              <button onClick={nextTrack}>⏭</button>
-            </div>
+            <button
+              className={`mu-player__like ${isLiked(current) ? 'on' : ''}`}
+              onClick={() => toggleLike(current)}
+            >
+              {isLiked(current) ? '❤️' : '🤍'}
+            </button>
           </div>
-          <div className="mu-player__bar" onClick={seek}>
-            <div className="mu-player__progress" style={{ width: `${progress}%` }} />
-          </div>
+
+          <input
+            className="mu-seek"
+            type="range"
+            min={0}
+            max={duration || current.duration || 100}
+            value={progress}
+            onChange={seekTo}
+            style={{ backgroundSize: `${(progress / (duration || current.duration || 1)) * 100}% 100%` }}
+          />
           <div className="mu-player__time">
-            <span>{fmtTime((progress / 100) * (duration || 0))}</span>
-            <span>{fmtTime(duration)}</span>
+            <span>{fmtTime(progress)}</span>
+            <span>{fmtTime(duration || current.duration)}</span>
+          </div>
+
+          <div className="mu-player__controls">
+            <button
+              className={shuffle ? 'on' : ''}
+              onClick={() => { setShuffle(!shuffle); haptic('light'); }}
+              aria-label="Перемешать"
+            >🔀</button>
+            <button onClick={prevTrack} className="mu-player__skip">⏮</button>
+            <button className="mu-player__play" onClick={togglePlay}>{playing ? '⏸' : '▶'}</button>
+            <button onClick={nextTrack} className="mu-player__skip">⏭</button>
+            <button
+              className={repeat ? 'on' : ''}
+              onClick={() => { setRepeat(!repeat); haptic('light'); }}
+              aria-label="Повтор"
+            >🔁</button>
           </div>
         </div>
       )}

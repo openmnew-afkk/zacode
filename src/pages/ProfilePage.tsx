@@ -104,15 +104,6 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div
-          className="profile-setting"
-          onClick={() => navigate('/sport')}
-          style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14 }}
-        >
-          <span className="profile-setting__label">⚽ СпортАнализ · прогнозы матчей</span>
-          <span className="profile-setting__value">→</span>
-        </div>
-
-        <div
           className={`profile-setting ${isPremium ? 'profile-setting--premium' : ''}`}
           onClick={() => navigate('/premium')}
           style={isPremium ? undefined : { background: 'rgba(139,92,246,0.08)', borderRadius: 14 }}
@@ -159,6 +150,14 @@ const ProfilePage: React.FC = () => {
         <div className="profile-section">
           <div
             className="profile-setting"
+            onClick={() => navigate('/sport')}
+            style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14 }}
+          >
+            <span className="profile-setting__label">⚽ СпортАнализ · ИИ-экспрессы (админ)</span>
+            <span className="profile-setting__value">→</span>
+          </div>
+          <div
+            className="profile-setting"
             onClick={() => navigate('/admin')}
             style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 14 }}
           >
@@ -169,6 +168,24 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Правовая информация */}
+      <div className="profile-section">
+        <div className="profile-legal">
+          <span className="profile-legal__icon">⚖️</span>
+          <span className="profile-legal__text">
+            Приложение не размещает и не хранит контент. Весь контент транслируется
+            со сторонних источников. 18+
+          </span>
+        </div>
+        <div
+          className="profile-setting"
+          onClick={() => navigate('/rules')}
+        >
+          <span className="profile-setting__label">📜 Правила и правовая информация</span>
+          <span className="profile-setting__value">→</span>
+        </div>
+      </div>
 
       {/* Кнопка закрытия — только внутри Telegram (в браузере она ничего не делает) */}
       {tg && (

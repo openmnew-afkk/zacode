@@ -17,6 +17,46 @@
 .mu-search {
   display: flex; gap: 8px; margin: 10px 16px 12px;
 }
+
+/* Вкладки музыки */
+.mu-tabs {
+  display: flex; gap: 6px; padding: 4px 16px 10px;
+}
+.mu-tab {
+  flex: 1; padding: 10px; border-radius: 13px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: rgba(255,255,255,0.5);
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: all 0.18s;
+}
+.mu-tab.active {
+  background: linear-gradient(135deg, rgba(236,72,153,0.2), rgba(168,85,247,0.15));
+  border-color: rgba(236,72,153,0.5);
+  color: #f9a8d4;
+}
+.mu-tab__count {
+  background: rgba(236,72,153,0.25);
+  color: #f9a8d4;
+  font-size: 10px; font-weight: 800;
+  padding: 1px 7px; border-radius: 9px;
+}
+
+/* Лайк в списке */
+.mu-like {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: none; font-size: 14px; cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: transform 0.15s;
+}
+.mu-like:active { transform: scale(1.25); }
+.mu-track__dur {
+  font-size: 10.5px; color: rgba(255,255,255,0.35);
+  font-variant-numeric: tabular-nums; flex-shrink: 0;
+  width: 34px; text-align: right;
+}
 .mu-search__input {
   flex: 1; padding: 11px 14px; border-radius: 14px;
   background: rgba(255,255,255,0.05);

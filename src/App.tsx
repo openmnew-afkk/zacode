@@ -5,6 +5,7 @@ import MovieDetailPage from './pages/MovieDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
 import SportPage from './pages/SportPage';
 import MusicPage from './pages/MusicPage';
+import RulesPage from './pages/RulesPage';
 import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import PremiumPage from './pages/PremiumPage';
@@ -102,6 +103,7 @@ function App() {
         <Route path="/favorites" element={<FavoritesPage />} />
         <Route path="/sport" element={<SportPage />} />
         <Route path="/music" element={<MusicPage />} />
+        <Route path="/rules" element={<RulesPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />

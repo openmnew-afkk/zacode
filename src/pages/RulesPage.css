@@ -1,0 +1,31 @@
+.rules { padding: 16px 18px 60px; min-height: 100vh; }
+.rules-back {
+  background: none; border: none;
+  color: rgba(255,255,255,0.5); font-size: 14px;
+  cursor: pointer; padding: 8px 0;
+}
+.rules-title { font-size: 20px; font-weight: 800; color: #fff; margin: 8px 0 4px; }
+.rules-updated { font-size: 11px; color: rgba(255,255,255,0.3); margin: 0 0 18px; }
+.rules-section {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 15px 16px;
+  margin-bottom: 12px;
+}
+.rules-section__title {
+  font-size: 14px; font-weight: 800; color: #f0c96a;
+  margin: 0 0 10px;
+}
+.rules-item {
+  font-size: 12px;
+  line-height: 1.65;
+  color: rgba(255,255,255,0.6);
+  margin: 0 0 9px;
+}
+.rules-item:last-child { margin-bottom: 0; }
+.rules-footer {
+  font-size: 11px; color: rgba(255,255,255,0.3);
+  text-align: center; margin-top: 20px;
+  line-height: 1.5;
+}

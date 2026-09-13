@@ -6,10 +6,10 @@ import './PremiumPage.css';
 import './PremiumRoulette.css';
 
 const features = [
-  { icon: '📊', title: 'Статистика', desc: 'Графики твоих просмотров' },
+  { icon: '📊', title: 'Статистика дневника', desc: 'Графики просмотров и оценок' },
+  { icon: '🎵', title: 'Музыка без лимитов', desc: 'Плейлисты и избранные треки' },
   { icon: '📅', title: 'Календарь релизов', desc: 'Уведомления о новинках' },
   { icon: '🚫', title: 'Без рекламы', desc: 'Ничего лишнего' },
-  { icon: '🔖', title: 'Списки без лимитов', desc: 'Сколько угодно коллекций' },
   { icon: '🤖', title: 'ИИ-рекомендации', desc: 'Умный подбор под вкус' },
   { icon: '👑', title: 'Золотой профиль', desc: 'Эксклюзивный дизайн' },
   { icon: '⚡', title: 'Ранний доступ', desc: 'Новые фичи первыми' },
@@ -148,11 +148,11 @@ const PremiumPage: React.FC = () => {
                 : 'Бессрочный доступ'}
           </p>
           <div className="pm-active-features">
-            <div className="pm-active-item">✅ Статистика и графики</div>
+            <div className="pm-active-item">✅ Статистика дневника</div>
+            <div className="pm-active-item">✅ Музыка без лимитов</div>
             <div className="pm-active-item">✅ Календарь релизов</div>
             <div className="pm-active-item">✅ Без рекламы</div>
             <div className="pm-active-item">✅ ИИ-рекомендации</div>
-            <div className="pm-active-item">✅ Золотой профиль</div>
           </div>
         </div>
       </div>
