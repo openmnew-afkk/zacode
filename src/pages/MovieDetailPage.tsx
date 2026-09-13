@@ -15,16 +15,98 @@ const STATUSES: Array<{ id: WatchStatus; label: string; icon: string }> = [
   { id: 'dropped', label: 'Брошено', icon: '🚫' },
 ];
 
-/* Легальные сервисы для поиска, где посмотреть */
+/* Легальные сервисы для поиска, где посмотреть — с брендовыми иконками */
 const whereToWatch = (title: string) => [
-  { name: 'JustWatch', icon: '🔎', url: `https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(title)}` },
-  { name: 'Кинопоиск', icon: '🎬', url: `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(title)}` },
-  { name: 'Okko', icon: '🟠', url: `https://okko.ru/search?q=${encodeURIComponent(title)}` },
-  { name: 'Wink', icon: '🟣', url: `https://wink.ru/search?q=${encodeURIComponent(title)}` },
-  { name: 'Иви', icon: '📺', url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}` },
-  { name: 'Netflix', icon: '🅽', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
-  { name: 'YouTube', icon: '▶️', url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}` },
+  { name: 'JustWatch', brand: 'justwatch', url: `https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(title)}` },
+  { name: 'Кинопоиск', brand: 'kinopoisk', url: `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(title)}` },
+  { name: 'Okko', brand: 'okko', url: `https://okko.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Wink', brand: 'wink', url: `https://wink.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Иви', brand: 'ivi', url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}` },
+  { name: 'Netflix', brand: 'netflix', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
+  { name: 'YouTube', brand: 'youtube', url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}` },
 ];
+
+/** Брендовые иконки-плитки сервисов */
+const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
+  const tile = (bg: string, content: React.ReactNode) => (
+    <svg width="38" height="38" viewBox="0 0 38 38">
+      <rect width="38" height="38" rx="11" fill={bg} />
+      {content}
+    </svg>
+  );
+  switch (brand) {
+    case 'kinopoisk':
+      // Кинопоиск: оранжево-красная лента с белым «КП»
+      return tile('url(#kpGrad)', (
+        <>
+          <defs>
+            <linearGradient id="kpGrad" x1="0" y1="0" x2="38" y2="38">
+              <stop stopColor="#ff5b00"/><stop offset="1" stopColor="#e23d00"/>
+            </linearGradient>
+          </defs>
+          <text x="19" y="24" textAnchor="middle" fontSize="13" fontWeight="900" fill="#fff" fontFamily="Arial">КП</text>
+        </>
+      ));
+    case 'okko':
+      // Okko: оранжевый градиент, белый круг-о
+      return tile('url(#okkoGrad)', (
+        <>
+          <defs>
+            <linearGradient id="okkoGrad" x1="0" y1="0" x2="38" y2="38">
+              <stop stopColor="#ff9500"/><stop offset="1" stopColor="#ff6a00"/>
+            </linearGradient>
+          </defs>
+          <circle cx="19" cy="19" r="9" stroke="#fff" strokeWidth="3.4" fill="none"/>
+        </>
+      ));
+    case 'wink':
+      // Wink: фиолетовый ТВ с бликом
+      return tile('url(#winkGrad)', (
+        <>
+          <defs>
+            <linearGradient id="winkGrad" x1="0" y1="0" x2="38" y2="38">
+              <stop stopColor="#a960ee"/><stop offset="1" stopColor="#7b2ff7"/>
+            </linearGradient>
+          </defs>
+          <path d="M11 13h16v12H11z" rx="3" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinejoin="round"/>
+          <path d="M15 16.5l6 3.5-6 3.5v-7z" fill="#fff"/>
+        </>
+      ));
+    case 'ivi':
+      // Иви: синяя плитка, белое «иви»
+      return tile('#0a6cff', (
+        <text x="19" y="24" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fff" fontFamily="Arial" fontStyle="italic">иви</text>
+      ));
+    case 'netflix':
+      // Netflix: чёрная плитка, красная N
+      return tile('#141414', (
+        <>
+          <rect width="38" height="38" rx="11" fill="#141414" stroke="rgba(255,255,255,0.12)"/>
+          <text x="19" y="25" textAnchor="middle" fontSize="17" fontWeight="900" fill="#e50914" fontFamily="Arial">N</text>
+        </>
+      ));
+    case 'youtube':
+      // YouTube: красная плитка, белый play
+      return tile('#ff0000', (
+        <path d="M14 12.5l11 6.5-11 6.5v-13z" fill="#fff"/>
+      ));
+    case 'justwatch':
+      // JustWatch: жёлто-оранжевая плитка с глазом-таймером
+      return tile('url(#jwGrad)', (
+        <>
+          <defs>
+            <linearGradient id="jwGrad" x1="0" y1="0" x2="38" y2="38">
+              <stop stopColor="#ffd200"/><stop offset="1" stopColor="#ffb800"/>
+            </linearGradient>
+          </defs>
+          <path d="M19 10c-5.5 0-9 9-9 9s3.5 9 9 9 9-9 9-9-3.5-9-9-9z" fill="none" stroke="#1a1a1a" strokeWidth="2.4"/>
+          <circle cx="19" cy="19" r="3.4" fill="#1a1a1a"/>
+        </>
+      ));
+    default:
+      return tile('rgba(255,255,255,0.1)', <span>▶</span>);
+  }
+};
 
 const MovieDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -334,7 +416,7 @@ const MovieDetailPage: React.FC = () => {
               className="dp-where__item"
               onClick={() => { haptic('light'); openLink(s.url); }}
             >
-              <span className="dp-where__icon">{s.icon}</span>
+              <BrandIcon brand={s.brand} />
               <span className="dp-where__name">{s.name}</span>
             </button>
           ))}

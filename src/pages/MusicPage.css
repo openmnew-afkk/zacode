@@ -191,3 +191,154 @@
   font-size: 10px; color: rgba(255,255,255,0.35);
   margin-top: 4px;
 }
+
+/* Слайдер перемотки */
+.mu-seek {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%; height: 5px; border-radius: 4px;
+  background-image: linear-gradient(90deg, #ec4899, #a855f7);
+  background-repeat: no-repeat;
+  background-color: rgba(255,255,255,0.12);
+  cursor: pointer; outline: none;
+  margin-top: 12px;
+}
+.mu-seek::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(236,72,153,0.7);
+  cursor: pointer;
+}
+
+/* ═══ Полноэкранный плеер ═══ */
+.mu-full {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: stretch; justify-content: center;
+  animation: muFullIn 0.3s cubic-bezier(0.34,1.2,0.64,1) both;
+}
+@keyframes muFullIn {
+  from { opacity: 0; transform: translateY(60px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.mu-full__bg {
+  position: absolute; inset: -40px;
+  background-size: cover; background-position: center;
+  filter: blur(60px) brightness(0.45) saturate(1.4);
+}
+.mu-full__shade {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(15,8,24,0.55), rgba(15,8,24,0.92) 70%);
+}
+.mu-full__panel {
+  position: relative; z-index: 2;
+  width: 100%; max-width: 480px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 24px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+.mu-full__topbar {
+  width: 100%; display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.mu-full__collapse {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #fff; font-size: 17px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.mu-full__like {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-size: 18px; cursor: pointer;
+}
+.mu-full__like.on { background: rgba(236,72,153,0.2); border-color: rgba(236,72,153,0.5); }
+
+.mu-full__art-wrap {
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  margin: 18px 0 22px;
+  position: relative;
+  box-shadow: 0 24px 70px rgba(168,85,247,0.4);
+}
+.mu-full__art-wrap.playing::after {
+  content: '';
+  position: absolute; inset: -14px;
+  border-radius: 50%;
+  border: 2px solid rgba(236,72,153,0.35);
+  animation: muPulse 2.2s ease-in-out infinite;
+}
+@keyframes muPulse {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.06); opacity: 0.25; }
+}
+.mu-full__art {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.mu-full__art--ph {
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #ec4899, #a855f7);
+  font-size: 70px;
+}
+
+.mu-full__title {
+  font-size: 21px; font-weight: 800; color: #fff;
+  text-align: center; margin: 0;
+  max-width: 100%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mu-full__artist {
+  font-size: 13.5px; color: rgba(255,255,255,0.5);
+  margin: 5px 0 0; text-align: center;
+}
+
+/* Эквалайзер */
+.mu-eq {
+  display: flex; align-items: flex-end; gap: 3.5px;
+  height: 26px; margin: 14px 0 4px;
+}
+.mu-eq span {
+  width: 3.5px; height: 8px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #f472b6, #a855f7);
+  opacity: 0.25;
+}
+.mu-eq.on span {
+  animation: muEq 0.8s ease-in-out infinite alternate;
+}
+@keyframes muEq {
+  from { height: 6px; opacity: 0.4; }
+  to { height: 24px; opacity: 1; }
+}
+
+.mu-full__time { width: 100%; max-width: 340px; }
+
+.mu-full__controls {
+  display: flex; align-items: center; gap: 18px;
+  margin-top: 14px;
+}
+.mu-full__controls button {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.8);
+  font-size: 16px; cursor: pointer;
+  transition: transform 0.15s;
+}
+.mu-full__controls button:active { transform: scale(0.88); }
+.mu-full__controls button.on {
+  color: #f9a8d4;
+  border-color: rgba(236,72,153,0.5);
+  background: rgba(236,72,153,0.15);
+}
+.mu-full__play {
+  width: 68px !important; height: 68px !important;
+  background: linear-gradient(135deg, #ec4899, #a855f7) !important;
+  border: none !important;
+  font-size: 24px !important;
+  color: #fff !important;
+  box-shadow: 0 10px 30px rgba(236,72,153,0.45);
+}

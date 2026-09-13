@@ -52,6 +52,7 @@ const MusicPage: React.FC = () => {
   const [duration, setDuration] = useState(0);
   const [shuffle, setShuffle] = useState(false);
   const [repeat, setRepeat] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
@@ -234,10 +235,10 @@ const MusicPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Полноценный плеер */}
-      {current && (
+      {/* Мини-плеер (бар) */}
+      {current && !expanded && (
         <div className="mu-player">
-          <div className="mu-player__main">
+          <div className="mu-player__main" onClick={() => { setExpanded(true); haptic('light'); }}>
             {current.artwork
               ? <img src={current.artwork} alt="" className="mu-player__art" />
               : <span className="mu-player__art mu-player__art--ph">🎵</span>}
@@ -245,42 +246,80 @@ const MusicPage: React.FC = () => {
               <p className="mu-player__title">{current.title}</p>
               <p className="mu-player__artist">{current.artist}</p>
             </div>
-            <button
-              className={`mu-player__like ${isLiked(current) ? 'on' : ''}`}
-              onClick={() => toggleLike(current)}
-            >
-              {isLiked(current) ? '❤️' : '🤍'}
-            </button>
+            <div className="mu-player__controls">
+              <button onClick={(e) => { e.stopPropagation(); prevTrack(); }}>⏮</button>
+              <button className="mu-player__play" onClick={(e) => { e.stopPropagation(); togglePlay(); }}>{playing ? '⏸' : '▶'}</button>
+              <button onClick={(e) => { e.stopPropagation(); nextTrack(); }}>⏭</button>
+            </div>
           </div>
-
-          <input
-            className="mu-seek"
-            type="range"
-            min={0}
-            max={duration || current.duration || 100}
-            value={progress}
-            onChange={seekTo}
-            style={{ backgroundSize: `${(progress / (duration || current.duration || 1)) * 100}% 100%` }}
-          />
-          <div className="mu-player__time">
-            <span>{fmtTime(progress)}</span>
-            <span>{fmtTime(duration || current.duration)}</span>
+          <div className="mu-player__bar">
+            <div
+              className="mu-player__progress"
+              style={{ width: `${(progress / (duration || current.duration || 1)) * 100}%` }}
+            />
           </div>
+        </div>
+      )}
 
-          <div className="mu-player__controls">
-            <button
-              className={shuffle ? 'on' : ''}
-              onClick={() => { setShuffle(!shuffle); haptic('light'); }}
-              aria-label="Перемешать"
-            >🔀</button>
-            <button onClick={prevTrack} className="mu-player__skip">⏮</button>
-            <button className="mu-player__play" onClick={togglePlay}>{playing ? '⏸' : '▶'}</button>
-            <button onClick={nextTrack} className="mu-player__skip">⏭</button>
-            <button
-              className={repeat ? 'on' : ''}
-              onClick={() => { setRepeat(!repeat); haptic('light'); }}
-              aria-label="Повтор"
-            >🔁</button>
+      {/* Полноэкранный плеер */}
+      {current && expanded && (
+        <div className="mu-full" onClick={() => setExpanded(false)}>
+          <div className="mu-full__bg" style={{ backgroundImage: current.artwork ? `url(${current.artwork})` : undefined }} />
+          <div className="mu-full__shade" />
+          <div className="mu-full__panel" onClick={(e) => e.stopPropagation()}>
+            <div className="mu-full__topbar">
+              <button className="mu-full__collapse" onClick={() => { setExpanded(false); haptic('light'); }}>⌄</button>
+              <button
+                className={`mu-full__like ${isLiked(current) ? 'on' : ''}`}
+                onClick={() => toggleLike(current)}
+              >
+                {isLiked(current) ? '❤️' : '🤍'}
+              </button>
+            </div>
+
+            <div className={`mu-full__art-wrap ${playing ? 'playing' : ''}`}>
+              {current.artwork
+                ? <img src={current.artwork} alt="" className="mu-full__art" />
+                : <span className="mu-full__art mu-full__art--ph">🎵</span>}
+            </div>
+
+            <p className="mu-full__title">{current.title}</p>
+            <p className="mu-full__artist">{current.artist}</p>
+
+            {/* Эквалайзер */}
+            <div className={`mu-eq ${playing ? 'on' : ''}`}>
+              {Array.from({ length: 9 }).map((_, i) => (
+                <span key={i} style={{ animationDelay: `${i * 0.13}s` }} />
+              ))}
+            </div>
+
+            <input
+              className="mu-seek"
+              type="range"
+              min={0}
+              max={duration || current.duration || 100}
+              value={progress}
+              onChange={seekTo}
+              style={{ backgroundSize: `${(progress / (duration || current.duration || 1)) * 100}% 100%` }}
+            />
+            <div className="mu-player__time mu-full__time">
+              <span>{fmtTime(progress)}</span>
+              <span>{fmtTime(duration || current.duration)}</span>
+            </div>
+
+            <div className="mu-full__controls">
+              <button
+                className={shuffle ? 'on' : ''}
+                onClick={() => { setShuffle(!shuffle); haptic('light'); }}
+              >🔀</button>
+              <button onClick={prevTrack}>⏮</button>
+              <button className="mu-full__play" onClick={togglePlay}>{playing ? '⏸' : '▶'}</button>
+              <button onClick={nextTrack}>⏭</button>
+              <button
+                className={repeat ? 'on' : ''}
+                onClick={() => { setRepeat(!repeat); haptic('light'); }}
+              >🔁</button>
+            </div>
           </div>
         </div>
       )}

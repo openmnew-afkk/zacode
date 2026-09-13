@@ -304,6 +304,24 @@
   border: 1px solid rgba(255,215,0,0.3);
   border-radius: 14px;
 }
+
+/* Золотая премиум-кнопка в профиле */
+.profile-setting--gold {
+  background: linear-gradient(135deg, rgba(232,184,74,0.2), rgba(226,61,61,0.1)) !important;
+  border: 1px solid rgba(232,184,74,0.5);
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(232,184,74,0.15);
+}
+.profile-setting--gold .profile-setting__label {
+  color: #f5d78a !important;
+  font-weight: 800;
+}
+.profile-setting--gold .profile-setting__value { color: #f5d78a; }
+.profile-setting--gold:active { transform: scale(0.98); }
+.profile-setting--gold-active {
+  background: linear-gradient(135deg, rgba(255,215,0,0.14), rgba(255,215,0,0.05)) !important;
+  border-color: rgba(255,215,0,0.6);
+}
 /* Правовая плашка */
 .profile-legal {
   display: flex;

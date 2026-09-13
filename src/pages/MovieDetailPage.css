@@ -536,7 +536,11 @@
   transition: all 0.15s;
 }
 .dp-where__item:active { transform: scale(0.93); background: rgba(255,255,255,0.08); }
-.dp-where__icon { font-size: 19px; }
+.dp-where__icon {
+  width: 38px; height: 38px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+}
 .dp-where__name {
   font-size: 11px;
   font-weight: 700;

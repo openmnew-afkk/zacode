@@ -104,12 +104,11 @@ const ProfilePage: React.FC = () => {
         </div>
 
         <div
-          className={`profile-setting ${isPremium ? 'profile-setting--premium' : ''}`}
+          className={`profile-setting profile-setting--gold ${isPremium ? 'profile-setting--gold-active' : ''}`}
           onClick={() => navigate('/premium')}
-          style={isPremium ? undefined : { background: 'rgba(139,92,246,0.08)', borderRadius: 14 }}
         >
           <span className="profile-setting__label">
-            {isPremium ? '👑 Мой Премиум' : '👑 Подключить Премиум'}
+            {isPremium ? '👑 Премиум активен' : '👑 Подключить Премиум'}
           </span>
           <span className="profile-setting__value">{isPremium ? '✓' : '→'}</span>
         </div>
