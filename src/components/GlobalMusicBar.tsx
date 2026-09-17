@@ -6,7 +6,7 @@ const GlobalMusicBar: React.FC = () => {
   const {
     currentTrack, isPlaying, progress, duration,
     setPlaying, nextTrack, prevTrack, toggleLike, isLiked,
-    setProgress, setDuration,
+    setProgress, setDuration, seekSignal, shuffleOn, repeatOn,
   } = useMusicStore();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -15,7 +15,15 @@ const GlobalMusicBar: React.FC = () => {
   useEffect(() => {
     if (!audioRef.current) {
       const audio = new Audio();
-      audio.addEventListener('ended', () => nextTrack());
+      audio.addEventListener('ended', () => {
+        const { repeatOn: rep, nextTrack: next } = useMusicStore.getState();
+        if (rep && audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(() => {});
+          return;
+        }
+        next();
+      });
       audio.addEventListener('timeupdate', () => {
         if (audioRef.current) setProgress(audioRef.current.currentTime);
       });
@@ -25,6 +33,12 @@ const GlobalMusicBar: React.FC = () => {
       audioRef.current = audio;
     }
   }, []);
+
+  /* Перемотка из полноэкранного плеера */
+  useEffect(() => {
+    if (!audioRef.current || !seekSignal) return;
+    try { audioRef.current.currentTime = seekSignal.value; } catch {}
+  }, [seekSignal?.tick]);
 
   useEffect(() => {
     if (!audioRef.current || !currentTrack) return;

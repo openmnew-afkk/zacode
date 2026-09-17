@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
+import { useMusicStore } from '../store/musicStore';
 import './MusicPage.css';
 
 /* ═══════════ Типы ═══════════ */
@@ -55,6 +56,47 @@ const mapTrack = (t: any, host: string): Track => ({
   genre: t.genre || 'Music',
   streamUrl: `${host}/v1/tracks/${t.id}/stream?app_name=${APP_NAME}`,
 });
+
+/* ═══ iTunes Search API — фолбэк-источник (без ключей, CORS открыт, реальные превью) ═══ */
+const ITUNES_TERMS = [
+  'pop hits', 'lofi beats', 'hip hop', 'rock classics', 'edm dance',
+  'jazz', 'chill vibes', 'r&b soul', 'techno', 'indie hits', 'latin pop', 'phonk',
+];
+
+const mapItunes = (t: any): Track => ({
+  id: `it-${t.trackId}`,
+  title: t.trackName ?? 'Без названия',
+  artist: t.artistName ?? 'Неизвестный артист',
+  artwork: (t.artworkUrl100 || '').replace('100x100bb', '600x600bb'),
+  duration: t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 30,
+  plays: 0,
+  genre: t.primaryGenreName || 'Music',
+  streamUrl: t.previewUrl || '',
+});
+
+const fetchItunes = async (term: string, limit = 40): Promise<Track[]> => {
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&media=music&limit=${limit}`;
+  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  const json = await res.json();
+  return (json?.results ?? []).filter((t: any) => t.previewUrl).map(mapItunes);
+};
+
+const shuffleArr = <T,>(arr: T[]): T[] => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
+/* Демо-треки — крайний фолбэк, если оба источника недоступны */
+const DEMO_TRACKS: Track[] = [
+  { id: 'demo-1', title: 'Midnight Dreams', artist: 'Luna Vibe', artwork: '', duration: 180, plays: 0, genre: 'Electronic', streamUrl: '' },
+  { id: 'demo-2', title: 'Neon Nights', artist: 'Synthwave Collective', artwork: '', duration: 210, plays: 0, genre: 'Synthwave', streamUrl: '' },
+  { id: 'demo-3', title: 'Digital Love', artist: 'Cyber Beats', artwork: '', duration: 195, plays: 0, genre: 'Electronic', streamUrl: '' },
+  { id: 'demo-4', title: 'Crimson Sky', artist: 'Velvet Echo', artwork: '', duration: 240, plays: 0, genre: 'Ambient', streamUrl: '' },
+];
 
 /* ═══════════ SVG-иконки (единый премиум-стиль) ═══════════ */
 const IconPlay = ({ size = 22 }: { size?: number }) => (
@@ -133,36 +175,33 @@ const Artwork: React.FC<{ src: string; alt: string; className: string }> = ({ sr
 /* ═══════════ Компонент ═══════════ */
 const MusicPage: React.FC = () => {
   const { haptic } = useTelegram();
+  const {
+    currentTrack, isPlaying, progress, duration,
+    setTrack, setPlaying, nextTrack, prevTrack,
+    toggleShuffle, toggleRepeat, shuffleOn, repeatOn,
+    seekTo,
+    likedTracks, toggleLike: storeToggleLike, isLiked: storeIsLiked,
+  } = useMusicStore();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<Tab>('trending');
-  const [liked, setLiked] = useState<Track[]>(() => {
-    try { return JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'); } catch { return []; }
-  });
-  const [current, setCurrent] = useState<Track | null>(() => {
-    try { return JSON.parse(localStorage.getItem(NOW_KEY) || 'null'); } catch { return null; }
-  });
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [shuffle, setShuffle] = useState(false);
-  const [repeat, setRepeat] = useState(false);
   const [showFull, setShowFull] = useState(false);
   const [feedLabel, setFeedLabel] = useState('Популярное сейчас');
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
-  /* ── Загрузка: каждый раз случайный жанр + период + страница → всегда свежая музыка ── */
+  /* ── Загрузка: Audius → iTunes → демо. Музыка ЕСТЬ всегда и каждый раз разная ── */
   const loadFeed = useCallback(async (mode: 'init' | 'refresh') => {
     if (mode === 'refresh') setRefreshing(true); else setLoading(true);
     const genre = pick(GENRES);
     const time = pick(TIME_RANGES);
     const offset = mode === 'refresh' ? Math.floor(Math.random() * 4) * 30 : Math.floor(Math.random() * 3) * 30;
+
+    /* 1) Audius — пробуем discovery-хосты */
     let host = pick(HOSTS_FALLBACK);
     try {
-      const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(5000) });
+      const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(4000) });
       const json = await res.json();
       if (Array.isArray(json?.data) && json.data[0]) host = json.data[0];
     } catch {}
@@ -170,110 +209,95 @@ const MusicPage: React.FC = () => {
     try {
       const params = new URLSearchParams({ 'app_name': APP_NAME, limit: '40', time, offset: String(offset) });
       if (genre) params.set('genre', genre);
-      const res = await fetch(`${host}/v1/tracks/trending?${params}`, { signal: AbortSignal.timeout(9000) });
-      const json = await res.json();
-      const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, host));
-      if (fetched.length > 0) {
-        /* перемешиваем — лента всегда разная */
-        for (let i = fetched.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [fetched[i], fetched[j]] = [fetched[j], fetched[i]];
+      const res = await fetch(`${host}/v1/tracks/trending?${params}`, { signal: AbortSignal.timeout(7000) });
+      if (res.ok) {
+        const json = await res.json();
+        const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, host));
+        if (fetched.length > 0) {
+          setTracks(shuffleArr(fetched));
+          setFeedLabel(genre ? `${genre} · ${time === 'week' ? 'за неделю' : time === 'month' ? 'за месяц' : 'всё время'}` : `${time === 'week' ? 'Хиты недели' : time === 'month' ? 'Хиты месяца' : 'Лучшее всех времён'}`);
+          setLoading(false);
+          setRefreshing(false);
+          return;
         }
-        setTracks(fetched);
-        setFeedLabel(genre ? `${genre} · ${time === 'week' ? 'за неделю' : time === 'month' ? 'за месяц' : 'всё время'}` : `${time === 'week' ? 'Хиты недели' : time === 'month' ? 'Хиты месяца' : 'Лучшее всех времён'}`);
       }
     } catch {}
+
+    /* 2) iTunes — случайная подборка, работает всегда (CORS открыт) */
+    try {
+      const fetched = await fetchItunes(pick(ITUNES_TERMS));
+      if (fetched.length > 0) {
+        setTracks(shuffleArr(fetched));
+        setFeedLabel('Подборка дня · свежие хиты');
+        setLoading(false);
+        setRefreshing(false);
+        return;
+      }
+    } catch {}
+
+    /* 3) Демо-режим */
+    setTracks(shuffleArr(DEMO_TRACKS));
+    setFeedLabel('Демо-режим · сеть недоступна');
     setLoading(false);
     setRefreshing(false);
   }, []);
 
   useEffect(() => { loadFeed('init'); }, [loadFeed]);
 
-  useEffect(() => {
-    try { if (current) localStorage.setItem(NOW_KEY, JSON.stringify(current)); } catch {}
-  }, [current]);
-
-  /* ── Лайки ── */
-  const isLiked = (t: Track | null) => !!t && liked.some((l) => l.id === t.id);
+  /* ── Лайки (глобальный store, сохраняются в localStorage) ── */
+  const liked = likedTracks;
+  const isLiked = (t: Track | null) => !!t && storeIsLiked(t.id);
   const toggleLike = (t: Track) => {
     haptic('light');
-    setLiked((prev) => {
-      const has = prev.some((l) => l.id === t.id);
-      const next = has ? prev.filter((l) => l.id !== t.id) : [{ ...t }, ...prev];
-      try { localStorage.setItem(LIKED_KEY, JSON.stringify(next)); } catch {}
-      return next;
-    });
+    storeToggleLike(t);
   };
 
-  /* ── Поиск ── */
+  /* ── Поиск: Audius → iTunes ── */
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
     haptic('light');
     setLoading(true);
     try {
-      const res = await fetch(`${hostRef.current}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP_NAME}&limit=30`, { signal: AbortSignal.timeout(9000) });
-      const json = await res.json();
-      setTracks((json?.data ?? []).map((t: any) => mapTrack(t, hostRef.current)));
-      setFeedLabel(`Поиск: «${q}»`);
+      const res = await fetch(`${hostRef.current}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP_NAME}&limit=30`, { signal: AbortSignal.timeout(7000) });
+      if (res.ok) {
+        const json = await res.json();
+        const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, hostRef.current));
+        if (fetched.length > 0) {
+          setTracks(fetched);
+          setFeedLabel(`Поиск: «${q}»`);
+          setLoading(false);
+          return;
+        }
+      }
     } catch {}
+    try {
+      const fetched = await fetchItunes(q, 30);
+      setTracks(fetched);
+      setFeedLabel(fetched.length > 0 ? `Поиск: «${q}»` : `Ничего не найдено: «${q}»`);
+    } catch {
+      setTracks([]);
+    }
     setLoading(false);
   };
 
-  /* ── Плеер ── */
+  /* ── Плеер (движок — глобальный, в GlobalMusicBar) ── */
+  const current = currentTrack;
+  const playing = isPlaying;
   const play = (t: Track) => {
-    if (current?.id === t.id) { togglePlay(); return; }
     haptic('medium');
-    setCurrent(t);
+    const idx = list.indexOf(t);
+    setTrack(t, list, idx >= 0 ? idx : 0);
     setPlaying(true);
-    setProgress(0);
-    setDuration(t.duration || 0);
   };
 
   const togglePlay = () => {
-    const a = audioRef.current;
-    if (!a || !current) return;
+    if (!current) return;
     haptic('light');
-    if (playing) { a.pause(); setPlaying(false); }
-    else { a.play().catch(() => setPlaying(false)); setPlaying(true); }
+    setPlaying(!playing);
   };
 
   const list = tab === 'liked' ? liked : tracks;
-
-  const nextTrack = useCallback((auto = false) => {
-    if (!list.length) return;
-    if (!auto) haptic('light');
-    if (shuffle) {
-      const others = list.filter((t) => t.id !== current?.id);
-      if (others.length) { setCurrent(others[Math.floor(Math.random() * others.length)]); setPlaying(true); setProgress(0); return; }
-    }
-    const idx = current ? list.findIndex((t) => t.id === current.id) : -1;
-    const nxt = list[(idx + 1) % list.length];
-    if (nxt) { setCurrent(nxt); setPlaying(true); setProgress(0); }
-  }, [list, current, shuffle, haptic]);
-
-  const prevTrack = () => {
-    if (!list.length || !current) return;
-    haptic('light');
-    const idx = list.findIndex((t) => t.id === current.id);
-    const prv = list[(idx - 1 + list.length) % list.length];
-    if (prv) { setCurrent(prv); setPlaying(true); setProgress(0); }
-  };
-
-  const seekTo = (v: number) => {
-    const a = audioRef.current;
-    if (a) { a.currentTime = v; setProgress(v); }
-  };
-
-  /* Автоплей при смене трека */
-  useEffect(() => {
-    const a = audioRef.current;
-    if (!a || !current) return;
-    a.src = current.streamUrl;
-    a.load();
-    if (playing) a.play().catch(() => setPlaying(false));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current?.id]);
 
   const progressPct = duration > 0 ? (progress / duration) * 100 : 0;
 
@@ -347,7 +371,7 @@ const MusicPage: React.FC = () => {
               <Artwork src={t.artwork} alt={t.title} className="mu-row__art" />
               <span className="mu-row__info">
                 <span className="mu-row__title">{t.title}</span>
-                <span className="mu-row__artist">{t.artist} · {fmtPlays(t.plays)} ▶</span>
+                <span className="mu-row__artist">{t.artist}{t.plays > 0 ? ` · ${fmtPlays(t.plays)} ▶` : ''}</span>
               </span>
               <span
                 className={`mu-row__like ${isLiked(t) ? 'mu-row__like--on' : ''}`}
@@ -362,30 +386,6 @@ const MusicPage: React.FC = () => {
       </div>
       <div className="mu-blob mu-blob--2" />
       <div className="mu-blob mu-blob--3" />
-
-      {/* ═══ Мини-плеер над таббаром ═══ */}
-      {current && (
-        <div className={`mu-mini ${showFull ? 'mu-mini--hidden' : ''}`} onClick={() => { setShowFull(true); haptic('light'); }}>
-          <Artwork src={current.artwork} alt={current.title} className="mu-mini__art" />
-          <div className="mu-mini__info">
-            <span className="mu-mini__title">{current.title}</span>
-            <span className="mu-mini__artist">{current.artist}</span>
-            <div className="mu-mini__bar"><span style={{ width: `${progressPct}%` }} /></div>
-          </div>
-          <button
-            className="mu-mini__btn mu-mini__btn--play"
-            onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-          >
-            {playing ? <IconPause size={20} /> : <IconPlay size={20} />}
-          </button>
-          <button
-            className="mu-mini__btn"
-            onClick={(e) => { e.stopPropagation(); nextTrack(); }}
-          >
-            <IconNext size={18} />
-          </button>
-        </div>
-      )}
 
       {/* ═══ Полноэкранный плеер — центральная glass-карточка ═══ */}
       {current && showFull && (
@@ -413,7 +413,7 @@ const MusicPage: React.FC = () => {
 
             <div className="mu-full__tags">
               <span className="mu-tag"><IconFire size={12} /> {current.genre}</span>
-              <span className="mu-tag"><IconWave size={12} /> {fmtPlays(current.plays)} прослушиваний</span>
+              {current.plays > 0 && <span className="mu-tag"><IconWave size={12} /> {fmtPlays(current.plays)} прослушиваний</span>}
               <span className="mu-tag"><IconClock size={12} /> {fmtTime(current.duration)}</span>
             </div>
 
@@ -435,36 +435,26 @@ const MusicPage: React.FC = () => {
 
             <div className="mu-full__controls">
               <button
-                className={`mu-full__side ${shuffle ? 'mu-full__side--on' : ''}`}
-                onClick={() => { setShuffle(!shuffle); haptic('light'); }}
+                className={`mu-full__side ${shuffleOn ? 'mu-full__side--on' : ''}`}
+                onClick={() => { toggleShuffle(); haptic('light'); }}
               >
-                <IconShuffle active={shuffle} />
+                <IconShuffle active={shuffleOn} />
               </button>
-              <button className="mu-full__skip" onClick={prevTrack}><IconPrev size={26} /></button>
+              <button className="mu-full__skip" onClick={() => { prevTrack(); haptic('light'); }}><IconPrev size={26} /></button>
               <button className="mu-full__play" onClick={togglePlay}>
                 {playing ? <IconPause size={28} /> : <IconPlay size={28} />}
               </button>
-              <button className="mu-full__skip" onClick={() => nextTrack()}><IconNext size={26} /></button>
+              <button className="mu-full__skip" onClick={() => { nextTrack(); haptic('light'); }}><IconNext size={26} /></button>
               <button
-                className={`mu-full__side ${repeat ? 'mu-full__side--on' : ''}`}
-                onClick={() => { setRepeat(!repeat); haptic('light'); }}
+                className={`mu-full__side ${repeatOn ? 'mu-full__side--on' : ''}`}
+                onClick={() => { toggleRepeat(); haptic('light'); }}
               >
-                <IconRepeat active={repeat} />
+                <IconRepeat active={repeatOn} />
               </button>
             </div>
           </div>
         </div>
       )}
-
-      {/* Аудио */}
-      <audio
-        ref={audioRef}
-        onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
-        onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 0)}
-        onEnded={() => { if (repeat) { seekTo(0); audioRef.current?.play().catch(() => {}); } else nextTrack(true); }}
-        onPause={() => setPlaying(false)}
-        onPlay={() => setPlaying(true)}
-      />
     </div>
   );
 };

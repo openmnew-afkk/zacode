@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import MovieDetailPage from './pages/MovieDetailPage';
 import FavoritesPage from './pages/FavoritesPage';
@@ -7,18 +7,18 @@ import ProfilePage from './pages/ProfilePage';
 import SearchPage from './pages/SearchPage';
 import PremiumPage from './pages/PremiumPage';
 import AdminPage from './pages/AdminPage';
+import MusicPage from './pages/MusicPage';
+import AiPickPage from './pages/AiPickPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
-import AiFab from './components/AiFab';
-import { useTelegram } from './hooks/useTelegram';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
-  const { tg } = useTelegram();
+  const navigate = useNavigate();
   const { setTelegramUsername } = useStore();
   const { currentTrack } = useMusicStore();
 
@@ -30,22 +30,37 @@ function App() {
     } catch {}
   }, []);
 
+  /* ═══ При каждом входе — всегда главная (Telegram восстанавливает последний URL) ═══ */
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+    window.scrollTo(0, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
-    <div className="app-root" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
+    <div className="app-root">
       {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
 
       <Routes location={location}>
+        {/* Всегда главная по умолчанию */}
         <Route path="/" element={<HomePage />} />
         <Route path="/movie/:id" element={<MovieDetailPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/favorites" element={<FavoritesPage />} />
+        <Route path="/music" element={<MusicPage />} />
+        <Route path="/ai" element={<AiPickPage />} />
         <Route path="/premium" element={<PremiumPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/admin" element={<AdminPage />} />
+        {/* Любой неизвестный путь → главная */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
+      {/* Глобальная музыкальная панель над TabBar */}
       {currentTrack && <GlobalMusicBar />}
-      <AiFab />
+
       <TabBar />
     </div>
   );

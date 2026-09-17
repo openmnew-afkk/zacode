@@ -447,6 +447,19 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div className="hp-header__actions">
+              {/* 🤖 AI кружок — мигает, рядом с поиском */}
+              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="КиноИИ">
+                <span className="hp-ai-circle__ring" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <defs>
+                    <linearGradient id="aig2" x1="0" y1="0" x2="24" y2="24">
+                      <stop stopColor="#a78bfa"/><stop offset="1" stopColor="#f472b6"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2z" fill="url(#aig2)"/>
+                  <path d="M19 13.5l1 2.7 2.7 1-2.7 1-1 2.7-1-2.7-2.7-1 2.7-1 1-2.7z" fill="#f9a8d4" opacity="0.9"/>
+                </svg>
+              </button>
               <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <circle cx="8.5" cy="8.5" r="6" stroke="currentColor" strokeWidth="1.7"/>

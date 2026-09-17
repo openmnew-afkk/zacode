@@ -23,6 +23,8 @@ interface MusicState {
   repeatOn: boolean;
   likedTracks: Track[];
   isExpanded: boolean;
+  /* Внутренний сигнал перемотки (слушает глобальный аудио-движок) */
+  seekSignal: { value: number; tick: number } | null;
 
   setTrack: (track: Track, queue?: Track[], index?: number) => void;
   setPlaying: (v: boolean) => void;
@@ -35,6 +37,7 @@ interface MusicState {
   toggleLike: (track: Track) => void;
   isLiked: (id: string) => boolean;
   setExpanded: (v: boolean) => void;
+  seekTo: (v: number) => void;
 }
 
 const loadLiked = (): Track[] => {
@@ -52,6 +55,7 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   repeatOn: false,
   likedTracks: loadLiked(),
   isExpanded: false,
+  seekSignal: null,
 
   setTrack: (track, queue = [], index = 0) => {
     set({ currentTrack: track, queue, queueIndex: index, progress: 0 });
@@ -65,7 +69,12 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     if (!queue.length) return;
     let next: number;
     if (repeatOn) { next = queueIndex; }
-    else if (shuffleOn) { next = Math.floor(Math.random() * queue.length); }
+    else if (shuffleOn) {
+      if (queue.length <= 1) { next = 0; }
+      else {
+        do { next = Math.floor(Math.random() * queue.length); } while (next === queueIndex);
+      }
+    }
     else { next = (queueIndex + 1) % queue.length; }
     set({ currentTrack: queue[next], queueIndex: next, progress: 0 });
   },
@@ -90,4 +99,8 @@ export const useMusicStore = create<MusicState>((set, get) => ({
 
   isLiked: (id) => get().likedTracks.some((t) => t.id === id),
   setExpanded: (v) => set({ isExpanded: v }),
+  seekTo: (v) => {
+    const tick = (get().seekSignal?.tick || 0) + 1;
+    set({ seekSignal: { value: v, tick }, progress: v });
+  },
 }));
