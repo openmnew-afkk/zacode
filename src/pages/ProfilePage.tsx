@@ -1,197 +1,172 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
-import type { Movie } from '../types';
 import './ProfilePage.css';
 
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp, haptic, tg } = useTelegram();
-  const {
-    favorites, watchHistory, clearHistory, isPremium, premiumExpiry,
-    theme, setTheme, role, telegramUsername,
-  } = useStore();
+  const { favorites, watchHistory, clearHistory, isPremium, theme, setTheme, role, telegramUsername } = useStore();
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Гость';
   const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
-
-  /* Остаток дней премиума */
-  const daysLeft = premiumExpiry
-    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
-    : null;
-
   const isAdminUser = user?.username === 'MikySauce' || role === 'admin' || role === 'moderator';
 
+  const menuItems = [
+    {
+      icon: '❤️',
+      color: '#ef4444',
+      bg: 'rgba(239,68,68,0.15)',
+      label: 'Избранное',
+      sub: `${favorites.length} фильмов`,
+      action: () => navigate('/favorites'),
+    },
+    {
+      icon: '🔍',
+      color: '#3b82f6',
+      bg: 'rgba(59,130,246,0.15)',
+      label: 'Поиск',
+      sub: 'Найти фильм или сериал',
+      action: () => navigate('/search'),
+    },
+    {
+      icon: '🎵',
+      color: '#8b5cf6',
+      bg: 'rgba(139,92,246,0.15)',
+      label: 'Музыка',
+      sub: 'Слушать прямо сейчас',
+      action: () => navigate('/music'),
+    },
+    {
+      icon: isPremium ? '👑' : '⭐',
+      color: '#f59e0b',
+      bg: 'rgba(245,158,11,0.15)',
+      label: isPremium ? 'Премиум активен' : 'Подключить Премиум',
+      sub: isPremium ? 'Все функции открыты' : '199 ₽/мес · 2400 ₽/год',
+      action: () => navigate('/premium'),
+      highlight: !isPremium,
+    },
+    {
+      icon: theme === 'dark' ? '🌙' : '☀️',
+      color: '#06b6d4',
+      bg: 'rgba(6,182,212,0.15)',
+      label: theme === 'dark' ? 'Тёмная тема' : 'Светлая тема',
+      sub: 'Нажми чтобы переключить',
+      action: () => { haptic('light'); setTheme(theme === 'dark' ? 'violet' : 'dark'); },
+    },
+    {
+      icon: '📜',
+      color: '#64748b',
+      bg: 'rgba(100,116,139,0.15)',
+      label: 'Правила',
+      sub: 'Правовая информация',
+      action: () => navigate('/rules'),
+    },
+  ];
+
+  if (isAdminUser) {
+    menuItems.push({
+      icon: '⚙️',
+      color: '#8b5cf6',
+      bg: 'rgba(139,92,246,0.18)',
+      label: role === 'moderator' && user?.username !== 'MikySauce' ? 'Панель модератора' : 'Админ панель',
+      sub: 'Управление приложением',
+      action: () => navigate('/admin'),
+    });
+  }
+
   return (
-    <div className="profile-page page">
-      {/* ── Шапка профиля ── */}
-      {isPremium ? (
-        /* 👑 Премиум-профиль — золотая карточка */
-        <div className="profile-header profile-header--premium">
-          <div className="profile-premium-shine" />
-          <div className="profile-avatar profile-avatar--premium">
-            {user?.photo_url ? (
-              <img src={user.photo_url} alt="" className="profile-avatar__img" />
-            ) : (
-              <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
-            )}
-          </div>
-          <h1 className="profile-name profile-name--premium">{displayName}</h1>
-          {username && <p className="profile-username">{username}</p>}
-          <div className="profile-premium-badge profile-premium-badge--gold">
-            ✨ PREMIUM{daysLeft ? ` · ${daysLeft} дн.` : ' · ♾️'}
-          </div>
-        </div>
-      ) : (
-        /* Обычный профиль — просто и аккуратно */
-        <div className="profile-header">
-          <div className="profile-avatar">
-            {user?.photo_url ? (
-              <img src={user.photo_url} alt="" className="profile-avatar__img" />
-            ) : (
-              <div className="profile-avatar__placeholder">{displayName[0]?.toUpperCase() || '?'}</div>
-            )}
-          </div>
-          <h1 className="profile-name">{displayName}</h1>
-          {username && <p className="profile-username">{username}</p>}
-          <div className="profile-premium-badge">Базовый профиль</div>
-        </div>
-      )}
+    <div className="pf page">
+      {/* BG gradient */}
+      <div className="pf__bg" />
 
-      {/* Статистика */}
-      <div className="profile-stats">
-        <div className="profile-stat" onClick={() => navigate('/favorites')}>
-          <span className="profile-stat__value">{watchHistory.length}</span>
-          <span className="profile-stat__label">Просмотрено</span>
-        </div>
-        <div className="profile-stat" onClick={() => navigate('/favorites')}>
-          <span className="profile-stat__value">{favorites.length}</span>
-          <span className="profile-stat__label">В избранном</span>
-        </div>
-        {isPremium && (
-          <div className="profile-stat profile-stat--premium">
-            <span className="profile-stat__value">👑</span>
-            <span className="profile-stat__label">Премиум</span>
+      {/* Avatar with gradient ring — like photo 3 */}
+      <div className="pf__header">
+        <div className="pf__avatar-wrap">
+          <div className="pf__avatar-ring" />
+          <div className="pf__avatar">
+            {user?.photo_url
+              ? <img src={user.photo_url} alt="" />
+              : <span>{displayName[0]?.toUpperCase() || '?'}</span>
+            }
           </div>
-        )}
+          {isPremium && <div className="pf__premium-dot">👑</div>}
+        </div>
+
+        <h1 className="pf__name">
+          {displayName}
+          {(isAdminUser || isPremium) && <span className="pf__verified">✓</span>}
+        </h1>
+        {username && <p className="pf__username">{username}</p>}
+        {isPremium && <div className="pf__premium-badge">✨ PREMIUM</div>}
       </div>
 
-      {/* Настройки */}
-      <div className="profile-section">
-        <h2 className="profile-section__title">⚙️ Настройки</h2>
-
-        {/* Тема */}
-        <div
-          className="profile-setting"
-          onClick={() => { haptic('light'); setTheme(theme === 'dark' ? 'violet' : 'dark'); }}
-        >
-          <span className="profile-setting__label">
-            {theme === 'dark' ? '🌙 Тёмная тема' : '💗 Розовая (для девочек)'}
-          </span>
-          <span className="profile-setting__value">→</span>
+      {/* Stats */}
+      <div className="pf__stats">
+        <div className="pf__stat" onClick={() => navigate('/favorites')}>
+          <span className="pf__stat-val">{watchHistory.length}</span>
+          <span className="pf__stat-lbl">Просмотрено</span>
         </div>
-
-        {/* Реклама управляется только из админ-панели */}
-        <div className="profile-setting" onClick={() => navigate('/favorites')}>
-          <span className="profile-setting__label">❤️ Избранное</span>
-          <span className="profile-setting__value">{favorites.length}</span>
+        <div className="pf__stat-div" />
+        <div className="pf__stat" onClick={() => navigate('/favorites')}>
+          <span className="pf__stat-val">{favorites.length}</span>
+          <span className="pf__stat-lbl">Избранное</span>
         </div>
-
-        <div className="profile-setting" onClick={() => navigate('/search')}>
-          <span className="profile-setting__label">🔍 Поиск</span>
-          <span className="profile-setting__value">→</span>
-        </div>
-
-        <div
-          className={`profile-setting profile-setting--gold ${isPremium ? 'profile-setting--gold-active' : ''}`}
-          onClick={() => navigate('/premium')}
-        >
-          <span className="profile-setting__label">
-            {isPremium ? '👑 Премиум активен' : '👑 Подключить Премиум'}
-          </span>
-          <span className="profile-setting__value">{isPremium ? '✓' : '→'}</span>
+        <div className="pf__stat-div" />
+        <div className="pf__stat">
+          <span className="pf__stat-val">{isPremium ? '👑' : '—'}</span>
+          <span className="pf__stat-lbl">Премиум</span>
         </div>
       </div>
 
-      {/* История */}
-      <div className="profile-section">
-        <div className="profile-section__header">
-          <h2 className="profile-section__title">История просмотров</h2>
-          {watchHistory.length > 0 && (
-            <button className="profile-clear" onClick={clearHistory}>Очистить</button>
-          )}
-        </div>
-        {watchHistory.length > 0 ? (
-          <div className="profile-history">
-            {watchHistory.map((item) => (
-              <div key={item.movie.id} className="history-item" onClick={() => navigate(`/movie/${item.movie.id}`)}>
-                <img
-                  className="history-item__poster"
-                  src={item.movie.poster_path || 'https://via.placeholder.com/80x120?text=?'}
-                  alt={item.movie.title}
-                />
-                <div className="history-item__info">
-                  <p className="history-item__title">{item.movie.title}</p>
-                  <p className="history-item__date">{new Date(item.watchedAt).toLocaleDateString('ru-RU')}</p>
+      {/* Menu items — like photo 3 */}
+      <div className="pf__menu">
+        {menuItems.map((item, i) => (
+          <button
+            key={i}
+            className={`pf__item ${item.highlight ? 'pf__item--highlight' : ''}`}
+            onClick={item.action}
+          >
+            <span className="pf__item-icon" style={{ background: item.bg, color: item.color }}>
+              {item.icon}
+            </span>
+            <div className="pf__item-text">
+              <span className="pf__item-label">{item.label}</span>
+              <span className="pf__item-sub">{item.sub}</span>
+            </div>
+            <span className="pf__item-arrow">›</span>
+          </button>
+        ))}
+      </div>
+
+      {/* History */}
+      {watchHistory.length > 0 && (
+        <div className="pf__section">
+          <div className="pf__section-hd">
+            <span className="pf__section-title">История просмотров</span>
+            <button className="pf__clear" onClick={clearHistory}>Очистить</button>
+          </div>
+          <div className="pf__history">
+            {watchHistory.slice(0, 10).map((item) => (
+              <div key={item.movie.id} className="pf__hist-item" onClick={() => navigate(`/movie/${item.movie.id}`)}>
+                <img src={item.movie.poster_path || ''} alt="" />
+                <div>
+                  <p className="pf__hist-title">{item.movie.title}</p>
+                  <p className="pf__hist-date">{new Date(item.watchedAt).toLocaleDateString('ru-RU')}</p>
                 </div>
-                <span className="history-item__arrow">›</span>
+                <span className="pf__item-arrow">›</span>
               </div>
             ))}
           </div>
-        ) : (
-          <p className="profile-empty">Вы ещё ничего не смотрели</p>
-        )}
-      </div>
-
-      {/* Админ/модератор */}
-      {isAdminUser && (
-        <div className="profile-section">
-          <div
-            className="profile-setting"
-            onClick={() => navigate('/sport')}
-            style={{ background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 14 }}
-          >
-            <span className="profile-setting__label">⚽ СпортАнализ · ИИ-экспрессы (админ)</span>
-            <span className="profile-setting__value">→</span>
-          </div>
-          <div
-            className="profile-setting"
-            onClick={() => navigate('/admin')}
-            style={{ background: 'rgba(139,92,246,0.1)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: 14 }}
-          >
-            <span className="profile-setting__label">
-              {role === 'moderator' && user?.username !== 'MikySauce' ? '🛡 Панель модератора' : '⚙️ Админ панель'}
-            </span>
-            <span className="profile-setting__value">→</span>
-          </div>
         </div>
       )}
 
-      {/* Правовая информация */}
-      <div className="profile-section">
-        <div className="profile-legal">
-          <span className="profile-legal__icon">⚖️</span>
-          <span className="profile-legal__text">
-            Приложение не размещает и не хранит контент. Весь контент транслируется
-            со сторонних источников. 18+
-          </span>
-        </div>
-        <div
-          className="profile-setting"
-          onClick={() => navigate('/rules')}
-        >
-          <span className="profile-setting__label">📜 Правила и правовая информация</span>
-          <span className="profile-setting__value">→</span>
-        </div>
-      </div>
-
-      {/* Кнопка закрытия — только внутри Telegram (в браузере она ничего не делает) */}
       {tg && (
-        <div className="profile-close-wrap">
-          <button className="profile-close" onClick={closeApp}>Закрыть приложение</button>
-        </div>
+        <button className="pf__close" onClick={closeApp}>Закрыть приложение</button>
       )}
+
+      <div className="pf__footer">КиноЗал · Все права защищены</div>
     </div>
   );
 };
