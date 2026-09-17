@@ -5,6 +5,7 @@ import {
   getApiBase, setApiBase, adminGetConfig, adminGrantPremium, adminRevokePremium,
   adminAddModerator, adminRemoveModerator, adminApprovePayment, adminRemovePayment,
   adminSaveConfig, modGrantPremium, modSaveConfig, moderatorLogin,
+  fetchConfig, findLocalGrant, saveLocalGrant, removeLocalGrant, getLocalGrants,
   type AdminConfig, type PremiumGrant,
 } from '../api/backend';
 import './AdminPage.css';
@@ -35,6 +36,10 @@ const AdminPage: React.FC = () => {
   /* ── Центральный конфиг (платежи, гранты) ── */
   const [serverCfg, setServerCfg] = useState<AdminConfig | null>(null);
 
+  /* ── Статус API-сервера: empty | down | ok ── */
+  const [apiStatus, setApiStatus] = useState<'empty' | 'down' | 'ok' | 'checking'>('checking');
+  const [localGrants, setLocalGrants] = useState<PremiumGrant[]>(() => getLocalGrants());
+
   /* ── Премиум по нику ── */
   const [grantName, setGrantName] = useState('');
   const [grantDays, setGrantDays] = useState(30);
@@ -52,6 +57,14 @@ const AdminPage: React.FC = () => {
   const [reqNote, setReqNote] = useState(requisites.note);
   const [reqMsg, setReqMsg] = useState('');
   const [autoApprove, setAutoApprove] = useState(true);
+
+  /* ── Проверка доступности сервера после входа ── */
+  useEffect(() => {
+    if (!isAdmin && !isModerator) return;
+    if (!getApiBase()) { setApiStatus('empty'); return; }
+    setApiStatus('checking');
+    fetchConfig().then((cfg) => setApiStatus(cfg ? 'ok' : 'down'));
+  }, [isAdmin, isModerator]);
 
   /* ── Загрузка центрального конфига после входа ── */
   useEffect(() => {
@@ -124,21 +137,39 @@ const AdminPage: React.FC = () => {
     const token = localStorage.getItem(ADMIN_TOKEN_KEY) || '';
     const res = isFullAdmin
       ? await adminGrantPremium(token, grantName, grantDays, grantForever)
-      : await modGrantPremium(grantName, grantDays);
-    setGrantMsg(res.message || (res.ok ? '✅ Готово' : '❌ Ошибка'));
+      : await modGrantPremium(grantName, grantDays, telegramUsername);
     if (res.ok) {
+      setGrantMsg(res.message || '✅ Премиум выдан на сервере — работает на всех устройствах');
       setGrantName('');
-      // Обновляем список грантов
       if (isFullAdmin) {
         adminGetConfig(token).then((cfg) => { if (cfg) setServerCfg(cfg); });
       }
+      return;
     }
+    /* ── Фолбэк: сервер недоступен → сохраняем грант локально ── */
+    saveLocalGrant(grantName, grantDays, grantForever, telegramUsername || 'admin');
+    setLocalGrants(getLocalGrants());
+    /* Если выдали себе — применяем сразу */
+    const clean = grantName.trim().replace(/^@/, '').toLowerCase();
+    const my = (telegramUsername || '').replace(/^@/, '').toLowerCase();
+    if (clean === my) {
+      const g = findLocalGrant(grantName);
+      if (g) applyRemotePremium(g.forever ? null : g.expiry);
+    }
+    setGrantName('');
+    setGrantMsg(
+      getApiBase()
+        ? '⚠️ Сервер недоступен — премиум сохранён ЛОКАЛЬНО (только на этом устройстве). Проверь адрес API или запусти RU-Proxy.'
+        : '⚠️ Адрес API не задан — премиум сохранён ЛОКАЛЬНО (только на этом устройстве). Задай адрес сервера в разделе «API-сервер».'
+    );
   };
 
   const handleRevokePremium = async (name: string) => {
     const token = localStorage.getItem(ADMIN_TOKEN_KEY) || '';
+    removeLocalGrant(name);
+    setLocalGrants(getLocalGrants());
     const res = await adminRevokePremium(token, name);
-    setGrantMsg(res.message || '');
+    setGrantMsg(res.message || (res.ok ? '✅ Грант отозван' : '⚠️ Сервер недоступен — локальный грант удалён'));
     adminGetConfig(token).then((cfg) => { if (cfg) setServerCfg(cfg); });
   };
 
@@ -259,7 +290,28 @@ const AdminPage: React.FC = () => {
               <span className="admin__stat-label">Реклама</span>
               <span className="admin__stat-value">{adsEnabled ? '📺 Вкл' : '🚫 Выкл'}</span>
             </div>
+            <div className="admin__stat">
+              <span className="admin__stat-label">API-сервер</span>
+              <span className="admin__stat-value">
+                {apiStatus === 'ok' && '🟢 Онлайн'}
+                {apiStatus === 'down' && '🔴 Недоступен'}
+                {apiStatus === 'empty' && '⚪ Не задан'}
+                {apiStatus === 'checking' && '⏳ Проверка…'}
+              </span>
+            </div>
           </div>
+          {apiStatus !== 'ok' && (
+            <p className="admin__hint">
+              {apiStatus === 'empty'
+                ? '⚠️ Адрес API не задан: выдача премиума/модераторов другим пользователям не работает. Укажи адрес RU-Proxy в разделе ниже — там работает всё централизованно.'
+                : '⚠️ Сервер не отвечает: выдача работает только локально (на этом устройстве). Проверь, что RU-Proxy запущен, и адрес указан верно.'}
+            </p>
+          )}
+          {localGrants.length > 0 && (
+            <p className="admin__hint">
+              📦 Локальных грантов: {localGrants.length} — видны только на этом устройстве
+            </p>
+          )}
         </section>
 
         {/* API-сервер — центральное управление (админ) */}
@@ -355,6 +407,27 @@ const AdminPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          )}
+          {isFullAdmin && localGrants.length > 0 && (
+            <>
+              <p className="admin__hint">📦 Локальные гранты (только это устройство):</p>
+              <div className="admin__list">
+                {localGrants.map((g: PremiumGrant) => (
+                  <div key={`local-${g.username}`} className="admin__list-item">
+                    <div className="admin__list-info">
+                      <span className="admin__list-name">📱 @{g.username}</span>
+                      <span className="admin__list-sub">
+                        {g.forever ? '♾️ Бессрочно' : g.expiry ? `до ${new Date(g.expiry).toLocaleDateString('ru-RU')}` : ''} · локально
+                      </span>
+                    </div>
+                    <button
+                      className="admin__list-remove"
+                      onClick={() => { removeLocalGrant(g.username); setLocalGrants(getLocalGrants()); }}
+                    >✕</button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </section>
 

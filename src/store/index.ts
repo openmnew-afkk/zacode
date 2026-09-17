@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import type { Movie, WatchHistoryItem, AppTheme, WatchStatus, TrackedItem } from '../types';
 import type { BackendConfig, Requisites, Prices } from '../api/backend';
+import { findLocalGrant } from '../api/backend';
 
 /* ── localStorage helpers ── */
 const load = <T>(key: string, fallback: T): T => {
@@ -113,6 +114,8 @@ interface AppState {
   setRole: (role: 'admin' | 'moderator' | null) => void;
   /** Применить конфиг с сервера (реклама, объявления, реквизиты, премия) */
   applyBackendConfig: (cfg: BackendConfig, myName: string) => void;
+  /** Применить локальные гранты (фолбэк, когда сервер недоступен) */
+  applyLocalPremium: (myName: string) => void;
   /** Активировать премиум с сервера (без записи в localStorage) */
   applyRemotePremium: (expiry: number | null) => void;
 }
@@ -298,5 +301,13 @@ export const useStore = create<AppState>((set, get) => ({
         get().applyRemotePremium(grant.forever ? null : grant.expiry);
       }
     }
+  },
+
+  /* ═══ Локальные гранты (админ выдал без сервера — работают на этом устройстве) ═══ */
+  applyLocalPremium: (myName) => {
+    try {
+      const grant = findLocalGrant(myName);
+      if (grant) get().applyRemotePremium(grant.forever ? null : grant.expiry);
+    } catch {}
   },
 }));

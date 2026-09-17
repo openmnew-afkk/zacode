@@ -211,7 +211,50 @@ export const adminSaveConfig = (token: string, fields: Record<string, unknown>) 
   adminPost(fields, { adminToken: token });
 
 /* Команды модератора (права ограничены на сервере) */
-export const modGrantPremium = (name: string, days: number) =>
-  adminPost({ action: 'grantPremium', name, days }, { modUser: name });
+export const modGrantPremium = (name: string, days: number, modName: string) =>
+  adminPost({ action: 'grantPremium', name, days }, { modUser: modName });
 export const modSaveConfig = (name: string, fields: Record<string, unknown>) =>
   adminPost(fields, { modUser: name });
+
+/* ════════════ Локальный фолбэк (когда сервер недоступен) ════════════ *
+ * Гранты сохраняются на устройстве и применяются при каждом запуске.
+ * Чтобы премиум виделся на ВСЕХ устройствах — нужен доступный API-сервер. */
+
+const LOCAL_GRANTS_KEY = 'tc_local_grants';
+
+export function getLocalGrants(): PremiumGrant[] {
+  try { return JSON.parse(localStorage.getItem(LOCAL_GRANTS_KEY) || '[]'); } catch { return []; }
+}
+
+export function saveLocalGrant(name: string, days: number, forever: boolean, by: string): void {
+  const clean = name.trim().replace(/^@/, '');
+  if (!clean) return;
+  const grants = getLocalGrants().filter((g) => g.name.toLowerCase() !== clean.toLowerCase());
+  grants.unshift({
+    name: clean,
+    username: clean,
+    expiry: forever ? null : Date.now() + days * 24 * 60 * 60 * 1000,
+    forever,
+    by,
+    at: Date.now(),
+  });
+  try { localStorage.setItem(LOCAL_GRANTS_KEY, JSON.stringify(grants)); } catch {}
+}
+
+export function removeLocalGrant(name: string): void {
+  const clean = name.trim().replace(/^@/, '');
+  const grants = getLocalGrants().filter((g) => g.name.toLowerCase() !== clean.toLowerCase());
+  try { localStorage.setItem(LOCAL_GRANTS_KEY, JSON.stringify(grants)); } catch {}
+}
+
+/** Проверка: есть ли действующий локальный грант для имени */
+export function findLocalGrant(name: string): PremiumGrant | null {
+  const clean = name.trim().replace(/^@/, '').toLowerCase();
+  if (!clean) return null;
+  const g = getLocalGrants().find(
+    (x) => x.name.toLowerCase() === clean || x.username.toLowerCase() === clean
+  );
+  if (!g) return null;
+  if (!g.forever && (!g.expiry || g.expiry <= Date.now())) return null;
+  return g;
+}

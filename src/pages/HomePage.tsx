@@ -486,34 +486,41 @@ const HomePage: React.FC = () => {
       {/* ── Быстрое превью (длинное нажатие на карточку) ── */}
       {preview && (
         <div className="hp-preview-overlay" onClick={() => setPreview(null)}>
+          <div
+            className="hp-preview__bg"
+            style={{ backgroundImage: `url(${preview.backdrop_path || preview.poster_path})` }}
+          />
+          <div className="hp-preview__veil" />
           <div className="hp-preview" onClick={e => e.stopPropagation()}>
-            <div className="hp-preview__top">
-              <img
-                className="hp-preview__poster"
-                src={preview.poster_path}
-                alt={preview.title}
-                onError={e => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
-              />
-              <div className="hp-preview__info">
-                <h3 className="hp-preview__title">{preview.title}</h3>
-                <div className="hp-preview__meta">
-                  {preview.vote_average > 0 && <span className="hp-preview__rating">★ {preview.vote_average.toFixed(1)}</span>}
-                  {preview.release_date && <span>{preview.release_date.slice(0, 4)}</span>}
-                  <span>{preview.is_serial ? 'Сериал' : 'Фильм'}</span>
-                </div>
-                {preview.overview && (
-                  <p className="hp-preview__desc">
-                    {preview.overview.length > 320 ? `${preview.overview.slice(0, 320)}…` : preview.overview}
-                  </p>
-                )}
-              </div>
+            <button className="hp-preview__close" onClick={() => setPreview(null)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+            <img
+              className="hp-preview__poster"
+              src={preview.backdrop_path || preview.poster_path}
+              alt={preview.title}
+              onError={e => { (e.target as HTMLImageElement).style.visibility = 'hidden'; }}
+            />
+            <h3 className="hp-preview__title">{preview.title}</h3>
+            {preview.original_title && preview.original_title !== preview.title && (
+              <p className="hp-preview__original">{preview.original_title}</p>
+            )}
+            {preview.overview && (
+              <p className="hp-preview__desc">
+                {preview.overview.length > 220 ? `${preview.overview.slice(0, 220)}…` : preview.overview}
+              </p>
+            )}
+            <div className="hp-preview__tags">
+              {preview.vote_average > 0 && <span className="hp-preview__tag">★ {preview.vote_average.toFixed(1)}</span>}
+              {preview.release_date && <span className="hp-preview__tag">{preview.release_date.slice(0, 4)}</span>}
+              <span className="hp-preview__tag">{preview.is_serial ? '📺 Сериал' : '🎬 Фильм'}</span>
             </div>
             <div className="hp-preview__actions">
               <button
                 className="hp-preview__btn hp-preview__btn--primary"
                 onClick={() => { setPreview(null); navigate(`/movie/${preview.id}`); }}
               >
-                ▶ Открыть
+                ▶ Смотреть
               </button>
               <button
                 className={`hp-preview__btn hp-preview__btn--fav ${isFavorite(preview.id) ? 'active' : ''}`}
@@ -523,10 +530,9 @@ const HomePage: React.FC = () => {
                   else addFavorite(preview);
                 }}
               >
-                {isFavorite(preview.id) ? '❤️ В избранном' : '🤍 В избранное'}
+                {isFavorite(preview.id) ? '❤️' : '🤍'}
               </button>
             </div>
-            <button className="hp-preview__close" onClick={() => setPreview(null)}>✕</button>
           </div>
         </div>
       )}
