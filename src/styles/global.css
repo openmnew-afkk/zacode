@@ -482,3 +482,6 @@ button {
 /* Скролл-ряды без прыжков */
 .hp-row__scroll { scroll-behavior: smooth; }
 
+/* Компактный музыкальный плеер: добавляем место снизу, чтобы бар ничего не перекрывал */
+.app-main--with-player { padding-bottom: 64px; }
+

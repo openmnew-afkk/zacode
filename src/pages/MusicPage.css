@@ -3,7 +3,7 @@
 .mu {
   position: relative;
   min-height: 100vh;
-  padding: 4px 16px 180px;
+  padding: 4px 16px 150px;
   background: #07070d;
   overflow: hidden;
 }
@@ -179,22 +179,41 @@
   border: 1px solid rgba(167, 139, 250, 0.25);
   backdrop-filter: blur(12px);
 }
-.mu-row__num {
-  width: 24px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.3);
-  font-variant-numeric: tabular-nums;
+.mu-row__art-wrap {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
 }
-.mu-row--active .mu-row__num { color: #a78bfa; }
 .mu-row__art {
   width: 50px; height: 50px;
   border-radius: 14px;
   object-fit: cover;
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  flex-shrink: 0;
+}
+.mu-row__eq {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2.5px;
+  padding-bottom: 10px;
+  border-radius: 14px;
+  background: rgba(10, 8, 18, 0.45);
+}
+.mu-row__eq span {
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #a78bfa, #ec4899);
+  animation: muEq 0.9s ease-in-out infinite;
+}
+.mu-row__eq span:nth-child(2) { animation-delay: 0.25s; }
+.mu-row__eq span:nth-child(3) { animation-delay: 0.5s; }
+@keyframes muEq {
+  0%, 100% { height: 8px; }
+  50% { height: 20px; }
 }
 .mu-art-fallback {
   display: grid;
@@ -537,6 +556,5 @@
 .mu-full__side--on { color: #a78bfa; }
 
 /* Волновой индикатор "играет" */
-.mu-row--active .mu-row__num svg { animation: muPulse 1.1s ease-in-out infinite; }
-@keyframes muPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+.mu-row--active .mu-row__title { color: #fff; }
 }

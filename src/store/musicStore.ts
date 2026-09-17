@@ -38,6 +38,8 @@ interface MusicState {
   isLiked: (id: string) => boolean;
   setExpanded: (v: boolean) => void;
   seekTo: (v: number) => void;
+  /** Полностью закрыть плеер: остановить музыку и спрятать бар */
+  closeTrack: () => void;
 }
 
 const loadLiked = (): Track[] => {
@@ -103,4 +105,13 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     const tick = (get().seekSignal?.tick || 0) + 1;
     set({ seekSignal: { value: v, tick }, progress: v });
   },
+  closeTrack: () => set({
+    currentTrack: null,
+    isPlaying: false,
+    progress: 0,
+    duration: 0,
+    queue: [],
+    queueIndex: 0,
+    isExpanded: false,
+  }),
 }));

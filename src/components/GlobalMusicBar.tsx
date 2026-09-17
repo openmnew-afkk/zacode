@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useMusicStore } from '../store/musicStore';
 import './GlobalMusicBar.css';
 
 const GlobalMusicBar: React.FC = () => {
+  const navigate = useNavigate();
   const {
     currentTrack, isPlaying, progress, duration,
-    setPlaying, nextTrack, prevTrack, toggleLike, isLiked,
-    setProgress, setDuration, seekSignal, shuffleOn, repeatOn,
+    setPlaying, nextTrack, toggleLike, isLiked,
+    setProgress, setDuration, seekSignal, closeTrack, setExpanded,
   } = useMusicStore();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -57,97 +59,62 @@ const GlobalMusicBar: React.FC = () => {
 
   const pct = duration > 0 ? (progress / duration) * 100 : 0;
   const liked = isLiked(currentTrack.id);
-  const timeLeft = duration > progress ? duration - progress : 0;
-
-  const fmt = (s: number) => {
-    if (!s || !isFinite(s)) return '0:00';
-    const neg = s < 0;
-    const abs = Math.abs(s);
-    return `${neg ? '-' : ''}${Math.floor(abs / 60)}:${Math.floor(abs % 60).toString().padStart(2, '0')}`;
-  };
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-    const pos = ratio * duration;
-    if (audioRef.current) audioRef.current.currentTime = pos;
-    setProgress(pos);
-  };
-
-  const artBg = currentTrack.artwork && !imgError
-    ? `url(${currentTrack.artwork})`
-    : 'linear-gradient(135deg, #4c1d95, #1e1b4b)';
 
   return (
     <div className="gbar">
-      {/* Card */}
-      <div className="gbar__card">
-        {/* BG blur from art */}
-        <div className="gbar__bg" style={{ backgroundImage: artBg }} />
-        <div className="gbar__bg-overlay" />
-
-        {/* Top row: avatar + info + actions */}
-        <div className="gbar__top">
-          <div className="gbar__avatar">
-            {currentTrack.artwork && !imgError
-              ? <img src={currentTrack.artwork} alt="" onError={() => setImgError(true)} />
-              : <span>🎵</span>
-            }
-          </div>
-          <div className="gbar__info">
-            <div className="gbar__title">{currentTrack.title}</div>
-            <div className="gbar__artist">{currentTrack.artist}</div>
-          </div>
-          <button
-            className={`gbar__icon-btn ${liked ? 'gbar__icon-btn--liked' : ''}`}
-            onClick={() => toggleLike(currentTrack)}
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24"
-              fill={liked ? 'currentColor' : 'none'}
-              stroke="currentColor" strokeWidth="2">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-            </svg>
-          </button>
-        </div>
-
-        {/* Big art cover */}
-        <div className="gbar__art">
+      <div className="gbar__bar" onClick={() => { navigate('/music'); setExpanded(true); }}>
+        {/* Компактная обложка */}
+        <div className="gbar__cover">
           {currentTrack.artwork && !imgError
-            ? <img src={currentTrack.artwork} alt={currentTrack.title} onError={() => setImgError(true)} />
-            : <div className="gbar__art-ph">🎵</div>
+            ? <img src={currentTrack.artwork} alt="" onError={() => setImgError(true)} />
+            : <span>🎵</span>
           }
+          {/* Бегущая полоса прогресса по нижнему краю */}
+          <div className="gbar__line"><span style={{ width: `${pct}%` }} /></div>
         </div>
 
-        {/* Progress */}
-        <div className="gbar__seek" onClick={handleSeek}>
-          <div className="gbar__seek-fill" style={{ width: `${pct}%` }}>
-            <div className="gbar__seek-thumb" />
-          </div>
-        </div>
-        <div className="gbar__times">
-          <span>{fmt(progress)}</span>
-          <span>-{fmt(timeLeft)}</span>
+        <div className="gbar__info">
+          <div className="gbar__title">{currentTrack.title}</div>
+          <div className="gbar__artist">{currentTrack.artist}</div>
         </div>
 
-        {/* Controls */}
-        <div className="gbar__controls">
-          <button className="gbar__ctrl" onClick={prevTrack}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/>
-            </svg>
-          </button>
-          <button className="gbar__ctrl gbar__ctrl--play" onClick={() => setPlaying(!isPlaying)}>
-            {isPlaying
-              ? <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-              : <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            }
-          </button>
-          <button className="gbar__ctrl" onClick={nextTrack}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-            </svg>
-          </button>
-        </div>
+        <button
+          className={`gbar__btn ${liked ? 'gbar__btn--liked' : ''}`}
+          onClick={(e) => { e.stopPropagation(); toggleLike(currentTrack); }}
+          aria-label="Нравится"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+            <path d="M19.5 5.3a5 5 0 0 0-7.1 0L12 5.7l-.4-.4a5 5 0 1 0-7.1 7.1l.4.4L12 20l7.1-7.2.4-.4a5 5 0 0 0 0-7.1z" />
+          </svg>
+        </button>
+
+        <button
+          className="gbar__btn gbar__btn--play"
+          onClick={(e) => { e.stopPropagation(); setPlaying(!isPlaying); }}
+          aria-label={isPlaying ? 'Пауза' : 'Играть'}
+        >
+          {isPlaying
+            ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4.4" height="15" rx="1.6" /><rect x="13.6" y="4.5" width="4.4" height="15" rx="1.6" /></svg>
+            : <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8.5 5.9c0-1.2 1.3-1.9 2.3-1.3l9.2 5.6c1 .6 1 2 0 2.6l-9.2 5.6c-1 .6-2.3-.1-2.3-1.3V5.9z" /></svg>
+          }
+        </button>
+
+        <button
+          className="gbar__btn gbar__btn--next"
+          onClick={(e) => { e.stopPropagation(); nextTrack(); }}
+          aria-label="Следующий"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 6.8c0-1 1.1-1.6 2-1.1l8 5.2c.8.5.8 1.7 0 2.2l-8 5.2c-.9.5-2-.1-2-1.1V6.8z" /><rect x="16.5" y="5" width="2.6" height="14" rx="1.3" /></svg>
+        </button>
+
+        {/* Закрыть плеер — останавливает музыку и прячет бар */}
+        <button
+          className="gbar__btn gbar__btn--close"
+          onClick={(e) => { e.stopPropagation(); closeTrack(); }}
+          aria-label="Закрыть плеер"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
       </div>
     </div>
   );

@@ -181,6 +181,7 @@ const MusicPage: React.FC = () => {
     toggleShuffle, toggleRepeat, shuffleOn, repeatOn,
     seekTo,
     likedTracks, toggleLike: storeToggleLike, isLiked: storeIsLiked,
+    isExpanded, setExpanded,
   } = useMusicStore();
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
@@ -243,6 +244,14 @@ const MusicPage: React.FC = () => {
   }, []);
 
   useEffect(() => { loadFeed('init'); }, [loadFeed]);
+
+  /* Мини-плеер открыл полный экран */
+  useEffect(() => {
+    if (isExpanded) {
+      if (currentTrack) setShowFull(true);
+      setExpanded(false);
+    }
+  }, [isExpanded, currentTrack, setExpanded]);
 
   /* ── Лайки (глобальный store, сохраняются в localStorage) ── */
   const liked = likedTracks;
@@ -367,8 +376,14 @@ const MusicPage: React.FC = () => {
           const active = current?.id === t.id;
           return (
             <button key={`${t.id}-${i}`} className={`mu-row ${active ? 'mu-row--active' : ''}`} onClick={() => play(t)}>
-              <span className="mu-row__num">{active && playing ? <IconWave size={16} /> : String(i + 1).padStart(2, '0')}</span>
-              <Artwork src={t.artwork} alt={t.title} className="mu-row__art" />
+              <span className="mu-row__art-wrap">
+                <Artwork src={t.artwork} alt={t.title} className="mu-row__art" />
+                {active && playing && (
+                  <span className="mu-row__eq">
+                    <span /><span /><span />
+                  </span>
+                )}
+              </span>
               <span className="mu-row__info">
                 <span className="mu-row__title">{t.title}</span>
                 <span className="mu-row__artist">{t.artist}{t.plays > 0 ? ` · ${fmtPlays(t.plays)} ▶` : ''}</span>

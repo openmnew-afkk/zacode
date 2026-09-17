@@ -43,20 +43,22 @@ function App() {
     <div className="app-root">
       {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
 
-      <Routes location={location}>
-        {/* Всегда главная по умолчанию */}
-        <Route path="/" element={<HomePage />} />
-        <Route path="/movie/:id" element={<MovieDetailPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/music" element={<MusicPage />} />
-        <Route path="/ai" element={<AiPickPage />} />
-        <Route path="/premium" element={<PremiumPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        {/* Любой неизвестный путь → главная */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <div className={`app-main ${currentTrack ? 'app-main--with-player' : ''}`}>
+        <Routes location={location}>
+          {/* Всегда главная по умолчанию */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/movie/:id" element={<MovieDetailPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/music" element={<MusicPage />} />
+          <Route path="/ai" element={<AiPickPage />} />
+          <Route path="/premium" element={<PremiumPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          {/* Любой неизвестный путь → главная */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
 
       {/* Глобальная музыкальная панель над TabBar */}
       {currentTrack && <GlobalMusicBar />}
