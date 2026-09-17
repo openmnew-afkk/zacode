@@ -28,6 +28,26 @@ const GENRES = [
   'Techno', 'Deep House', 'R&B/Soul', 'Jazz', 'Ambient', 'Dubstep',
 ];
 const TIME_RANGES = ['week', 'month', 'allTime'];
+
+/* Палитра живых градиентов для карточек треков (каждый трек — своего цвета) */
+const CARD_GRADS: Array<[string, string, string]> = [
+  ['#0f4c45', '#1f8f6e', '#37d9a0'], // изумруд
+  ['#4a2a10', '#a05e1e', '#e8a54b'], // янтарь
+  ['#2a1250', '#6d28d9', '#c084fc'], // фиолет
+  ['#0a1f4d', '#1d4ed8', '#60a5fa'], // синий
+  ['#4d0a2e', '#be185d', '#f472b6'], // малина
+  ['#0b3a4d', '#0e7490', '#22d3ee'], // циан
+  ['#3d1d0a', '#b45309', '#fbbf24'], // золото
+];
+const hashStr = (s: string): number => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+};
+const gradFor = (id: string): string => {
+  const [c1, c2, c3] = CARD_GRADS[hashStr(id) % CARD_GRADS.length];
+  return `linear-gradient(104deg, ${c1} 0%, ${c2} 58%, ${c3} 130%)`;
+};
 const HOSTS_FALLBACK = [
   'https://discoveryprovider.audius.co',
   'https://audius-discovery-2.altego.net',
@@ -374,8 +394,17 @@ const MusicPage: React.FC = () => {
         )}
         {!loading && list.map((t, i) => {
           const active = current?.id === t.id;
+          // У играющего трека — реальный прогресс, у остальных — декоративная позиция полосы
+          const barW = active
+            ? Math.min(100, Math.max(3, duration > 0 ? (progress / duration) * 100 : 0))
+            : 30 + (hashStr(t.id) % 55);
           return (
-            <button key={`${t.id}-${i}`} className={`mu-row ${active ? 'mu-row--active' : ''}`} onClick={() => play(t)}>
+            <button
+              key={`${t.id}-${i}`}
+              className={`mu-row ${active ? 'mu-row--active' : ''}`}
+              style={{ background: gradFor(t.id) }}
+              onClick={() => play(t)}
+            >
               <span className="mu-row__art-wrap">
                 <Artwork src={t.artwork} alt={t.title} className="mu-row__art" />
                 {active && playing && (
@@ -386,7 +415,12 @@ const MusicPage: React.FC = () => {
               </span>
               <span className="mu-row__info">
                 <span className="mu-row__title">{t.title}</span>
-                <span className="mu-row__artist">{t.artist}{t.plays > 0 ? ` · ${fmtPlays(t.plays)} ▶` : ''}</span>
+                <span className="mu-row__bar"><i style={{ width: `${barW}%` }} /></span>
+                <span className="mu-row__artist">
+                  {t.artist}
+                  {t.plays > 0 ? ` · ${fmtPlays(t.plays)} ▶` : ''}
+                  {active && duration > 0 ? ` · ${fmtTime(progress)} / ${fmtTime(duration)}` : ''}
+                </span>
               </span>
               <span
                 className={`mu-row__like ${isLiked(t) ? 'mu-row__like--on' : ''}`}

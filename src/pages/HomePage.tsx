@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
@@ -212,6 +213,14 @@ const HomePage: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<Movie | null>(null);
+
+  // Блокируем скролл страницы под открытым превью
+  useEffect(() => {
+    if (!preview) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [preview]);
 
   const openPreview = useCallback((m: Movie) => {
     haptic('medium');
@@ -496,8 +505,9 @@ const HomePage: React.FC = () => {
         {renderContent()}
       </div>
 
-      {/* ── Быстрое превью (длинное нажатие на карточку) ── */}
-      {preview && (
+      {/* ── Быстрое превью (длинное нажатие на карточку) — портал в body,
+             чтобы position:fixed не ломался трансформами предков ── */}
+      {preview && createPortal(
         <div className="hp-preview-overlay" onClick={() => setPreview(null)}>
           <div
             className="hp-preview__bg"
@@ -547,7 +557,8 @@ const HomePage: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
