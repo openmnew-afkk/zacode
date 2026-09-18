@@ -7,7 +7,7 @@ import {
 } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
-import type { Movie } from '../types';
+import type { Movie, TrackedItem } from '../types';
 import './HomePage.css';
 
 /* ──────────────────────────────────────────────────────── */
@@ -97,6 +97,54 @@ const Row: React.FC<{
 };
 
 /* ──────────────────────────────────────────────────────── */
+/*  Продолжить просмотр — градиентные карточки с прогрессом  */
+/* ──────────────────────────────────────────────────────── */
+const CW_GRADS: Array<[string, string, string]> = [
+  ['#3a2a10', '#8a6a2e', '#d4b06a'], // бронза
+  ['#0a3a32', '#0e7d5e', '#2bbf96'], // изумруд
+  ['#2a1250', '#5b2a9e', '#a06ee8'], // фиолет
+  ['#4d0a2e', '#8a1d55', '#e05a96'], // малина
+  ['#0a234d', '#1d4e8a', '#5aa0e8'], // синий
+];
+const cwHash = (id: string): number => {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  return Math.abs(h);
+};
+const cwGrad = (id: string): string => {
+  const [c1, c2, c3] = CW_GRADS[cwHash(id) % CW_GRADS.length];
+  return `linear-gradient(100deg, ${c1} 0%, ${c2} 55%, ${c3} 125%)`;
+};
+
+const ContinueCard: React.FC<{ item: TrackedItem; onOpen: (id: string) => void }> = ({ item, onOpen }) => {
+  const m = item.movie;
+  // Пока плеер не отдаёт точную позицию — прогресс оценочный, поле progress готово для него
+  const pct = item.progress != null
+    ? Math.round(item.progress * 100)
+    : 20 + (cwHash(m.id) % 60);
+  const minsLeft = m.runtime
+    ? Math.max(5, Math.round(m.runtime * (1 - pct / 100)))
+    : 25 + (cwHash(m.id) % 20);
+  return (
+    <button className="hp-cw__card" style={{ background: cwGrad(m.id) }} onClick={() => onOpen(m.id)}>
+      <span className="hp-cw__thumb-wrap">
+        <img className="hp-cw__thumb" src={m.poster_path} alt={m.title} loading="lazy" />
+      </span>
+      <span className="hp-cw__info">
+        <span className="hp-cw__name">{m.title}</span>
+        <span className="hp-cw__bar"><i style={{ width: `${pct}%` }} /></span>
+        <span className="hp-cw__meta">
+          {pct}%{m.runtime ? ` · осталось ~${minsLeft} мин` : ' · смотрю'}
+        </span>
+      </span>
+      <span className="hp-cw__play">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+      </span>
+    </button>
+  );
+};
+
+/* ──────────────────────────────────────────────────────── */
 /*  Hero баннер                                            */
 /* ──────────────────────────────────────────────────────── */
 const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ movies, onWatch }) => {
@@ -153,14 +201,18 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
           {m.is_serial ? 'Сериал' : 'Фильм'} · Популярное
         </div>
         <h2 className="hp-hero__title">{m.title}</h2>
-        {m.overview && <p className="hp-hero__desc">{m.overview.slice(0, 100)}…</p>}
-        <div className="hp-hero__meta">
-          {m.vote_average > 0 && <span className="hp-hero__rating">★ {m.vote_average.toFixed(1)}</span>}
-          {m.release_date && <span>{m.release_date.slice(0, 4)}</span>}
+        {m.original_title && m.original_title !== m.title && (
+          <p className="hp-hero__subtitle">{m.original_title}</p>
+        )}
+        {m.overview && <p className="hp-hero__desc">{m.overview.slice(0, 110)}…</p>}
+        <div className="hp-hero__actions">
+          <button className="hp-hero__btn" onClick={e => { e.stopPropagation(); onWatch(m.id); }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+            Смотреть
+          </button>
+          {m.vote_average > 0 && <span className="hp-hero__tag">★ {m.vote_average.toFixed(1)}</span>}
+          {m.release_date && <span className="hp-hero__tag">{m.release_date.slice(0, 4)}</span>}
         </div>
-        <button className="hp-hero__btn" onClick={e => { e.stopPropagation(); onWatch(m.id); }}>
-          Открыть
-        </button>
       </div>
       {heroMovies.length > 1 && (
         <div className="hp-hero__pager">
@@ -203,10 +255,9 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user: tgUser } = useTelegram();
   const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
-  const watching = Object.values(tracked)
+  const watchingTracked = Object.values(tracked)
     .filter((t) => t.status === 'watching')
-    .sort((a, b) => b.addedAt - a.addedAt)
-    .map((t) => t.movie);
+    .sort((a, b) => b.addedAt - a.addedAt);
   const { haptic } = useTelegram();
   const [tab, setTab] = useState('home');
   const [query, setQuery] = useState('');
@@ -361,8 +412,13 @@ const HomePage: React.FC = () => {
           )}
 
           <Hero movies={heroMovies} onWatch={go} />
-          {watching.length > 0 && (
-            <Row title="Продолжаю смотреть" icon="👀" movies={watching} onMovieClick={go} onMovieLongPress={openPreview} />
+          {watchingTracked.length > 0 && (
+            <div className="hp-cw">
+              <h3 className="hp-cw__heading">Продолжить просмотр</h3>
+              {watchingTracked.slice(0, 4).map((t) => (
+                <ContinueCard key={t.movie.id} item={t} onOpen={go} />
+              ))}
+            </div>
           )}
           <Row title="Тренды недели" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />

@@ -1,4 +1,4 @@
-/* ===== TabBar ===== */
+/* ===== TabBar — плавающая стеклянная капсула с «док-пузырём» ===== */
 
 .tab-bar {
   position: fixed;
@@ -6,113 +6,97 @@
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 0 8px max(env(safe-area-inset-bottom, 0px), 6px);
+  padding: 0 14px max(env(safe-area-inset-bottom, 0px), 10px);
+  pointer-events: none;
 }
 
 .tab-bar__inner {
+  pointer-events: auto;
   display: flex;
-  align-items: center;
-  justify-content: space-around;
-  height: 60px;
-  border-radius: 22px;
-  background: rgba(14, 12, 10, 0.82);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
-  margin-bottom: 4px;
+  align-items: stretch;
+  height: 64px;
+  border-radius: 30px;
+  background: rgba(15, 13, 19, 0.8);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
 }
 
 .tab-bar__item {
   position: relative;
+  flex: 1;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 6px 14px;
-  border-radius: 16px;
-  color: rgba(255, 255, 255, 0.32);
-  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.34);
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  min-width: 56px;
+  transition: color 0.25s;
 }
 
-.tab-bar__item:active { transform: scale(0.88); }
-
-.tab-bar__item--active { color: #f0c96a; }
-
-.tab-bar__item--active::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 16px;
-  background: radial-gradient(
-    ellipse at center bottom,
-    rgba(232, 184, 74, 0.16) 0%,
-    transparent 70%
-  );
+.tab-bar__item:active .tab/* ===== TabBar — плавающая стеклянная ка? 
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 0 14px max(env(sa? ? positioн  bottom: 0;
+  leи  left: 0;
+r_  right: ti  z-index: {  padding: 0 1;
   pointer-events: none;
 }
 
-.tab-bar__item--active::after {
-  content: '';
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #e8b84a;
-  box-shadow: 0 0 8px 2px rgba(232, 184, 74, 0.55);
+.tab-bar__inner {
+  pointer-eventsm:}
+
+.tab-bar__inner {
+ idth: 48px;
+  height: 5  display: flex;
+  ali16  align-items: d:  height: 64px;
+  bordg,  border-radiu21  background: rgba(151p  backdrop-filter: blur(30px) satur    -webkit-backdrop-filter: blur(30px) satura5)  border: 1px solid rgba(255, 255, 255, 0.08);
+  boxev  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55)c-}
+
+.tab-bar__item {
+  position: relative;
+  fBubble {
+  from { tran  flex: 1;
+  display0%  displayte  align-items: .7  justify-content: ce    border: none;
+  backgro-5  background: (0  color: rgba(255, 255, 2
+}  cursor: pointer;
+  -webkit-tap-hat  -webkit-tap-hig;
+  transition: color 0.25s;
 }
 
-.tab-bar__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+.tab-bar__itju}
+
+.tab-bar__item:active width.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: , 0.64, 1);
 }
 
-.tab-bar__item--active .tab-bar__icon {
-  transform: translateY(-1px) scale(1.08);
-  filter: drop-shadow(0 0 6px rgba(232, 184, 74, 0.45));
+.tab-bar__item--active { color: #fff; }
+
+.tab  right: m-  z-index:ab  padding: 0 1 t  leи  left: 0;
+r_  right: ti  z-index: {  padding: opr_  right: ti   r  pointer-events: none;
 }
 
-.tab-bar__label {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
+.tab-bar__inba}
 
-.tab-bar__item--active .tab-bar__label {
-  color: #f0c96a;
-}
+.tab-bar__inner {
+ lute;  pointer-events t
+.tab-bar__inner {cal idth: 48px;
+  h m  height: 56p  ali16  align-items: d:  ng  bordg,  border-radiu21  background: ro  boxev  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55)c-}
 
-.tab-bar__badge {
-  position: absolute;
-  top: 2px;
-  right: 8px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #e23d3d, #c62828);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.tab-bar__item {
+  position: relative;
+  fBubble {
+  from { tran  flex: 1;
+  display0%  displayte  align-items: .7  juhadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
-
-.tab-bar__item--premium.tab-bar__item--active { color: #fbbf24; }
-.tab-bar__item--premium.tab-bar__item--active::after {
-  background: #f59e0b;
-  box-shadow: 0 0 8px 2px rgba(245,158,11,0.55);
-}
-.tab-bar__item--premium.tab-bar__item--active .tab-bar__label { color: #fbbf24; }

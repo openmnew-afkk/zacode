@@ -29,7 +29,7 @@
   --r-full: 9999px;
   --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
   --ease-smooth: cubic-bezier(0.4,0,0.2,1);
-  --tabbar-h: calc(52px + max(env(safe-area-inset-bottom), 8px) + 8px);
+  --tabbar-h: calc(64px + max(env(safe-area-inset-bottom), 10px) + 10px);
   --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }

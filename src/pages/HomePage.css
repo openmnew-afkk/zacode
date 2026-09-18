@@ -138,9 +138,9 @@
 /* ── Hero ── */
 .hp-hero {
   position: relative;
-  height: 58vw;
-  min-height: 200px;
-  max-height: 340px;
+  height: 74vw;
+  min-height: 280px;
+  max-height: 420px;
   overflow: hidden;
   cursor: pointer;
   margin-bottom: 4px;
@@ -195,15 +195,28 @@
   50%       { opacity: 0.5; transform: scale(0.7); }
 }
 .hp-hero__title {
-  font-size: 22px;
+  font-size: 27px;
   font-weight: 900;
   color: #fff;
-  line-height: 1.15;
-  margin-bottom: 6px;
+  line-height: 1.12;
+  margin-bottom: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
+}
+/* разреженный капс-подзаголовок — как «N O R W A Y» на референсе */
+.hp-hero__subtitle {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .hp-hero__desc {
   font-size: 12px;
@@ -214,37 +227,46 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
-.hp-hero__meta {
+.hp-hero__actions {
   display: flex;
-  gap: 8px;
   align-items: center;
-  margin-bottom: 10px;
+  gap: 10px;
 }
-.hp-hero__rating {
-  font-size: 12px;
-  font-weight: 700;
-  color: #fbbf24;
-}
-.hp-hero__meta > span {
-  font-size: 11px;
-  color: rgba(255,255,255,0.4);
-}
+/* нежная стеклянная кнопка-пилюля со свечением (как «Discover More») */
 .hp-hero__btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #e8b84a, #d4922a);
-  color: #1a1208;
-  font-size: 14px;
-  font-weight: 800;
-  border: none;
+  padding: 11px 24px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(232,184,74,0.35);
-  transition: transform 0.12s;
+  box-shadow: 0 0 26px rgba(255, 255, 255, 0.1), 0 8px 22px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
 }
-.hp-hero__btn:active { transform: scale(0.96); }
+.hp-hero__btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 34px rgba(255, 255, 255, 0.16), 0 8px 22px rgba(0, 0, 0, 0.35);
+}
+.hp-hero__tag {
+  padding: 9px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+  white-space: nowrap;
+}
 /* Пейджер hero — прогресс-бар + счётчик слайдов */
 .hp-hero__pager {
   position: absolute;
@@ -656,4 +678,126 @@
 @keyframes ai-ring-pulse {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50%       { opacity: 0.15; transform: scale(1.25); }
+}
+
+/* ── Продолжить просмотр: градиентные карточки с прогрессом ── */
+.hp-cw {
+  margin: 6px 14px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hp-cw__heading {
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px;
+}
+.hp-cw__card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px 9px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+  transition: transform 0.18s, border-color 0.2s;
+}
+/* нежный стеклянный блик поверх градиента */
+.hp-cw__card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), transparent 45%);
+  pointer-events: none;
+}
+.hp-cw__card:active { transform: scale(0.977); }
+.hp-cw__thumb-wrap {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+  background: rgba(255, 255, 255, 0.06);
+}
+.hp-cw__thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hp-cw__info {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.hp-cw__name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* светящаяся полоса прогресса */
+.hp-cw__bar {
+  position: relative;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+.hp-cw__bar i {
+  display: block;
+  height: 100%;
+  min-width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), #fff);
+  position: relative;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
+}
+.hp-cw__bar i::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.6);
+}
+.hp-cw__meta {
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.66);
+}
+.hp-cw__play {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #fff;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
 }
