@@ -23,30 +23,11 @@ const LIKED_KEY = 'mu_liked_v2';
 const NOW_KEY = 'mu_now_v2';
 
 /* Случайный жанр и период при каждом заходе — музыка всегда свежая */
-const GENRES = [
-  '', 'Electronic', 'Hip-Hop/Rap', 'Pop', 'Rock', 'Lo-Fi', 'House',
-  'Techno', 'Deep House', 'R&B/Soul', 'Jazz', 'Ambient', 'Dubstep',
-];
-const TIME_RANGES = ['week', 'month', 'allTime'];
 
-/* Палитра живых градиентов для карточек треков (каждый трек — своего цвета) */
-const CARD_GRADS: Array<[string, string, string]> = [
-  ['#0f4c45', '#1f8f6e', '#37d9a0'], // изумруд
-  ['#4a2a10', '#a05e1e', '#e8a54b'], // янтарь
-  ['#2a1250', '#6d28d9', '#c084fc'], // фиолет
-  ['#0a1f4d', '#1d4ed8', '#60a5fa'], // синий
-  ['#4d0a2e', '#be185d', '#f472b6'], // малина
-  ['#0b3a4d', '#0e7490', '#22d3ee'], // циан
-  ['#3d1d0a', '#b45309', '#fbbf24'], // золото
-];
 const hashStr = (s: string): number => {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
   return Math.abs(h);
-};
-const gradFor = (id: string): string => {
-  const [c1, c2, c3] = CARD_GRADS[hashStr(id) % CARD_GRADS.length];
-  return `linear-gradient(104deg, ${c1} 0%, ${c2} 58%, ${c3} 130%)`;
 };
 const HOSTS_FALLBACK = [
   'https://discoveryprovider.audius.co',
@@ -99,6 +80,63 @@ const fetchItunes = async (term: string, limit = 40): Promise<Track[]> => {
   const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
   const json = await res.json();
   return (json?.results ?? []).filter((t: any) => t.previewUrl).map(mapItunes);
+};
+
+/* ── Deezer (бесплатный сервис, отдаёт 30-сек превью) — через JSONP, CORS не нужен ── */
+const jsonp = (url: string): Promise<any> =>
+  new Promise((resolve, reject) => {
+    const cb = `dz_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+    const script = document.createElement('script');
+    const cleanup = () => { clearTimeout(timer); delete (window as any)[cb]; script.remove(); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('jsonp timeout')); }, 8000);
+    (window as any)[cb] = (data: any) => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('jsonp error')); };
+    script.src = `${url}${url.includes('?') ? '&' : '?'}output=jsonp&callback=${cb}`;
+    document.head.appendChild(script);
+  });
+
+const fetchDeezerChart = async (limit = 25): Promise<Track[]> => {
+  const data = await jsonp(`https://api.deezer.com/chart/0/tracks?limit=${limit}`);
+  return (data?.data ?? [])
+    .filter((t: any) => t.preview)
+    .map((t: any) => ({
+      id: `dz-${t.id}`,
+      title: t.title || '',
+      artist: t.artist?.name || '',
+      artwork: (t.album?.cover_medium || '').replace('cover_medium', 'cover_big'),
+      duration: 30,
+      plays: t.rank ? Math.round(t.rank / 1000) : 0,
+      genre: 'Chart',
+      streamUrl: t.preview,
+    }));
+};
+
+const fetchDeezerSearch = async (q: string, limit = 20): Promise<Track[]> => {
+  const data = await jsonp(`https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=${limit}`);
+  return (data?.data ?? [])
+    .filter((t: any) => t.preview)
+    .map((t: any) => ({
+      id: `dz-${t.id}`,
+      title: t.title || '',
+      artist: t.artist?.name || '',
+      artwork: (t.album?.cover_medium || '').replace('cover_medium', 'cover_big'),
+      duration: 30,
+      plays: 0,
+      genre: 'Search',
+      streamUrl: t.preview,
+    }));
+};
+
+/* Склеиваем подборки из разных сервисов без повторов */
+const dedupeTracks = (arr: Track[]): Track[] => {
+  const seen = new Set<string>();
+  return arr.filter((t) => {
+    if (!t.title || !t.streamUrl) return false;
+    const key = `${t.title.toLowerCase()}|${t.artist.toLowerCase()}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 };
 
 const shuffleArr = <T,>(arr: T[]): T[] => {
@@ -212,14 +250,26 @@ const MusicPage: React.FC = () => {
   const [feedLabel, setFeedLabel] = useState('Популярное сейчас');
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
-  /* ── Загрузка: Audius → iTunes → демо. Музыка ЕСТЬ всегда и каждый раз разная ── */
+  /* ── Загрузка: топ-чарты (Apple Music + Deezer) → Audius → демо. Всегда разная ── */
   const loadFeed = useCallback(async (mode: 'init' | 'refresh') => {
     if (mode === 'refresh') setRefreshing(true); else setLoading(true);
-    const genre = pick(GENRES);
-    const time = pick(TIME_RANGES);
-    const offset = mode === 'refresh' ? Math.floor(Math.random() * 4) * 30 : Math.floor(Math.random() * 3) * 30;
 
-    /* 1) Audius — пробуем discovery-хосты */
+    /* 1) Топ-чарты двух бесплатных сервисов параллельно */
+    const [itA, itB, dz] = await Promise.all([
+      fetchItunes(pick(ITUNES_TERMS), 25).catch(() => [] as Track[]),
+      fetchItunes(pick(ITUNES_TERMS), 25).catch(() => [] as Track[]),
+      fetchDeezerChart(25).catch(() => [] as Track[]),
+    ]);
+    const merged = dedupeTracks([...shuffleArr(dz), ...shuffleArr([...itA, ...itB])]);
+    if (merged.length > 0) {
+      setTracks(merged);
+      setFeedLabel(dz.length > 0 && itA.length + itB.length > 0 ? 'Топ-чарт · Deezer + Apple Music' : 'Топ-чарт · свежие хиты');
+      setLoading(false);
+      setRefreshing(false);
+      return;
+    }
+
+    /* 2) Audius — резервный сервис */
     let host = pick(HOSTS_FALLBACK);
     try {
       const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(4000) });
@@ -228,31 +278,17 @@ const MusicPage: React.FC = () => {
     } catch {}
     hostRef.current = host;
     try {
-      const params = new URLSearchParams({ 'app_name': APP_NAME, limit: '40', time, offset: String(offset) });
-      if (genre) params.set('genre', genre);
-      const res = await fetch(`${host}/v1/tracks/trending?${params}`, { signal: AbortSignal.timeout(7000) });
+      const res = await fetch(`${host}/v1/tracks/trending?app_name=${APP_NAME}&limit=40`, { signal: AbortSignal.timeout(7000) });
       if (res.ok) {
         const json = await res.json();
         const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, host));
         if (fetched.length > 0) {
           setTracks(shuffleArr(fetched));
-          setFeedLabel(genre ? `${genre} · ${time === 'week' ? 'за неделю' : time === 'month' ? 'за месяц' : 'всё время'}` : `${time === 'week' ? 'Хиты недели' : time === 'month' ? 'Хиты месяца' : 'Лучшее всех времён'}`);
+          setFeedLabel('Хиты · Audius');
           setLoading(false);
           setRefreshing(false);
           return;
         }
-      }
-    } catch {}
-
-    /* 2) iTunes — случайная подборка, работает всегда (CORS открыт) */
-    try {
-      const fetched = await fetchItunes(pick(ITUNES_TERMS));
-      if (fetched.length > 0) {
-        setTracks(shuffleArr(fetched));
-        setFeedLabel('Подборка дня · свежие хиты');
-        setLoading(false);
-        setRefreshing(false);
-        return;
       }
     } catch {}
 
@@ -281,12 +317,23 @@ const MusicPage: React.FC = () => {
     storeToggleLike(t);
   };
 
-  /* ── Поиск: Audius → iTunes ── */
+  /* ── Поиск: Apple Music + Deezer параллельно → Audius ── */
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
     haptic('light');
     setLoading(true);
+    const [it, dz] = await Promise.all([
+      fetchItunes(q, 25).catch(() => [] as Track[]),
+      fetchDeezerSearch(q, 20).catch(() => [] as Track[]),
+    ]);
+    const merged = dedupeTracks([...dz, ...it]);
+    if (merged.length > 0) {
+      setTracks(merged);
+      setFeedLabel(`Поиск: «${q}»`);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch(`${hostRef.current}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP_NAME}&limit=30`, { signal: AbortSignal.timeout(7000) });
       if (res.ok) {
@@ -300,13 +347,8 @@ const MusicPage: React.FC = () => {
         }
       }
     } catch {}
-    try {
-      const fetched = await fetchItunes(q, 30);
-      setTracks(fetched);
-      setFeedLabel(fetched.length > 0 ? `Поиск: «${q}»` : `Ничего не найдено: «${q}»`);
-    } catch {
-      setTracks([]);
-    }
+    setTracks([]);
+    setFeedLabel(`Ничего не найдено: «${q}»`);
     setLoading(false);
   };
 
@@ -402,7 +444,6 @@ const MusicPage: React.FC = () => {
             <button
               key={`${t.id}-${i}`}
               className={`mu-row ${active ? 'mu-row--active' : ''}`}
-              style={{ background: gradFor(t.id) }}
               onClick={() => play(t)}
             >
               <span className="mu-row__art-wrap">

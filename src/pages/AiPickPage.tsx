@@ -88,7 +88,7 @@ type Stage = 'quiz' | 'thinking' | 'results' | 'empty';
 const AiPickPage: React.FC = () => {
   const navigate = useNavigate();
   const { haptic } = useTelegram();
-  const { favorites, watchHistory } = useStore();
+  const { favorites, watchHistory, isFavorite, addFavorite, removeFavorite } = useStore();
 
   const [mood, setMood] = useState<MoodDef | null>(null);
   const [time, setTime] = useState<TimeDef | null>(null);
@@ -214,16 +214,43 @@ const AiPickPage: React.FC = () => {
             <div className="aip-list">
               {picks.map((p) => (
                 <div key={p.movie.id} className="aip-card" onClick={() => navigate(`/movie/${p.movie.id}`)}>
-                  <img className="aip-card__poster" src={p.movie.poster_path} alt="" loading="lazy" />
-                  <div className="aip-card__body">
+                  <div
+                    className="aip-card__cover"
+                    style={{ backgroundImage: `url(${p.movie.backdrop_path || p.movie.poster_path})` }}
+                  >
+                    <div className="aip-card__veil" />
                     <span className="aip-card__match">{p.match}%</span>
-                    <h3 className="aip-card__title">{p.movie.title}</h3>
-                    <p className="aip-card__meta">
-                      {p.movie.release_date?.slice(0, 4)}
-                      {p.movie.is_serial ? ' · сериал' : ''}
-                      {p.movie.vote_average > 0 ? ` · ★ ${p.movie.vote_average.toFixed(1)}` : ''}
-                    </p>
+                    <div className="aip-card__cover-bottom">
+                      <h3 className="aip-card__title">{p.movie.title}</h3>
+                      <p className="aip-card__meta">
+                        {p.movie.release_date?.slice(0, 4)}
+                        {p.movie.is_serial ? ' · сериал' : ''}
+                        {p.movie.vote_average > 0 ? ` · ★ ${p.movie.vote_average.toFixed(1)}` : ''}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="aip-card__foot">
                     {p.reason && <p className="aip-card__reason">💡 {p.reason}</p>}
+                    <div className="aip-card__actions">
+                      <button
+                        className="aip-card__watch"
+                        onClick={(e) => { e.stopPropagation(); haptic('medium'); navigate(`/movie/${p.movie.id}`); }}
+                      >
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+                        Смотреть
+                      </button>
+                      <button
+                        className={`aip-card__fav ${isFavorite(p.movie.id) ? 'active' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          haptic('light');
+                          if (isFavorite(p.movie.id)) removeFavorite(p.movie.id);
+                          else addFavorite(p.movie);
+                        }}
+                      >
+                        {isFavorite(p.movie.id) ? '❤️' : '🤍'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

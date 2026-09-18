@@ -1,4 +1,4 @@
-/* ===== TabBar — плавающая стеклянная капсула с «док-пузырём» ===== */
+/* ===== TabBar — классическая капсула с подписями и золотым акцентом ===== */
 
 .tab-bar {
   position: fixed;
@@ -6,100 +6,112 @@
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 0 14px max(env(safe-area-inset-bottom, 0px), 10px);
-  pointer-events: none;
+  padding: 0 10px max(env(safe-area-inset-bottom, 0px), 8px);
 }
 
 .tab-bar__inner {
-  pointer-events: auto;
   display: flex;
-  align-items: stretch;
-  height: 66px;
-  border-radius: 32px;
-  background: rgba(10, 9, 14, 0.88);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+  align-items: center;
+  justify-content: space-around;
+  height: 62px;
+  border-radius: 24px;
+  background: rgba(12, 10, 8, 0.86);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 -4px 32px rgba(0, 0, 0, 0.5),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  margin-bottom: 4px;
 }
 
 .tab-bar__item {
   position: relative;
-  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 3px;
+  padding: 6px 14px;
+  border-radius: 16px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.35);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.25s;
+  min-width: 56px;
 }
 
-.tab-bar__item:active .tab-bar__icon {
-  transform: scale(0.85);
-}
+.tab-bar__item:active { transform: scale(0.88); }
 
-.tab-bar__label {
-  display: none;
-}
+.tab-bar__item--active { color: #f0c96a; }
 
-/* «Док-пузырь» — тёмный овал, выступающий над капсулой у активной вкладки */
+/* нежное золотое свечение за активной иконкой */
 .tab-bar__item--active::before {
   content: '';
   position: absolute;
-  bottom: 27px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 52px;
-  border-radius: 17px;
-  background: linear-gradient(168deg, #2f2a38 0%, #191522 80%);
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.5),
-    0 0 22px rgba(255, 255, 255, 0.08);
+  inset: 0;
+  border-radius: 16px;
+  background: radial-gradient(
+    ellipse at center bottom,
+    rgba(232, 184, 74, 0.18) 0%,
+    transparent 70%
+  );
   pointer-events: none;
-  animation: tabBubble 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
 
-@keyframes tabBubble {
-  from {
-    transform: translateX(-50%) translateY(12px) scale(0.7);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(-50%) translateY(0) scale(1);
-    opacity: 1;
-  }
+/* светящаяся точка-индикатор */
+.tab-bar__item--active::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #e8b84a;
+  box-shadow: 0 0 8px 2px rgba(232, 184, 74, 0.55);
+  animation: tabDot 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes tabDot {
+  from { transform: translateX(-50%) scale(0); opacity: 0; }
+  to   { transform: translateX(-50%) scale(1); opacity: 1; }
 }
 
 .tab-bar__icon {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 27px;
-  height: 27px;
+  width: 26px;
+  height: 26px;
   transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.tab-bar__item--active {
-  color: #fff;
+.tab-bar__item--active .tab-bar__icon {
+  transform: translateY(-1px) scale(1.1);
+  filter: drop-shadow(0 0 6px rgba(232, 184, 74, 0.5));
 }
 
-.tab-bar__item--active .tab-bar__icon {
-  transform: translateY(-20px) scale(1.05);
-  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 14px rgba(255, 255, 255, 0.25));
+.tab-bar__label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: color 0.25s;
+}
+
+.tab-bar__item--active .tab-bar__label {
+  color: #f0c96a;
+  text-shadow: 0 0 12px rgba(232, 184, 74, 0.4);
 }
 
 .tab-bar__badge {
   position: absolute;
-  z-index: 2;
-  top: 4px;
-  right: calc(50% - 26px);
+  top: 2px;
+  right: 8px;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
@@ -113,3 +125,10 @@
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
+
+.tab-bar__item--premium.tab-bar__item--active { color: #fbbf24; }
+.tab-bar__item--premium.tab-bar__item--active::after {
+  background: #f59e0b;
+  box-shadow: 0 0 8px 2px rgba(245, 158, 11, 0.55);
+}
+.tab-bar__item--premium.tab-bar__item--active .tab-bar__label { color: #fbbf24; }

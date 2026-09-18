@@ -158,7 +158,7 @@
   cursor: pointer;
 }
 
-/* ── Список треков: градиентные карточки ── */
+/* ── Список треков: чистые стеклянные карточки ── */
 .mu-list { display: flex; flex-direction: column; gap: 10px; }
 .mu-list__pad { height: 20px; }
 .mu-row {
@@ -168,26 +168,22 @@
   gap: 13px;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   cursor: pointer;
   text-align: left;
   overflow: hidden;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.38);
-  transition: transform 0.18s, box-shadow 0.2s, border-color 0.2s;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
+  transition: transform 0.18s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
 }
-/* мягкий блик сверху — «стекло» поверх градиента */
-.mu-row::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.16), transparent 45%);
-  pointer-events: none;
-}
-.mu-row:active { transform: scale(0.975); }
+.mu-row:active { transform: scale(0.975); background: rgba(255, 255, 255, 0.08); }
 .mu-row--active {
-  border-color: rgba(255, 255, 255, 0.42);
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5), 0 0 26px rgba(255, 255, 255, 0.12);
+  border-color: rgba(240, 201, 106, 0.45);
+  background: rgba(240, 201, 106, 0.07);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.42), 0 0 20px rgba(240, 201, 106, 0.1);
 }
 .mu-row__art-wrap {
   position: relative;
