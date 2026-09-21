@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
+import AuraEmblem from '../components/AuraEmblem';
 import './ProfilePage.css';
 
 interface MenuItem {
@@ -20,7 +21,11 @@ interface MenuGroup {
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp, haptic, tg } = useTelegram();
-  const { favorites, watchHistory, clearHistory, isPremium, theme, setTheme, role, telegramUsername } = useStore();
+  const { favorites, watchHistory, clearHistory, isPremium, premiumExpiry, theme, setTheme, role, telegramUsername } = useStore();
+
+  const daysLeft = premiumExpiry
+    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
+    : null;
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Пользователь';
   const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
@@ -146,44 +151,63 @@ const ProfilePage: React.FC = () => {
       {/* BG gradient */}
       <div className="pf__bg" />
 
-      {/* iOS User Profile Card */}
+      {/* VIP Metal Profile Card */}
       <div className="pf__card">
-        <div className="pf__avatar-wrap">
-          <div className="pf__avatar-ring" />
-          <div className="pf__avatar">
-            {user?.photo_url ? (
-              <img src={user.photo_url} alt="" />
-            ) : (
-              <span>{displayName[0]?.toUpperCase() || 'A'}</span>
+        <div className="pf__card-shine" />
+        <div className="pf__card-top">
+          <div className="pf__avatar-wrap">
+            <div className="pf__avatar-ring" />
+            <div className="pf__avatar">
+              {user?.photo_url ? (
+                <img src={user.photo_url} alt="" />
+              ) : (
+                <span>{displayName[0]?.toUpperCase() || 'A'}</span>
+              )}
+            </div>
+            {isPremium && (
+              <div className="pf__premium-dot">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24">
+                  <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
+                </svg>
+              </div>
             )}
           </div>
-          {isPremium && (
-            <div className="pf__premium-dot">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24">
-                <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
-              </svg>
+
+          <div className="pf__user-meta">
+            <div className="pf__user-title-row">
+              <h1 className="pf__name">{displayName}</h1>
+              {(isAdminUser || isPremium) && (
+                <span className="pf__verified" title="Верифицирован">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                </span>
+              )}
             </div>
-          )}
+            {username && <p className="pf__username">{username}</p>}
+            <div className="pf__badges">
+              {isPremium ? (
+                <span className="pf__badge pf__badge--premium">👑 AURA VIP PRO</span>
+              ) : (
+                <span className="pf__badge">БАЗОВЫЙ УРОВЕНЬ</span>
+              )}
+              {isAdminUser && <span className="pf__badge pf__badge--admin">ADMIN</span>}
+            </div>
+          </div>
+
+          <AuraEmblem size="sm" className="pf__card-emblem" />
         </div>
 
-        <div className="pf__user-meta">
-          <h1 className="pf__name">
-            {displayName}
-            {(isAdminUser || isPremium) && (
-              <span className="pf__verified" title="Верифицирован">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-              </span>
-            )}
-          </h1>
-          {username && <p className="pf__username">{username}</p>}
-          <div className="pf__badges">
-            {isPremium ? (
-              <span className="pf__badge pf__badge--premium">AURA PRO</span>
-            ) : (
-              <span className="pf__badge">БАЗОВЫЙ ДОСТУП</span>
-            )}
-            {isAdminUser && <span className="pf__badge pf__badge--admin">ADMIN</span>}
+        <div className="pf__vip-status-bar" onClick={() => navigate('/premium')}>
+          <div className="pf__vip-status-left">
+            <span className={`pf__vip-dot ${isPremium ? 'active' : ''}`} />
+            <span className="pf__vip-status-text">
+              {isPremium
+                ? (isAdminUser ? 'Бессрочный VIP доступ' : `Подписка активна · ${daysLeft ? `${daysLeft} дн.` : ''}`)
+                : 'Попробуйте 2 дня VIP бесплатно'}
+            </span>
           </div>
+          <span className="pf__vip-action-btn">
+            {isPremium ? 'Продлить' : 'Активировать'} →
+          </span>
         </div>
       </div>
 

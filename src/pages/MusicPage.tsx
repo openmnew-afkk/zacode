@@ -35,13 +35,17 @@ const HOSTS_FALLBACK = [
 ];
 
 const RUSSIAN_SEEDS = [
-  'Баста', 'Miyagi & Эндшпиль', 'ANNA ASTI', 'MACAN', 'Zivert', 'JONY',
-  'Хиты России', 'Три дня дождя', 'Скриптонит', 'HammAli Navai', 'Xcho', 'Markul',
+  'Баста', 'Miyagi', 'ANNA ASTI', 'MACAN', 'Zivert', 'JONY',
+  'Три дня дождя', 'Скриптонит', 'HammAli Navai', 'Xcho', 'Markul',
+  'Хаски', 'OG Buda', 'FEDUK', 'Lizer', 'PHARAOH', 'Монеточка', 'LSP', 'Guf', 'Saluki',
+  'GONE Fludd', 'Thomas Mraz', 'Mayot', 'Кравц', 'Mary Gu', 'INSTASAMKA', 'Big Baby Tape',
 ];
 
 const WORLD_SEEDS = [
   'The Weeknd', 'Billie Eilish', 'Dua Lipa', 'Drake', 'Taylor Swift',
-  'Travis Scott', 'Coldplay', 'top hits', 'pop hits',
+  'Travis Scott', 'Coldplay', 'Post Malone', 'Kendrick Lamar', 'Bruno Mars',
+  'Ed Sheeran', 'Rihanna', 'Imagine Dragons', 'Eminem', 'Harry Styles',
+  'SZA', 'Doja Cat', 'Arctic Monkeys', 'Justin Bieber', 'Ariana Grande',
 ];
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
@@ -276,14 +280,21 @@ const MusicPage: React.FC = () => {
         const aud = await fetchAudius(45);
         setTracks(aud.length > 0 ? shuffleArr(aud) : []);
       } else if (activeTab === 'wave') {
-        setFeedLabel('Моя волна · Ваш вкус');
-        // Моя волна: умная смесь из предпочтений (лайки) + хиты
-        const [ru, wo, au] = await Promise.all([
-          fetchItunesSearch(pick(RUSSIAN_SEEDS), 'RU', 20).catch(() => [] as Track[]),
-          fetchItunesSearch(pick(WORLD_SEEDS), 'US', 20).catch(() => [] as Track[]),
-          fetchAudius(15).catch(() => [] as Track[]),
+        setFeedLabel('Моя волна · Всегда новая музыка');
+        const r1 = pick(RUSSIAN_SEEDS);
+        const r2 = pick(RUSSIAN_SEEDS.filter((s) => s !== r1));
+        const w1 = pick(WORLD_SEEDS);
+        const w2 = pick(WORLD_SEEDS.filter((s) => s !== w1));
+        const [ruA, ruB, woA, woB, au] = await Promise.all([
+          fetchItunesSearch(r1, 'RU', 18).catch(() => [] as Track[]),
+          fetchItunesSearch(r2, 'RU', 18).catch(() => [] as Track[]),
+          fetchItunesSearch(w1, 'US', 18).catch(() => [] as Track[]),
+          fetchItunesSearch(w2, 'US', 18).catch(() => [] as Track[]),
+          fetchAudius(24).catch(() => [] as Track[]),
         ]);
-        const pool = dedupeTracks([...likedTracks, ...shuffleArr(ru), ...shuffleArr(wo), ...shuffleArr(au)]);
+        const likedIds = new Set(likedTracks.map((t) => t.id));
+        const pool = dedupeTracks(shuffleArr([...ruA, ...ruB, ...woA, ...woB, ...au]))
+          .filter((t) => !likedIds.has(t.id));
         setTracks(pool);
       }
     } catch (e) {
@@ -447,9 +458,7 @@ const MusicPage: React.FC = () => {
             </div>
             <h2 className="mu-wave-card__title">Моя Волна</h2>
             <p className="mu-wave-card__sub">
-              {likedTracks.length > 0
-                ? `Подобрано на основе ваших ${likedTracks.length} любимых треков`
-                : 'Непрерывный персональный поток свежей русской и мировой музыки'}
+              Непрерывный поток свежей русской и мировой музыки — при каждом обновлении новые треки
             </p>
             <div className="mu-wave-card__bar">
               <span className="mu-wave-eq"><i /><i /><i /><i /><i /></span>

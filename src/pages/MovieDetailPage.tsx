@@ -59,84 +59,113 @@ const whereToWatch = (title: string) => [
 ];
 
 /** Брендовые иконки-плитки сервисов */
+/** Брендовые иконки-плитки официальных стримингов */
 const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
-  const tile = (bg: string, content: React.ReactNode) => (
-    <svg width="38" height="38" viewBox="0 0 38 38">
-      <rect width="38" height="38" rx="11" fill={bg} />
-      {content}
-    </svg>
-  );
   switch (brand) {
     case 'kinopoisk':
-      // Кинопоиск: оранжево-красная лента с белым «КП»
-      return tile('url(#kpGrad)', (
-        <>
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <defs>
-            <linearGradient id="kpGrad" x1="0" y1="0" x2="38" y2="38">
-              <stop stopColor="#ff5b00"/><stop offset="1" stopColor="#e23d00"/>
+            <linearGradient id="kpBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff6200" />
+              <stop offset="1" stopColor="#e52600" />
             </linearGradient>
           </defs>
-          <text x="19" y="24" textAnchor="middle" fontSize="13" fontWeight="900" fill="#fff" fontFamily="Arial">КП</text>
-        </>
-      ));
+          <rect width="38" height="38" rx="11" fill="url(#kpBg)" />
+          {/* Кинематографичная солнечная корона Кинопоиска */}
+          <circle cx="19" cy="19" r="4.2" fill="#ffffff" />
+          <path d="M19 8v3.5M19 26.5V30M8 19h3.5M26.5 19H30M11.2 11.2l2.5 2.5M24.3 24.3l2.5 2.5M11.2 26.8l2.5-2.5M24.3 13.7l2.5-2.5" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" />
+        </svg>
+      );
     case 'okko':
-      // Okko: оранжевый градиент, белый круг-о
-      return tile('url(#okkoGrad)', (
-        <>
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <defs>
-            <linearGradient id="okkoGrad" x1="0" y1="0" x2="38" y2="38">
-              <stop stopColor="#ff9500"/><stop offset="1" stopColor="#ff6a00"/>
+            <linearGradient id="okkoBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#6322ea" />
+              <stop offset="1" stopColor="#3b0764" />
             </linearGradient>
           </defs>
-          <circle cx="19" cy="19" r="9" stroke="#fff" strokeWidth="3.4" fill="none"/>
-        </>
-      ));
+          <rect width="38" height="38" rx="11" fill="url(#okkoBg)" />
+          {/* Фирменные перекрывающиеся кольца Okko */}
+          <circle cx="15.5" cy="19" r="6.8" stroke="#ffffff" strokeWidth="3" fill="none" />
+          <circle cx="22.5" cy="19" r="6.8" stroke="#f43f5e" strokeWidth="3" fill="none" opacity="0.9" />
+        </svg>
+      );
     case 'wink':
-      // Wink: фиолетовый ТВ с бликом
-      return tile('url(#winkGrad)', (
-        <>
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <rect width="38" height="38" rx="11" fill="#0f0c1b" />
+          {/* Фирменный ленточный треугольник Wink */}
           <defs>
-            <linearGradient id="winkGrad" x1="0" y1="0" x2="38" y2="38">
-              <stop stopColor="#a960ee"/><stop offset="1" stopColor="#7b2ff7"/>
+            <linearGradient id="winkRibbon" x1="10" y1="10" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff007a" />
+              <stop offset="0.5" stopColor="#ff5500" />
+              <stop offset="1" stopColor="#7928ca" />
             </linearGradient>
           </defs>
-          <path d="M11 13h16v12H11z" rx="3" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinejoin="round"/>
-          <path d="M15 16.5l6 3.5-6 3.5v-7z" fill="#fff"/>
-        </>
-      ));
+          <path d="M14 11l13 8-13 8z" fill="url(#winkRibbon)" />
+          <path d="M14 11l6 8-6 8z" fill="rgba(255,255,255,0.25)" />
+        </svg>
+      );
     case 'ivi':
-      // Иви: синяя плитка, белое «иви»
-      return tile('#0a6cff', (
-        <text x="19" y="24" textAnchor="middle" fontSize="12" fontWeight="800" fill="#fff" fontFamily="Arial" fontStyle="italic">иви</text>
-      ));
-    case 'netflix':
-      // Netflix: чёрная плитка, красная N
-      return tile('#141414', (
-        <>
-          <rect width="38" height="38" rx="11" fill="#141414" stroke="rgba(255,255,255,0.12)"/>
-          <text x="19" y="25" textAnchor="middle" fontSize="17" fontWeight="900" fill="#e50914" fontFamily="Arial">N</text>
-        </>
-      ));
-    case 'youtube':
-      // YouTube: красная плитка, белый play
-      return tile('#ff0000', (
-        <path d="M14 12.5l11 6.5-11 6.5v-13z" fill="#fff"/>
-      ));
-    case 'justwatch':
-      // JustWatch: жёлто-оранжевая плитка с глазом-таймером
-      return tile('url(#jwGrad)', (
-        <>
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
           <defs>
-            <linearGradient id="jwGrad" x1="0" y1="0" x2="38" y2="38">
-              <stop stopColor="#ffd200"/><stop offset="1" stopColor="#ffb800"/>
+            <linearGradient id="iviBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ea144c" />
+              <stop offset="1" stopColor="#830026" />
             </linearGradient>
           </defs>
-          <path d="M19 10c-5.5 0-9 9-9 9s3.5 9 9 9 9-9 9-9-3.5-9-9-9z" fill="none" stroke="#1a1a1a" strokeWidth="2.4"/>
-          <circle cx="19" cy="19" r="3.4" fill="#1a1a1a"/>
-        </>
-      ));
+          <rect width="38" height="38" rx="11" fill="url(#iviBg)" />
+          {/* 4 округлых капсулы ivi */}
+          <rect x="10" y="14" width="3.5" height="10" rx="1.75" fill="#ffffff" />
+          <circle cx="11.75" cy="11.5" r="1.75" fill="#ffffff" />
+          <path d="M16 14l2.5 10 2.5-10" stroke="#ffffff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
+          <rect x="24.5" y="14" width="3.5" height="10" rx="1.75" fill="#ffffff" />
+          <circle cx="26.25" cy="11.5" r="1.75" fill="#ffffff" />
+        </svg>
+      );
+    case 'netflix':
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <rect width="38" height="38" rx="11" fill="#0c0c0e" stroke="rgba(255,255,255,0.08)" />
+          {/* Фирменная лента N Netflix */}
+          <path d="M14 10v18h3V10z" fill="#b81d24" />
+          <path d="M21 10v18h3V10z" fill="#b81d24" />
+          <path d="M14 10l10 18h-3L14 10z" fill="#e50914" />
+        </svg>
+      );
+    case 'youtube':
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <rect width="38" height="38" rx="11" fill="#cc0000" />
+          <path d="M10 14.5c0-2 1.5-3.5 3.5-3.5h11c2 0 3.5 1.5 3.5 3.5v9c0 2-1.5 3.5-3.5 3.5h-11c-2 0-3.5-1.5-3.5-3.5v-9z" fill="#ffffff" />
+          <polygon points="16,15.5 24,19 16,22.5" fill="#cc0000" />
+        </svg>
+      );
+    case 'justwatch':
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <defs>
+            <linearGradient id="jwBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#f5b800" />
+              <stop offset="1" stopColor="#d97706" />
+            </linearGradient>
+          </defs>
+          <rect width="38" height="38" rx="11" fill="url(#jwBg)" />
+          <path d="M19 9c-5.5 0-9.5 7.5-9.5 10s4 10 9.5 10 9.5-7.5 9.5-10-4-10-9.5-10z" fill="#18181b" />
+          <circle cx="19" cy="19" r="4" fill="#fbbf24" />
+          <circle cx="19" cy="19" r="1.8" fill="#18181b" />
+        </svg>
+      );
     default:
-      return tile('rgba(255,255,255,0.1)', <span>▶</span>);
+      return (
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <rect width="38" height="38" rx="11" fill="rgba(255,255,255,0.08)" />
+          <polygon points="15,13 25,19 15,25" fill="#ffffff" />
+        </svg>
+      );
   }
 };
 
@@ -492,36 +521,68 @@ const MovieDetailPage: React.FC = () => {
         <div className="dp-trailer-overlay" onClick={() => setShowWatch(false)}>
           <div className="dp-trailer" onClick={(e) => e.stopPropagation()}>
             <div className="dp-watch-bar">
-              <span className="dp-watch-bar__title">
-                {watchOptions[watchIdx]?.flag} {watchOptions[watchIdx]?.label} · {movie.title}
-              </span>
-              <button className="dp-watch-bar__close" onClick={() => setShowWatch(false)}>✕</button>
+              <div className="dp-watch-bar__info">
+                <span className="dp-watch-bar__title">
+                  {watchOptions[watchIdx]?.flag} {watchOptions[watchIdx]?.label} · {movie.title}
+                </span>
+                <span className="dp-watch-bar__sub">
+                  {watchOptions[watchIdx]?.sublabel}
+                </span>
+              </div>
+              <div className="dp-watch-bar__actions">
+                <button
+                  className="dp-watch-bar__btn"
+                  onClick={() => {
+                    haptic('light');
+                    const cur = watchIdx;
+                    setWatchIdx(-1);
+                    setTimeout(() => setWatchIdx(cur), 50);
+                  }}
+                  title="Перезагрузить поток"
+                  aria-label="Перезагрузить"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                  </svg>
+                </button>
+                <button className="dp-watch-bar__close" onClick={() => setShowWatch(false)} aria-label="Закрыть">✕</button>
+              </div>
             </div>
             <div className="dp-watch-hint">
-              <span className="dp-watch-hint__badge">🎙️ Студии:</span>
-              <span className="dp-watch-hint__text">LostFilm · Red Head Sound · Резка · Дубляж в плеере</span>
+              <span className="dp-watch-hint__badge">🛡️ Режим без VPN:</span>
+              <span className="dp-watch-hint__text">Прямой поток · Без перехода по внешним ссылкам</span>
             </div>
-            <iframe
-              key={watchOptions[watchIdx]?.url}
-              src={watchOptions[watchIdx]?.url}
-              className="dp-trailer__frame"
-              title="Просмотр"
-              allowFullScreen
-              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-              referrerPolicy="origin"
-            />
-            <div className="dp-watch-sources">
-              {watchOptions.map((o, i) => (
-                <button
-                  key={o.id}
-                  className={`dp-watch-src ${i === watchIdx ? 'active' : ''}`}
-                  onClick={() => setWatchIdx(i)}
-                  title={o.sublabel}
-                >
-                  <span className="dp-watch-src__flag">{o.flag}</span>
-                  <span className="dp-watch-src__name">{o.label}</span>
-                </button>
-              ))}
+            {watchIdx >= 0 ? (
+              <iframe
+                key={`${watchOptions[watchIdx]?.url}-${watchIdx}`}
+                src={watchOptions[watchIdx]?.url}
+                className="dp-trailer__frame"
+                title="Просмотр"
+                allowFullScreen
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write; cross-origin-isolated"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="dp-watch-loading">
+                <div className="dp-watch__spinner" />
+                <span>Подключение к потоку…</span>
+              </div>
+            )}
+            <div className="dp-watch-sources-wrap">
+              <span className="dp-watch-sources-title">Серверы вещания (переключите, если не грузит):</span>
+              <div className="dp-watch-sources">
+                {watchOptions.map((o, i) => (
+                  <button
+                    key={o.id}
+                    className={`dp-watch-src ${i === watchIdx ? 'active' : ''}`}
+                    onClick={() => { haptic('light'); setWatchIdx(i); }}
+                    title={o.sublabel}
+                  >
+                    <span className="dp-watch-src__flag">{o.flag}</span>
+                    <span className="dp-watch-src__name">{o.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             {isSerial && (
               <div className="dp-watch-eps">

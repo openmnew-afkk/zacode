@@ -1,18 +1,16 @@
-/* ===== Источники просмотра и мульти-балансеры озвучек =====
+/* ===== Источники просмотра и мульти-балансеры видео =====
  *
- * Поддержка всех основных русскоязычных видео-балансеров:
- *  1. Kinobox (мульти-балансер: агрегирует Kodik, Alloha, Collaps, HDRezka,
- *     позволяет переключать озвучки: LostFilm, Red Head Sound, Кубик в кубе, Дубляж и др.)
- *  2. Kodik (богатейшая база сериалов, аниме и фильмов)
- *  3. Collaps HD (скоростной CDN-сервер)
- *  4. Alloha TV (Full HD потоки с выбором переводов)
- *  5. Voidboost (HDRezka переводы)
- *  6. VidSrc RU (международный резерв с русской дорожкой)
- *  7. SuperEmbed (мульти-провайдер)
+ * Проверенные серверы для прямого просмотра внутри приложения без сторонних ссылок:
+ *  1. Collaps HD (Delivembed) — прямой российский CDN (LostFilm, RHS, Резка, Дубляж) [РФ / Без VPN]
+ *  2. VidLink Pro — скоростной плеер 4K/1080p с русскими аудиодорожками [РФ / Без VPN]
+ *  3. VidSrc PM — стабильное прямое CDN-зеркало без блокировок
+ *  4. VidSrc SH — надёжный резервный поток
+ *  5. 2Embed HD — мировой архив фильмов и сериалов
+ *  6. MultiEmbed — адаптивный авто-ротатор потоков
  */
 import type { WatchOption } from '../types';
 
-/** Проверка ограничений: полный обход включён для всех фильмов */
+/** Проверка ограничений: просмотр разрешён для всех фильмов */
 export function isRestrictedContent(_countries: string[] | undefined): boolean {
   return false;
 }
@@ -27,115 +25,110 @@ export interface WatchBuildParams {
 }
 
 /**
- * Генерация списка серверов для просмотра фильма или сериала
+ * Генерация списка проверенных серверов для просмотра фильма или сериала
  */
 export function buildWatchOptions({
   tmdbId,
   imdbId = '',
-  title,
   isSerial,
   season = 1,
   episode = 1,
 }: WatchBuildParams): WatchOption[] {
   const cleanTmdb = tmdbId.replace(/^(tv|movie)-/, '');
   const cleanImdb = imdbId.startsWith('tt') ? imdbId : '';
-  const encTitle = encodeURIComponent(title);
 
   const opts: WatchOption[] = [];
 
-  /* 1. Kinobox — лучший плеер со встроенным выбором LostFilm, Red Head Sound, Дубляж, Кубик и др. */
+  /* 1. Collaps HD — скоростной российский CDN со студиями озвучки */
   opts.push({
-    id: 'kinobox',
-    label: 'Kinobox VIP',
-    sublabel: '🎙️ LostFilm · RHS · Резка · Дубляж',
-    url: `https://kinobox.tv/embed/?tmdb=${cleanTmdb}${cleanImdb ? `&imdb=${cleanImdb}` : ''}&title=${encTitle}`,
+    id: 'collaps',
+    label: 'Collaps HD',
+    sublabel: '🇷🇺 LostFilm · RHS · Резка · Дубляж (Без VPN)',
+    url: isSerial
+      ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}`
+      : cleanImdb
+        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}`
+        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}`,
     type: 'iframe',
     lang: 'ru',
-    provider: 'Kinobox',
+    provider: 'Collaps',
+    flag: '🇷🇺',
+    quality: '1080p',
+  });
+
+  /* 2. VidLink Pro — скоростной плеер с русскими аудиодорожками без блокировок */
+  opts.push({
+    id: 'vidlink',
+    label: 'VidLink Pro',
+    sublabel: '⚡ Русские дорожки · 4K/1080p (Без VPN)',
+    url: isSerial
+      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://vidlink.pro/movie/${cleanTmdb}`,
+    type: 'iframe',
+    lang: 'ru',
+    provider: 'VidLink',
     flag: '⚡',
     quality: '4K/1080p',
   });
 
-  /* 2. Kodik — база всех переводов и серий */
+  /* 3. VidSrc PM — прямой CDN без блокировок */
   opts.push({
-    id: 'kodik',
-    label: 'Kodik Сервер',
-    sublabel: '🍿 Все студии озвучки и сезоны',
-    url: `https://kodik.info/find-player?${cleanImdb ? `imdb_id=${cleanImdb}&` : ''}title=${encTitle}`,
-    type: 'iframe',
-    lang: 'ru',
-    provider: 'Kodik',
-    flag: '🍿',
-    quality: 'Full HD',
-  });
-
-  /* 3. Collaps HD — скоростной стриминг */
-  opts.push({
-    id: 'collaps',
-    label: 'Collaps HD',
-    sublabel: '🚀 Быстрая загрузка без задержек',
+    id: 'vidsrc-pm',
+    label: 'VidSrc PM',
+    sublabel: '💎 Быстрый CDN-сервер (Прямой поток)',
     url: isSerial
-      ? `https://api.bhcesh.me/embed/tv/${cleanTmdb}`
-      : `https://api.bhcesh.me/embed/movie/${cleanTmdb}`,
+      ? `https://vidsrc.pm/embed/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://vidsrc.pm/embed/movie/${cleanTmdb}`,
     type: 'iframe',
-    lang: 'ru',
-    provider: 'Collaps',
-    flag: '🚀',
-    quality: '1080p',
-  });
-
-  /* 4. Alloha TV — мультиязычные дорожки и дубляж */
-  opts.push({
-    id: 'alloha',
-    label: 'Alloha TV',
-    sublabel: '💎 Лицензионный дубляж & озвучки',
-    url: `https://api.alloha.tv/?tmdb=${cleanTmdb}${cleanImdb ? `&imdb=${cleanImdb}` : ''}`,
-    type: 'iframe',
-    lang: 'ru',
-    provider: 'Alloha',
+    lang: 'multi',
+    provider: 'VidSrc',
     flag: '💎',
     quality: '1080p',
   });
 
-  /* 5. Voidboost — HDRezka Studio */
+  /* 4. VidSrc SH — надёжное зеркало */
   opts.push({
-    id: 'voidboost',
-    label: 'Voidboost (Rezka)',
-    sublabel: '🎬 Фирменные переводы HDRezka',
-    url: `https://voidboost.net/embed/${cleanImdb || cleanTmdb}`,
+    id: 'vidsrc-sh',
+    label: 'VidSrc SH',
+    sublabel: '🚀 Альтернативный скоростной поток',
+    url: isSerial
+      ? `https://vidsrc.sh/embed/tv/${cleanTmdb}/${season}/${episode}`
+      : cleanImdb
+        ? `https://vidsrc.sh/embed/movie?imdb=${cleanImdb}`
+        : `https://vidsrc.sh/embed/movie/${cleanTmdb}`,
     type: 'iframe',
-    lang: 'ru',
-    provider: 'Voidboost',
-    flag: '🎬',
+    lang: 'multi',
+    provider: 'VidSrcSH',
+    flag: '🚀',
     quality: '1080p',
   });
 
-  /* 6. VidSrc RU — международный резерв */
+  /* 5. 2Embed HD — мировой архив */
   opts.push({
-    id: 'vidsrc-ru',
-    label: 'VidSrc Резерв',
-    sublabel: '🇷🇺 Русская дорожка',
+    id: '2embed',
+    label: '2Embed HD',
+    sublabel: '🍿 Мировая база кино и сериалов',
     url: isSerial
-      ? `https://vidsrc.xyz/embed/tv?tmdb=${cleanTmdb}&season=${season}&episode=${episode}&ds_lang=ru`
-      : `https://vidsrc.xyz/embed/movie?tmdb=${cleanTmdb}&ds_lang=ru`,
+      ? `https://www.2embed.cc/embedtv/${cleanTmdb}&s=${season}&e=${episode}`
+      : `https://www.2embed.cc/embed/${cleanTmdb}`,
     type: 'iframe',
-    lang: 'ru',
-    provider: 'VidSrc',
-    flag: '🇷🇺',
-    quality: 'HD',
+    lang: 'multi',
+    provider: '2Embed',
+    flag: '🍿',
+    quality: 'Full HD',
   });
 
-  /* 7. SuperEmbed — глобальный резерв */
+  /* 6. MultiEmbed — адаптивный авто-ротатор */
   opts.push({
-    id: 'superembed',
-    label: 'SuperEmbed',
-    sublabel: '🌐 Мультиязычный сервер',
+    id: 'multiembed',
+    label: 'MultiEmbed',
+    sublabel: '🌐 Мульти-балансер потоков',
     url: isSerial
       ? `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1&s=${season}&e=${episode}`
       : `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1`,
     type: 'iframe',
     lang: 'multi',
-    provider: 'SuperEmbed',
+    provider: 'MultiEmbed',
     flag: '🌐',
     quality: 'HD',
   });
@@ -168,12 +161,32 @@ export function switchSourceUrl(
   episode: number
 ): string {
   const cleanTmdb = tmdbId.replace(/^(tv|movie)-/, '');
+  if (base.provider === 'Collaps') {
+    return isSerial
+      ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}`
+      : `https://api.delivembed.cc/embed/movie/${cleanTmdb}`;
+  }
+  if (base.provider === 'VidLink') {
+    return isSerial
+      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://vidlink.pro/movie/${cleanTmdb}`;
+  }
   if (base.provider === 'VidSrc') {
     return isSerial
-      ? `https://vidsrc.xyz/embed/tv?tmdb=${cleanTmdb}&season=${season}&episode=${episode}${base.lang === 'ru' ? '&ds_lang=ru' : ''}`
-      : `https://vidsrc.xyz/embed/movie?tmdb=${cleanTmdb}${base.lang === 'ru' ? '?ds_lang=ru' : ''}`;
+      ? `https://vidsrc.pm/embed/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://vidsrc.pm/embed/movie/${cleanTmdb}`;
   }
-  if (base.provider === 'SuperEmbed') {
+  if (base.provider === 'VidSrcSH') {
+    return isSerial
+      ? `https://vidsrc.sh/embed/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://vidsrc.sh/embed/movie/${cleanTmdb}`;
+  }
+  if (base.provider === '2Embed') {
+    return isSerial
+      ? `https://www.2embed.cc/embedtv/${cleanTmdb}&s=${season}&e=${episode}`
+      : `https://www.2embed.cc/embed/${cleanTmdb}`;
+  }
+  if (base.provider === 'MultiEmbed') {
     return isSerial
       ? `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1&s=${season}&e=${episode}`
       : `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1`;

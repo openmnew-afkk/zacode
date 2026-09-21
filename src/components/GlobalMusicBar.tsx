@@ -48,9 +48,9 @@ const GlobalMusicBar: React.FC = () => {
     }
 
     setImgError(false);
-    if (isPlaying) {
-      audioEngine.playTrack(currentTrack.streamUrl, speed).catch(() => {});
-    }
+    audioEngine.playTrack(currentTrack.streamUrl, speed)
+      .then(() => setPlaying(true))
+      .catch(() => {});
   }, [currentTrack?.id]);
 
   /* Пауза / возобновление */

@@ -2,6 +2,7 @@
   min-height: 100vh;
   padding: 0 0 100px;
   background: #090810;
+  color: #fff;
 }
 
 .rules-header {
@@ -13,29 +14,31 @@
   gap: 12px;
   padding: 14px 16px;
   padding-top: max(env(safe-area-inset-top, 14px), 14px);
-  background: rgba(10, 10, 18, 0.85);
+  background: rgba(10, 10, 18, 0.88);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .rules-back {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background-color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
 }
 .rules-back:active {
   transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .rules-header__text {
@@ -51,26 +54,59 @@
 }
 .rules-updated {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: rgba(255, 255, 255, 0.45);
   margin: 2px 0 0;
 }
 
 .rules-content {
   padding: 16px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.rules-badge-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.rules-badge-card__icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.rules-badge-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.rules-badge-card__text strong {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #e9d5ff;
+}
+.rules-badge-card__text span {
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .rules-section {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 18px;
   padding: 16px 18px;
   margin-bottom: 14px;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 .rules-section__title {
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 800;
   color: #c4b5fd;
   margin: 0 0 10px;
@@ -79,15 +115,36 @@
 .rules-item {
   font-size: 12.5px;
   line-height: 1.6;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255, 255, 255, 0.68);
   margin: 0 0 10px;
 }
 .rules-item:last-child {
   margin-bottom: 0;
 }
+
+.rules-contact-card {
+  background: rgba(236, 72, 153, 0.06);
+  border: 1px dashed rgba(236, 72, 153, 0.25);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-top: 20px;
+}
+.rules-contact-card__title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f472b6;
+  margin: 0 0 6px;
+}
+.rules-contact-card__desc {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
 .rules-footer {
   font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.35);
   text-align: center;
   margin-top: 24px;
   line-height: 1.5;

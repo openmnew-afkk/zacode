@@ -9,6 +9,7 @@ import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
 import AuraEmblem from '../components/AuraEmblem';
+import AuraAiEmblem from '../components/AuraAiEmblem';
 import './HomePage.css';
 
 /* ──────────────────────────────────────────────────────── */
@@ -529,20 +530,7 @@ const HomePage: React.FC = () => {
             <div className="hp-header__actions">
               {/* ✦ Aura AI кнопка */}
               <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="Aura AI" title="Aura AI — Умный подбор">
-                <span className="hp-ai-circle__ring" />
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <defs>
-                    <linearGradient id="cineAiGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#a855f7" />
-                      <stop offset="0.5" stopColor="#ec4899" />
-                      <stop offset="1" stopColor="#06b6d4" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#cineAiGrad)" />
-                  <circle cx="12" cy="12" r="2.2" fill="#ffffff" />
-                  <path d="M18.5 4.5L19.3 6.7L21.5 7.5L19.3 8.3L18.5 10.5L17.7 8.3L15.5 7.5L17.7 6.7L18.5 4.5Z" fill="#38bdf8" opacity="0.9" />
-                  <path d="M5.5 14.5L6.2 16.5L8.2 17.2L6.2 17.9L5.5 19.9L4.8 17.9L2.8 17.2L4.8 16.5L5.5 14.5Z" fill="#f472b6" opacity="0.85" />
-                </svg>
+                <AuraAiEmblem size="sm" />
               </button>
               <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

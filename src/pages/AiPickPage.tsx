@@ -4,6 +4,7 @@ import { smartDiscover, getRecommendations } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
+import AuraAiEmblem from '../components/AuraAiEmblem';
 import './AiPickPage.css';
 
 /* ══════════════════════════════════════════════════════ */
@@ -181,18 +182,7 @@ const AiPickPage: React.FC = () => {
     return (
       <div className="aip page">
         <header className="aip-header">
-          <div className="aip-header__avatar">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <defs>
-                <linearGradient id="aipGrad" x1="2" y1="2" x2="22" y2="22">
-                  <stop stopColor="#ffffff" />
-                  <stop offset="1" stopColor="#c084fc" />
-                </linearGradient>
-              </defs>
-              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#aipGrad)" />
-              <circle cx="12" cy="12" r="2.2" fill="#7c3aed" />
-            </svg>
-          </div>
+          <AuraAiEmblem size="md" />
           <div className="aip-header__info">
             <h1 className="aip-header__title">Aura AI</h1>
             <p className="aip-header__sub">{mood?.label} · {time?.label} · {era?.label}</p>
@@ -312,18 +302,7 @@ const AiPickPage: React.FC = () => {
   return (
     <div className="aip page">
       <header className="aip-header">
-        <div className="aip-header__avatar">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <defs>
-              <linearGradient id="aipGrad2" x1="2" y1="2" x2="22" y2="22">
-                <stop stopColor="#ffffff" />
-                <stop offset="1" stopColor="#c084fc" />
-              </linearGradient>
-            </defs>
-            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#aipGrad2)" />
-            <circle cx="12" cy="12" r="2.2" fill="#7c3aed" />
-          </svg>
-        </div>
+        <AuraAiEmblem size="md" />
         <div className="aip-header__info">
           <h1 className="aip-header__title">Aura AI</h1>
           <p className="aip-header__sub">Нейросетевой куратор кино</p>
