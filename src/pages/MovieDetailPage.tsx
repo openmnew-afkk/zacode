@@ -549,8 +549,8 @@ const MovieDetailPage: React.FC = () => {
               </div>
             </div>
             <div className="dp-watch-hint">
-              <span className="dp-watch-hint__badge">🛡️ Режим без VPN:</span>
-              <span className="dp-watch-hint__text">Прямой поток · Без перехода по внешним ссылкам</span>
+              <span className="dp-watch-hint__badge">🌍 Режим с VPN:</span>
+              <span className="dp-watch-hint__text">⚡ Серверы 1–5 работают на ура с VPN · Русская озвучка</span>
             </div>
             {watchIdx >= 0 ? (
               <iframe
@@ -569,7 +569,7 @@ const MovieDetailPage: React.FC = () => {
               </div>
             )}
             <div className="dp-watch-sources-wrap">
-              <span className="dp-watch-sources-title">Серверы вещания (переключите, если не грузит):</span>
+              <span className="dp-watch-sources-title">Серверы вещания (1–5 работают с любым VPN):</span>
               <div className="dp-watch-sources">
                 {watchOptions.map((o, i) => (
                   <button

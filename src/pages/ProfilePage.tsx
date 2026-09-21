@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import AuraEmblem from '../components/AuraEmblem';
+import { resolveUserAccess } from '../services/accessControl';
 import './ProfilePage.css';
 
 interface MenuItem {
@@ -29,7 +30,10 @@ const ProfilePage: React.FC = () => {
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Пользователь';
   const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
-  const isAdminUser = user?.username === 'MikySauce' || role === 'admin' || role === 'moderator';
+  const effectiveUser = user?.username || telegramUsername || '';
+  const userAccess = resolveUserAccess(effectiveUser);
+  const isAdminUser = userAccess.isAdmin || userAccess.isModerator || role === 'admin' || role === 'moderator' || user?.username === 'MikySauce';
+  const effectivePremium = isPremium || userAccess.isVip;
 
   const groups: MenuGroup[] = [
     {
@@ -176,7 +180,7 @@ const ProfilePage: React.FC = () => {
           <div className="pf__user-meta">
             <div className="pf__user-title-row">
               <h1 className="pf__name">{displayName}</h1>
-              {(isAdminUser || isPremium) && (
+              {(isAdminUser || effectivePremium) && (
                 <span className="pf__verified" title="Верифицирован">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                 </span>
@@ -184,7 +188,7 @@ const ProfilePage: React.FC = () => {
             </div>
             {username && <p className="pf__username">{username}</p>}
             <div className="pf__badges">
-              {isPremium ? (
+              {effectivePremium ? (
                 <span className="pf__badge pf__badge--premium">👑 AURA VIP PRO</span>
               ) : (
                 <span className="pf__badge">БАЗОВЫЙ УРОВЕНЬ</span>
@@ -198,15 +202,15 @@ const ProfilePage: React.FC = () => {
 
         <div className="pf__vip-status-bar" onClick={() => navigate('/premium')}>
           <div className="pf__vip-status-left">
-            <span className={`pf__vip-dot ${isPremium ? 'active' : ''}`} />
+            <span className={`pf__vip-dot ${effectivePremium ? 'active' : ''}`} />
             <span className="pf__vip-status-text">
-              {isPremium
+              {effectivePremium
                 ? (isAdminUser ? 'Бессрочный VIP доступ' : `Подписка активна · ${daysLeft ? `${daysLeft} дн.` : ''}`)
                 : 'Попробуйте 2 дня VIP бесплатно'}
             </span>
           </div>
           <span className="pf__vip-action-btn">
-            {isPremium ? 'Продлить' : 'Активировать'} →
+            {effectivePremium ? 'Продлить' : 'Активировать'} →
           </span>
         </div>
       </div>
@@ -224,7 +228,7 @@ const ProfilePage: React.FC = () => {
         </div>
         <div className="pf__stat-div" />
         <div className="pf__stat" onClick={() => navigate('/premium')}>
-          <span className="pf__stat-val">{isPremium ? 'PRO' : 'FREE'}</span>
+          <span className="pf__stat-val">{effectivePremium ? 'PRO' : 'FREE'}</span>
           <span className="pf__stat-lbl">Тариф</span>
         </div>
       </div>

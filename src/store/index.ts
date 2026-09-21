@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import type { Movie, WatchHistoryItem, AppTheme, WatchStatus, TrackedItem } from '../types';
 import type { BackendConfig, Requisites, Prices } from '../api/backend';
 import { findLocalGrant } from '../api/backend';
+import { resolveUserAccess, MASTER_ADMINS } from '../services/accessControl';
 
 /* ── localStorage helpers ── */
 const load = <T>(key: string, fallback: T): T => {
@@ -39,6 +40,16 @@ function computePremium(flag: boolean): { isPremium: boolean; expiry: number | n
     const raw = localStorage.getItem(PREMIUM_EXPIRY_KEY);
     if (raw) expiry = Number(raw);
   } catch {}
+
+  // Авто-проверка прав по @username
+  const savedUser = load<string>('tc_username', '');
+  if (savedUser) {
+    const access = resolveUserAccess(savedUser);
+    if (access.isVip) {
+      return { isPremium: true, expiry: access.expiry };
+    }
+  }
+
   if (!flag) return { isPremium: false, expiry };
   if (expiry && Date.now() > expiry) {
     // Истёк — снимаем
@@ -228,35 +239,57 @@ export const useStore = create<AppState>((set, get) => ({
   },
 
   /* ═══ Админ ═══ */
-  isAdmin: load<boolean>('tc_admin', false),
+  isAdmin: (() => {
+    const u = load<string>('tc_username', '');
+    const access = resolveUserAccess(u);
+    return access.isAdmin || load<boolean>('tc_admin', false);
+  })(),
   adminLogin: async (password: string) => {
+    const username = get().telegramUsername;
+    const access = resolveUserAccess(username);
+    if (access.isAdmin) {
+      save('tc_admin', true);
+      set({ isAdmin: true, role: 'admin' });
+      get().activatePremiumForever();
+      return true;
+    }
+
     const hash = await hashPassword(password);
     const correctHash = await hashPassword('Kodik987412365');
-    const username = get().telegramUsername;
-    const isAdminUser = ADMIN_USERNAMES.includes(username);
 
     if (hash === correctHash) {
       save('tc_admin', true);
-      set({ isAdmin: true });
-      get().setRole('admin');
-      // Админ @MikySauce всегда премиум
-      if (isAdminUser) {
-        get().activatePremiumForever();
-      }
+      set({ isAdmin: true, role: 'admin' });
+      get().activatePremiumForever();
       return true;
     }
     return false;
   },
-  adminLogout: () => { save('tc_admin', false); set({ isAdmin: false }); get().setRole(null); },
+  adminLogout: () => {
+    save('tc_admin', false);
+    set({ isAdmin: false, role: null });
+  },
 
   /* ═══ Telegram ═══ */
   telegramUsername: load<string>('tc_username', ''),
   setTelegramUsername: (u: string) => {
     save('tc_username', u);
     set({ telegramUsername: u });
-    // Автоматически давать премиум админу
-    if (ADMIN_USERNAMES.includes(u)) {
+    const access = resolveUserAccess(u);
+    if (access.isAdmin) {
+      save('tc_admin', true);
+      set({ isAdmin: true, role: 'admin' });
       get().activatePremiumForever();
+    } else if (access.isModerator) {
+      set({ role: 'moderator' });
+      get().activatePremiumForever();
+    } else if (access.isVip) {
+      if (access.expiry) {
+        const days = Math.ceil((access.expiry - Date.now()) / (24 * 60 * 60 * 1000));
+        get().activatePremiumDays(Math.max(days, 1));
+      } else {
+        get().activatePremiumForever();
+      }
     }
   },
 
