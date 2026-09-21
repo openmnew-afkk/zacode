@@ -4,6 +4,12 @@ import { searchMovies } from '../api/catalog';
 import type { Movie } from '../types';
 import './SearchPage.css';
 
+const QUICK_SEARCHES = [
+  'Дюна', 'Оппенгеймер', 'Интерстеллар', 'Гарри Поттер',
+  'Одни из нас', 'Во все тяжкие', 'Очень странные дела',
+  'Атака титанов', 'Бэтмен', 'Джентльмены', 'Человек-паук',
+];
+
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -23,16 +29,18 @@ const SearchPage: React.FC = () => {
         setMovies(res.results);
       } catch { setMovies([]); }
       setLoading(false);
-    }, 400);
+    }, 380);
     return () => clearTimeout(debounceRef.current);
   }, [query, searchType]);
 
   const isEmpty = !loading && movies.length === 0 && query.trim().length > 0;
+  const isInitial = !loading && query.trim().length === 0;
 
   return (
     <div className="search-page page">
       <div className="search-header">
-        <h1 className="search-header__title">🔍 Поиск</h1>
+        <h1 className="search-header__title">Поиск</h1>
+        <span className="search-header__sub">Тысячи фильмов и сериалов в одном месте</span>
       </div>
 
       <div className="search-input-wrap">
@@ -45,35 +53,84 @@ const SearchPage: React.FC = () => {
           ref={inputRef}
           className="search-input"
           type="text"
-          placeholder="Название фильма, сериала…"
+          placeholder="Фильм, сериал, мультфильм…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoComplete="off"
           spellCheck={false}
         />
-        {query && <button className="search-clear" onClick={() => { setQuery(''); inputRef.current?.focus(); }}>✕</button>}
+        {query && (
+          <button
+            className="search-clear"
+            onClick={() => { setQuery(''); inputRef.current?.focus(); }}
+            aria-label="Очистить"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       <div className="search-types">
-        <button className={`search-type ${searchType === 'movie' ? 'active' : ''}`} onClick={() => setSearchType('movie')}>🎬 Фильмы</button>
-        <button className={`search-type ${searchType === 'series' ? 'active' : ''}`} onClick={() => setSearchType('series')}>📺 Сериалы</button>
+        <button
+          className={`search-type ${searchType === 'movie' ? 'active' : ''}`}
+          onClick={() => setSearchType('movie')}
+        >
+          Фильмы
+        </button>
+        <button
+          className={`search-type ${searchType === 'series' ? 'active' : ''}`}
+          onClick={() => setSearchType('series')}
+        >
+          Сериалы
+        </button>
       </div>
+
+      {isInitial && (
+        <div className="search-quick">
+          <div className="search-quick__title">🔥 Часто ищут</div>
+          <div className="search-quick__chips">
+            {QUICK_SEARCHES.map((item) => (
+              <button
+                key={item}
+                className="search-chip"
+                onClick={() => {
+                  setQuery(item);
+                  inputRef.current?.focus();
+                }}
+              >
+                {item}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {loading && (
         <div className="search-grid">
           {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="search-skeleton"><div className="search-skeleton__poster skeleton-pulse" /></div>
+            <div key={i} className="search-skeleton">
+              <div className="search-skeleton__poster skeleton-pulse" />
+              <div className="search-skeleton__text skeleton-pulse" />
+            </div>
           ))}
         </div>
       )}
 
-      {!loading && (
+      {!loading && movies.length > 0 && (
         <div className="search-grid">
           {movies.map((movie) => (
             <div key={movie.id} className="search-card" onClick={() => navigate(`/movie/${movie.id}`)}>
               <div className="search-card__poster">
-                <img src={movie.poster_path} alt={movie.title} loading="lazy" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?'; }} />
-                {movie.vote_average > 0 && <span className="search-card__rating">★ {movie.vote_average.toFixed(1)}</span>}
+                <img
+                  src={movie.poster_path}
+                  alt={movie.title}
+                  loading="lazy"
+                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?'; }}
+                />
+                <div className="search-card__fade" />
+                {movie.vote_average > 0 && (
+                  <span className="search-card__rating">★ {movie.vote_average.toFixed(1)}</span>
+                )}
               </div>
               <p className="search-card__title">{movie.title}</p>
               {movie.release_date && <p className="search-card__year">{movie.release_date.slice(0, 4)}</p>}
@@ -84,9 +141,9 @@ const SearchPage: React.FC = () => {
 
       {isEmpty && (
         <div className="search-empty">
-          <span className="search-empty__icon">😕</span>
+          <div className="search-empty__icon-wrap">🔍</div>
           <p className="search-empty__title">Ничего не найдено</p>
-          <p className="search-empty__sub">Попробуйте изменить запрос</p>
+          <p className="search-empty__sub">Попробуйте изменить формулировку или ввести другое название</p>
         </div>
       )}
     </div>
