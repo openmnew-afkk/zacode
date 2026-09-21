@@ -182,17 +182,18 @@
   top: 15%;
   left: 50%;
   transform: translateX(-50%);
-  width: 320px;
-  height: 320px;
+  width: 340px;
+  height: 340px;
   border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(236, 72, 153, 0.25) 50%, rgba(56, 189, 248, 0.15) 75%, transparent 100%);
   filter: blur(80px);
   pointer-events: none;
-  opacity: 0.55;
+  opacity: 0.65;
   animation: aura-sway 6s ease-in-out infinite alternate;
 }
 @keyframes aura-sway {
-  0% { transform: translateX(-50%) scale(0.9) rotate(0deg); opacity: 0.4; }
-  100% { transform: translateX(-50%) scale(1.2) rotate(30deg); opacity: 0.75; }
+  0% { transform: translateX(-50%) scale(0.9) rotate(0deg); opacity: 0.45; }
+  100% { transform: translateX(-50%) scale(1.2) rotate(30deg); opacity: 0.8; }
 }
 
 .gfull > * {
@@ -274,6 +275,7 @@
   position: absolute;
   inset: -14px;
   border-radius: 36px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.55) 0%, rgba(236, 72, 153, 0.4) 50%, rgba(56, 189, 248, 0.35) 100%);
   filter: blur(32px);
   opacity: 0.7;
   pointer-events: none;

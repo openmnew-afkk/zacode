@@ -180,18 +180,24 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
   if (!m) return null;
 
   return (
-    <div
-      className="hp-hero"
-      onClick={() => onWatch(m.id)}
-      onTouchStart={e => { touchX.current = e.touches[0].clientX; }}
-      onTouchEnd={e => {
-        if (touchX.current === null || heroMovies.length <= 1) return;
-        const dx = e.changedTouches[0].clientX - touchX.current;
-        if (dx < -45) next();
-        else if (dx > 45) prev();
-        touchX.current = null;
-      }}
-    >
+    <div className="hp-hero-wrap">
+      {/* Ambient OLED backlight glow spilling beyond borders */}
+      <div
+        className={`hp-hero-wrap__ambient ${fading ? 'fading' : ''}`}
+        style={{ backgroundImage: `url(${m.backdrop_path})` }}
+      />
+      <div
+        className="hp-hero"
+        onClick={() => onWatch(m.id)}
+        onTouchStart={e => { touchX.current = e.touches[0].clientX; }}
+        onTouchEnd={e => {
+          if (touchX.current === null || heroMovies.length <= 1) return;
+          const dx = e.changedTouches[0].clientX - touchX.current;
+          if (dx < -45) next();
+          else if (dx > 45) prev();
+          touchX.current = null;
+        }}
+      >
       <div className={`hp-hero__bg ${fading ? 'fading' : ''}`} style={{ backgroundImage: `url(${m.backdrop_path})` }} />
       <div className="hp-hero__overlay" />
       <div className={`hp-hero__content ${fading ? 'fading' : ''}`}>
@@ -220,6 +226,7 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
         ))}
       </div>
     </div>
+  </div>
   );
 };
 
@@ -610,9 +617,9 @@ const HomePage: React.FC = () => {
               <p className="hp-preview__original">{preview.original_title}</p>
             )}
             {preview.overview && (
-              <p className="hp-preview__desc">
-                {preview.overview.length > 220 ? `${preview.overview.slice(0, 220)}…` : preview.overview}
-              </p>
+              <div className="hp-preview__desc-wrap">
+                <p className="hp-preview__desc">{preview.overview}</p>
+              </div>
             )}
             <div className="hp-preview__tags">
               {preview.vote_average > 0 && <span className="hp-preview__tag">★ {preview.vote_average.toFixed(1)}</span>}

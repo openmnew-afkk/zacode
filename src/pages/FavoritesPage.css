@@ -214,48 +214,165 @@
   padding: 0;
 }
 
-/* Quick dropdown */
-.fav-card__dropdown {
-  position: absolute;
-  bottom: 34px;
-  left: 6px;
-  right: 6px;
-  z-index: 10;
-  background: rgba(24, 20, 36, 0.96);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+/* ── iOS Action Sheet Modal ── */
+.fav-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 12px 14px calc(env(safe-area-inset-bottom, 12px) + 12px);
+  animation: fav-sheet-fade 0.2s ease both;
+}
+@keyframes fav-sheet-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.fav-sheet {
+  width: 100%;
+  max-width: 440px;
   display: flex;
   flex-direction: column;
-  animation: drop-up 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
+  gap: 8px;
+  animation: fav-sheet-up 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-@keyframes drop-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+@keyframes fav-sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
 }
-.fav-card__dropdown button {
+
+.fav-sheet__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: rgba(26, 22, 38, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 16px 16px 0 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.fav-sheet__poster {
+  width: 40px;
+  height: 56px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+}
+.fav-sheet__poster img {
   width: 100%;
-  padding: 9px 10px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.fav-sheet__meta {
+  flex: 1;
+  min-width: 0;
+}
+.fav-sheet__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fav-sheet__sub {
+  display: block;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+  margin-top: 3px;
+}
+
+.fav-sheet__group {
+  background: rgba(26, 22, 38, 0.96);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fav-sheet__btn {
+  width: 100%;
+  padding: 14px 16px;
   background: none;
   border: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   color: #fff;
-  font-size: 11.5px;
+  font-size: 14.5px;
   font-weight: 600;
-  text-align: left;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-.fav-card__dropdown button:last-child {
-  border-bottom: none;
+.fav-sheet__btn:first-child {
+  border-top: none;
 }
-.fav-card__dropdown button:active {
+.fav-sheet__btn:active {
   background: rgba(255, 255, 255, 0.08);
 }
-.fav-card__dropdown button.danger {
+.fav-sheet__btn--danger {
   color: #f43f5e;
+}
+
+.fav-sheet__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.fav-sheet__icon.icon--green { color: #34d399; }
+.fav-sheet__icon.icon--blue { color: #38bdf8; }
+.fav-sheet__icon.icon--purple { color: #c084fc; }
+.fav-sheet__icon.icon--red { color: #f43f5e; }
+
+.fav-sheet__btn-text {
+  flex: 1;
+}
+
+.fav-sheet__cancel {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.fav-sheet__cancel-btn {
+  width: 100%;
+  padding: 15px;
+  background: rgba(32, 28, 44, 0.98);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.fav-sheet__cancel-btn:active {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .fav-card__info {

@@ -1,5 +1,6 @@
 /* ===== MusicStore — глобальный стейт музыки (сохраняется при переходах) ===== */
 import { create } from 'zustand';
+import { audioEngine } from '../services/audioEngine';
 
 interface Track {
   id: string;
@@ -60,6 +61,9 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   seekSignal: null,
 
   setTrack: (track, queue = [], index = 0) => {
+    if (!track) {
+      audioEngine.stop();
+    }
     set({ currentTrack: track, queue, queueIndex: index, progress: 0 });
   },
   setPlaying: (v) => set({ isPlaying: v }),
@@ -105,13 +109,16 @@ export const useMusicStore = create<MusicState>((set, get) => ({
     const tick = (get().seekSignal?.tick || 0) + 1;
     set({ seekSignal: { value: v, tick }, progress: v });
   },
-  closeTrack: () => set({
-    currentTrack: null,
-    isPlaying: false,
-    progress: 0,
-    duration: 0,
-    queue: [],
-    queueIndex: 0,
-    isExpanded: false,
-  }),
+  closeTrack: () => {
+    audioEngine.stop();
+    set({
+      currentTrack: null,
+      isPlaying: false,
+      progress: 0,
+      duration: 0,
+      queue: [],
+      queueIndex: 0,
+      isExpanded: false,
+    });
+  },
 }));

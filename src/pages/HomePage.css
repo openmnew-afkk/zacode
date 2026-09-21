@@ -155,9 +155,31 @@
 .hp-content { flex: 1; }
 
 /* ── Floating Hero Billboard ── */
+.hp-hero-wrap {
+  position: relative;
+  margin: 8px 14px 14px;
+}
+.hp-hero-wrap__ambient {
+  position: absolute;
+  inset: -6px;
+  border-radius: 34px;
+  background-size: cover;
+  background-position: center 25%;
+  filter: blur(34px) saturate(180%);
+  opacity: 0.52;
+  transform: scale(0.96);
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+  z-index: 0;
+}
+.hp-hero-wrap__ambient.fading {
+  opacity: 0.1;
+}
+
 .hp-hero {
   position: relative;
-  margin: 8px 14px 12px;
+  z-index: 1;
+  margin: 0;
   border-radius: 26px;
   overflow: hidden;
   height: 68vw;
@@ -566,15 +588,28 @@
   margin: 0 0 10px;
 }
 
+.hp-preview__desc-wrap {
+  max-height: 125px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 6px;
+  margin: 0 0 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+.hp-preview__desc-wrap::-webkit-scrollbar {
+  width: 3.5px;
+}
+.hp-preview__desc-wrap::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+}
+
 .hp-preview__desc {
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 12.5px;
-  line-height: 1.5;
-  margin: 0 0 10px;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 0;
 }
 
 /* Чипсы-теги как на референсе */

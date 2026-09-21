@@ -39,6 +39,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
 
   return (
     <div className={`sp ${fading ? 'sp--fade' : ''}`}>
+      {/* Широкоформатная подсветка, выходящая далеко за границы */}
+      <div className="sp__ambient-aura" />
       {/* Мягкий рассеянный световой ореол */}
       <div className="sp__ambient-glow" />
 

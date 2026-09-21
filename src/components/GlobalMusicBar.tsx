@@ -1,20 +1,7 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMusicStore } from '../store/musicStore';
+import { audioEngine } from '../services/audioEngine';
 import './GlobalMusicBar.css';
-
-const AURA_PALETTES = [
-  { glow: 'rgba(168, 85, 247, 0.5)', grad: 'linear-gradient(135deg, #7c3aed 0%, #ec4899 100%)' },
-  { glow: 'rgba(56, 189, 248, 0.5)', grad: 'linear-gradient(135deg, #0284c7 0%, #38bdf8 50%, #818cf8 100%)' },
-  { glow: 'rgba(16, 185, 129, 0.5)', grad: 'linear-gradient(135deg, #059669 0%, #10b981 50%, #3b82f6 100%)' },
-  { glow: 'rgba(244, 63, 94, 0.5)', grad: 'linear-gradient(135deg, #e11d48 0%, #fb7185 50%, #f59e0b 100%)' },
-  { glow: 'rgba(192, 132, 252, 0.5)', grad: 'linear-gradient(135deg, #9333ea 0%, #c084fc 50%, #f472b6 100%)' },
-];
-
-const hashVal = (s: string) => {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-};
 
 const GlobalMusicBar: React.FC = () => {
   const {
@@ -24,7 +11,6 @@ const GlobalMusicBar: React.FC = () => {
     closeTrack, isExpanded, setExpanded,
   } = useMusicStore();
 
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [imgError, setImgError] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [toast, setToast] = useState('');
@@ -35,13 +21,59 @@ const GlobalMusicBar: React.FC = () => {
     setTimeout(() => setToast(''), 2500);
   };
 
-  const palette = useMemo(() => {
-    if (!currentTrack) return AURA_PALETTES[0];
-    const idx = hashVal(currentTrack.id || currentTrack.title) % AURA_PALETTES.length;
-    return AURA_PALETTES[idx];
+  /* Подключаем слушатели одиночного аудио-движка */
+  useEffect(() => {
+    const unsubEnd = audioEngine.onEnded(() => {
+      nextTrack();
+    });
+    const unsubTime = audioEngine.onTimeUpdate((time) => {
+      setProgress(time);
+    });
+    const unsubDur = audioEngine.onDurationChange((dur) => {
+      setDuration(dur);
+    });
+
+    return () => {
+      unsubEnd();
+      unsubTime();
+      unsubDur();
+    };
+  }, [nextTrack, setProgress, setDuration]);
+
+  /* Загрузка и воспроизведение трека */
+  useEffect(() => {
+    if (!currentTrack) {
+      audioEngine.stop();
+      return;
+    }
+
+    setImgError(false);
+    if (isPlaying) {
+      audioEngine.playTrack(currentTrack.streamUrl, speed).catch(() => {});
+    }
   }, [currentTrack?.id]);
 
-  /* ── Меню трека (3 точки) ── */
+  /* Пауза / возобновление */
+  useEffect(() => {
+    if (!currentTrack) return;
+    if (isPlaying) {
+      audioEngine.resume().catch(() => {});
+    } else {
+      audioEngine.pause();
+    }
+  }, [isPlaying, currentTrack]);
+
+  /* Закрытие плеера с гарантированной остановкой звука */
+  const handleClosePlayer = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    audioEngine.stop();
+    setPlaying(false);
+    closeTrack();
+  };
+
+  if (!currentTrack) return null;
+
+  /* Меню опций */
   const handleShare = () => {
     setShowMenu(false);
     if (!currentTrack) return;
@@ -89,36 +121,9 @@ const GlobalMusicBar: React.FC = () => {
 
   const changeSpeed = (s: number) => {
     setSpeed(s);
-    if (audioRef.current) audioRef.current.playbackRate = s;
+    audioEngine.setSpeed(s);
     showToastMsg(`Скорость: ${s}x`);
   };
-
-  // Audio engine
-  useEffect(() => {
-    if (!audioRef.current) {
-      const audio = new Audio();
-      audio.addEventListener('ended', () => nextTrack());
-      audio.addEventListener('timeupdate', () => setProgress(audio.currentTime));
-      audio.addEventListener('durationchange', () => setDuration(audio.duration || 0));
-      audioRef.current = audio;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!audioRef.current || !currentTrack) return;
-    audioRef.current.src = currentTrack.streamUrl;
-    audioRef.current.playbackRate = speed;
-    setImgError(false);
-    if (isPlaying) audioRef.current.play().catch(() => {});
-  }, [currentTrack?.id]);
-
-  useEffect(() => {
-    if (!audioRef.current || !currentTrack) return;
-    if (isPlaying) audioRef.current.play().catch(() => {});
-    else audioRef.current.pause();
-  }, [isPlaying]);
-
-  if (!currentTrack) return null;
 
   const pct = duration > 0 ? (progress / duration) * 100 : 0;
   const liked = isLiked(currentTrack.id);
@@ -130,13 +135,13 @@ const GlobalMusicBar: React.FC = () => {
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration;
-    if (audioRef.current) audioRef.current.currentTime = pos;
+    audioEngine.seek(pos);
     setProgress(pos);
   };
 
   const art = currentTrack.artwork && !imgError ? currentTrack.artwork : '';
 
-  /* ══ Развёрнутый полноэкранный плеер (Slide-up modal) ══ */
+  /* ══ Развёрнутый полноэкранный плеер ══ */
   if (isExpanded) {
     return (
       <div className="gfull">
@@ -144,8 +149,8 @@ const GlobalMusicBar: React.FC = () => {
         {art && <div className="gfull__bg" style={{ backgroundImage: `url(${art})` }} />}
         <div className="gfull__overlay" />
 
-        {/* Aurora glow mesh */}
-        <div className="gfull__aurora" style={{ background: palette.glow }} />
+        {/* Ambient aura glow */}
+        <div className="gfull__aurora" />
 
         {/* Swipe handle */}
         <div className="gfull__handle" onClick={() => setExpanded(false)}>
@@ -166,9 +171,9 @@ const GlobalMusicBar: React.FC = () => {
           </button>
         </div>
 
-        {/* Artwork with dynamic multi-color aura */}
+        {/* Artwork with ambient aura glow */}
         <div className="gfull__art-container">
-          <div className="gfull__art-aura" style={{ background: palette.grad }} />
+          <div className="gfull__art-aura" />
           <div className="gfull__art">
             {art ? (
               <img src={art} alt="" onError={() => setImgError(true)} />
@@ -251,7 +256,7 @@ const GlobalMusicBar: React.FC = () => {
           </button>
         </div>
 
-        {/* iOS Action Sheet Modal (3 точки) */}
+        {/* iOS Action Sheet Modal */}
         {showMenu && (
           <div className="gfull__sheet-backdrop" onClick={() => setShowMenu(false)}>
             <div className="gfull__sheet" onClick={(e) => e.stopPropagation()}>
@@ -319,7 +324,7 @@ const GlobalMusicBar: React.FC = () => {
   /* ══ Мини-капсула (над нижним меню TabBar) ══ */
   return (
     <div className="gbar" onClick={() => setExpanded(true)}>
-      <div className="gbar__progress" style={{ width: `${pct}%`, background: palette.grad }} />
+      <div className="gbar__progress" style={{ width: `${pct}%` }} />
       <div className="gbar__inner">
         <div className="gbar__art">
           {art ? (
@@ -329,7 +334,7 @@ const GlobalMusicBar: React.FC = () => {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 17.5V6.3L20 4v11.2"/><circle cx="6.5" cy="17.5" r="2.6"/><circle cx="17.5" cy="15.2" r="2.6"/></svg>
             </div>
           )}
-          {isPlaying && <div className="gbar__art-pulse" style={{ borderColor: palette.glow }} />}
+          {isPlaying && <div className="gbar__art-pulse" />}
         </div>
         <div className="gbar__info">
           <div className="gbar__title">{currentTrack.title}</div>
@@ -348,12 +353,9 @@ const GlobalMusicBar: React.FC = () => {
           </button>
           <button
             className="gbar__btn gbar__btn--close"
-            onClick={(e) => {
-              e.stopPropagation();
-              closeTrack();
-            }}
-            aria-label="Закрыть плеер"
-            title="Закрыть плеер"
+            onClick={handleClosePlayer}
+            aria-label="Остановить и закрыть плеер"
+            title="Остановить и закрыть плеер"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
