@@ -197,7 +197,9 @@ const Artwork: React.FC<{ src: string; alt: string; className: string }> = ({ sr
   if (!src || err) {
     return (
       <div className={`${className} mu-art-fallback`}>
-        <IconNote size={24} />
+        <div className="mu-wave-mini">
+          <span /><span /><span />
+        </div>
       </div>
     );
   }
@@ -364,7 +366,9 @@ const MusicPage: React.FC = () => {
       <div className="mu-header">
         <div className="mu-header__brand">
           <div className="mu-header__logo">
-            <IconNote size={18} />
+            <div className="mu-wave-mini mu-wave-mini--white">
+              <span /><span /><span /><span />
+            </div>
           </div>
           <div>
             <h1 className="mu-header__title">Музыка</h1>

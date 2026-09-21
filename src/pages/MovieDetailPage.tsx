@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer } from '../api/catalog';
-import { buildForeignWatchOptions, isRestrictedContent, switchSourceUrl } from '../api/watch';
+import { buildWatchOptions, isRestrictedContent } from '../api/watch';
 import type { MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -334,7 +334,12 @@ const MovieDetailPage: React.FC = () => {
                 className="dp-watch"
                 onClick={() => {
                   haptic('medium');
-                  setWatchOptions(buildForeignWatchOptions(tmdbId, isSerial));
+                  setWatchOptions(buildWatchOptions({
+                    tmdbId,
+                    imdbId: movie.imdbID,
+                    title: movie.title,
+                    isSerial,
+                  }));
                   setWatchIdx(0);
                   setShowWatch(true);
                 }}
@@ -482,7 +487,7 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Плеер (зарубежный контент, рус. озвучка) ── */}
+      {/* ── Плеер (все студии озвучки: LostFilm, Red Head Sound, Дубляж, Резка) ── */}
       {showWatch && watchOptions.length > 0 && (
         <div className="dp-trailer-overlay" onClick={() => setShowWatch(false)}>
           <div className="dp-trailer" onClick={(e) => e.stopPropagation()}>
@@ -491,6 +496,10 @@ const MovieDetailPage: React.FC = () => {
                 {watchOptions[watchIdx]?.flag} {watchOptions[watchIdx]?.label} · {movie.title}
               </span>
               <button className="dp-watch-bar__close" onClick={() => setShowWatch(false)}>✕</button>
+            </div>
+            <div className="dp-watch-hint">
+              <span className="dp-watch-hint__badge">🎙️ Студии:</span>
+              <span className="dp-watch-hint__text">LostFilm · Red Head Sound · Резка · Дубляж в плеере</span>
             </div>
             <iframe
               key={watchOptions[watchIdx]?.url}
@@ -507,15 +516,17 @@ const MovieDetailPage: React.FC = () => {
                   key={o.id}
                   className={`dp-watch-src ${i === watchIdx ? 'active' : ''}`}
                   onClick={() => setWatchIdx(i)}
+                  title={o.sublabel}
                 >
-                  {o.flag} {o.label}
+                  <span className="dp-watch-src__flag">{o.flag}</span>
+                  <span className="dp-watch-src__name">{o.label}</span>
                 </button>
               ))}
             </div>
             {isSerial && (
               <div className="dp-watch-eps">
                 <button className="dp-watch-ep" onClick={() => { haptic('light'); setWatchIdx((i) => i); }}>
-                  Сезон/серия выбираются внутри плеера
+                  Сезоны и серии переключаются напрямую в окне плеера
                 </button>
               </div>
             )}

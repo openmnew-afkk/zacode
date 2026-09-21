@@ -70,11 +70,9 @@ const ProfilePage: React.FC = () => {
         },
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 17.5V6.3L20 4v11.2" />
-              <circle cx="6.5" cy="17.5" r="2.6" fill="#c084fc" />
-              <circle cx="17.5" cy="15.2" r="2.6" fill="#c084fc" />
-            </svg>
+            <div className="tab-bar__wave active" style={{ width: 18, height: 18 }}>
+              <span /><span /><span /><span /><span />
+            </div>
           ),
           label: 'Музыка AURA',
           sub: 'Русские и мировые хиты · Моя волна',

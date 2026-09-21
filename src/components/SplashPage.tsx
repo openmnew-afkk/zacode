@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import AuraEmblem from './AuraEmblem';
 import './SplashPage.css';
 
 interface SplashPageProps {
@@ -45,22 +46,9 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       <div className="sp__ambient-glow" />
 
       <div className="sp__center">
-        {/* Минималистичная кинематографичная призма AURA */}
+        {/* Голографическая квантовая эмблема AURA */}
         <div className="sp__prism">
-          <div className="sp__prism-beam" />
-          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" className="sp__prism-svg">
-            <defs>
-              <linearGradient id="auraG1" x1="0" y1="0" x2="56" y2="56">
-                <stop stopColor="#ffffff" />
-                <stop offset="0.6" stopColor="#c084fc" />
-                <stop offset="1" stopColor="#38bdf8" />
-              </linearGradient>
-            </defs>
-            {/* Внешний ромб-призма */}
-            <polygon points="28,4 52,28 28,52 4,28" stroke="url(#auraG1)" strokeWidth="1.8" fill="none" opacity="0.85" />
-            {/* Внутренняя световая точка */}
-            <circle cx="28" cy="28" r="4.5" fill="#ffffff" />
-          </svg>
+          <AuraEmblem size="hero" className="sp__prism-emblem" />
         </div>
 
         {/* Название AURA */}

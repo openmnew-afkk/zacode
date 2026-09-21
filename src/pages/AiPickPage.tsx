@@ -97,9 +97,13 @@ const AiPickPage: React.FC = () => {
   const [picks, setPicks] = useState<Pick[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  /* Автоскролл чата вниз */
+  /* Автоскролл: на этапе результатов — вверх к первому фильму, в чате — к вопросу */
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    if (stage === 'results') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
   }, [stage, mood, time, era]);
 
   const runSearch = async (selMood: MoodDef, selTime: TimeDef, selEra: EraDef) => {
@@ -142,6 +146,7 @@ const AiPickPage: React.FC = () => {
     const result = buildPicks([...poolMap.values()], taste, selMood);
     setPicks(result);
     setStage(result.length ? 'results' : 'empty');
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
   };
 
   const pickMood = (m: MoodDef) => { haptic('light'); setMood(m); };

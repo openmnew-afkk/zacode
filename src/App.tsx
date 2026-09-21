@@ -9,6 +9,7 @@ import PremiumPage from './pages/PremiumPage';
 import AdminPage from './pages/AdminPage';
 import MusicPage from './pages/MusicPage';
 import AiPickPage from './pages/AiPickPage';
+import RulesPage from './pages/RulesPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
@@ -54,6 +55,7 @@ function App() {
           <Route path="/ai" element={<AiPickPage />} />
           <Route path="/premium" element={<PremiumPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/rules" element={<RulesPage />} />
           <Route path="/admin" element={<AdminPage />} />
           {/* Любой неизвестный путь → главная */}
           <Route path="*" element={<Navigate to="/" replace />} />

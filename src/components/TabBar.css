@@ -76,3 +76,37 @@
   padding: 0 4px;
   box-shadow: 0 2px 6px rgba(239,68,68,0.4);
 }
+
+/* ── Live Sound Wave Animation ── */
+.tab-bar__wave {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5px;
+  height: 22px;
+  width: 22px;
+}
+.tab-bar__wave span {
+  display: block;
+  width: 2.4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
+  animation: tab-wave-bounce 1.1s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+}
+.tab-bar__wave span:nth-child(1) { height: 7px; animation-delay: 0.12s; }
+.tab-bar__wave span:nth-child(2) { height: 16px; animation-delay: 0.38s; }
+.tab-bar__wave span:nth-child(3) { height: 11px; animation-delay: 0.05s; }
+.tab-bar__wave span:nth-child(4) { height: 18px; animation-delay: 0.28s; }
+.tab-bar__wave span:nth-child(5) { height: 8px; animation-delay: 0.45s; }
+
+.tab-bar__wave.active span {
+  background: linear-gradient(180deg, #c084fc, #38bdf8);
+  box-shadow: 0 0 6px rgba(192, 132, 252, 0.6);
+  animation-duration: 0.75s;
+}
+
+@keyframes tab-wave-bounce {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1.15); }
+}

@@ -8,6 +8,7 @@ import {
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
+import AuraEmblem from '../components/AuraEmblem';
 import './HomePage.css';
 
 /* ──────────────────────────────────────────────────────── */
@@ -518,17 +519,7 @@ const HomePage: React.FC = () => {
           <>
             <div className="hp-header__brand">
               <div className="hp-header__emblem">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-                  <defs>
-                    <linearGradient id="auraMonogram" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#a855f7" />
-                      <stop offset="0.5" stopColor="#38bdf8" />
-                      <stop offset="1" stopColor="#ec4899" />
-                    </linearGradient>
-                  </defs>
-                  <polygon points="12,2 22,12 12,22 2,12" stroke="url(#auraMonogram)" strokeWidth="2.2" fill="rgba(168,85,247,0.15)" strokeLinejoin="round"/>
-                  <circle cx="12" cy="12" r="3.2" fill="#ffffff" />
-                </svg>
+                <AuraEmblem size="sm" />
               </div>
               <div>
                 <h1 className="hp-header__title">AURA</h1>

@@ -75,22 +75,30 @@ const RulesPage: React.FC = () => {
   const navigate = useNavigate();
   return (
     <div className="rules page">
-      <button className="rules-back" onClick={() => navigate(-1)}>← Назад</button>
-      <h1 className="rules-title">📜 Правила и правовая информация</h1>
-      <p className="rules-updated">Обновлено: {new Date().toLocaleDateString('ru-RU')}</p>
-
-      {SECTIONS.map((s) => (
-        <div key={s.title} className="rules-section">
-          <h2 className="rules-section__title">{s.title}</h2>
-          {s.items.map((item, i) => (
-            <p key={i} className="rules-item">{item}</p>
-          ))}
+      <header className="rules-header">
+        <button className="rules-back" onClick={() => navigate(-1)} aria-label="Назад">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div className="rules-header__text">
+          <h1 className="rules-title">Пользовательское соглашение</h1>
+          <p className="rules-updated">Правовая база и правила сервиса AURA</p>
         </div>
-      ))}
+      </header>
 
-      <p className="rules-footer">
-        © КиноЗал. Приложение-агрегатор. Контакты для правообладателей — через Telegram-профиль.
-      </p>
+      <div className="rules-content">
+        {SECTIONS.map((s) => (
+          <div key={s.title} className="rules-section">
+            <h2 className="rules-section__title">{s.title}</h2>
+            {s.items.map((item, i) => (
+              <p key={i} className="rules-item">{item.replace(/КиноЗал/g, 'AURA')}</p>
+            ))}
+          </div>
+        ))}
+
+        <p className="rules-footer">
+          © AURA Cinema & Sound. Сервис-агрегатор. Все права защищены.
+        </p>
+      </div>
     </div>
   );
 };
