@@ -26,7 +26,7 @@ interface MusicState {
   /* Внутренний сигнал перемотки (слушает глобальный аудио-движок) */
   seekSignal: { value: number; tick: number } | null;
 
-  setTrack: (track: Track, queue?: Track[], index?: number) => void;
+  setTrack: (track: Track | null, queue?: Track[], index?: number) => void;
   setPlaying: (v: boolean) => void;
   setProgress: (v: number) => void;
   setDuration: (v: number) => void;

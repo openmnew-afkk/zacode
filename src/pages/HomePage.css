@@ -801,3 +801,40 @@
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
 }
+
+/* ── Hero dots (replaces 1/8 counter) ── */
+.hp-hero__dots {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 6px; z-index: 3;
+}
+.hp-hero__dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  transition: all 0.3s ease;
+}
+.hp-hero__dot--on {
+  width: 18px; border-radius: 4px;
+  background: #fff;
+}
+
+/* ── Premium tabs (no icons, pill style) ── */
+.hp-tabs {
+  display: flex; gap: 6px; padding: 6px 16px 12px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hp-tabs::-webkit-scrollbar { display: none; }
+.hp-tab {
+  padding: 8px 18px; border-radius: 999px; border: none;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.5);
+  font-size: 13px; font-weight: 700;
+  white-space: nowrap; cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.hp-tab.active {
+  background: #fff;
+  color: #0a0a12;
+}
+.hp-tab:active { transform: scale(0.95); }

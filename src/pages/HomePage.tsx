@@ -214,14 +214,11 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
           {m.release_date && <span className="hp-hero__tag">{m.release_date.slice(0, 4)}</span>}
         </div>
       </div>
-      {heroMovies.length > 1 && (
-        <div className="hp-hero__pager">
-          <div className="hp-hero__progress">
-            <div key={idx} className="hp-hero__progress-fill" />
+        <div className="hp-hero__dots">
+            {heroMovies.map((_, i) => (
+              <span key={i} className={`hp-hero__dot ${i === idx ? 'hp-hero__dot--on' : ''}`} />
+            ))}
           </div>
-          <span className="hp-hero__counter">{idx + 1} / {heroMovies.length}</span>
-        </div>
-      )}
     </div>
   );
 };
@@ -231,11 +228,11 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
 /* ──────────────────────────────────────────────────────── */
 
 const TABS = [
-  { id: 'home', label: '🏠 Главная' },
-  { id: 'movies', label: '🎬 Фильмы' },
-  { id: 'series', label: '📺 Сериалы' },
-  { id: 'top', label: '🏆 Топ' },
-  { id: 'new', label: '🆕 Новинки' },
+  { id: 'home', label: 'Главная' },
+  { id: 'movies', label: 'Фильмы' },
+  { id: 'series', label: 'Сериалы' },
+  { id: 'top', label: 'Топ' },
+  { id: 'new', label: 'Новинки' },
 ];
 
 const GENRES_MOVIES = [
