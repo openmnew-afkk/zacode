@@ -13,7 +13,7 @@ const TABS: Array<{ id: WatchStatus | 'want'; label: string }> = [
 
 const FavoritesPage: React.FC = () => {
   const navigate = useNavigate();
-  const { favorites, tracked, setTrackedStatus, removeFavorite, removeTracked } = useStore();
+  const { favorites, tracked, setTrackedStatus, removeFavorite } = useStore();
   const [tab, setTab] = useState<WatchStatus | 'want'>('want');
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
@@ -51,7 +51,8 @@ const FavoritesPage: React.FC = () => {
     if (tab === 'want') {
       removeFavorite(movieId);
     } else {
-      removeTracked(movieId);
+      const item = tracked[movieId];
+      if (item) setTrackedStatus(item.movie, null);
     }
     setActiveMenuId(null);
   };
