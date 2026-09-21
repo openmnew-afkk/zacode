@@ -1,11 +1,11 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import './SplashPage.css';
 
 interface SplashPageProps {
   onDone?: () => void;
 }
 
-/* Постеры топ-фильмов для фона splash (TMDB) */
+/* Постеры культовых шедевров для фона splash (TMDB) */
 const POSTERS = [
   'https://image.tmdb.org/t/p/w342/d5NXSklXo0qyIYkgV94XAgMIckC.jpg', // Inception
   'https://image.tmdb.org/t/p/w342/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg', // Shawshank
@@ -21,43 +21,65 @@ const POSTERS = [
   'https://image.tmdb.org/t/p/w342/7WsyChQLEftFiDhRkUUaT4C2RKg.jpg', // Matrix
 ];
 
+const HINTS = [
+  'Синхронизация с серверами…',
+  'Подготовка 4K каталога…',
+  'Загрузка музыки и трендов…',
+  'Добро пожаловать в KINOVERSE',
+];
+
 const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logoReady, setLogoReady] = useState(false);
   const [textReady, setTextReady] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
 
   useEffect(() => {
-    // Прогресс-бар
+    // Прогресс загрузки
     const iv = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) { clearInterval(iv); return 100; }
-        return p + Math.random() * 6 + 2;
+      setProgress((p) => {
+        if (p >= 100) {
+          clearInterval(iv);
+          return 100;
+        }
+        return p + Math.random() * 8 + 3;
       });
-    }, 50);
+    }, 45);
 
-    // Анимация появления
-    const t1 = setTimeout(() => setLogoReady(true), 200);
-    const t2 = setTimeout(() => setTextReady(true), 600);
+    // Смена статусов
+    const hIv = setInterval(() => {
+      setHintIndex((i) => (i < HINTS.length - 1 ? i + 1 : i));
+    }, 550);
 
-    // Закрытие
+    // Появление элементов
+    const t1 = setTimeout(() => setLogoReady(true), 150);
+    const t2 = setTimeout(() => setTextReady(true), 500);
+
+    // Завершение сплеша
     const t3 = setTimeout(() => {
       setFading(true);
       setTimeout(() => {
         setVisible(false);
         onDone?.();
-      }, 500);
-    }, 2200);
+      }, 480);
+    }, 2100);
 
-    return () => { clearInterval(iv); clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+    return () => {
+      clearInterval(iv);
+      clearInterval(hIv);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, [onDone]);
 
   if (!visible) return null;
 
   return (
     <div className={`sp ${fading ? 'sp--fade' : ''}`}>
-      {/* Фон — постеры фильмов с blur */}
+      {/* Фон — плавающий кинематографичный коллаж */}
       <div className="sp__posters">
         {POSTERS.map((p, i) => (
           <div key={i} className="sp__poster" style={{ backgroundImage: `url(${p})` }} />
@@ -65,69 +87,83 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       </div>
       <div className="sp__overlay" />
 
-      {/* Светящиеся частицы */}
+      {/* Светящиеся звездные частицы */}
       <div className="sp__particles">
-        {Array.from({ length: 12 }).map((_, i) => (
-          <div key={i} className="sp__particle" style={{
-            left: `${8 + Math.random() * 84}%`,
-            top: `${10 + Math.random() * 80}%`,
-            animationDelay: `${Math.random() * 3}s`,
-            animationDuration: `${2.5 + Math.random() * 2}s`,
-            width: `${2 + Math.random() * 3}px`,
-            height: `${2 + Math.random() * 3}px`,
-          }} />
+        {Array.from({ length: 14 }).map((_, i) => (
+          <div
+            key={i}
+            className="sp__particle"
+            style={{
+              left: `${5 + Math.random() * 90}%`,
+              top: `${8 + Math.random() * 84}%`,
+              animationDelay: `${Math.random() * 2.5}s`,
+              animationDuration: `${2 + Math.random() * 2.5}s`,
+              width: `${2 + Math.random() * 3}px`,
+              height: `${2 + Math.random() * 3}px`,
+            }}
+          />
         ))}
       </div>
 
-      {/* Контент */}
+      {/* Контент сплеша */}
       <div className="sp__content">
-        {/* Логотип */}
+        {/* Логотип KINOVERSE: объектив + орбита + призма */}
         <div className={`sp__logo ${logoReady ? 'sp__logo--in' : ''}`}>
           <div className="sp__logo-glow" />
-          <svg width="72" height="72" viewBox="0 0 72 72" fill="none" className="sp__logo-icon">
+          <svg width="84" height="84" viewBox="0 0 84 84" fill="none" className="sp__logo-icon">
             <defs>
-              <linearGradient id="spg1" x1="0" y1="0" x2="72" y2="72">
-                <stop stopColor="#c084fc"/><stop offset="1" stopColor="#f472b6"/>
+              <linearGradient id="kinoverseGrad1" x1="0" y1="0" x2="84" y2="84">
+                <stop stopColor="#a855f7" />
+                <stop offset="0.5" stopColor="#ec4899" />
+                <stop offset="1" stopColor="#06b6d4" />
               </linearGradient>
-              <linearGradient id="spg2" x1="24" y1="22" x2="52" y2="52">
-                <stop stopColor="#f0abfc"/><stop offset="1" stopColor="#ec4899"/>
+              <linearGradient id="kinoverseGrad2" x1="28" y1="26" x2="60" y2="58">
+                <stop stopColor="#ffffff" />
+                <stop offset="1" stopColor="#c084fc" />
               </linearGradient>
+              <filter id="neonBloom" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
             </defs>
-            {/* Film frame */}
-            <rect x="12" y="16" width="48" height="40" rx="10" stroke="url(#spg1)" strokeWidth="2.5" fill="rgba(255,255,255,0.03)"/>
-            {/* Play triangle */}
-            <path d="M30 26l18 10-18 10V26z" fill="url(#spg2)"/>
-            {/* Film holes top */}
-            <circle cx="20" cy="16" r="2" fill="rgba(192,132,252,0.4)"/>
-            <circle cx="28" cy="16" r="2" fill="rgba(192,132,252,0.3)"/>
-            <circle cx="44" cy="16" r="2" fill="rgba(192,132,252,0.3)"/>
-            <circle cx="52" cy="16" r="2" fill="rgba(192,132,252,0.4)"/>
-            {/* Film holes bottom */}
-            <circle cx="20" cy="56" r="2" fill="rgba(192,132,252,0.4)"/>
-            <circle cx="28" cy="56" r="2" fill="rgba(192,132,252,0.3)"/>
-            <circle cx="44" cy="56" r="2" fill="rgba(192,132,252,0.3)"/>
-            <circle cx="52" cy="56" r="2" fill="rgba(192,132,252,0.4)"/>
+            {/* Внешнее кольцо орбиты */}
+            <circle cx="42" cy="42" r="34" stroke="url(#kinoverseGrad1)" strokeWidth="2.5" opacity="0.6" />
+            <ellipse cx="42" cy="42" rx="38" ry="14" stroke="url(#kinoverseGrad1)" strokeWidth="1.5" transform="rotate(-25 42 42)" opacity="0.85" />
+            
+            {/* Внутренняя кинолинза */}
+            <rect x="22" y="24" width="40" height="36" rx="12" fill="rgba(255, 255, 255, 0.05)" stroke="url(#kinoverseGrad1)" strokeWidth="2" />
+            {/* Кнопка Play / Призма */}
+            <path d="M36 32L54 42L36 52V32Z" fill="url(#kinoverseGrad2)" filter="url(#neonBloom)" />
+            {/* Квантовые искры */}
+            <circle cx="28" cy="24" r="1.8" fill="#38bdf8" />
+            <circle cx="56" cy="24" r="1.8" fill="#f472b6" />
+            <circle cx="28" cy="60" r="1.8" fill="#c084fc" />
+            <circle cx="56" cy="60" r="1.8" fill="#38bdf8" />
           </svg>
         </div>
 
-        {/* Название */}
+        {/* Название KINOVERSE */}
         <div className={`sp__brand ${textReady ? 'sp__brand--in' : ''}`}>
           <h1 className="sp__title">
-            <span className="sp__title-kin">КИНО</span>
-            <span className="sp__title-va">ВА</span>
+            <span className="sp__title-kino">KINO</span>
+            <span className="sp__title-verse">VERSE</span>
           </h1>
-          <p className="sp__tagline">Лучшее кино. Один клик.</p>
+          <p className="sp__tagline">Вселенная кино и музыки</p>
         </div>
 
-        {/* Прогресс */}
+        {/* Прогресс-бар с живым статусом */}
         <div className={`sp__progress ${textReady ? 'sp__progress--in' : ''}`}>
           <div className="sp__bar">
             <div className="sp__bar-fill" style={{ width: `${Math.min(progress, 100)}%` }} />
           </div>
+          <span className="sp__hint">{HINTS[hintIndex]}</span>
         </div>
       </div>
 
-      <div className="sp__footer">КИНОВА · Telegram Mini App</div>
+      <div className="sp__footer">KINOVERSE · PREMIUM CINEMA PLATFORM</div>
     </div>
   );
 };

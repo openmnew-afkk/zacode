@@ -176,9 +176,20 @@ const AiPickPage: React.FC = () => {
     return (
       <div className="aip page">
         <header className="aip-header">
-          <div className="aip-header__avatar">✦</div>
+          <div className="aip-header__avatar">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <defs>
+                <linearGradient id="aipGrad" x1="2" y1="2" x2="22" y2="22">
+                  <stop stopColor="#ffffff" />
+                  <stop offset="1" stopColor="#c084fc" />
+                </linearGradient>
+              </defs>
+              <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#aipGrad)" />
+              <circle cx="12" cy="12" r="2.2" fill="#7c3aed" />
+            </svg>
+          </div>
           <div className="aip-header__info">
-            <h1 className="aip-header__title">КиноИИ</h1>
+            <h1 className="aip-header__title">CineAI</h1>
             <p className="aip-header__sub">{mood?.emoji} {mood?.label} · {time?.label} · {era?.label}</p>
           </div>
           <button className="aip-icon-btn" onClick={reset} aria-label="Заново">↺</button>
@@ -188,7 +199,7 @@ const AiPickPage: React.FC = () => {
           <div className="aip-chat">
             <div className="aip-bubble aip-bubble--ai">
               <span className="aip-dots"><i /><i /><i /></span>
-              Изучаю ваш вкус и перебираю каталог…
+              CineAI анализирует твой вкус и сканирует библиотеку…
             </div>
           </div>
         )}
@@ -196,7 +207,7 @@ const AiPickPage: React.FC = () => {
         {stage === 'empty' && (
           <div className="aip-chat">
             <div className="aip-bubble aip-bubble--ai">
-              Хм, по такому запросу ничего достойного не нашёл 😔
+              Хм, по такому точному запросу ничего достойного не нашёл 😔 Попробуем другие параметры?
               <div style={{ marginTop: 12 }}>
                 <button className="aip-btn" onClick={reset}>↺ Настроить заново</button>
               </div>
@@ -207,10 +218,10 @@ const AiPickPage: React.FC = () => {
         {stage === 'results' && (
           <>
             <div className="aip-chat">
-              <div className="aip-bubble aip-bubble--ai">
-                Готово! Совпадение считаю по твоим избранным и истории просмотров 👇
-              </div>
+            <div className="aip-bubble aip-bubble--ai">
+              Готово! Совпадение рассчитано нейросетью по твоим избранным и истории просмотров 👇
             </div>
+          </div>
             <div className="aip-list">
               {picks.map((p) => (
                 <div key={p.movie.id} className="aip-card" onClick={() => navigate(`/movie/${p.movie.id}`)}>
@@ -219,7 +230,7 @@ const AiPickPage: React.FC = () => {
                     style={{ backgroundImage: `url(${p.movie.backdrop_path || p.movie.poster_path})` }}
                   >
                     <div className="aip-card__veil" />
-                    <span className="aip-card__match">{p.match}%</span>
+                    <span className="aip-card__match">{p.match}% совпадение</span>
                     <div className="aip-card__cover-bottom">
                       <h3 className="aip-card__title">{p.movie.title}</h3>
                       <p className="aip-card__meta">
@@ -270,17 +281,28 @@ const AiPickPage: React.FC = () => {
   return (
     <div className="aip page">
       <header className="aip-header">
-        <div className="aip-header__avatar">✦</div>
+        <div className="aip-header__avatar">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <defs>
+              <linearGradient id="aipGrad2" x1="2" y1="2" x2="22" y2="22">
+                <stop stopColor="#ffffff" />
+                <stop offset="1" stopColor="#c084fc" />
+              </linearGradient>
+            </defs>
+            <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#aipGrad2)" />
+            <circle cx="12" cy="12" r="2.2" fill="#7c3aed" />
+          </svg>
+        </div>
         <div className="aip-header__info">
-          <h1 className="aip-header__title">КиноИИ</h1>
-          <p className="aip-header__sub">Подберу кино под настроение</p>
+          <h1 className="aip-header__title">CineAI</h1>
+          <p className="aip-header__sub">Нейроподбор под твое настроение</p>
         </div>
         <button className="aip-surprise" onClick={surprise}>🎲 Удиви меня</button>
       </header>
 
       <div className="aip-chat">
         <div className="aip-bubble aip-bubble--ai">
-          Привет! Я КиноИИ 🤖 Ответь на три вопроса — и я найду идеальный фильм или сериал.
+          Привет! Я <strong>CineAI</strong> ✦ Твой персональный кинокурирующий интеллект. Ответь на три простых вопроса — и я мгновенно подберу идеальный фильм или сериал.
         </div>
 
         {!mood ? (

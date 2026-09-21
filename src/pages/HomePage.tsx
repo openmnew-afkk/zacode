@@ -198,27 +198,28 @@ const Hero: React.FC<{ movies: Movie[]; onWatch: (id: string) => void }> = ({ mo
       <div className={`hp-hero__content ${fading ? 'fading' : ''}`}>
         <div className="hp-hero__chip">
           <span className="hp-hero__chip-dot" />
-          {m.is_serial ? 'Сериал' : 'Фильм'} · Популярное
+          <span>{m.is_serial ? 'Сериал' : 'Фильм'} · В тренде</span>
         </div>
         <h2 className="hp-hero__title">{m.title}</h2>
-        {m.original_title && m.original_title !== m.title && (
-          <p className="hp-hero__subtitle">{m.original_title}</p>
-        )}
         {m.overview && <p className="hp-hero__desc">{m.overview.slice(0, 110)}…</p>}
         <div className="hp-hero__actions">
           <button className="hp-hero__btn" onClick={e => { e.stopPropagation(); onWatch(m.id); }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
             Смотреть
           </button>
-          {m.vote_average > 0 && <span className="hp-hero__tag">★ {m.vote_average.toFixed(1)}</span>}
+          {m.vote_average > 0 && <span className="hp-hero__tag hp-hero__tag--gold">★ {m.vote_average.toFixed(1)}</span>}
           {m.release_date && <span className="hp-hero__tag">{m.release_date.slice(0, 4)}</span>}
         </div>
       </div>
-        <div className="hp-hero__dots">
-            {heroMovies.map((_, i) => (
-              <span key={i} className={`hp-hero__dot ${i === idx ? 'hp-hero__dot--on' : ''}`} />
-            ))}
-          </div>
+      <div className="hp-hero__dots">
+        {heroMovies.map((_, i) => (
+          <span
+            key={i}
+            className={`hp-hero__dot ${i === idx ? 'hp-hero__dot--on' : ''}`}
+            onClick={(e) => { e.stopPropagation(); goTo(i); }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -408,7 +409,6 @@ const HomePage: React.FC = () => {
             </div>
           )}
 
-          <Hero movies={heroMovies} onWatch={go} />
           {watchingTracked.length > 0 && (
             <div className="hp-cw">
               <h3 className="hp-cw__heading">Продолжить просмотр</h3>
@@ -502,24 +502,28 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <span className="hp-header__logo">🎬</span>
+              <span className="hp-header__logo">🪐</span>
               <div>
-                <h1 className="hp-header__title">КИНОВА</h1>
-                <span className="hp-header__sub">Фильмы · Сериалы · Аниме</span>
+                <h1 className="hp-header__title">KINOVERSE</h1>
+                <span className="hp-header__sub">Вселенная кино и музыки</span>
               </div>
             </div>
             <div className="hp-header__actions">
-              {/* 🤖 AI кружок — мигает, рядом с поиском */}
-              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="КиноИИ">
+              {/* 🤖 CineAI кнопка — квантовый голографический кристалл */}
+              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="CineAI" title="CineAI — Нейроподбор">
                 <span className="hp-ai-circle__ring" />
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <defs>
-                    <linearGradient id="aig2" x1="0" y1="0" x2="24" y2="24">
-                      <stop stopColor="#a78bfa"/><stop offset="1" stopColor="#f472b6"/>
+                    <linearGradient id="cineAiGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#a855f7" />
+                      <stop offset="0.5" stopColor="#ec4899" />
+                      <stop offset="1" stopColor="#06b6d4" />
                     </linearGradient>
                   </defs>
-                  <path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2z" fill="url(#aig2)"/>
-                  <path d="M19 13.5l1 2.7 2.7 1-2.7 1-1 2.7-1-2.7-2.7-1 2.7-1 1-2.7z" fill="#f9a8d4" opacity="0.9"/>
+                  <path d="M12 2L14.4 9.6L22 12L14.4 14.4L12 22L9.6 14.4L2 12L9.6 9.6L12 2Z" fill="url(#cineAiGrad)" />
+                  <circle cx="12" cy="12" r="2.2" fill="#ffffff" />
+                  <path d="M18.5 4.5L19.3 6.7L21.5 7.5L19.3 8.3L18.5 10.5L17.7 8.3L15.5 7.5L17.7 6.7L18.5 4.5Z" fill="#38bdf8" opacity="0.9" />
+                  <path d="M5.5 14.5L6.2 16.5L8.2 17.2L6.2 17.9L5.5 19.9L4.8 17.9L2.8 17.2L4.8 16.5L5.5 14.5Z" fill="#f472b6" opacity="0.85" />
                 </svg>
               </button>
               <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
@@ -542,7 +546,12 @@ const HomePage: React.FC = () => {
         )}
       </div>
 
-      {/* ── Вкладки (только не в поиске) ── */}
+      {/* ── Плавающие фильмы (Hero баннер) — строго ВЫШЕ вкладок! ── */}
+      {!showSearch && tab === 'home' && heroMovies.length > 0 && (
+        <Hero movies={heroMovies} onWatch={go} />
+      )}
+
+      {/* ── Вкладки — теперь строго НИЖЕ плавающих фильмов и ближе к каталогу! ── */}
       {!showSearch && (
         <div className="hp-tabs">
           {TABS.map(t => (

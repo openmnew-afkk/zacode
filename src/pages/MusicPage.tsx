@@ -18,11 +18,9 @@ interface Track {
 type Tab = 'trending' | 'liked';
 
 /* ═══════════ Константы ═══════════ */
-const APP_NAME = 'KinoZal';
+const APP_NAME = 'KINOVERSE';
 const LIKED_KEY = 'mu_liked_v2';
 const NOW_KEY = 'mu_now_v2';
-
-/* Случайный жанр и период при каждом заходе — музыка всегда свежая */
 
 const hashStr = (s: string): number => {
   let h = 0;
@@ -33,6 +31,8 @@ const HOSTS_FALLBACK = [
   'https://discoveryprovider.audius.co',
   'https://audius-discovery-2.altego.net',
   'https://audius-metadata-1.figment.io',
+  'https://dn1.audius.l2be.net',
+  'https://audius-dp.amsterdam.creatorseed.com',
 ];
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
@@ -250,11 +250,35 @@ const MusicPage: React.FC = () => {
   const [feedLabel, setFeedLabel] = useState('Популярное сейчас');
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
-  /* ── Загрузка: топ-чарты (Apple Music + Deezer) → Audius → демо. Всегда разная ── */
+  /* ── Загрузка: Audius (полные легальные треки 3-5 мин) → резервные чарты ── */
   const loadFeed = useCallback(async (mode: 'init' | 'refresh') => {
     if (mode === 'refresh') setRefreshing(true); else setLoading(true);
 
-    /* 1) Топ-чарты двух бесплатных сервисов параллельно */
+    /* 1) Audius — ОСНОВНОЙ источник полных треков */
+    let host = pick(HOSTS_FALLBACK);
+    try {
+      const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(4000) });
+      const json = await res.json();
+      if (Array.isArray(json?.data) && json.data[0]) host = json.data[0];
+    } catch {}
+    hostRef.current = host;
+
+    try {
+      const res = await fetch(`${host}/v1/tracks/trending?app_name=${APP_NAME}&limit=45`, { signal: AbortSignal.timeout(7000) });
+      if (res.ok) {
+        const json = await res.json();
+        const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, host));
+        if (fetched.length > 0) {
+          setTracks(shuffleArr(fetched));
+          setFeedLabel('Тренды · Полные треки (Audius)');
+          setLoading(false);
+          setRefreshing(false);
+          return;
+        }
+      }
+    } catch {}
+
+    /* 2) Резервный источник — популярные топ-чарты */
     const [itA, itB, dz] = await Promise.all([
       fetchItunes(pick(ITUNES_TERMS), 25).catch(() => [] as Track[]),
       fetchItunes(pick(ITUNES_TERMS), 25).catch(() => [] as Track[]),
@@ -263,34 +287,11 @@ const MusicPage: React.FC = () => {
     const merged = dedupeTracks([...shuffleArr(dz), ...shuffleArr([...itA, ...itB])]);
     if (merged.length > 0) {
       setTracks(merged);
-      setFeedLabel(dz.length > 0 && itA.length + itB.length > 0 ? 'Топ-чарт · Deezer + Apple Music' : 'Топ-чарт · свежие хиты');
+      setFeedLabel('Топ-чарт · Свежие хиты');
       setLoading(false);
       setRefreshing(false);
       return;
     }
-
-    /* 2) Audius — резервный сервис */
-    let host = pick(HOSTS_FALLBACK);
-    try {
-      const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(4000) });
-      const json = await res.json();
-      if (Array.isArray(json?.data) && json.data[0]) host = json.data[0];
-    } catch {}
-    hostRef.current = host;
-    try {
-      const res = await fetch(`${host}/v1/tracks/trending?app_name=${APP_NAME}&limit=40`, { signal: AbortSignal.timeout(7000) });
-      if (res.ok) {
-        const json = await res.json();
-        const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, host));
-        if (fetched.length > 0) {
-          setTracks(shuffleArr(fetched));
-          setFeedLabel('Хиты · Audius');
-          setLoading(false);
-          setRefreshing(false);
-          return;
-        }
-      }
-    } catch {}
 
     /* 3) Демо-режим */
     setTracks(shuffleArr(DEMO_TRACKS));
@@ -317,12 +318,29 @@ const MusicPage: React.FC = () => {
     storeToggleLike(t);
   };
 
-  /* ── Поиск: Apple Music + Deezer параллельно → Audius ── */
+  /* ── Поиск: Audius (полные треки) → резерв ── */
   const handleSearch = async () => {
     const q = query.trim();
     if (!q) return;
     haptic('light');
     setLoading(true);
+
+    /* 1) Ищем полные треки в Audius */
+    try {
+      const res = await fetch(`${hostRef.current}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP_NAME}&limit=30`, { signal: AbortSignal.timeout(7000) });
+      if (res.ok) {
+        const json = await res.json();
+        const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, hostRef.current));
+        if (fetched.length > 0) {
+          setTracks(fetched);
+          setFeedLabel(`Поиск: «${q}» (Полные треки)`);
+          setLoading(false);
+          return;
+        }
+      }
+    } catch {}
+
+    /* 2) Резервный поиск */
     const [it, dz] = await Promise.all([
       fetchItunes(q, 25).catch(() => [] as Track[]),
       fetchDeezerSearch(q, 20).catch(() => [] as Track[]),
@@ -334,19 +352,7 @@ const MusicPage: React.FC = () => {
       setLoading(false);
       return;
     }
-    try {
-      const res = await fetch(`${hostRef.current}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP_NAME}&limit=30`, { signal: AbortSignal.timeout(7000) });
-      if (res.ok) {
-        const json = await res.json();
-        const fetched = (json?.data ?? []).map((t: any) => mapTrack(t, hostRef.current));
-        if (fetched.length > 0) {
-          setTracks(fetched);
-          setFeedLabel(`Поиск: «${q}»`);
-          setLoading(false);
-          return;
-        }
-      }
-    } catch {}
+
     setTracks([]);
     setFeedLabel(`Ничего не найдено: «${q}»`);
     setLoading(false);

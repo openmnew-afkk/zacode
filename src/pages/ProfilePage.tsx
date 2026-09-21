@@ -4,6 +4,21 @@ import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import './ProfilePage.css';
 
+interface MenuItem {
+  icon: string;
+  color: string;
+  bg: string;
+  label: string;
+  sub: string;
+  action: () => void;
+  highlight?: boolean;
+}
+
+interface MenuGroup {
+  title: string;
+  items: MenuItem[];
+}
+
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp, haptic, tg } = useTelegram();
@@ -13,66 +28,97 @@ const ProfilePage: React.FC = () => {
   const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
   const isAdminUser = user?.username === 'MikySauce' || role === 'admin' || role === 'moderator';
 
-  const menuItems = [
+  const groups: MenuGroup[] = [
     {
-      icon: '❤️',
-      color: '#ef4444',
-      bg: 'rgba(239,68,68,0.15)',
-      label: 'Избранное',
-      sub: `${favorites.length} фильмов`,
-      action: () => navigate('/favorites'),
+      title: 'МЕДИАТЕКА',
+      items: [
+        {
+          icon: '❤️',
+          color: '#ef4444',
+          bg: 'linear-gradient(135deg, #ef4444, #dc2626)',
+          label: 'Избранное',
+          sub: `${favorites.length} фильмов и сериалов`,
+          action: () => navigate('/favorites'),
+        },
+        {
+          icon: '⏱',
+          color: '#3b82f6',
+          bg: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+          label: 'История просмотров',
+          sub: `${watchHistory.length} просмотрено`,
+          action: () => navigate('/favorites'),
+        },
+      ],
     },
     {
-      icon: '🔍',
-      color: '#3b82f6',
-      bg: 'rgba(59,130,246,0.15)',
-      label: 'Поиск',
-      sub: 'Найти фильм или сериал',
-      action: () => navigate('/search'),
+      title: 'ПОДПИСКА И СЕРВИСЫ',
+      items: [
+        {
+          icon: isPremium ? '👑' : '⭐',
+          color: '#f59e0b',
+          bg: 'linear-gradient(135deg, #f59e0b, #d97706)',
+          label: isPremium ? 'Премиум активен' : 'Подключить Премиум',
+          sub: isPremium ? 'Без рекламы · Максимальное качество' : 'От 99 ₽ · 3 дня бесплатно',
+          action: () => navigate('/premium'),
+          highlight: !isPremium,
+        },
+        {
+          icon: '🎵',
+          color: '#a855f7',
+          bg: 'linear-gradient(135deg, #a855f7, #9333ea)',
+          label: 'Музыка',
+          sub: 'Фоновое воспроизведение и хиты',
+          action: () => navigate('/music'),
+        },
+        {
+          icon: '🔍',
+          color: '#06b6d4',
+          bg: 'linear-gradient(135deg, #06b6d4, #0891b2)',
+          label: 'Каталог и поиск',
+          sub: 'Фильмы, сериалы и мультфильмы',
+          action: () => navigate('/search'),
+        },
+      ],
     },
     {
-      icon: '🎵',
-      color: '#8b5cf6',
-      bg: 'rgba(139,92,246,0.15)',
-      label: 'Музыка',
-      sub: 'Слушать прямо сейчас',
-      action: () => navigate('/music'),
-    },
-    {
-      icon: isPremium ? '👑' : '⭐',
-      color: '#f59e0b',
-      bg: 'rgba(245,158,11,0.15)',
-      label: isPremium ? 'Премиум активен' : 'Подключить Премиум',
-      sub: isPremium ? 'Все функции открыты' : '199 ₽/мес · 2400 ₽/год',
-      action: () => navigate('/premium'),
-      highlight: !isPremium,
-    },
-    {
-      icon: theme === 'dark' ? '🌙' : '☀️',
-      color: '#06b6d4',
-      bg: 'rgba(6,182,212,0.15)',
-      label: theme === 'dark' ? 'Тёмная тема' : 'Светлая тема',
-      sub: 'Нажми чтобы переключить',
-      action: () => { haptic('light'); setTheme(theme === 'dark' ? 'violet' : 'dark'); },
-    },
-    {
-      icon: '📜',
-      color: '#64748b',
-      bg: 'rgba(100,116,139,0.15)',
-      label: 'Правила',
-      sub: 'Правовая информация',
-      action: () => navigate('/rules'),
+      title: 'НАСТРОЙКИ',
+      items: [
+        {
+          icon: theme === 'dark' ? '🌙' : '☀️',
+          color: '#6366f1',
+          bg: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+          label: 'Оформление',
+          sub: theme === 'dark' ? 'Тёмная тема (OLED)' : 'Фиолетовый акцент',
+          action: () => {
+            haptic('light');
+            setTheme(theme === 'dark' ? 'violet' : 'dark');
+          },
+        },
+        {
+          icon: '📜',
+          color: '#64748b',
+          bg: 'linear-gradient(135deg, #64748b, #475569)',
+          label: 'Правила и соглашение',
+          sub: 'Правовая информация',
+          action: () => navigate('/rules'),
+        },
+      ],
     },
   ];
 
   if (isAdminUser) {
-    menuItems.push({
-      icon: '⚙️',
-      color: '#8b5cf6',
-      bg: 'rgba(139,92,246,0.18)',
-      label: role === 'moderator' && user?.username !== 'MikySauce' ? 'Панель модератора' : 'Админ панель',
-      sub: 'Управление приложением',
-      action: () => navigate('/admin'),
+    groups.push({
+      title: 'АДМИНИСТРИРОВАНИЕ',
+      items: [
+        {
+          icon: '⚙️',
+          color: '#ec4899',
+          bg: 'linear-gradient(135deg, #ec4899, #db2777)',
+          label: role === 'moderator' && user?.username !== 'MikySauce' ? 'Панель модератора' : 'Панель администратора',
+          sub: 'Управление пользователями и контентом',
+          action: () => navigate('/admin'),
+        },
+      ],
     });
   }
 
@@ -81,28 +127,38 @@ const ProfilePage: React.FC = () => {
       {/* BG gradient */}
       <div className="pf__bg" />
 
-      {/* Avatar with gradient ring — like photo 3 */}
-      <div className="pf__header">
+      {/* iOS User Profile Card */}
+      <div className="pf__card">
         <div className="pf__avatar-wrap">
           <div className="pf__avatar-ring" />
           <div className="pf__avatar">
-            {user?.photo_url
-              ? <img src={user.photo_url} alt="" />
-              : <span>{displayName[0]?.toUpperCase() || '?'}</span>
-            }
+            {user?.photo_url ? (
+              <img src={user.photo_url} alt="" />
+            ) : (
+              <span>{displayName[0]?.toUpperCase() || '?'}</span>
+            )}
           </div>
           {isPremium && <div className="pf__premium-dot">👑</div>}
         </div>
 
-        <h1 className="pf__name">
-          {displayName}
-          {(isAdminUser || isPremium) && <span className="pf__verified">✓</span>}
-        </h1>
-        {username && <p className="pf__username">{username}</p>}
-        {isPremium && <div className="pf__premium-badge">✨ PREMIUM</div>}
+        <div className="pf__user-meta">
+          <h1 className="pf__name">
+            {displayName}
+            {(isAdminUser || isPremium) && <span className="pf__verified">✓</span>}
+          </h1>
+          {username && <p className="pf__username">{username}</p>}
+          <div className="pf__badges">
+            {isPremium ? (
+              <span className="pf__badge pf__badge--premium">👑 PREMIUM</span>
+            ) : (
+              <span className="pf__badge">БАЗОВЫЙ ДОСТУП</span>
+            )}
+            {isAdminUser && <span className="pf__badge pf__badge--admin">ADMIN</span>}
+          </div>
+        </div>
       </div>
 
-      {/* Stats */}
+      {/* iOS Metrics Bar */}
       <div className="pf__stats">
         <div className="pf__stat" onClick={() => navigate('/favorites')}>
           <span className="pf__stat-val">{watchHistory.length}</span>
@@ -111,51 +167,64 @@ const ProfilePage: React.FC = () => {
         <div className="pf__stat-div" />
         <div className="pf__stat" onClick={() => navigate('/favorites')}>
           <span className="pf__stat-val">{favorites.length}</span>
-          <span className="pf__stat-lbl">Избранное</span>
+          <span className="pf__stat-lbl">В избранном</span>
         </div>
         <div className="pf__stat-div" />
-        <div className="pf__stat">
-          <span className="pf__stat-val">{isPremium ? '👑' : '—'}</span>
-          <span className="pf__stat-lbl">Премиум</span>
+        <div className="pf__stat" onClick={() => navigate('/premium')}>
+          <span className="pf__stat-val">{isPremium ? 'PRO' : 'FREE'}</span>
+          <span className="pf__stat-lbl">Тариф</span>
         </div>
       </div>
 
-      {/* Menu items — like photo 3 */}
-      <div className="pf__menu">
-        {menuItems.map((item, i) => (
-          <button
-            key={i}
-            className={`pf__item ${item.highlight ? 'pf__item--highlight' : ''}`}
-            onClick={item.action}
-          >
-            <span className="pf__item-icon" style={{ background: item.bg, color: item.color }}>
-              {item.icon}
-            </span>
-            <div className="pf__item-text">
-              <span className="pf__item-label">{item.label}</span>
-              <span className="pf__item-sub">{item.sub}</span>
+      {/* iOS Inset Grouped Sections */}
+      <div className="pf__groups">
+        {groups.map((grp, gIdx) => (
+          <div key={gIdx} className="pf__group">
+            <div className="pf__group-title">{grp.title}</div>
+            <div className="pf__group-box">
+              {grp.items.map((item, iIdx) => (
+                <button
+                  key={iIdx}
+                  className={`pf__row ${item.highlight ? 'pf__row--highlight' : ''}`}
+                  onClick={item.action}
+                >
+                  <div className="pf__icon-box" style={{ background: item.bg }}>
+                    <span>{item.icon}</span>
+                  </div>
+                  <div className="pf__row-content">
+                    <div className="pf__row-text">
+                      <span className="pf__row-label">{item.label}</span>
+                      <span className="pf__row-sub">{item.sub}</span>
+                    </div>
+                    <span className="pf__arrow">›</span>
+                  </div>
+                </button>
+              ))}
             </div>
-            <span className="pf__item-arrow">›</span>
-          </button>
+          </div>
         ))}
       </div>
 
-      {/* History */}
+      {/* Recent Watch History Preview */}
       {watchHistory.length > 0 && (
-        <div className="pf__section">
-          <div className="pf__section-hd">
-            <span className="pf__section-title">История просмотров</span>
-            <button className="pf__clear" onClick={clearHistory}>Очистить</button>
+        <div className="pf__group">
+          <div className="pf__history-header">
+            <span className="pf__group-title">НЕДАВНО СМОТРЕЛИ</span>
+            <button className="pf__clear-btn" onClick={clearHistory}>
+              Очистить
+            </button>
           </div>
-          <div className="pf__history">
-            {watchHistory.slice(0, 10).map((item) => (
-              <div key={item.movie.id} className="pf__hist-item" onClick={() => navigate(`/movie/${item.movie.id}`)}>
-                <img src={item.movie.poster_path || ''} alt="" />
-                <div>
-                  <p className="pf__hist-title">{item.movie.title}</p>
-                  <p className="pf__hist-date">{new Date(item.watchedAt).toLocaleDateString('ru-RU')}</p>
+          <div className="pf__history-scroll">
+            {watchHistory.slice(0, 8).map((item) => (
+              <div
+                key={item.movie.id}
+                className="pf__hist-card"
+                onClick={() => navigate(`/movie/${item.movie.id}`)}
+              >
+                <div className="pf__hist-poster">
+                  <img src={item.movie.poster_path || ''} alt="" loading="lazy" />
                 </div>
-                <span className="pf__item-arrow">›</span>
+                <span className="pf__hist-title">{item.movie.title}</span>
               </div>
             ))}
           </div>
@@ -163,10 +232,14 @@ const ProfilePage: React.FC = () => {
       )}
 
       {tg && (
-        <button className="pf__close" onClick={closeApp}>Закрыть приложение</button>
+        <div className="pf__exit-wrap">
+          <button className="pf__close-btn" onClick={closeApp}>
+            Закрыть приложение
+          </button>
+        </div>
       )}
 
-      <div className="pf__footer">КиноЗал · Все права защищены</div>
+      <div className="pf__footer">KINOVERSE · Все права защищены</div>
     </div>
   );
 };
