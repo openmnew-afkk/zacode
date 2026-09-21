@@ -14,11 +14,11 @@ const tabs: TabDef[] = [
     path: '/',
     label: 'Главная',
     icon: (active) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         {active ? (
-          <path d="M12 3.2L4 9.5V20a1 1 0 0 0 1 1h5v-6h4v6h5a1 1 0 0 0 1-1V9.5L12 3.2z" fill="currentColor"/>
+          <path d="M12 2.5L2.5 10.5V20.5C2.5 21.05 2.95 21.5 3.5 21.5H8.5V14.5H15.5V21.5H20.5C21.05 21.5 21.5 21.05 21.5 20.5V10.5L12 2.5Z" fill="currentColor" />
         ) : (
-          <path d="M4 9.5L12 3l8 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/>
+          <path d="M12 2.5L2.5 10.5V20.5C2.5 21.05 2.95 21.5 3.5 21.5H8.5V14.5H15.5V21.5H20.5C21.05 21.5 21.5 21.05 21.5 20.5V10.5L12 2.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
         )}
       </svg>
     ),
@@ -27,12 +27,9 @@ const tabs: TabDef[] = [
     path: '/search',
     label: 'Поиск',
     icon: (active) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-        {active ? (
-          <><circle cx="11" cy="11" r="6.5" fill="currentColor"/><path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/></>
-        ) : (
-          <><circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.6"/><path d="M16.5 16.5L21 21" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></>
-        )}
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth={active ? '2.4' : '1.8'} />
+        <path d="M16.5 16.5L21.5 21.5" stroke="currentColor" strokeWidth={active ? '2.6' : '1.8'} strokeLinecap="round" />
       </svg>
     ),
   },
@@ -40,11 +37,11 @@ const tabs: TabDef[] = [
     path: '/favorites',
     label: 'Списки',
     icon: (active) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         {active ? (
-          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+          <path d="M5 3.5C5 2.67 5.67 2 6.5 2H17.5C18.33 2 19 2.67 19 3.5V22L12 18L5 22V3.5Z" fill="currentColor" />
         ) : (
-          <path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z" stroke="currentColor" strokeWidth="1.6"/>
+          <path d="M5 3.5C5 2.67 5.67 2 6.5 2H17.5C18.33 2 19 2.67 19 3.5V22L12 18L5 22V3.5Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
         )}
       </svg>
     ),
@@ -53,11 +50,19 @@ const tabs: TabDef[] = [
     path: '/music',
     label: 'Музыка',
     icon: (active) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         {active ? (
-          <><path d="M9 18V6l11-2v12" fill="currentColor"/><circle cx="7" cy="18" r="2.6" fill="currentColor"/><circle cx="18" cy="16" r="2.6" fill="currentColor"/></>
+          <>
+            <path d="M9 17V5L20 3V15" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <circle cx="6" cy="17" r="3" fill="currentColor" />
+            <circle cx="17" cy="15" r="3" fill="currentColor" />
+          </>
         ) : (
-          <><path d="M9 18V6l11-2v12" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round"/><circle cx="7" cy="18" r="2.6" stroke="currentColor" strokeWidth="1.6"/><circle cx="18" cy="16" r="2.6" stroke="currentColor" strokeWidth="1.6"/></>
+          <>
+            <path d="M9 17V5L20 3V15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            <circle cx="6" cy="17" r="3" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="17" cy="15" r="3" stroke="currentColor" strokeWidth="1.8" />
+          </>
         )}
       </svg>
     ),
@@ -66,11 +71,15 @@ const tabs: TabDef[] = [
     path: '/profile',
     label: 'Профиль',
     icon: (active) => (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         {active ? (
-          <><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 20c0-3.9 3.6-7 8-7s8 3.1 8 7" fill="currentColor"/></>
+          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 6C13.66 6 15 7.34 15 9C15 10.66 13.66 12 12 12C10.34 12 9 10.66 9 9C9 7.34 10.34 6 12 6ZM12 20.2C9.5 20.2 7.29 18.92 6 16.98C6.03 14.99 10 13.9 12 13.9C13.99 13.9 17.97 14.99 18 16.98C16.71 18.92 14.5 20.2 12 20.2Z" fill="currentColor" />
         ) : (
-          <><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.6"/><path d="M4 20c0-3.9 3.6-7 8-7s8 3.1 8 7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/></>
+          <>
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.8" />
+            <circle cx="12" cy="9" r="3.2" stroke="currentColor" strokeWidth="1.8" />
+            <path d="M6.2 18.4C7.4 16.4 9.6 15.2 12 15.2C14.4 15.2 16.6 16.4 17.8 18.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </>
         )}
       </svg>
     ),
@@ -98,7 +107,7 @@ const TabBar: React.FC = () => {
           return (
             <button
               key={tab.path}
-              className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}${tab.path === '/premium' ? ' tab-bar__item--premium' : ''}`}
+              className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}`}
               onClick={() => navigate(tab.path)}
               aria-label={tab.label}
             >

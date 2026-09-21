@@ -5,8 +5,7 @@ import { useStore } from '../store';
 import './ProfilePage.css';
 
 interface MenuItem {
-  icon: string;
-  color: string;
+  icon: React.ReactNode;
   bg: string;
   label: string;
   sub: string;
@@ -24,7 +23,7 @@ const ProfilePage: React.FC = () => {
   const { user, closeApp, haptic, tg } = useTelegram();
   const { favorites, watchHistory, clearHistory, isPremium, theme, setTheme, role, telegramUsername } = useStore();
 
-  const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Гость';
+  const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Пользователь';
   const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
   const isAdminUser = user?.username === 'MikySauce' || role === 'admin' || role === 'moderator';
 
@@ -33,16 +32,23 @@ const ProfilePage: React.FC = () => {
       title: 'МЕДИАТЕКА',
       items: [
         {
-          icon: '❤️',
-          color: '#ef4444',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #ef4444, #dc2626)',
           label: 'Избранное',
-          sub: `${favorites.length} фильмов и сериалов`,
+          sub: `${favorites.length} сохранено`,
           action: () => navigate('/favorites'),
         },
         {
-          icon: '⏱',
-          color: '#3b82f6',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.2" />
+              <path d="M12 7V12L15 15" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #3b82f6, #2563eb)',
           label: 'История просмотров',
           sub: `${watchHistory.length} просмотрено`,
@@ -54,28 +60,41 @@ const ProfilePage: React.FC = () => {
       title: 'ПОДПИСКА И СЕРВИСЫ',
       items: [
         {
-          icon: isPremium ? '👑' : '⭐',
-          color: '#f59e0b',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
+              <rect x="4" y="18" width="16" height="2.2" rx="1.1" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #f59e0b, #d97706)',
-          label: isPremium ? 'Премиум активен' : 'Подключить Премиум',
-          sub: isPremium ? 'Без рекламы · Максимальное качество' : 'От 99 ₽ · 3 дня бесплатно',
+          label: isPremium ? 'Премиум подписка' : 'Оформить Премиум',
+          sub: isPremium ? 'Все привилегии активны' : 'Без рекламы · 3 дня бесплатно',
           action: () => navigate('/premium'),
           highlight: !isPremium,
         },
         {
-          icon: '🎵',
-          color: '#a855f7',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M9 17V5L20 3V15" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              <circle cx="6" cy="17" r="3" fill="currentColor" />
+              <circle cx="17" cy="15" r="3" fill="currentColor" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #a855f7, #9333ea)',
-          label: 'Музыка',
-          sub: 'Фоновое воспроизведение и хиты',
+          label: 'Музыка AURA',
+          sub: 'Русские и мировые хиты · Моя волна',
           action: () => navigate('/music'),
         },
         {
-          icon: '🔍',
-          color: '#06b6d4',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="2.2" />
+              <path d="M16 16L21 21" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #06b6d4, #0891b2)',
           label: 'Каталог и поиск',
-          sub: 'Фильмы, сериалы и мультфильмы',
+          sub: 'Тысячи фильмов и сериалов',
           action: () => navigate('/search'),
         },
       ],
@@ -84,21 +103,28 @@ const ProfilePage: React.FC = () => {
       title: 'НАСТРОЙКИ',
       items: [
         {
-          icon: theme === 'dark' ? '🌙' : '☀️',
-          color: '#6366f1',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #6366f1, #4f46e5)',
           label: 'Оформление',
-          sub: theme === 'dark' ? 'Тёмная тема (OLED)' : 'Фиолетовый акцент',
+          sub: theme === 'dark' ? 'Глубокая тёмная тема' : 'Фиолетовый неоновый акцент',
           action: () => {
             haptic('light');
             setTheme(theme === 'dark' ? 'violet' : 'dark');
           },
         },
         {
-          icon: '📜',
-          color: '#64748b',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+              <polyline points="14 2 14 8 20 8" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #64748b, #475569)',
-          label: 'Правила и соглашение',
+          label: 'Пользовательское соглашение',
           sub: 'Правовая информация',
           action: () => navigate('/rules'),
         },
@@ -111,8 +137,12 @@ const ProfilePage: React.FC = () => {
       title: 'АДМИНИСТРИРОВАНИЕ',
       items: [
         {
-          icon: '⚙️',
-          color: '#ec4899',
+          icon: (
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" stroke="currentColor" strokeWidth="1.6" />
+            </svg>
+          ),
           bg: 'linear-gradient(135deg, #ec4899, #db2777)',
           label: role === 'moderator' && user?.username !== 'MikySauce' ? 'Панель модератора' : 'Панель администратора',
           sub: 'Управление пользователями и контентом',
@@ -135,10 +165,16 @@ const ProfilePage: React.FC = () => {
             {user?.photo_url ? (
               <img src={user.photo_url} alt="" />
             ) : (
-              <span>{displayName[0]?.toUpperCase() || '?'}</span>
+              <span>{displayName[0]?.toUpperCase() || 'A'}</span>
             )}
           </div>
-          {isPremium && <div className="pf__premium-dot">👑</div>}
+          {isPremium && (
+            <div className="pf__premium-dot">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24">
+                <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
+              </svg>
+            </div>
+          )}
         </div>
 
         <div className="pf__user-meta">
@@ -149,7 +185,7 @@ const ProfilePage: React.FC = () => {
           {username && <p className="pf__username">{username}</p>}
           <div className="pf__badges">
             {isPremium ? (
-              <span className="pf__badge pf__badge--premium">👑 PREMIUM</span>
+              <span className="pf__badge pf__badge--premium">AURA PRO</span>
             ) : (
               <span className="pf__badge">БАЗОВЫЙ ДОСТУП</span>
             )}
@@ -189,7 +225,7 @@ const ProfilePage: React.FC = () => {
                   onClick={item.action}
                 >
                   <div className="pf__icon-box" style={{ background: item.bg }}>
-                    <span>{item.icon}</span>
+                    {item.icon}
                   </div>
                   <div className="pf__row-content">
                     <div className="pf__row-text">
@@ -239,7 +275,7 @@ const ProfilePage: React.FC = () => {
         </div>
       )}
 
-      <div className="pf__footer">KINOVERSE · Все права защищены</div>
+      <div className="pf__footer">AURA · Все права защищены</div>
     </div>
   );
 };

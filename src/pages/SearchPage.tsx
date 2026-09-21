@@ -87,7 +87,12 @@ const SearchPage: React.FC = () => {
 
       {isInitial && (
         <div className="search-quick">
-          <div className="search-quick__title">🔥 Часто ищут</div>
+          <div className="search-quick__title">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#f43f5e', marginRight: 6 }}>
+              <path d="M12 22c-4.4 0-7.5-3-7.5-7.2 0-2.6 1.3-4.6 2.6-6.2.6-.8 1.9-.4 2 .7.1.9.4 1.7 1 2.3.3-3.5 2-6.9 5.3-8.8.9-.5 2 .2 1.9 1.2-.1 1.6.2 3.5 1.6 5.7 1.1 1.7 2.6 3.4 2.6 5.6C21.5 19 18.4 22 12 22z" />
+            </svg>
+            Популярные запросы
+          </div>
           <div className="search-quick__chips">
             {QUICK_SEARCHES.map((item) => (
               <button
@@ -141,7 +146,11 @@ const SearchPage: React.FC = () => {
 
       {isEmpty && (
         <div className="search-empty">
-          <div className="search-empty__icon-wrap">🔍</div>
+          <div className="search-empty__icon-wrap">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
+          </div>
           <p className="search-empty__title">Ничего не найдено</p>
           <p className="search-empty__sub">Попробуйте изменить формулировку или ввести другое название</p>
         </div>

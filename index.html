@@ -2,20 +2,24 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%2308070e'/><polygon points='50,15 85,50 50,85 15,50' fill='none' stroke='%23a855f7' stroke-width='6'/><circle cx='50' cy='50' r='14' fill='%23ffffff'/></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#09080a" />
-    <meta name="description" content="КиноЗал — фильмы и сериалы онлайн бесплатно" />
+    <meta name="theme-color" content="#06050a" />
+    <meta name="description" content="AURA — фильмы, сериалы и музыка в одном приложении" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <title>КиноЗал</title>
+    <title>AURA — Кино и Музыка</title>
     <style>
-      html, body { background: #09080a; margin: 0; padding: 0; }
+      html, body { background: #06050a; margin: 0; padding: 0; overflow-x: hidden; }
     </style>
   </head>
   <body>
-    <div id="root"><div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#09080a;color:rgba(255,255,255,0.5);font-family:-apple-system,BlinkMacSystemFont,sans-serif"><div style="width:34px;height:34px;border-radius:50%;border:3px solid rgba(232,184,74,0.2);border-top-color:#e8b84a;animation:shellspin 0.8s linear infinite"></div><span style="font-size:13px;letter-spacing:0.06em">Загрузка КиноЗала…</span></div></div>
-    <style>@keyframes shellspin{to{transform:rotate(360deg)}}</style>
+    <div id="root">
+      <div style="position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:#06050a;color:rgba(255,255,255,0.4);font-family:-apple-system,BlinkMacSystemFont,sans-serif">
+        <div style="width:28px;height:28px;border-radius:50%;border:2px solid rgba(168,85,247,0.2);border-top-color:#a855f7;animation:auraspin 0.8s linear infinite"></div>
+      </div>
+    </div>
+    <style>@keyframes auraspin{to{transform:rotate(360deg)}}</style>
     <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>

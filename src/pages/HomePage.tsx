@@ -69,16 +69,15 @@ const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movi
 /* ──────────────────────────────────────────────────────── */
 const Row: React.FC<{
   title: string;
-  icon?: string;
   movies: Movie[];
   loading?: boolean;
   onMovieClick: (id: string) => void;
   onMovieLongPress?: (m: Movie) => void;
-}> = ({ title, icon, movies, loading, onMovieClick, onMovieLongPress }) => {
+}> = ({ title, movies, loading, onMovieClick, onMovieLongPress }) => {
   if (!loading && movies.length === 0) return null;
   return (
     <div className="hp-row">
-      <h3 className="hp-row__title">{icon && <span>{icon}</span>} {title}</h3>
+      <h3 className="hp-row__title">{title}</h3>
       <div className="hp-row__scroll">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
@@ -237,16 +236,16 @@ const TABS = [
 ];
 
 const GENRES_MOVIES = [
-  { id: 28, name: '💥 Боевики' },
-  { id: 35, name: '😂 Комедии' },
-  { id: 18, name: '🎭 Драмы' },
-  { id: 27, name: '👻 Ужасы' },
-  { id: 878, name: '🚀 Фантастика' },
-  { id: 10749, name: '❤️ Мелодрамы' },
-  { id: 53, name: '🔪 Триллеры' },
-  { id: 16, name: '✨ Анимация' },
-  { id: 12, name: '🗺️ Приключения' },
-  { id: 80, name: '🕵️ Криминал' },
+  { id: 28, name: 'Боевики' },
+  { id: 35, name: 'Комедии' },
+  { id: 18, name: 'Драмы' },
+  { id: 27, name: 'Ужасы' },
+  { id: 878, name: 'Фантастика' },
+  { id: 10749, name: 'Мелодрамы' },
+  { id: 53, name: 'Триллеры' },
+  { id: 16, name: 'Анимация' },
+  { id: 12, name: 'Приключения' },
+  { id: 80, name: 'Криминал' },
 ];
 
 const HomePage: React.FC = () => {
@@ -371,10 +370,10 @@ const HomePage: React.FC = () => {
             </div>
           )}
           {!searchLoading && searchResults.length === 0 && query.trim() && (
-            <div className="hp-empty">😕 По запросу «{query}» ничего не найдено</div>
+            <div className="hp-empty">По запросу «{query}» ничего не найдено</div>
           )}
           {!searchLoading && searchResults.length === 0 && !query.trim() && (
-            <div className="hp-empty">🔍 Введите название фильма или сериала</div>
+            <div className="hp-empty">Введите название фильма или сериала</div>
           )}
           <div className="hp-grid">
             {searchResults.map(m => <Card key={m.id} movie={m} onClick={() => go(m.id)} onLongPress={openPreview} />)}
@@ -389,14 +388,19 @@ const HomePage: React.FC = () => {
           {/* Ошибка загрузки */}
           {loadError && !loadingMain && trending.length === 0 && (
             <div className="hp-error">
-              <p style={{fontSize: 40, marginBottom: 12}}>😕</p>
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: 12 }}>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
               <p style={{fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 6}}>Не удалось загрузить</p>
-              <p style={{fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16}}>Проверьте интернет или попробуйте VPN</p>
+              <p style={{fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16}}>Проверьте интернет-соединение</p>
               <button
-                style={{padding: '10px 28px', borderRadius: 12, background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)', color: '#c4b5fd', fontWeight: 700, fontSize: 14, cursor: 'pointer'}}
+                style={{display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'rgba(168,85,247,0.16)', border: '1px solid rgba(168,85,247,0.3)', color: '#c4b5fd', fontWeight: 700, fontSize: 13, cursor: 'pointer'}}
                 onClick={() => setRetryCount(c => c + 1)}
               >
-                🔄 Повторить
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                Повторить
               </button>
             </div>
           )}
@@ -417,10 +421,10 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           )}
-          <Row title="Тренды недели" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Топ фильмов всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Лучшие сериалы" icon="📺" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Тренды недели" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Сейчас в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Топ фильмов всех времён" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие сериалы" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           {GENRES_MOVIES.map(g => (
             <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           ))}
@@ -431,9 +435,9 @@ const HomePage: React.FC = () => {
     if (tab === 'movies') {
       return (
         <>
-          <Row title="Тренды — Фильмы" icon="🔥" movies={trendMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Сейчас в кино" icon="🎬" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Лучшие фильмы" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Тренды — Фильмы" movies={trendMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Сейчас в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие фильмы" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           {GENRES_MOVIES.map(g => (
             <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           ))}
@@ -444,8 +448,8 @@ const HomePage: React.FC = () => {
     if (tab === 'series') {
       return (
         <>
-          <Row title="Тренды — Сериалы" icon="🔥" movies={trendSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Топ сериалов" icon="🏆" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Тренды — Сериалы" movies={trendSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Топ сериалов" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -453,8 +457,8 @@ const HomePage: React.FC = () => {
     if (tab === 'top') {
       return (
         <>
-          <Row title="Лучшие фильмы всех времён" icon="🏆" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Лучшие сериалы" icon="🏆" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие фильмы всех времён" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Лучшие сериалы" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -462,8 +466,8 @@ const HomePage: React.FC = () => {
     if (tab === 'new') {
       return (
         <>
-          <Row title="Новинки в кино" icon="🆕" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Тренды" icon="🔥" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Новинки в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="Тренды" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -476,7 +480,11 @@ const HomePage: React.FC = () => {
       {/* ── Объявление / реклама (только для пользователей без премиума) ── */}
       {!isPremium && adsEnabled && announcement.trim() && (
         <div className="hp-ad">
-          <span className="hp-ad__icon">📢</span>
+          <span className="hp-ad__icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+          </span>
           <span className="hp-ad__text">{announcement}</span>
         </div>
       )}
@@ -502,15 +510,27 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <span className="hp-header__logo">🪐</span>
+              <div className="hp-header__emblem">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                  <defs>
+                    <linearGradient id="auraMonogram" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                      <stop stopColor="#a855f7" />
+                      <stop offset="0.5" stopColor="#38bdf8" />
+                      <stop offset="1" stopColor="#ec4899" />
+                    </linearGradient>
+                  </defs>
+                  <polygon points="12,2 22,12 12,22 2,12" stroke="url(#auraMonogram)" strokeWidth="2.2" fill="rgba(168,85,247,0.15)" strokeLinejoin="round"/>
+                  <circle cx="12" cy="12" r="3.2" fill="#ffffff" />
+                </svg>
+              </div>
               <div>
-                <h1 className="hp-header__title">KINOVERSE</h1>
-                <span className="hp-header__sub">Вселенная кино и музыки</span>
+                <h1 className="hp-header__title">AURA</h1>
+                <span className="hp-header__sub">Cinema & Sound</span>
               </div>
             </div>
             <div className="hp-header__actions">
-              {/* 🤖 CineAI кнопка — квантовый голографический кристалл */}
-              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="CineAI" title="CineAI — Нейроподбор">
+              {/* ✦ Aura AI кнопка */}
+              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="Aura AI" title="Aura AI — Умный подбор">
                 <span className="hp-ai-circle__ring" />
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <defs>
@@ -567,8 +587,7 @@ const HomePage: React.FC = () => {
         {renderContent()}
       </div>
 
-      {/* ── Быстрое превью (длинное нажатие на карточку) — портал в body,
-             чтобы position:fixed не ломался трансформами предков ── */}
+      {/* ── Быстрое превью (длинное нажатие на карточку) — портал в body ── */}
       {preview && createPortal(
         <div className="hp-preview-overlay" onClick={() => setPreview(null)}>
           <div
@@ -598,14 +617,15 @@ const HomePage: React.FC = () => {
             <div className="hp-preview__tags">
               {preview.vote_average > 0 && <span className="hp-preview__tag">★ {preview.vote_average.toFixed(1)}</span>}
               {preview.release_date && <span className="hp-preview__tag">{preview.release_date.slice(0, 4)}</span>}
-              <span className="hp-preview__tag">{preview.is_serial ? '📺 Сериал' : '🎬 Фильм'}</span>
+              <span className="hp-preview__tag">{preview.is_serial ? 'Сериал' : 'Фильм'}</span>
             </div>
             <div className="hp-preview__actions">
               <button
                 className="hp-preview__btn hp-preview__btn--primary"
                 onClick={() => { setPreview(null); navigate(`/movie/${preview.id}`); }}
               >
-                ▶ Смотреть
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+                Смотреть
               </button>
               <button
                 className={`hp-preview__btn hp-preview__btn--fav ${isFavorite(preview.id) ? 'active' : ''}`}
@@ -614,8 +634,11 @@ const HomePage: React.FC = () => {
                   if (isFavorite(preview.id)) removeFavorite(preview.id);
                   else addFavorite(preview);
                 }}
+                aria-label="В избранное"
               >
-                {isFavorite(preview.id) ? '❤️' : '🤍'}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite(preview.id) ? '#ec4899' : 'none'} stroke={isFavorite(preview.id) ? '#ec4899' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
               </button>
             </div>
           </div>
