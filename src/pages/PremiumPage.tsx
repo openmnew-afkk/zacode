@@ -4,6 +4,7 @@ import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { claimPremium, getApiBase } from '../api/backend';
 import AuraEmblem from '../components/AuraEmblem';
+import RulesModal from '../components/RulesModal';
 import './PremiumPage.css';
 
 interface FeatureItem {
@@ -99,6 +100,7 @@ const PremiumPage: React.FC = () => {
 
   /* Оплата */
   const [showPayModal, setShowPayModal] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   const [payName, setPayName] = useState(telegramUsername);
   const [payMsg, setPayMsg] = useState('');
   const [payLoading, setPayLoading] = useState(false);
@@ -242,10 +244,12 @@ const PremiumPage: React.FC = () => {
           </div>
 
           <div className="pm-legal-wrap">
-            <button className="pm-legal-btn" onClick={() => { haptic('light'); navigate('/rules'); }}>
+            <button className="pm-legal-btn" onClick={() => { haptic('light'); setShowRules(true); }}>
               🛡️ Пользовательское соглашение и правила сервиса
             </button>
           </div>
+
+          <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
         </div>
       </div>
     );
@@ -388,7 +392,7 @@ const PremiumPage: React.FC = () => {
         </div>
 
         <div className="pm-legal-wrap">
-          <button className="pm-legal-btn" onClick={() => { haptic('light'); navigate('/rules'); }}>
+          <button className="pm-legal-btn" onClick={() => { haptic('light'); setShowRules(true); }}>
             🛡️ Пользовательское соглашение и правила сервиса
           </button>
         </div>
@@ -469,6 +473,8 @@ const PremiumPage: React.FC = () => {
             <span className="pm-success__check">✓</span> {successMsg}
           </div>
         )}
+
+        <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
       </div>
     </div>
   );

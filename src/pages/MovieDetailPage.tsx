@@ -549,8 +549,32 @@ const MovieDetailPage: React.FC = () => {
               </div>
             </div>
             <div className="dp-watch-hint">
-              <span className="dp-watch-hint__badge">🌍 Режим с VPN:</span>
-              <span className="dp-watch-hint__text">⚡ Серверы 1–5 работают на ура с VPN · Русская озвучка</span>
+              {watchOptions[watchIdx]?.provider === 'VidLink' ? (
+                <>
+                  <span className="dp-watch-hint__badge">⚡ VidLink Pro:</span>
+                  <span className="dp-watch-hint__text">100% с VPN · Нажмите ⚙️ или 🎧 в плеере для русской дорожки</span>
+                </>
+              ) : watchOptions[watchIdx]?.provider === 'Collaps' ? (
+                <>
+                  <span className="dp-watch-hint__badge">🇷🇺 Collaps HD:</span>
+                  <span className="dp-watch-hint__text">LostFilm · Red Head Sound · Резка · Дубляж (выбор студии в плеере)</span>
+                </>
+              ) : watchOptions[watchIdx]?.provider === 'Kinohub' ? (
+                <>
+                  <span className="dp-watch-hint__badge">🎬 Kinohub:</span>
+                  <span className="dp-watch-hint__text">Агрегатор русских студий · Авто-выбор рабочих потоков</span>
+                </>
+              ) : watchOptions[watchIdx]?.provider === 'Voidboost' ? (
+                <>
+                  <span className="dp-watch-hint__badge">🍿 Voidboost HD:</span>
+                  <span className="dp-watch-hint__text">LostFilm · NewStudio · Дубляж (резервный поток РФ)</span>
+                </>
+              ) : (
+                <>
+                  <span className="dp-watch-hint__badge">🌍 Скоростной CDN:</span>
+                  <span className="dp-watch-hint__text">Работает с любым VPN · Full HD качество</span>
+                </>
+              )}
             </div>
             {watchIdx >= 0 ? (
               <iframe
@@ -559,8 +583,8 @@ const MovieDetailPage: React.FC = () => {
                 className="dp-trailer__frame"
                 title="Просмотр"
                 allowFullScreen
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write; cross-origin-isolated"
-                referrerPolicy="no-referrer"
+                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write"
+                referrerPolicy="strict-origin-when-cross-origin"
               />
             ) : (
               <div className="dp-watch-loading">
@@ -569,7 +593,7 @@ const MovieDetailPage: React.FC = () => {
               </div>
             )}
             <div className="dp-watch-sources-wrap">
-              <span className="dp-watch-sources-title">Серверы вещания (1–5 работают с любым VPN):</span>
+              <span className="dp-watch-sources-title">Серверы вещания (с поддержкой VPN и русской озвучки):</span>
               <div className="dp-watch-sources">
                 {watchOptions.map((o, i) => (
                   <button

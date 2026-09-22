@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import AuraEmblem from '../components/AuraEmblem';
+import RulesModal from '../components/RulesModal';
 import { resolveUserAccess } from '../services/accessControl';
 import './ProfilePage.css';
 
@@ -23,6 +24,7 @@ const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp, haptic, tg } = useTelegram();
   const { favorites, watchHistory, clearHistory, isPremium, premiumExpiry, theme, setTheme, role, telegramUsername } = useStore();
+  const [showRules, setShowRules] = useState(false);
 
   const daysLeft = premiumExpiry
     ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
@@ -125,7 +127,10 @@ const ProfilePage: React.FC = () => {
           ),
           label: 'Пользовательское соглашение',
           sub: 'Правовая информация',
-          action: () => navigate('/rules'),
+          action: () => {
+            haptic('light');
+            setShowRules(true);
+          },
         },
       ],
     },
@@ -297,6 +302,8 @@ const ProfilePage: React.FC = () => {
           </button>
         </div>
       )}
+
+      <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
 
       <div className="pf__footer">AURA · Все права защищены</div>
     </div>

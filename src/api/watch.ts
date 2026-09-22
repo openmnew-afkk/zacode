@@ -1,12 +1,15 @@
 /* ===== Источники просмотра и мульти-балансеры видео =====
  *
- * Оптимизировано для просмотра в РФ под VPN:
- *  1. VidLink Pro — скоростной 4K/1080p плеер с русскими аудиодорожками (работает на ура с VPN)
- *  2. VidSrc PM — прямой быстрый международный CDN (работает на ура с VPN)
- *  3. VidSrc SH — надёжный резервный поток (работает на ура с VPN)
- *  4. 2Embed HD — мировой архив фильмов и сериалов (работает на ура с VPN)
- *  5. MultiEmbed — адаптивный авто-ротатор потоков (работает на ура с VPN)
- *  6. Collaps HD (Delivembed) — российский CDN со студиями (LostFilm, RHS, Резка) [для тех, кто без VPN]
+ * Оптимизировано для воспроизведения с русской озвучкой под VPN:
+ *  1. Collaps HD (Delivembed) — российский CDN со студиями (LostFilm, RHS, Резка, Дубляж)
+ *     * С исправлением передачи host & referrer для обхода сбоев iframe в РФ/VPN
+ *  2. Kinohub / Kinobox — агрегатор балансеров РФ (Kodik, Alloha, Collaps, VideoCDN)
+ *  3. VidLink Pro — скоростной 4K/1080p CDN с выбором аудиодорожек (включая русскую)
+ *  4. Voidboost HD — проверенное зеркало со студийными переводами
+ *  5. VidSrc PM — скоростной международный CDN под VPN
+ *  6. VidSrc SH — надёжный резервный поток под VPN
+ *  7. 2Embed HD — мировой архив кино и сериалов
+ *  8. MultiEmbed — авто-ротатор потоков
  */
 import type { WatchOption } from '../types';
 
@@ -26,7 +29,6 @@ export interface WatchBuildParams {
 
 /**
  * Генерация списка проверенных серверов для просмотра фильма или сериала.
- * Первыми идут скоростные серверы, которые работают под VPN.
  */
 export function buildWatchOptions({
   tmdbId,
@@ -40,14 +42,48 @@ export function buildWatchOptions({
 
   const opts: WatchOption[] = [];
 
-  /* 1. VidLink Pro — топовый плеер с русскими дорожками, стабильно работает под VPN */
+  /* 1. Collaps HD — главный балансер с русскими студиями (LostFilm, RHS, Резка, Дубляж) */
+  opts.push({
+    id: 'collaps',
+    label: 'Collaps HD',
+    sublabel: '🇷🇺 LostFilm · Red Head Sound · Резка · Дубляж',
+    url: isSerial
+      ? cleanImdb
+        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
+        : `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+      : cleanImdb
+        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
+        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
+    type: 'iframe',
+    lang: 'ru',
+    provider: 'Collaps',
+    flag: '🇷🇺',
+    quality: '1080p',
+  });
+
+  /* 2. Kinohub / Kinobox — мульти-балансер (Kodik, Alloha, Collaps, VideoCDN) */
+  opts.push({
+    id: 'kinohub',
+    label: 'Kinohub',
+    sublabel: '🎬 Мульти-балансер РФ · Авто-поиск студий озвучки',
+    url: cleanImdb
+      ? `https://on.kinohub.vip/?imdb=${cleanImdb}`
+      : `https://kinobox.in/movie/${cleanTmdb}`,
+    type: 'iframe',
+    lang: 'ru',
+    provider: 'Kinohub',
+    flag: '🎬',
+    quality: 'Full HD',
+  });
+
+  /* 3. VidLink Pro — ультра-быстрый 4K плеер, 100% стабилен с любым VPN, русская дорожка в меню звука */
   opts.push({
     id: 'vidlink',
     label: 'VidLink Pro',
-    sublabel: '⚡ 4K/1080p · Русская озвучка · Работает с VPN',
+    sublabel: '⚡ 4K/1080p · Выбор дорожки (вкл. русскую) · 100% с VPN',
     url: isSerial
-      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}`
-      : `https://vidlink.pro/movie/${cleanTmdb}`,
+      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`
+      : `https://vidlink.pro/movie/${cleanTmdb}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`,
     type: 'iframe',
     lang: 'ru',
     provider: 'VidLink',
@@ -55,7 +91,24 @@ export function buildWatchOptions({
     quality: '4K/1080p',
   });
 
-  /* 2. VidSrc PM — прямой скоростной CDN, отлично работает под VPN */
+  /* 4. Voidboost HD — зеркало со студийными переводами */
+  opts.push({
+    id: 'voidboost',
+    label: 'Voidboost HD',
+    sublabel: '🍿 LostFilm · NewStudio · Дубляж (Резерв РФ)',
+    url: cleanImdb
+      ? `https://voidboost.net/embed/${cleanImdb}`
+      : isSerial
+        ? `https://voidboost.net/embed/tv/${cleanTmdb}`
+        : `https://voidboost.net/embed/movie/${cleanTmdb}`,
+    type: 'iframe',
+    lang: 'ru',
+    provider: 'Voidboost',
+    flag: '🍿',
+    quality: '1080p',
+  });
+
+  /* 5. VidSrc PM — прямой скоростной CDN, отлично работает под VPN */
   opts.push({
     id: 'vidsrc-pm',
     label: 'VidSrc PM',
@@ -70,7 +123,7 @@ export function buildWatchOptions({
     quality: '1080p',
   });
 
-  /* 3. VidSrc SH — надёжное зеркало под VPN */
+  /* 6. VidSrc SH — надёжное зеркало под VPN */
   opts.push({
     id: 'vidsrc-sh',
     label: 'VidSrc SH',
@@ -87,51 +140,34 @@ export function buildWatchOptions({
     quality: '1080p',
   });
 
-  /* 4. 2Embed HD — мировой архив кино и сериалов */
+  /* 7. 2Embed HD — мировой архив кино и сериалов */
   opts.push({
     id: '2embed',
     label: '2Embed HD',
-    sublabel: '🍿 Мировой архив · Сезоны и серии · Работает с VPN',
+    sublabel: '🌐 Мировой архив · Сезоны и серии · Работает с VPN',
     url: isSerial
       ? `https://www.2embed.cc/embedtv/${cleanTmdb}&s=${season}&e=${episode}`
       : `https://www.2embed.cc/embed/${cleanTmdb}`,
     type: 'iframe',
     lang: 'multi',
     provider: '2Embed',
-    flag: '🍿',
+    flag: '🌐',
     quality: 'Full HD',
   });
 
-  /* 5. MultiEmbed — авто-ротатор потоков */
+  /* 8. MultiEmbed — авто-ротатор потоков */
   opts.push({
     id: 'multiembed',
     label: 'MultiEmbed',
-    sublabel: '🌐 Мульти-балансер · Работает с VPN',
+    sublabel: '🔄 Мульти-балансер · Работает с VPN',
     url: isSerial
       ? `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1&s=${season}&e=${episode}`
       : `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1`,
     type: 'iframe',
     lang: 'multi',
     provider: 'MultiEmbed',
-    flag: '🌐',
+    flag: '🔄',
     quality: 'HD',
-  });
-
-  /* 6. Collaps HD — российский CDN со студиями озвучки (только без VPN) */
-  opts.push({
-    id: 'collaps',
-    label: 'Collaps HD',
-    sublabel: '🇷🇺 LostFilm · RHS · Резка (Только БЕЗ VPN)',
-    url: isSerial
-      ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}`
-      : cleanImdb
-        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}`
-        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}`,
-    type: 'iframe',
-    lang: 'ru',
-    provider: 'Collaps',
-    flag: '🇷🇺',
-    quality: '1080p',
   });
 
   return opts;
@@ -157,15 +193,37 @@ export function buildForeignWatchOptions(
 export function switchSourceUrl(
   base: WatchOption,
   tmdbId: string,
+  imdbId: string = '',
   isSerial: boolean,
   season: number,
   episode: number
 ): string {
   const cleanTmdb = tmdbId.replace(/^(tv|movie)-/, '');
+  const cleanImdb = imdbId.startsWith('tt') ? imdbId : '';
+
+  if (base.provider === 'Collaps') {
+    return cleanImdb
+      ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
+      : isSerial
+        ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`;
+  }
+  if (base.provider === 'Kinohub') {
+    return cleanImdb
+      ? `https://on.kinohub.vip/?imdb=${cleanImdb}`
+      : `https://kinobox.in/movie/${cleanTmdb}`;
+  }
+  if (base.provider === 'Voidboost') {
+    return cleanImdb
+      ? `https://voidboost.net/embed/${cleanImdb}`
+      : isSerial
+        ? `https://voidboost.net/embed/tv/${cleanTmdb}`
+        : `https://voidboost.net/embed/movie/${cleanTmdb}`;
+  }
   if (base.provider === 'VidLink') {
     return isSerial
-      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}`
-      : `https://vidlink.pro/movie/${cleanTmdb}`;
+      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`
+      : `https://vidlink.pro/movie/${cleanTmdb}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`;
   }
   if (base.provider === 'VidSrc') {
     return isSerial
@@ -175,7 +233,9 @@ export function switchSourceUrl(
   if (base.provider === 'VidSrcSH') {
     return isSerial
       ? `https://vidsrc.sh/embed/tv/${cleanTmdb}/${season}/${episode}`
-      : `https://vidsrc.sh/embed/movie/${cleanTmdb}`;
+      : cleanImdb
+        ? `https://vidsrc.sh/embed/movie?imdb=${cleanImdb}`
+        : `https://vidsrc.sh/embed/movie/${cleanTmdb}`;
   }
   if (base.provider === '2Embed') {
     return isSerial
@@ -186,11 +246,6 @@ export function switchSourceUrl(
     return isSerial
       ? `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1&s=${season}&e=${episode}`
       : `https://multiembed.mov/?video_id=${cleanTmdb}&tmdb=1`;
-  }
-  if (base.provider === 'Collaps') {
-    return isSerial
-      ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}`
-      : `https://api.delivembed.cc/embed/movie/${cleanTmdb}`;
   }
   return base.url;
 }
