@@ -24,6 +24,22 @@ const tabs: TabDef[] = [
     ),
   },
   {
+    path: '/feed',
+    label: 'Лента',
+    icon: (active) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        {active ? (
+          <path d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2zM10 16V8l6 4-6 4z" fill="currentColor" />
+        ) : (
+          <>
+            <rect x="2.5" y="2.5" width="19" height="19" rx="4.5" stroke="currentColor" strokeWidth="1.8" />
+            <polygon points="10,8 16,12 10,16" fill="currentColor" />
+          </>
+        )}
+      </svg>
+    ),
+  },
+  {
     path: '/search',
     label: 'Поиск',
     icon: (active) => (

@@ -95,3 +95,26 @@ export interface CatalogResponse {
   total_pages: number;
   total_results: number;
 }
+
+export interface FeedPost {
+  id: string;
+  category: 'trailer' | 'announce' | 'premiere' | 'series';
+  title: string;
+  badge: string;
+  badgeColor?: string;
+  description: string;
+  releaseDate: string;
+  specs?: string;
+  posterUrl: string;
+  youtubeId?: string;
+  duration?: string;
+  hasSubtitles?: boolean;
+  movieId?: string;
+  timestamp: string;
+  reactions: {
+    fire: number;
+    heart: number;
+    popcorn: number;
+    clap: number;
+  };
+}

@@ -23,6 +23,13 @@
   --glass-blur:     20px;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
+  --tg-top-inset: 0px;
+  --header-safe-top: max(
+    env(safe-area-inset-top, 12px),
+    var(--tg-content-safe-area-inset-top, 0px),
+    var(--tg-top-inset, 0px),
+    12px
+  );
   --r-sm:  10px;
   --r-md:  14px;
   --r-lg:  20px;
@@ -43,6 +50,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
   background: var(--bg);
   overscroll-behavior: none;
+}
+
+html.tg-fullscreen, body.tg-fullscreen {
+  --tg-top-inset: max(var(--tg-content-safe-area-inset-top, 94px), 94px);
 }
 
 body {

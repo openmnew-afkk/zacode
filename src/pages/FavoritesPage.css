@@ -7,7 +7,7 @@
 
 .fav-header {
   padding: 18px 16px 8px;
-  padding-top: max(env(safe-area-inset-top, 18px), 18px);
+  padding-top: var(--header-safe-top);
 }
 .fav-header__title {
   font-size: 28px;

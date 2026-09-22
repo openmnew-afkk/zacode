@@ -98,6 +98,41 @@ export const useTelegram = () => {
       if (typeof tg.setBottomBarColor === 'function') {
         try { tg.setBottomBarColor('#08080f'); } catch {}
       }
+
+      const updateSafeArea = () => {
+        const isFs = Boolean((tg as any)?.isFullscreen);
+        const csTop = Number((tg as any)?.contentSafeAreaInset?.top || 0);
+        const saTop = Number((tg as any)?.safeAreaInset?.top || 0);
+
+        if (isFs || csTop > 40) {
+          document.documentElement.classList.add('tg-fullscreen');
+          const offset = Math.max(csTop, saTop + 36, 92);
+          document.documentElement.style.setProperty('--tg-top-inset', `${offset}px`);
+        } else {
+          document.documentElement.classList.remove('tg-fullscreen');
+          document.documentElement.style.setProperty('--tg-top-inset', '0px');
+        }
+      };
+
+      updateSafeArea();
+
+      if (typeof (tg as any)?.onEvent === 'function') {
+        try {
+          (tg as any).onEvent('fullscreenChanged', updateSafeArea);
+          (tg as any).onEvent('contentSafeAreaChanged', updateSafeArea);
+          (tg as any).onEvent('safeAreaChanged', updateSafeArea);
+        } catch {}
+      }
+
+      return () => {
+        if (typeof (tg as any)?.offEvent === 'function') {
+          try {
+            (tg as any).offEvent('fullscreenChanged', updateSafeArea);
+            (tg as any).offEvent('contentSafeAreaChanged', updateSafeArea);
+            (tg as any).offEvent('safeAreaChanged', updateSafeArea);
+          } catch {}
+        }
+      };
     }
   }, []);
 

@@ -2,6 +2,7 @@
 .pf {
   min-height: 100vh;
   padding: 0 0 120px;
+  padding-top: var(--header-safe-top);
   position: relative;
   background: #090810;
   overflow-x: hidden;

@@ -7,7 +7,7 @@
 
 .search-header {
   padding: 16px 16px 6px;
-  padding-top: max(env(safe-area-inset-top, 16px), 16px);
+  padding-top: var(--header-safe-top);
 }
 .search-header__title {
   font-size: 28px;
