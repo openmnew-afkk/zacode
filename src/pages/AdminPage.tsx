@@ -5,6 +5,7 @@ import { useTelegram } from '../hooks/useTelegram';
 import {
   getStoredGrants, grantAccessToUser, revokeUserAccess, extendUserAccess,
   generateVipToken, syncFromCloud, resolveUserAccess, MASTER_ADMINS,
+  toggleRussianAccessForUser, checkRussianAccess,
   type UserGrant, type UserRole, type DurationOption
 } from '../services/accessControl';
 import VeloraEmblem from '../components/VeloraEmblem';
@@ -55,6 +56,8 @@ const AdminPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('vip');
   const [selectedDuration, setSelectedDuration] = useState<DurationOption>('30d');
   const [grantNote, setGrantNote] = useState('');
+  const [grantRussianAccess, setGrantRussianAccess] = useState(true);
+  const [quickRussianUser, setQuickRussianUser] = useState('');
   const [actionNotice, setActionNotice] = useState<{ msg: string; type: 'success' | 'info' | 'error' } | null>(null);
 
   /* Объявление */
@@ -127,7 +130,8 @@ const AdminPage: React.FC = () => {
       selectedRole,
       selectedDuration,
       telegramUsername || 'MikySauce',
-      grantNote
+      grantNote,
+      grantRussianAccess
     );
     if (res) {
       const updated = getStoredGrants();
@@ -136,6 +140,21 @@ const AdminPage: React.FC = () => {
       setGrantNote('');
       showToast(`Права ${ROLE_LABELS[selectedRole].label} успешно выданы для ${res.displayName}!`, 'success');
     }
+  };
+
+  /* Быстрое переключение доступа к российскому кино */
+  const handleToggleRussianAccess = (rawUser: string, forceEnable?: boolean) => {
+    if (!rawUser.trim()) {
+      showToast('Введите никнейм пользователя', 'error');
+      return;
+    }
+    const isNowActive = toggleRussianAccessForUser(rawUser, forceEnable);
+    setGrants(getStoredGrants());
+    if (forceEnable) setQuickRussianUser('');
+    showToast(
+      `Доступ к РФ кино для @${rawUser.replace(/^@/, '')} ${isNowActive ? 'открыт! 🇷🇺' : 'заблокирован 🔒'}`,
+      isNowActive ? 'success' : 'info'
+    );
   };
 
   /* Продление доступа */
@@ -386,6 +405,18 @@ const AdminPage: React.FC = () => {
                   onChange={(e) => setGrantNote(e.target.value)}
                 />
               </div>
+
+              <div className="adm-field adm-field--toggle">
+                <label className="adm-toggle-label">
+                  <input
+                    type="checkbox"
+                    checked={grantRussianAccess}
+                    onChange={(e) => setGrantRussianAccess(e.target.checked)}
+                  />
+                  <span className="adm-toggle-custom" />
+                  <span className="adm-toggle-text">🇷🇺 Включить допуск к Русским фильмам и сериалам</span>
+                </label>
+              </div>
             </div>
 
             <div className="adm-form-actions">
@@ -403,6 +434,34 @@ const AdminPage: React.FC = () => {
                 }}
               >
                 📋 Скопировать персональную VIP-ссылку
+              </button>
+            </div>
+          </div>
+
+          {/* Быстрое управление доступом к российскому каталогу */}
+          <div className="adm-card adm-card--rus-highlight">
+            <div className="adm-card__header">
+              <div>
+                <h2 className="adm-card__title">🇷🇺 Выдать доступ к Русскому Кино по нику</h2>
+                <span className="adm-card__sub">
+                  Позволяет открывать закрытый каталог российского кино конкретным пользователям по @username
+                </span>
+              </div>
+            </div>
+
+            <div className="adm-rus-quick-row">
+              <input
+                className="adm-field__input"
+                type="text"
+                placeholder="@username пользователя (например @durov)"
+                value={quickRussianUser}
+                onChange={(e) => setQuickRussianUser(e.target.value)}
+              />
+              <button
+                className="adm-btn adm-btn--rus"
+                onClick={() => handleToggleRussianAccess(quickRussianUser, true)}
+              >
+                🇷🇺 Открыть доступ к РФ кино
               </button>
             </div>
           </div>
@@ -484,6 +543,9 @@ const AdminPage: React.FC = () => {
                           <span className="adm-user-role-badge" style={{ color: roleMeta.color, borderColor: `${roleMeta.color}40`, backgroundColor: `${roleMeta.color}15` }}>
                             {roleMeta.icon} {roleMeta.badge}
                           </span>
+                          <span className={`adm-user-rus-badge ${g.hasRussianAccess ? 'active' : ''}`}>
+                            {g.hasRussianAccess ? '🇷🇺 РФ Кино' : '🔒 Без РФ'}
+                          </span>
                           {isExpired && <span className="adm-user-expired-badge">Истёк</span>}
                         </div>
                         <div className="adm-user-meta">
@@ -497,6 +559,13 @@ const AdminPage: React.FC = () => {
                       </div>
 
                       <div className="adm-user-actions">
+                        <button
+                          className={`adm-icon-action adm-icon-action--rus ${g.hasRussianAccess ? 'active' : ''}`}
+                          onClick={() => handleToggleRussianAccess(g.username)}
+                          title={g.hasRussianAccess ? 'Забрать доступ к русскому кино' : 'Выдать доступ к русскому кино'}
+                        >
+                          {g.hasRussianAccess ? '🇷🇺 ВКЛ' : '🔒 РФ'}
+                        </button>
                         <button
                           className="adm-icon-action"
                           onClick={() => handleExtend(g.username)}

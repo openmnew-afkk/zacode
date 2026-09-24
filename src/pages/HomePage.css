@@ -882,5 +882,218 @@
   box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
 }
 
+/* ── Российский контент: значок на карточке ── */
+.hp-card__badge--rus {
+  background: linear-gradient(135deg, #1d4ed8 0%, #dc2626 100%) !important;
+  color: #fff !important;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+}
+
+/* ── Российский баннер вкладки ── */
+.hp-rus-banner {
+  margin: 12px 14px 18px;
+  padding: 18px 20px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.22) 0%, rgba(15, 23, 42, 0.7) 45%, rgba(220, 38, 38, 0.22) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.35);
+}
+.hp-rus-banner::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(220, 38, 38, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hp-rus-banner__content {
+  position: relative;
+  z-index: 1;
+}
+.hp-rus-banner__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.hp-rus-banner__badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #fff;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.hp-rus-access-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+.hp-rus-access-pill--active {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+.hp-rus-access-pill--locked {
+  background: rgba(244, 63, 94, 0.18);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fda4af;
+}
+.hp-rus-banner__title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+.hp-rus-banner__desc {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 14px;
+}
+.hp-rus-banner__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.hp-rus-banner__btn:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+}
+
+/* ── Модалка блокировки контента РФ (по нику) ── */
+.hp-lock-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(5, 5, 10, 0.78);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  animation: hpPreviewFade 0.25s ease;
+}
+.hp-lock-modal {
+  position: relative;
+  width: 100%;
+  max-width: 330px;
+  background: rgba(18, 16, 26, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 24px 20px 20px;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 1px 0 rgba(255, 255, 255, 0.15) inset;
+  animation: hpPreviewSlide 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.hp-lock-modal__icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 14px;
+  border-radius: 20px;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  display: grid;
+  place-items: center;
+}
+.hp-lock-modal__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 6px;
+}
+.hp-lock-modal__movie {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fda4af;
+  margin: 0 0 10px;
+}
+.hp-lock-modal__text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 0 0 14px;
+}
+.hp-lock-modal__nick-box {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+}
+.hp-lock-modal__nick-label {
+  color: rgba(255, 255, 255, 0.5);
+}
+.hp-lock-modal__nick-val {
+  color: #60a5fa;
+  font-weight: 700;
+  font-family: monospace;
+}
+.hp-lock-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hp-lock-modal__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 12px;
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.hp-lock-modal__btn--tg {
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.35);
+}
+.hp-lock-modal__btn--tg:active {
+  transform: scale(0.97);
+}
+.hp-lock-modal__btn--cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.hp-lock-modal__btn--cancel:active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 
 

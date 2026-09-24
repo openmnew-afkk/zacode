@@ -17,6 +17,7 @@ export function isRestrictedContent(_countries: string[] | undefined): boolean {
 export interface WatchBuildParams {
   tmdbId: string;
   imdbId?: string;
+  kinopoiskId?: number | string;
   title: string;
   isSerial: boolean;
   season?: number;
@@ -30,6 +31,7 @@ export interface WatchBuildParams {
 export function buildWatchOptions({
   tmdbId,
   imdbId = '',
+  kinopoiskId,
   title: _title,
   isSerial,
   season = 1,
@@ -37,6 +39,7 @@ export function buildWatchOptions({
 }: WatchBuildParams): WatchOption[] {
   const cleanTmdb = tmdbId.replace(/^(tv|movie)-/, '');
   const cleanImdb = imdbId.startsWith('tt') ? imdbId : '';
+  const cleanKp = kinopoiskId ? String(kinopoiskId).replace(/\D/g, '') : '';
 
   const opts: WatchOption[] = [];
 
@@ -45,13 +48,15 @@ export function buildWatchOptions({
     id: 'collaps',
     label: 'Collaps HD',
     sublabel: '🇷🇺 LostFilm · Red Head Sound · Резка · Дубляж (Сервер №1)',
-    url: isSerial
-      ? cleanImdb
-        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
-        : `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
-      : cleanImdb
-        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
-        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
+    url: cleanKp
+      ? `https://api.delivembed.cc/embed/kp/${cleanKp}?host=delivembed.cc`
+      : isSerial
+        ? cleanImdb
+          ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
+          : `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+        : cleanImdb
+          ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
+          : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
     type: 'iframe',
     lang: 'ru',
     provider: 'Collaps',
@@ -64,11 +69,13 @@ export function buildWatchOptions({
     id: 'voidboost',
     label: 'Voidboost HD',
     sublabel: '🍿 HDRezka · LostFilm · NewStudio · Дубляж (РФ)',
-    url: cleanImdb
-      ? `https://voidboost.net/embed/${cleanImdb}`
-      : isSerial
-        ? `https://voidboost.net/embed/tv/${cleanTmdb}`
-        : `https://voidboost.net/embed/movie/${cleanTmdb}`,
+    url: cleanKp
+      ? `https://voidboost.net/embed/${cleanKp}`
+      : cleanImdb
+        ? `https://voidboost.net/embed/${cleanImdb}`
+        : isSerial
+          ? `https://voidboost.net/embed/tv/${cleanTmdb}`
+          : `https://voidboost.net/embed/movie/${cleanTmdb}`,
     type: 'iframe',
     lang: 'ru',
     provider: 'Voidboost',
@@ -81,11 +88,13 @@ export function buildWatchOptions({
     id: 'alloha',
     label: 'Alloha / Резка',
     sublabel: '✨ Студийные озвучки РФ · Альтернативный поток',
-    url: cleanImdb
-      ? `https://stream.voidboost.cc/embed/${cleanImdb}`
-      : isSerial
-        ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
-        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
+    url: cleanKp
+      ? `https://stream.voidboost.cc/embed/${cleanKp}`
+      : cleanImdb
+        ? `https://stream.voidboost.cc/embed/${cleanImdb}`
+        : isSerial
+          ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+          : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
     type: 'iframe',
     lang: 'ru',
     provider: 'Alloha',
@@ -98,11 +107,13 @@ export function buildWatchOptions({
     id: 'lumex',
     label: 'Lumex HD',
     sublabel: '🎥 Российский видео-CDN · Дубляж Full HD',
-    url: cleanImdb
-      ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
-      : isSerial
-        ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
-        : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`,
+    url: cleanKp
+      ? `https://v1727192800.lumex.news/embed/${cleanKp}`
+      : cleanImdb
+        ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
+        : isSerial
+          ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
+          : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`,
     type: 'iframe',
     lang: 'ru',
     provider: 'Lumex',
@@ -110,7 +121,22 @@ export function buildWatchOptions({
     quality: 'Full HD',
   });
 
-  /* 5. Global 4K (США) — ЕДИНСТВЕННЫЙ американский сервер (100% стабилен с любым VPN США, оригинал + субтитры) */
+  /* 5. Kinobox — мульти-плеер по Кинопоиску для РФ */
+  if (cleanKp) {
+    opts.push({
+      id: 'kinobox',
+      label: 'Кинобокс HD',
+      sublabel: '🎬 Плееры РФ (HDRezka, Kodik, Collaps)',
+      url: `https://kinobox.tv/embed?kinopoisk=${cleanKp}`,
+      type: 'iframe',
+      lang: 'ru',
+      provider: 'Kinobox',
+      flag: '🎬',
+      quality: '1080p',
+    });
+  }
+
+  /* 6. Global 4K (США) — ЕДИНСТВЕННЫЙ американский сервер (100% стабилен с любым VPN США, оригинал + субтитры) */
   opts.push({
     id: 'global-us',
     label: 'Global 4K (США)',
@@ -151,38 +177,51 @@ export function switchSourceUrl(
   imdbId: string = '',
   isSerial: boolean,
   season: number,
-  episode: number
+  episode: number,
+  kinopoiskId?: number | string,
 ): string {
   const cleanTmdb = tmdbId.replace(/^(tv|movie)-/, '');
   const cleanImdb = imdbId.startsWith('tt') ? imdbId : '';
+  const cleanKp = kinopoiskId ? String(kinopoiskId).replace(/\D/g, '') : '';
 
+  if (base.provider === 'Kinobox' && cleanKp) {
+    return `https://kinobox.tv/embed?kinopoisk=${cleanKp}`;
+  }
   if (base.provider === 'Collaps') {
-    return cleanImdb
-      ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
-      : isSerial
-        ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
-        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`;
+    return cleanKp
+      ? `https://api.delivembed.cc/embed/kp/${cleanKp}?host=delivembed.cc`
+      : cleanImdb
+        ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
+        : isSerial
+          ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+          : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`;
   }
   if (base.provider === 'Voidboost') {
-    return cleanImdb
-      ? `https://voidboost.net/embed/${cleanImdb}`
-      : isSerial
-        ? `https://voidboost.net/embed/tv/${cleanTmdb}`
-        : `https://voidboost.net/embed/movie/${cleanTmdb}`;
+    return cleanKp
+      ? `https://voidboost.net/embed/${cleanKp}`
+      : cleanImdb
+        ? `https://voidboost.net/embed/${cleanImdb}`
+        : isSerial
+          ? `https://voidboost.net/embed/tv/${cleanTmdb}`
+          : `https://voidboost.net/embed/movie/${cleanTmdb}`;
   }
   if (base.provider === 'Alloha') {
-    return cleanImdb
-      ? `https://stream.voidboost.cc/embed/${cleanImdb}`
-      : isSerial
-        ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
-        : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`;
+    return cleanKp
+      ? `https://stream.voidboost.cc/embed/${cleanKp}`
+      : cleanImdb
+        ? `https://stream.voidboost.cc/embed/${cleanImdb}`
+        : isSerial
+          ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+          : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`;
   }
   if (base.provider === 'Lumex') {
-    return cleanImdb
-      ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
-      : isSerial
-        ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
-        : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`;
+    return cleanKp
+      ? `https://v1727192800.lumex.news/embed/${cleanKp}`
+      : cleanImdb
+        ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
+        : isSerial
+          ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
+          : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`;
   }
   if (base.provider === 'GlobalUS' || base.provider === 'VidLink') {
     return isSerial

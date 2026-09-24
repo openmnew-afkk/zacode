@@ -4,9 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
+  getRussianCinema,
 } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
+import { checkRussianAccess } from '../services/accessControl';
 import type { Movie, TrackedItem } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
 import './HomePage.css';
@@ -58,6 +60,7 @@ const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movi
           <span className="hp-card__rating">★ {movie.vote_average.toFixed(1)}</span>
         )}
         {movie.is_serial && <span className="hp-card__badge">Сериал</span>}
+        {movie.is_russian && <span className="hp-card__badge hp-card__badge--rus">🇷🇺 РФ</span>}
       </div>
       <p className="hp-card__title">{movie.title}</p>
       {movie.release_date && <p className="hp-card__year">{movie.release_date.slice(0, 4)}</p>}
@@ -239,6 +242,7 @@ const TABS = [
   { id: 'home', label: 'Главная' },
   { id: 'movies', label: 'Фильмы' },
   { id: 'series', label: 'Сериалы' },
+  { id: 'russian', label: '🇷🇺 РФ Кино' },
   { id: 'top', label: 'Топ' },
   { id: 'new', label: 'Новинки' },
 ];
@@ -269,14 +273,15 @@ const HomePage: React.FC = () => {
   const [showSearch, setShowSearch] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<Movie | null>(null);
+  const [lockedMovie, setLockedMovie] = useState<Movie | null>(null);
 
-  // Блокируем скролл страницы под открытым превью
+  // Блокируем скролл страницы под открытым превью или модалкой
   useEffect(() => {
-    if (!preview) return;
+    if (!preview && !lockedMovie) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
-  }, [preview]);
+  }, [preview, lockedMovie]);
 
   const openPreview = useCallback((m: Movie) => {
     haptic('medium');
@@ -290,6 +295,7 @@ const HomePage: React.FC = () => {
   const [topMovies, setTopMovies] = useState<Movie[]>([]);
   const [topSeries, setTopSeries] = useState<Movie[]>([]);
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
+  const [russianCinema, setRussianCinema] = useState<Movie[]>([]);
   const [genreRows, setGenreRows] = useState<Record<number, Movie[]>>({});
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
 
@@ -298,7 +304,19 @@ const HomePage: React.FC = () => {
   const [loadError, setLoadError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
-  const go = (id: string) => navigate(`/movie/${id}`);
+  const handleMovieClick = (id: string) => {
+    const all = [...trending, ...trendMovies, ...trendSeries, ...topMovies, ...topSeries, ...nowPlaying, ...russianCinema, ...searchResults];
+    const movie = all.find(m => m.id === id);
+    const isRus = movie?.is_russian || (movie?.id && String(movie.id).startsWith('rus-'));
+    if (isRus && !checkRussianAccess(tgUser?.username)) {
+      haptic('heavy');
+      setLockedMovie(movie || ({ id, title: 'Российское кино', is_russian: true } as Movie));
+      return;
+    }
+    navigate(`/movie/${id}`);
+  };
+
+  const go = handleMovieClick;
 
   /* Загрузка главных данных */
   useEffect(() => {
@@ -315,21 +333,23 @@ const HomePage: React.FC = () => {
           getTopRated('movie'),
           getTopRated('series'),
           getNowPlaying(),
+          getRussianCinema(),
         ]);
         if (!alive) return;
 
         const get = (i: number) => results[i].status === 'fulfilled' ? (results[i] as any).value : [];
 
-        const tr = get(0), tm = get(1), ts = get(2), top_m = get(3), top_s = get(4), np = get(5);
+        const tr = get(0), tm = get(1), ts = get(2), top_m = get(3), top_s = get(4), np = get(5), rus = get(6);
         setTrending(tr);
         setTrendMovies(tm);
         setTrendSeries(ts);
         setTopMovies(top_m);
         setTopSeries(top_s);
         setNowPlaying(np);
+        setRussianCinema(rus);
 
         // Если ВСЕ пустые — ошибка загрузки
-        const total = tr.length + tm.length + ts.length + top_m.length + top_s.length + np.length;
+        const total = tr.length + tm.length + ts.length + top_m.length + top_s.length + np.length + rus.length;
         if (total === 0) setLoadError(true);
       } catch (e) {
         console.error('Home load error:', e);
@@ -429,6 +449,7 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           )}
+          <Row title="🇷🇺 Российские сериалы и фильмы" movies={russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Тренды недели" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Сейчас в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Топ фильмов всех времён" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
@@ -436,6 +457,50 @@ const HomePage: React.FC = () => {
           {GENRES_MOVIES.map(g => (
             <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           ))}
+        </>
+      );
+    }
+
+    if (tab === 'russian') {
+      const rusMovies = russianCinema.filter(m => !m.is_serial);
+      const rusSeries = russianCinema.filter(m => m.is_serial);
+      const hasAccess = checkRussianAccess(tgUser?.username);
+      return (
+        <>
+          <div className="hp-rus-banner">
+            <div className="hp-rus-banner__content">
+              <div className="hp-rus-banner__header">
+                <span className="hp-rus-banner__badge">🇷🇺 РФ КИНО & СЕРИАЛЫ</span>
+                {hasAccess ? (
+                  <span className="hp-rus-access-pill hp-rus-access-pill--active">✓ Доступ открыт (@{tgUser?.username || 'аккаунт'})</span>
+                ) : (
+                  <span className="hp-rus-access-pill hp-rus-access-pill--locked">🔒 Выдаётся по нику в админке</span>
+                )}
+              </div>
+              <h2 className="hp-rus-banner__title">Премьеры и культовые проекты РФ</h2>
+              <p className="hp-rus-banner__desc">
+                Слово пацана, Цикады, Триггер, Холоп, Кухня, Мажор и другие хиты в Full HD.
+                {!hasAccess && ' Для получения доступа обратитесь к администратору в Telegram.'}
+              </p>
+              {!hasAccess && (
+                <a
+                  href="https://t.me/MikySauce"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hp-rus-banner__btn"
+                  onClick={() => haptic('medium')}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                  </svg>
+                  Запросить доступ у @MikySauce
+                </a>
+              )}
+            </div>
+          </div>
+          <Row title="🔥 Горячие новинки РФ" movies={russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="📺 Топовые сериалы РФ" movies={rusSeries.length > 0 ? rusSeries : russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row title="🎬 Российские фильмы" movies={rusMovies.length > 0 ? rusMovies : russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
         </>
       );
     }
@@ -646,6 +711,50 @@ const HomePage: React.FC = () => {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite(preview.id) ? '#ec4899' : 'none'} stroke={isFavorite(preview.id) ? '#ec4899' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* ── Модалка ограничения доступа к российскому кино ── */}
+      {lockedMovie && createPortal(
+        <div className="hp-lock-overlay" onClick={() => setLockedMovie(null)}>
+          <div className="hp-lock-modal" onClick={e => e.stopPropagation()}>
+            <div className="hp-lock-modal__icon">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fb7185" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
+            <h3 className="hp-lock-modal__title">Доступ к контенту РФ ограничен</h3>
+            <p className="hp-lock-modal__movie">«{lockedMovie.title}»</p>
+            <p className="hp-lock-modal__text">
+              Просмотр российских сериалов и новинок кино выдаётся администратором индивидуально по вашему нику Telegram.
+            </p>
+            <div className="hp-lock-modal__nick-box">
+              <span className="hp-lock-modal__nick-label">Ваш текущий ник:</span>
+              <span className="hp-lock-modal__nick-val">@{tgUser?.username || 'аккаунт_без_ника'}</span>
+            </div>
+            <div className="hp-lock-modal__actions">
+              <a
+                href="https://t.me/MikySauce"
+                target="_blank"
+                rel="noreferrer"
+                className="hp-lock-modal__btn hp-lock-modal__btn--tg"
+                onClick={() => { haptic('medium'); setLockedMovie(null); }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.52 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+                </svg>
+                Запросить доступ у @MikySauce
+              </a>
+              <button
+                className="hp-lock-modal__btn hp-lock-modal__btn--cancel"
+                onClick={() => setLockedMovie(null)}
+              >
+                Понятно
               </button>
             </div>
           </div>

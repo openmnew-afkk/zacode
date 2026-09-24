@@ -128,16 +128,15 @@ const MusicPage: React.FC = () => {
     setLoading(true);
     try {
       if (tab === 'wave') {
-        // Умная волна (Яндекс Музыка Style): подмешивает треки по выбранному настроению + лайки
+        // Умная волна (Яндекс Музыка Style): подмешивает только РЕАЛЬНЫЕ студийные треки по выбранному настроению без рекламы!
         const moodFiltered = RUSSIAN_CHART_TOP.filter((t) => t.mood === activeMood || activeMood === 'russian').map(mapRussianTrack);
-        const liveFiltered = RUSSIAN_RADIO_STREAMS.filter((t) => t.mood === activeMood).map(mapRussianTrack);
-        const audiusTracks = await fetchAudius(15);
-        setTracks([...moodFiltered, ...liveFiltered, ...audiusTracks]);
+        const audiusTracks = await fetchAudius(20);
+        setTracks([...moodFiltered, ...audiusTracks]);
       } else if (tab === 'chart') {
-        // Главный хит-парад России
+        // Главный хит-парад России (100% реальные песни, 0 радиорекламы)
         setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
       } else if (tab === 'live') {
-        // 24/7 Радиовещание в HD (без ограничений по времени)
+        // 24/7 Прямой эфир FM-радиостанций
         setTracks(RUSSIAN_RADIO_STREAMS.map(mapRussianTrack));
       } else if (tab === 'audius') {
         // Международные полные треки
@@ -154,8 +153,42 @@ const MusicPage: React.FC = () => {
   }, [tab, activeMood, likedTracks, fetchAudius]);
 
   useEffect(() => {
-    loadContent();
-  }, [loadContent]);
+    if (!query.trim()) {
+      loadContent();
+    }
+  }, [loadContent, query]);
+
+  /* Поиск через студийный каталог iTunes без рекламы */
+  useEffect(() => {
+    if (!query.trim()) return;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query.trim())}&country=RU&entity=song&limit=25`, {
+          signal: AbortSignal.timeout(6000),
+        });
+        const data = await res.json();
+        if (data?.results?.length > 0) {
+          const itunesResults: Track[] = data.results.filter((r: any) => r.previewUrl).map((r: any) => ({
+            id: `it-${r.trackId}`,
+            title: r.trackName,
+            artist: r.artistName,
+            artwork: r.artworkUrl100 ? r.artworkUrl100.replace('100x100bb', '600x600bb') : '',
+            duration: r.trackTimeMillis ? Math.round(r.trackTimeMillis / 1000) : 30,
+            plays: 0,
+            genre: r.primaryGenreName || 'Track',
+            streamUrl: r.previewUrl,
+          }));
+          if (itunesResults.length > 0) {
+            setTracks(itunesResults);
+          }
+        }
+      } catch {} finally {
+        setLoading(false);
+      }
+    }, 450);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   /* Управление воспроизведением */
   const handlePlayTrack = (track: Track, idx: number) => {
@@ -263,6 +296,11 @@ const MusicPage: React.FC = () => {
 
       {/* ── Список треков ── */}
       <main className="mu-content">
+        {tab === 'live' && !loading && (
+          <div className="mu-live-note">
+            <span>📻 Прямой эфир радиостанций в HD качестве (Record, DFM, Европа Плюс).</span>
+          </div>
+        )}
         {loading ? (
           <div className="mu-loading">
             <div className="mu-spinner" />

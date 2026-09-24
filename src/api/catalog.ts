@@ -688,3 +688,252 @@ export async function discoverSeries(opts: {
     return { ok: false, page: 1, results: [], total_pages: 0, total_results: 0 };
   }
 }
+
+/* ════════════ Российское кино и сериалы ════════════ */
+
+export const CURATED_RUSSIAN_HITS: Movie[] = [
+  {
+    id: 'tv-237478',
+    imdbID: 'tt30149074',
+    title: 'Слово пацана. Кровь на асфальте',
+    original_title: 'Slovo patsana. Krov na asfalte',
+    overview: 'Конец 1980-х. Пока родители борются за выживание в меняющейся стране, подростки сбиваются в уличные стаи и бьются за асфальт.',
+    poster_path: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2023-11-09',
+    vote_average: 8.5,
+    imdb_rating: 8.5,
+    runtime: null,
+    type: 'series',
+    genre_ids: [18, 80],
+    genres: ['Драма', 'Криминал'],
+    is_serial: true,
+    directors: ['Жора Крыжовников'],
+    actors: ['Иван Янковский', 'Рузиль Минекаев', 'Леон Кемстач'],
+    countries: ['Россия'],
+    popularity: 98.5,
+    adult: false,
+    quality: '4K Ultra HD',
+    is_russian: true,
+  },
+  {
+    id: 'movie-114479',
+    imdbID: 'tt0118767',
+    title: 'Брат',
+    original_title: 'Brat',
+    overview: 'Демобилизованный из армии Данила Багров приезжает в Санкт-Петербург к старшему брату, который оказывается наёмным убийцей.',
+    poster_path: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=1280&auto=format&fit=crop&q=80',
+    release_date: '1997-12-12',
+    vote_average: 8.2,
+    imdb_rating: 8.2,
+    runtime: 100,
+    type: 'movie',
+    genre_ids: [80, 18, 28],
+    genres: ['Криминал', 'Драма', 'Боевик'],
+    is_serial: false,
+    directors: ['Алексей Балабанов'],
+    actors: ['Сергей Бодров-мл.', 'Виктор Сухоруков', 'Светлана Письмиченко'],
+    countries: ['Россия'],
+    popularity: 88.2,
+    adult: false,
+    quality: 'Full HD',
+    is_russian: true,
+  },
+  {
+    id: 'movie-114480',
+    imdbID: 'tt0238883',
+    title: 'Брат 2',
+    original_title: 'Brat 2',
+    overview: 'Данила Багров отправляется в Америку, чтобы восстановить справедливость и вызволить брата сослуживца.',
+    poster_path: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1478760329108-5c3ed9d495a0?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2000-05-11',
+    vote_average: 8.1,
+    imdb_rating: 8.1,
+    runtime: 122,
+    type: 'movie',
+    genre_ids: [80, 28],
+    genres: ['Криминал', 'Боевик'],
+    is_serial: false,
+    directors: ['Алексей Балабанов'],
+    actors: ['Сергей Бодров-мл.', 'Виктор Сухоруков', 'Сергей Маковецкий'],
+    countries: ['Россия'],
+    popularity: 85.0,
+    adult: false,
+    quality: 'Full HD',
+    is_russian: true,
+  },
+  {
+    id: 'movie-850165',
+    imdbID: 'tt8550800',
+    title: 'Мастер и Маргарита',
+    original_title: 'Master i Margarita',
+    overview: 'Москва, 1930-е годы. Известный писатель оказывается в центре литературного скандала. Вскоре в городе появляется загадочный Воланд со свитой.',
+    poster_path: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2024-01-25',
+    vote_average: 7.9,
+    imdb_rating: 7.9,
+    runtime: 157,
+    type: 'movie',
+    genre_ids: [18, 14, 9648],
+    genres: ['Драма', 'Фэнтези', 'Детектив'],
+    is_serial: false,
+    directors: ['Михаил Локшин'],
+    actors: ['Аугуст Диль', 'Евгений Цыганов', 'Юлия Снигирь'],
+    countries: ['Россия'],
+    popularity: 94.0,
+    adult: false,
+    quality: '4K Ultra HD',
+    is_russian: true,
+  },
+  {
+    id: 'tv-121516',
+    imdbID: 'tt13989182',
+    title: 'Вампиры средней полосы',
+    original_title: 'Vampiry sredney polosy',
+    overview: 'Смоленск — обычный город, но в нём живут настоящие вампиры под предводительством деда Славы, которые никого не убивают.',
+    poster_path: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2021-03-18',
+    vote_average: 8.3,
+    imdb_rating: 8.3,
+    runtime: null,
+    type: 'series',
+    genre_ids: [35, 14, 9648],
+    genres: ['Комедия', 'Фэнтези', 'Детектив'],
+    is_serial: true,
+    directors: ['Антон Маслов'],
+    actors: ['Юрий Стоянов', 'Татьяна Догилева', 'Артём Ткаченко'],
+    countries: ['Россия'],
+    popularity: 82.0,
+    adult: false,
+    quality: 'Full HD',
+    is_russian: true,
+  },
+  {
+    id: 'tv-98188',
+    imdbID: 'tt10850238',
+    title: 'Триггер',
+    original_title: 'Trigger',
+    overview: 'Психолог Артём Стрелецкий использует провокационный метод шоковой терапии, выводя клиентов из зоны комфорта.',
+    poster_path: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2020-02-10',
+    vote_average: 8.1,
+    imdb_rating: 8.1,
+    runtime: null,
+    type: 'series',
+    genre_ids: [18, 9648],
+    genres: ['Драма', 'Детектив'],
+    is_serial: true,
+    directors: ['Дмитрий Тюрин'],
+    actors: ['Максим Матвеев', 'Лена Тронина'],
+    countries: ['Россия'],
+    popularity: 79.0,
+    adult: false,
+    quality: 'Full HD',
+    is_russian: true,
+  },
+  {
+    id: 'movie-630240',
+    imdbID: 'tt7601480',
+    title: 'Майор Гром: Чумной Доктор',
+    original_title: 'Mayor Grom: Chumnoy Doktor',
+    overview: 'Майор полиции Игорь Гром сталкивается с таинственным мстителем в маске Чумного Доктора, который объявляет войну коррупции в Петербурге.',
+    poster_path: 'https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2021-04-01',
+    vote_average: 7.7,
+    imdb_rating: 7.7,
+    runtime: 136,
+    type: 'movie',
+    genre_ids: [28, 80],
+    genres: ['Боевик', 'Криминал'],
+    is_serial: false,
+    directors: ['Олег Трофим'],
+    actors: ['Тихон Жизневский', 'Любовь Аксёнова'],
+    countries: ['Россия'],
+    popularity: 84.0,
+    adult: false,
+    quality: '4K Ultra HD',
+    is_russian: true,
+  },
+  {
+    id: 'movie-1075794',
+    imdbID: 'tt28489718',
+    title: 'Холоп 2',
+    original_title: 'Kholop 2',
+    overview: 'Гриша, бывший мажор, замечает избалованную Катю и решает перевоспитать её в декорациях эпохи наполеоновских войн.',
+    poster_path: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop&q=80',
+    backdrop_path: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=1280&auto=format&fit=crop&q=80',
+    release_date: '2024-01-01',
+    vote_average: 7.4,
+    imdb_rating: 7.4,
+    runtime: 119,
+    type: 'movie',
+    genre_ids: [35],
+    genres: ['Комедия'],
+    is_serial: false,
+    directors: ['Клим Шипенко'],
+    actors: ['Милош Бикович', 'Аглая Тарасова'],
+    countries: ['Россия'],
+    popularity: 91.0,
+    adult: false,
+    quality: '4K Ultra HD',
+    is_russian: true,
+  },
+];
+
+export async function getRussianMovies(): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>('/discover/movie', {
+      with_original_language: 'ru',
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 10,
+    });
+    const fetched = (data.results || []).map((i: any) => ({
+      ...toMovie(i, 'movie'),
+      is_russian: true,
+    }));
+    return fetched.length > 0 ? fetched : CURATED_RUSSIAN_HITS.filter((m) => !m.is_serial);
+  } catch {
+    return CURATED_RUSSIAN_HITS.filter((m) => !m.is_serial);
+  }
+}
+
+export async function getRussianSeries(): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>('/discover/tv', {
+      with_original_language: 'ru',
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 10,
+    });
+    const fetched = (data.results || []).map((i: any) => ({
+      ...toMovie(i, 'tv'),
+      is_russian: true,
+    }));
+    return fetched.length > 0 ? fetched : CURATED_RUSSIAN_HITS.filter((m) => m.is_serial);
+  } catch {
+    return CURATED_RUSSIAN_HITS.filter((m) => m.is_serial);
+  }
+}
+
+export async function getRussianCinema(): Promise<Movie[]> {
+  try {
+    const [movies, series] = await Promise.all([
+      getRussianMovies(),
+      getRussianSeries(),
+    ]);
+    const merged: Movie[] = [];
+    const maxLen = Math.max(movies.length, series.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (movies[i]) merged.push(movies[i]);
+      if (series[i]) merged.push(series[i]);
+    }
+    return merged.length > 0 ? merged : CURATED_RUSSIAN_HITS;
+  } catch {
+    return CURATED_RUSSIAN_HITS;
+  }
+}

@@ -801,3 +801,104 @@
   font-size: 11.5px;
   cursor: default;
 }
+
+/* ── Заблокированный просмотр по нику ── */
+.dp-watch--locked {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.22), rgba(225, 29, 72, 0.38)) !important;
+  color: #fda4af !important;
+  border: 1px solid rgba(244, 63, 94, 0.4) !important;
+  box-shadow: 0 4px 18px rgba(225, 29, 72, 0.25) !important;
+}
+
+.dp-meta--rus {
+  background: linear-gradient(135deg, rgba(29, 78, 216, 0.3), rgba(220, 38, 38, 0.3));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff !important;
+  font-weight: 800 !important;
+  border-radius: 8px;
+  padding: 2px 7px;
+}
+
+/* ── Карточка ограничения доступа к РФ контенту ── */
+.dp-rus-restricted {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin: 14px 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.12) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.dp-rus-restricted__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.dp-rus-restricted__body {
+  flex: 1;
+  min-width: 0;
+}
+.dp-rus-restricted__title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.dp-rus-restricted__text {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.65);
+  line-height: 1.45;
+  margin: 0 0 12px;
+}
+.dp-rus-restricted__nick {
+  color: #60a5fa;
+  font-weight: 700;
+  font-family: monospace;
+}
+.dp-rus-restricted__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+  transition: transform 0.15s ease;
+}
+.dp-rus-restricted__btn:active {
+  transform: scale(0.96);
+}
+
+/* ── Разрешённый доступ к РФ контенту ── */
+.dp-rus-granted {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 16px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+.dp-rus-granted__badge {
+  font-size: 12px;
+  font-weight: 800;
+  color: #6ee7b7;
+}
+.dp-rus-granted__sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+}

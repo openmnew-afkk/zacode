@@ -599,6 +599,68 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── Российское кино: бейджи и быстрый допуск ── */
+.adm-card--rus-highlight {
+  border-color: rgba(56, 189, 248, 0.35);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(56, 189, 248, 0.08) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.adm-rus-quick-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 14px;
+}
+@media (max-width: 480px) {
+  .adm-rus-quick-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+.adm-btn--rus {
+  background: linear-gradient(135deg, #ef4444, #3b82f6);
+  color: #fff;
+  border: none;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+}
+
+.adm-user-rus-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.5);
+  display: inline-flex;
+  align-items: center;
+}
+.adm-user-rus-badge.active {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.12);
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.adm-icon-action--rus {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: #94a3b8;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+.adm-icon-action--rus.active {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(56, 189, 248, 0.15);
+}
+
 /* ═══════════ СЕРВЕРЫ И VPN ═══════════ */
 .adm-vpn-alert {
   display: flex;
