@@ -98,19 +98,37 @@ export interface CatalogResponse {
 
 export interface FeedPost {
   id: string;
-  category: 'trailer' | 'announce' | 'premiere' | 'series';
+  category: 'trailer' | 'announce' | 'premiere' | 'series' | 'industry';
   title: string;
   badge: string;
   badgeColor?: string;
   description: string;
+  fullArticle?: string[];
+  quote?: {
+    text: string;
+    author: string;
+    role?: string;
+  };
+  keyFacts?: {
+    label: string;
+    value: string;
+  }[];
+  source: {
+    name: string;
+    url?: string;
+    publishedAt?: string;
+  };
   releaseDate: string;
   specs?: string;
   posterUrl: string;
+  gallery?: string[];
   youtubeId?: string;
   duration?: string;
   hasSubtitles?: boolean;
   movieId?: string;
   timestamp: string;
+  views?: string;
+  tags?: string[];
   reactions: {
     fire: number;
     heart: number;

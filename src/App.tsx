@@ -29,6 +29,12 @@ function App() {
     document.documentElement.classList.remove('dark', 'light');
     document.documentElement.classList.add(theme);
     try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg) {
+        const bgCol = theme === 'light' ? '#fff5f7' : '#09080b';
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor(bgCol);
+        if (typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor(bgCol);
+      }
       const user = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
       if (user?.username) setTelegramUsername(user.username);
     } catch {}

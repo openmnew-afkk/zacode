@@ -209,25 +209,6 @@ const MusicPage: React.FC = () => {
           </button>
         </div>
 
-        {/* ── Капсула «Моя Волна» в стиле Яндекс Музыки ── */}
-        {tab === 'wave' && (
-          <div className="mu-yandex-wave">
-            <div className="mu-yandex-wave__orb">
-              <div className={`mu-wave-disc ${isPlaying ? 'playing' : ''}`}>
-                <span /><span /><span /><span /><span />
-              </div>
-            </div>
-            <div className="mu-yandex-wave__info">
-              <div className="mu-yandex-wave__title">
-                <span>Персональный поток музыки</span>
-                <span className="mu-yandex-wave__live-badge">Live</span>
-              </div>
-              <p className="mu-yandex-wave__sub">
-                Подстраивается под ваши лайки и настроение, как в Яндекс Музыке
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* ── Переключатель настроений (Mood Selector) ── */}
         {tab === 'wave' && (

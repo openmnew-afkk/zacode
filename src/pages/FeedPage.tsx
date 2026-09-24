@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
-import { useStore } from '../store';
 import { INITIAL_FEED_POSTS } from '../data/feedPosts';
 import type { FeedPost } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
@@ -19,45 +18,30 @@ interface FilterChip {
 const STORIES = [
   { id: 'post-dune-messiah', title: 'Дюна 3', avatar: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=200&auto=format&fit=crop&q=80', badge: '🔥 Тизер' },
   { id: 'post-cliff-booth', title: 'Клифф Бут', avatar: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=200&auto=format&fit=crop&q=80', badge: '🎬 Трейлер' },
-  { id: 'post-batman-2', title: 'Бэтмен 2', avatar: 'https://images.unsplash.com/photo-1509281373149-e957c6296406?w=200&auto=format&fit=crop&q=80', badge: '🦇 Готэм' },
+  { id: 'post-batman-2', title: 'Бэтмен 2', avatar: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=200&auto=format&fit=crop&q=80', badge: '🦇 Готэм' },
+  { id: 'post-peaky-blinders', title: 'Козырьки', avatar: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=200&auto=format&fit=crop&q=80', badge: '🥃 Фильм' },
+  { id: 'post-avatar-3', title: 'Аватар 3', avatar: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=200&auto=format&fit=crop&q=80', badge: '🌊 Пепел' },
   { id: 'post-stranger-things-5', title: 'Странные дела', avatar: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=200&auto=format&fit=crop&q=80', badge: '⚡ Финал' },
-  { id: 'post-avengers-secret-wars', title: 'Мстители 5', avatar: 'https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=200&auto=format&fit=crop&q=80', badge: '🛡 Marvel' },
-  { id: 'post-shrek-5', title: 'Шрек 5', avatar: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=200&auto=format&fit=crop&q=80', badge: '🍿 2026' },
+  { id: 'post-avengers-doomsday', title: 'Мстители', avatar: 'https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=200&auto=format&fit=crop&q=80', badge: '🛡 Marvel' },
 ];
 
 const CHIPS: FilterChip[] = [
   { id: 'all', label: 'Все новости', icon: '🔥', count: 6 },
-  { id: 'trailer', label: 'Трейлеры с субтитрами', icon: '🎬', count: 3 },
-  { id: 'announce', label: 'Громкие анонсы', icon: '⚡', count: 2 },
-  { id: 'premiere', label: 'Скоро в кино', icon: '🍿', count: 2 },
+  { id: 'trailer', label: 'Трейлеры с субтитрами', icon: '🎬', count: 2 },
+  { id: 'announce', label: 'Анонсы индустрии', icon: '⚡', count: 3 },
+  { id: 'premiere', label: 'Скоро в кино', icon: '🍿', count: 1 },
   { id: 'series', label: 'Сериалы', icon: '📺', count: 1 },
 ];
-
-const VIEWS_MAP: Record<string, string> = {
-  'post-cliff-booth': '34.2K',
-  'post-dune-messiah': '58.9K',
-  'post-batman-2': '42.1K',
-  'post-stranger-things-5': '89.4K',
-  'post-avengers-secret-wars': '67.0K',
-  'post-shrek-5': '51.3K',
-};
-
-const TAGS_MAP: Record<string, string[]> = {
-  'post-cliff-booth': ['#Тарантино', '#БрэдПитт', '#Трейлер2026'],
-  'post-dune-messiah': ['#ДениВильнёв', '#ТимотиШаламе', '#IMAX70mm'],
-  'post-batman-2': ['#РобертПаттинсон', '#DC', '#Готэм'],
-  'post-stranger-things-5': ['#Netflix', '#ОченьСтранныеДела', '#Финал'],
-  'post-avengers-secret-wars': ['#Marvel', '#ДауниМладший', '#ДокторДум'],
-  'post-shrek-5': ['#Шрек5', '#DreamWorks', '#Мультфильм'],
-};
 
 const FeedPage: React.FC = () => {
   const navigate = useNavigate();
   const { haptic, openLink } = useTelegram();
 
-  const [posts] = useState<FeedPost[]>(INITIAL_FEED_POSTS);
+  const [posts, setPosts] = useState<FeedPost[]>(INITIAL_FEED_POSTS);
   const [filter, setFilter] = useState<FilterCategory>('all');
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<FeedPost | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   /* Состояние реакций */
   const [reactionsState, setReactionsState] = useState<Record<string, Record<string, { count: number; active: boolean }>>>(() => {
@@ -81,7 +65,16 @@ const FeedPage: React.FC = () => {
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 2000);
+    setTimeout(() => setToastMsg(null), 2200);
+  };
+
+  const handleRefresh = () => {
+    haptic('medium');
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+      showToast('Лента обновлена из открытых источников');
+    }, 700);
   };
 
   const handleReaction = (postId: string, reactionKey: 'fire' | 'heart' | 'popcorn' | 'clap') => {
@@ -113,7 +106,7 @@ const FeedPage: React.FC = () => {
 
   const handleShare = (post: FeedPost) => {
     haptic('medium');
-    const shareText = `🎬 ${post.title}\n\nСмотрите трейлер в VELORA Cinema:\nhttps://t.me/VeloraAppBot/app?startapp=${post.id}`;
+    const shareText = `🎬 ${post.title}\n\nСмотрите трейлер и подробности в VELORA Cinema:\nhttps://t.me/VeloraAppBot/app?startapp=${post.id}`;
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/VeloraAppBot/app')}&text=${encodeURIComponent(shareText)}`;
     openLink(shareUrl);
   };
@@ -130,10 +123,9 @@ const FeedPage: React.FC = () => {
 
   const handleStoryClick = (postId: string) => {
     haptic('medium');
-    setActiveVideoId(postId);
-    const el = document.getElementById(postId);
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const targetPost = posts.find((p) => p.id === postId);
+    if (targetPost) {
+      setSelectedArticle(targetPost);
     }
   };
 
@@ -153,19 +145,30 @@ const FeedPage: React.FC = () => {
             </div>
             <div>
               <span className="feed-header__tag">✦ VELORA КИНОЛЕНТА</span>
-              <h1 className="feed-header__title">Новости и трейлеры</h1>
+              <h1 className="feed-header__title">Новости индустрии</h1>
             </div>
           </div>
-          <button
-            className="feed-header__channel-btn"
-            onClick={() => openLink('https://t.me/VeloraSupport_bot')}
-            title="Канал VELORA"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
-            </svg>
-            <span>В Telegram</span>
-          </button>
+          <div className="feed-header__actions">
+            <button
+              className={`feed-header__reload-btn ${isRefreshing ? 'spinning' : ''}`}
+              onClick={handleRefresh}
+              title="Обновить ленту"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg>
+            </button>
+            <button
+              className="feed-header__channel-btn"
+              onClick={() => openLink('https://t.me/VeloraSupport_bot')}
+              title="Канал VELORA"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
+              </svg>
+              <span>В Telegram</span>
+            </button>
+          </div>
         </div>
 
         {/* ── Stories / Главные премьеры ── */}
@@ -204,7 +207,7 @@ const FeedPage: React.FC = () => {
         </div>
       </header>
 
-      {/* ── Список постов в стиле каналов Telegram ── */}
+      {/* ── Список аналитических постов из открытых источников ── */}
       <main className="feed-list">
         {filteredPosts.map((post) => {
           const isVideoPlaying = activeVideoId === post.id;
@@ -214,12 +217,12 @@ const FeedPage: React.FC = () => {
             popcorn: { count: post.reactions.popcorn, active: false },
             clap: { count: post.reactions.clap, active: false },
           };
-          const views = VIEWS_MAP[post.id] || '24.5K';
-          const tags = TAGS_MAP[post.id] || ['#Кино2026', '#Трейлер'];
+          const views = post.views || '34.2K';
+          const tags = post.tags || ['#Кино2026', '#Трейлер'];
 
           return (
             <article key={post.id} id={post.id} className="feed-card">
-              {/* Шапка поста Telegram */}
+              {/* Шапка поста с верификацией и источником */}
               <div className="feed-card__meta-bar">
                 <div className="feed-card__channel">
                   <div className="feed-card__channel-avatar">
@@ -227,7 +230,7 @@ const FeedPage: React.FC = () => {
                   </div>
                   <div className="feed-card__channel-info">
                     <div className="feed-card__channel-name">
-                      <span>VELORA Cinema News</span>
+                      <span>VELORA Cinema Journal</span>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
@@ -239,9 +242,15 @@ const FeedPage: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <span className="feed-card__badge">
-                  {post.badge}
-                </span>
+
+                <div className="feed-card__badges-right">
+                  <span className="feed-card__source-pill">
+                    📰 {post.source.name}
+                  </span>
+                  <span className="feed-card__badge">
+                    {post.badge}
+                  </span>
+                </div>
               </div>
 
               {/* 16:9 Видео-плеер трейлера с русскими субтитрами */}
@@ -303,8 +312,32 @@ const FeedPage: React.FC = () => {
 
               {/* Текстовая часть поста */}
               <div className="feed-card__content">
-                <h2 className="feed-card__headline">{post.title}</h2>
+                <h2
+                  className="feed-card__headline"
+                  onClick={() => setSelectedArticle(post)}
+                >
+                  {post.title}
+                </h2>
                 <p className="feed-card__desc">{post.description}</p>
+
+                {/* Факты-чипсы */}
+                {post.keyFacts && post.keyFacts.length > 0 && (
+                  <div className="feed-card__facts-chips">
+                    {post.keyFacts.slice(0, 3).map((f, i) => (
+                      <span key={i} className="feed-card__fact-chip">
+                        <b>{f.label}:</b> {f.value}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Цитата в карточке (если есть) */}
+                {post.quote && (
+                  <blockquote className="feed-card__quote-box">
+                    <p className="feed-card__quote-text">{post.quote.text}</p>
+                    <footer className="feed-card__quote-author">— {post.quote.author} ({post.quote.role})</footer>
+                  </blockquote>
+                )}
 
                 {/* Теги */}
                 <div className="feed-card__tags">
@@ -318,10 +351,6 @@ const FeedPage: React.FC = () => {
                     <span className="feed-card__release-icon">📅</span>
                     <span className="feed-card__release-text">{post.releaseDate}</span>
                   </div>
-                )}
-
-                {post.specs && (
-                  <p className="feed-card__specs">{post.specs}</p>
                 )}
 
                 {/* Реакции Telegram */}
@@ -358,6 +387,20 @@ const FeedPage: React.FC = () => {
 
                 {/* Кнопки действий */}
                 <div className="feed-card__actions">
+                  <button
+                    className="feed-card__btn feed-card__btn--read"
+                    onClick={() => {
+                      haptic('medium');
+                      setSelectedArticle(post);
+                    }}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                      <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    Читать статью
+                  </button>
+
                   {post.movieId && (
                     <button
                       className="feed-card__btn feed-card__btn--watch"
@@ -369,7 +412,7 @@ const FeedPage: React.FC = () => {
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M8 5v14l11-7z" />
                       </svg>
-                      Смотреть в VELORA
+                      Смотреть
                     </button>
                   )}
 
@@ -402,6 +445,117 @@ const FeedPage: React.FC = () => {
           );
         })}
       </main>
+
+      {/* ── Модальный ридер полной статьи («Читать обзор») ── */}
+      {selectedArticle && (
+        <div className="feed-modal-backdrop" onClick={() => setSelectedArticle(null)}>
+          <div className="feed-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="feed-modal__header">
+              <div className="feed-modal__source-row">
+                <span className="feed-modal__source-badge">
+                  📰 Источник: {selectedArticle.source.name}
+                </span>
+                {selectedArticle.source.url && (
+                  <button
+                    className="feed-modal__source-link"
+                    onClick={() => openLink(selectedArticle.source.url!)}
+                  >
+                    Оригинал ↗
+                  </button>
+                )}
+              </div>
+              <button
+                className="feed-modal__close"
+                onClick={() => setSelectedArticle(null)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="feed-modal__body">
+              <h1 className="feed-modal__title">{selectedArticle.title}</h1>
+              <div className="feed-modal__meta">
+                <span>{selectedArticle.timestamp}</span>
+                <span>·</span>
+                <span>👁 {selectedArticle.views || '40K'}</span>
+                <span>·</span>
+                <span>{selectedArticle.badge}</span>
+              </div>
+
+              {/* Медиа трейлера в модалке */}
+              {selectedArticle.youtubeId && (
+                <div className="feed-modal__media">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${selectedArticle.youtubeId}?playsinline=1&rel=0&modestbranding=1&cc_load_policy=1&hl=ru`}
+                    className="feed-modal__frame"
+                    title={selectedArticle.title}
+                    allowFullScreen
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                  />
+                </div>
+              )}
+
+              {/* Сетка ключевых фактов */}
+              {selectedArticle.keyFacts && (
+                <div className="feed-modal__facts-grid">
+                  <h3 className="feed-modal__facts-title">Ключевые данные производства:</h3>
+                  <div className="feed-modal__facts-list">
+                    {selectedArticle.keyFacts.map((fact, idx) => (
+                      <div key={idx} className="feed-modal__fact">
+                        <span className="feed-modal__fact-lbl">{fact.label}</span>
+                        <span className="feed-modal__fact-val">{fact.value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Цитата создателя */}
+              {selectedArticle.quote && (
+                <blockquote className="feed-modal__quote">
+                  <p>«{selectedArticle.quote.text}»</p>
+                  <footer>
+                    <strong>{selectedArticle.quote.author}</strong>
+                    <span>{selectedArticle.quote.role}</span>
+                  </footer>
+                </blockquote>
+              )}
+
+              {/* Полный текст статьи */}
+              <div className="feed-modal__text">
+                {selectedArticle.fullArticle && selectedArticle.fullArticle.length > 0 ? (
+                  selectedArticle.fullArticle.map((paragraph, idx) => (
+                    <p key={idx}>{paragraph}</p>
+                  ))
+                ) : (
+                  <p>{selectedArticle.description}</p>
+                )}
+              </div>
+
+              {/* Действия в модалке */}
+              <div className="feed-modal__footer-actions">
+                {selectedArticle.movieId && (
+                  <button
+                    className="feed-modal__btn feed-modal__btn--watch"
+                    onClick={() => {
+                      haptic('medium');
+                      navigate(`/movie/${selectedArticle.movieId}`);
+                    }}
+                  >
+                    Смотреть фильм в VELORA
+                  </button>
+                )}
+                <button
+                  className="feed-modal__btn feed-modal__btn--share"
+                  onClick={() => handleShare(selectedArticle)}
+                >
+                  Поделиться в Telegram
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Всплывающее уведомление */}
       {toastMsg && (

@@ -139,11 +139,11 @@ body.light {
   --bg:             #fff5f7;
   --bg-2:           #fef0f3;
   --bg-3:           #fce7ec;
-  --surface:        rgba(255, 255, 255, 0.92);
+  --surface:        rgba(255, 255, 255, 0.95);
   --surface-2:      rgba(255, 240, 245, 0.95);
   --surface-3:      rgba(253, 226, 236, 0.9);
   --surface-4:      rgba(244, 114, 182, 0.15);
-  --border:         rgba(244, 114, 182, 0.18);
+  --border:         rgba(244, 114, 182, 0.2);
   --border-light:   rgba(244, 114, 182, 0.28);
   --text:           #1f1a24;
   --text-2:         #4a4453;
@@ -152,7 +152,7 @@ body.light {
   --accent-2:       #fb7185;
   --accent-3:       #fda4af;
   --accent-glow:    rgba(244, 63, 94, 0.25);
-  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-bg:       rgba(255, 255, 255, 0.88);
   --glass-border:   rgba(244, 114, 182, 0.22);
   --glass-blur:     24px;
   --btn-r:          16px;
@@ -166,46 +166,54 @@ body.light {
   color: var(--text);
 }
 
+/* Все страницы в светлой теме */
 [data-theme='light'] .hp,
 [data-theme='light'] .pm,
 [data-theme='light'] .dp,
+[data-theme='light'] .pf,
 [data-theme='light'] .profile-page,
 [data-theme='light'] .fav-page,
 [data-theme='light'] .search-page,
 [data-theme='light'] .admin,
 [data-theme='light'] .feed-page,
 [data-theme='light'] .music-page,
+[data-theme='light'] .rules-page,
 [data-theme='light'] .aip {
-  background: var(--bg);
+  background: var(--bg) !important;
   color: var(--text);
 }
 
-/* Шапки и навигация в светлой теме */
+/* ── Шапки и навигация ── */
 [data-theme='light'] .hp-header,
 [data-theme='light'] .feed-header,
 [data-theme='light'] .search-header,
 [data-theme='light'] .profile-header,
+[data-theme='light'] .mu-header,
 [data-theme='light'] .aip-header {
-  background: rgba(255, 245, 247, 0.88);
+  background: rgba(255, 245, 247, 0.9) !important;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(244, 114, 182, 0.16);
+  border-bottom: 1px solid rgba(244, 114, 182, 0.18) !important;
 }
 
 [data-theme='light'] .hp-header__title,
 [data-theme='light'] .feed-header__title,
 [data-theme='light'] .search-header__title,
-[data-theme='light'] .profile-name,
-[data-theme='light'] .aip-header__title {
-  color: #1f1a24;
+[data-theme='light'] .mu-header__title,
+[data-theme='light'] .aip-header__title,
+[data-theme='light'] .fav-header__title {
+  color: #1f1a24 !important;
 }
 
 [data-theme='light'] .hp-header__sub,
-[data-theme='light'] .feed-header__tag {
-  color: #fb7185;
+[data-theme='light'] .feed-header__tag,
+[data-theme='light'] .mu-header__sub,
+[data-theme='light'] .search-header__sub,
+[data-theme='light'] .fav-header__sub {
+  color: #fb7185 !important;
 }
 
-/* Кнопки в светлой теме */
+/* ── Кнопки основных действий ── */
 [data-theme='light'] .dp-watch,
 [data-theme='light'] .pm-subscribe,
 [data-theme='light'] .pm-pay__btn,
@@ -219,108 +227,554 @@ body.light {
 [data-theme='light'] .hp-header__btn,
 [data-theme='light'] .hp-header__feed-btn,
 [data-theme='light'] .dp-back,
+[data-theme='light'] .mu-header__reload,
+[data-theme='light'] .feed-header__channel-btn,
 [data-theme='light'] .feed-reaction {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(244, 114, 182, 0.2);
-  color: #1f1a24;
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
   box-shadow: 0 2px 10px rgba(244, 114, 182, 0.08);
 }
 
-[data-theme='light'] .feed-card,
-[data-theme='light'] .profile-section,
-[data-theme='light'] .pm-plan,
-[data-theme='light'] .history-item,
-[data-theme='light'] .mu-card,
-[data-theme='light'] .mu-track,
-[data-theme='light'] .aip-bubble--ai {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(244, 114, 182, 0.16);
-  box-shadow: 0 6px 24px rgba(244, 114, 182, 0.07);
-}
-
-[data-theme='light'] .tab-bar {
-  background: rgba(255, 245, 247, 0.9);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-top: 1px solid rgba(244, 114, 182, 0.2);
-}
-
-[data-theme='light'] .tab-bar__item {
-  color: rgba(31, 26, 36, 0.45);
-}
-
-[data-theme='light'] .tab-bar__item--active {
-  color: #f43f5e;
-}
-
-[data-theme='light'] .tab-bar__item--active::after {
-  background: #f43f5e;
-  box-shadow: 0 0 10px 2px rgba(244, 63, 94, 0.5);
-}
-
+/* ── Главная страница (HomePage) ── */
 [data-theme='light'] .hp-tab {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(244, 114, 182, 0.2);
-  color: #6b6375;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #6b6375 !important;
 }
-
 [data-theme='light'] .hp-tab.active {
-  background: #f43f5e;
-  border-color: #f43f5e;
-  color: #ffffff;
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
   box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
 }
-
-[data-theme='light'] .hp-searchbar,
-[data-theme='light'] .search-input-wrap {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(244, 114, 182, 0.25);
-  color: #1f1a24;
-}
-
-[data-theme='light'] .hp-searchbar__input,
-[data-theme='light'] .search-input {
-  color: #1f1a24;
-}
-
-[data-theme='light'] .hp-searchbar__input::placeholder,
-[data-theme='light'] .search-input::placeholder {
-  color: rgba(31, 26, 36, 0.4);
-}
-
-[data-theme='light'] .hp-card__title,
-[data-theme='light'] .fav-card__title,
-[data-theme='light'] .search-card p,
 [data-theme='light'] .hp-row__title {
-  color: #1f1a24;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-card__year {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .hp-searchbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-searchbar__input {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-searchbar__input::placeholder {
+  color: rgba(31, 26, 36, 0.4) !important;
 }
 
-[data-theme='light'] .hp-card__year,
+/* ── Страница фильма (MovieDetailPage) ── */
+[data-theme='light'] .dp-player-slot {
+  background: var(--bg-2) !important;
+}
+[data-theme='light'] .dp-bg__grad {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 245, 247, 0.15) 0%,
+    rgba(255, 245, 247, 0.75) 50%,
+    rgba(255, 245, 247, 1) 100%
+  ) !important;
+}
+[data-theme='light'] .dp-hero__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-hero__orig {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .dp-meta span {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-section__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-desc {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-genre {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-fav {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-season-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-season-btn.active {
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-ep {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-ep__num {
+  background: rgba(244, 114, 182, 0.14) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-ep__label {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-row {
+  border-bottom-color: rgba(244, 114, 182, 0.14) !important;
+}
+[data-theme='light'] .dp-row__label {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .dp-row__val {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-status {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .dp-status__label {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-where__item {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .dp-where__name {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-bar__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-bar__sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .dp-watch-bar__close {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-bar__btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-watch-src {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-src.active {
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-watch-hint {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+}
+[data-theme='light'] .dp-watch-hint__badge {
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-watch-hint__text {
+  color: #4a4453 !important;
+}
+
+/* ── Поиск (SearchPage) ── */
+[data-theme='light'] .search-input-wrap {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.25) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-input {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-input::placeholder {
+  color: rgba(31, 26, 36, 0.4) !important;
+}
+[data-theme='light'] .search-type {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .search-type.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35) !important;
+}
+[data-theme='light'] .search-tag-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.22) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .search-tag-chip.active {
+  background: linear-gradient(135deg, #f43f5e, #fb7185) !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .search-active-tag {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-color: rgba(244, 63, 94, 0.22) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .search-active-tag__badge {
+  color: #f43f5e !important;
+}
+[data-theme='light'] .search-active-tag__text {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-quick__title {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .search-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .search-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-card__year {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .search-empty__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-empty__sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .search-empty__icon-wrap {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+}
+
+/* ── Избранное (FavoritesPage) ── */
+[data-theme='light'] .fav-stats {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .fav-stat__val {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .fav-stat__label {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .fav-tab {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .fav-tab.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .fav-card__title {
+  color: #1f1a24 !important;
+}
 [data-theme='light'] .fav-card__year {
-  color: #8a8194;
+  color: #8a8194 !important;
+}
+[data-theme='light'] .fav-empty__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .fav-empty__sub {
+  color: #8a8194 !important;
 }
 
+/* ── Профиль (ProfilePage) ── */
+[data-theme='light'] .pf__bg {
+  background: var(--bg) !important;
+}
+[data-theme='light'] .pf__card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  box-shadow: 0 8px 30px rgba(244, 114, 182, 0.12) !important;
+}
+[data-theme='light'] .pf__name {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .pf__handle {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__avatar {
+  border-color: #ffffff !important;
+  background: #fff0f3 !important;
+}
+[data-theme='light'] .pf__stats {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .pf__stat-val {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .pf__stat-lbl {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__stat-div {
+  background: rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .pf__group-title {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__group-box {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  box-shadow: 0 4px 20px rgba(244, 114, 182, 0.07) !important;
+}
+[data-theme='light'] .pf__row {
+  color: #1f1a24 !important;
+  border-bottom: 1px solid rgba(244, 114, 182, 0.12) !important;
+}
+[data-theme='light'] .pf__row-label {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .pf__row-val {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__row-sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__row-icon {
+  background: rgba(244, 114, 182, 0.12) !important;
+  color: #f43f5e !important;
+}
+
+/* ── КиноИИ (AiPickPage) ── */
+[data-theme='light'] .aip {
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(244, 63, 94, 0.12) 0%, transparent 60%) !important;
+}
+[data-theme='light'] .aip-surprise {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.3) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .aip-bubble--ai {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  color: #1f1a24 !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .aip-chip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #1f1a24 !important;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .aip-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  box-shadow: 0 6px 24px rgba(244, 114, 182, 0.1) !important;
+}
+[data-theme='light'] .aip-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .aip-card__reason {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .aip-dots i {
+  background: #f43f5e !important;
+}
+
+/* ── Музыка (MusicPage) и Плеер ── */
+[data-theme='light'] .mu-mood-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .mu-mood-chip.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(244, 63, 94, 0.35) !important;
+}
+[data-theme='light'] .mu-search {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.25) !important;
+}
+[data-theme='light'] .mu-search__input {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .mu-search__input::placeholder {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .mu-tabs {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .mu-tab {
+  color: #6b6375 !important;
+}
+[data-theme='light'] .mu-tab.active {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .mu-track {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.16) !important;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.06) !important;
+}
+[data-theme='light'] .mu-track__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .mu-track__artist {
+  color: #6b6375 !important;
+}
+[data-theme='light'] .mu-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.16) !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .mu-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .mu-card__sub {
+  color: #8a8194 !important;
+}
 [data-theme='light'] .global-music-bar {
-  background: rgba(255, 245, 247, 0.94);
-  border: 1px solid rgba(244, 114, 182, 0.25);
-  box-shadow: 0 8px 32px rgba(244, 114, 182, 0.15);
+  background: rgba(255, 245, 247, 0.94) !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(244, 114, 182, 0.15) !important;
 }
-
 [data-theme='light'] .gmb-info__title {
-  color: #1f1a24;
+  color: #1f1a24 !important;
 }
-
 [data-theme='light'] .gmb-info__artist {
-  color: #8a8194;
+  color: #8a8194 !important;
 }
-
 [data-theme='light'] .gmb-btn {
-  color: #4a4453;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .gmb-btn--play {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .gfull {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .gfull__overlay {
+  background: linear-gradient(180deg, rgba(255, 245, 247, 0.5) 0%, rgba(255, 245, 247, 0.98) 100%) !important;
+}
+[data-theme='light'] .gfull__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .gfull__artist {
+  color: #6b6375 !important;
+}
+[data-theme='light'] .gfull__btn--main {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .gfull__btn {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .gfull__handle-bar {
+  background: rgba(244, 114, 182, 0.4) !important;
 }
 
-[data-theme='light'] .gmb-btn--play {
-  background: #f43f5e;
-  color: #ffffff;
+/* ── Кинолента новостей (FeedPage) ── */
+[data-theme='light'] .feed-card {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .feed-card__channel-name span {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-card__time {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .feed-card__views {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .feed-card__headline {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-card__desc {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .feed-card__tag-pill {
+  background: rgba(244, 114, 182, 0.12) !important;
+  color: #f43f5e !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .feed-card__source-pill {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1f1a24 !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+}
+[data-theme='light'] .feed-card__release-pill {
+  background: rgba(254, 240, 243, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-card__specs {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .feed-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .feed-chip.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .feed-card__btn--copy,
+[data-theme='light'] .feed-card__btn--share,
+[data-theme='light'] .feed-card__btn--read {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-modal {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-modal__fact {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .feed-modal__quote {
+  background: rgba(254, 240, 243, 0.95) !important;
+  border-left-color: #f43f5e !important;
+}
+
+/* ── Навигационный бар (TabBar) ── */
+[data-theme='light'] .tab-bar {
+  background: rgba(255, 245, 247, 0.9) !important;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-top: 1px solid rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .tab-bar__item {
+  color: rgba(31, 26, 36, 0.45) !important;
+}
+[data-theme='light'] .tab-bar__item--active {
+  color: #f43f5e !important;
+}
+[data-theme='light'] .tab-bar__item--active::after {
+  background: #f43f5e !important;
+  box-shadow: 0 0 10px 2px rgba(244, 63, 94, 0.5) !important;
+}
+
+/* ── Шторка превью (MoviePreview) ── */
+[data-theme='light'] .mp-sheet {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+  border-top: 1px solid rgba(244, 114, 182, 0.25) !important;
 }
 
 /* ═══════════════════════════════════════════════
