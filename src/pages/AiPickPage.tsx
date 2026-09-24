@@ -4,7 +4,7 @@ import { smartDiscover, getRecommendations } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
-import AuraAiEmblem from '../components/AuraAiEmblem';
+import VeloraAiEmblem from '../components/VeloraAiEmblem';
 import './AiPickPage.css';
 
 /* ══════════════════════════════════════════════════════ */
@@ -182,9 +182,9 @@ const AiPickPage: React.FC = () => {
     return (
       <div className="aip page">
         <header className="aip-header">
-          <AuraAiEmblem size="md" />
+          <VeloraAiEmblem size="md" />
           <div className="aip-header__info">
-            <h1 className="aip-header__title">Aura AI</h1>
+            <h1 className="aip-header__title">Velora AI</h1>
             <p className="aip-header__sub">{mood?.label} · {time?.label} · {era?.label}</p>
           </div>
           <button className="aip-icon-btn" onClick={reset} aria-label="Заново" title="Заново">
@@ -199,7 +199,7 @@ const AiPickPage: React.FC = () => {
           <div className="aip-chat">
             <div className="aip-bubble aip-bubble--ai">
               <span className="aip-dots"><i /><i /><i /></span>
-              Aura AI анализирует ваши предпочтения и сканирует фильмотеку…
+              Velora AI анализирует ваши предпочтения и сканирует фильмотеку…
             </div>
           </div>
         )}
@@ -302,9 +302,9 @@ const AiPickPage: React.FC = () => {
   return (
     <div className="aip page">
       <header className="aip-header">
-        <AuraAiEmblem size="md" />
+        <VeloraAiEmblem size="md" />
         <div className="aip-header__info">
-          <h1 className="aip-header__title">Aura AI</h1>
+          <h1 className="aip-header__title">Velora AI</h1>
           <p className="aip-header__sub">Нейросетевой куратор кино</p>
         </div>
         <button className="aip-surprise" onClick={surprise}>
@@ -318,7 +318,7 @@ const AiPickPage: React.FC = () => {
 
       <div className="aip-chat">
         <div className="aip-bubble aip-bubble--ai">
-          Привет! Я <strong>Aura AI</strong> ✦ Персональный киноинтеллект. Ответьте на три коротких вопроса — и я мгновенно подберу идеальный фильм или сериал.
+          Привет! Я <strong>Velora AI</strong> ✦ Персональный киноинтеллект. Ответьте на три коротких вопроса — и я мгновенно подберу идеальный фильм или сериал.
         </div>
 
         {!mood ? (

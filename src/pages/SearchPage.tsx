@@ -10,6 +10,21 @@ const QUICK_SEARCHES = [
   'Атака титанов', 'Бэтмен', 'Джентльмены', 'Человек-паук',
 ];
 
+const HASHTAG_CHIPS = [
+  { tag: '#новинки2026', label: '#новинки2026', emoji: '⚡' },
+  { tag: '#боевики', label: '#боевики', emoji: '💥' },
+  { tag: '#комедии', label: '#комедии', emoji: '😂' },
+  { tag: '#фантастика', label: '#фантастика', emoji: '🚀' },
+  { tag: '#триллеры', label: '#триллеры', emoji: '🔪' },
+  { tag: '#ужасы', label: '#ужасы', emoji: '👻' },
+  { tag: '#аниме', label: '#аниме', emoji: '⚔️' },
+  { tag: '#сериалы', label: '#сериалы', emoji: '📺' },
+  { tag: '#топ100', label: '#топ100', emoji: '⭐' },
+  { tag: '#криминал', label: '#криминал', emoji: '🕵️' },
+  { tag: '#драма', label: '#драма', emoji: '🎭' },
+  { tag: '#мультфильмы', label: '#мультфильмы', emoji: '🎈' },
+];
+
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -53,7 +68,7 @@ const SearchPage: React.FC = () => {
           ref={inputRef}
           className="search-input"
           type="text"
-          placeholder="Фильм, сериал, мультфильм…"
+          placeholder="Фильм, сериал, или хештег #боевик #2026…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoComplete="off"
@@ -84,6 +99,37 @@ const SearchPage: React.FC = () => {
           Сериалы
         </button>
       </div>
+
+      {/* ── Горизонтальная лента хештегов для мгновенного подбора ── */}
+      <div className="search-tags-scroll">
+        {HASHTAG_CHIPS.map((item) => {
+          const isActive = query.trim().toLowerCase() === item.tag.toLowerCase();
+          return (
+            <button
+              key={item.tag}
+              className={`search-tag-chip ${isActive ? 'active' : ''}`}
+              onClick={() => {
+                if (isActive) {
+                  setQuery('');
+                } else {
+                  setQuery(item.tag);
+                }
+              }}
+            >
+              <span className="search-tag-chip__emoji">{item.emoji}</span>
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {query.includes('#') && !loading && movies.length > 0 && (
+        <div className="search-active-tag">
+          <span className="search-active-tag__badge">🏷️ Хештег:</span>
+          <span className="search-active-tag__text">{query}</span>
+          <span className="search-active-tag__count">Найдено: {movies.length}</span>
+        </div>
+      )}
 
       {isInitial && (
         <div className="search-quick">

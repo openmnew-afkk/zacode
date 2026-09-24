@@ -220,16 +220,280 @@ export async function getAllTrending(): Promise<Movie[]> {
   }
 }
 
+/* ═══════════ Хештег и жанровый маппинг TMDB ═══════════ */
+interface HashtagParsed {
+  genreIdsMovie: number[];
+  genreIdsTv: number[];
+  year?: number;
+  sortBy?: string;
+  minVotes?: number;
+  origLang?: string;
+  forceType?: 'movie' | 'series';
+  keyword: string;
+}
+
+const HASHTAG_GENRE_MAP: Record<string, { movie: number[]; tv: number[] }> = {
+  'боевик': { movie: [28], tv: [10759] },
+  'боевики': { movie: [28], tv: [10759] },
+  'action': { movie: [28], tv: [10759] },
+  'экшн': { movie: [28], tv: [10759] },
+  'комедия': { movie: [35], tv: [35] },
+  'комедии': { movie: [35], tv: [35] },
+  'comedy': { movie: [35], tv: [35] },
+  'драма': { movie: [18], tv: [18] },
+  'драмы': { movie: [18], tv: [18] },
+  'drama': { movie: [18], tv: [18] },
+  'ужасы': { movie: [27], tv: [9648] },
+  'хоррор': { movie: [27], tv: [9648] },
+  'хорроры': { movie: [27], tv: [9648] },
+  'ужастик': { movie: [27], tv: [9648] },
+  'horror': { movie: [27], tv: [9648] },
+  'фантастика': { movie: [878], tv: [10765] },
+  'scifi': { movie: [878], tv: [10765] },
+  'sci-fi': { movie: [878], tv: [10765] },
+  'фэнтези': { movie: [14], tv: [10765] },
+  'фентези': { movie: [14], tv: [10765] },
+  'fantasy': { movie: [14], tv: [10765] },
+  'триллер': { movie: [53], tv: [9648] },
+  'триллеры': { movie: [53], tv: [9648] },
+  'thriller': { movie: [53], tv: [9648] },
+  'криминал': { movie: [80], tv: [80] },
+  'crime': { movie: [80], tv: [80] },
+  'мультфильм': { movie: [16], tv: [16] },
+  'мультфильмы': { movie: [16], tv: [16] },
+  'мультики': { movie: [16], tv: [16] },
+  'анимация': { movie: [16], tv: [16] },
+  'animation': { movie: [16], tv: [16] },
+  'аниме': { movie: [16], tv: [16] },
+  'anime': { movie: [16], tv: [16] },
+  'приключения': { movie: [12], tv: [10759] },
+  'приключение': { movie: [12], tv: [10759] },
+  'adventure': { movie: [12], tv: [10759] },
+  'детектив': { movie: [9648], tv: [9648] },
+  'детективы': { movie: [9648], tv: [9648] },
+  'mystery': { movie: [9648], tv: [9648] },
+  'мелодрама': { movie: [10749], tv: [10749] },
+  'романтика': { movie: [10749], tv: [10749] },
+  'romance': { movie: [10749], tv: [10749] },
+  'семейный': { movie: [10751], tv: [10751] },
+  'семья': { movie: [10751], tv: [10751] },
+  'family': { movie: [10751], tv: [10751] },
+  'история': { movie: [36], tv: [36] },
+  'исторический': { movie: [36], tv: [36] },
+  'history': { movie: [36], tv: [36] },
+  'военный': { movie: [10752], tv: [10768] },
+  'война': { movie: [10752], tv: [10768] },
+  'war': { movie: [10752], tv: [10768] },
+  'вестерн': { movie: [37], tv: [37] },
+  'western': { movie: [37], tv: [37] },
+  'документальный': { movie: [99], tv: [99] },
+  'документалка': { movie: [99], tv: [99] },
+  'доку': { movie: [99], tv: [99] },
+  'doc': { movie: [99], tv: [99] },
+};
+
+function parseSearchHashtags(rawQuery: string): HashtagParsed {
+  const result: HashtagParsed = {
+    genreIdsMovie: [],
+    genreIdsTv: [],
+    sortBy: 'popularity.desc',
+    keyword: '',
+  };
+
+  const tags = (rawQuery.match(/#([a-zA-Zа-яА-ЯёЁ0-9_-]+)/g) || []).map((t) =>
+    t.replace(/^#/, '').toLowerCase().trim()
+  );
+
+  const residual = rawQuery.replace(/#([a-zA-Zа-яА-ЯёЁ0-9_-]+)/g, '').trim();
+  result.keyword = residual;
+
+  // Если нет явных символов #, проверим, не ввёл ли пользователь название жанра целиком
+  if (tags.length === 0 && rawQuery.trim()) {
+    const single = rawQuery.trim().toLowerCase();
+    if (HASHTAG_GENRE_MAP[single]) {
+      tags.push(single);
+      result.keyword = '';
+    }
+  }
+
+  for (const tag of tags) {
+    if (/^\d{4}$/.test(tag)) {
+      result.year = parseInt(tag, 10);
+      continue;
+    }
+    if (tag.includes('2026') || tag.includes('новинк') || tag.includes('премьер')) {
+      result.year = 2026;
+      result.sortBy = 'popularity.desc';
+    } else if (tag.includes('2025')) {
+      result.year = 2025;
+    } else if (tag.includes('2024')) {
+      result.year = 2024;
+    } else if (tag.includes('2023')) {
+      result.year = 2023;
+    }
+
+    if (tag === 'топ' || tag === 'топ100' || tag === 'лучшее') {
+      result.sortBy = 'vote_average.desc';
+      result.minVotes = 300;
+    }
+
+    if (tag === 'сериал' || tag === 'сериалы' || tag === 'series') {
+      result.forceType = 'series';
+    } else if (tag === 'фильм' || tag === 'фильмы' || tag === 'movie') {
+      result.forceType = 'movie';
+    }
+
+    if (tag === 'аниме' || tag === 'anime') {
+      result.genreIdsMovie.push(16);
+      result.genreIdsTv.push(16);
+      result.origLang = 'ja';
+    }
+
+    const matched = HASHTAG_GENRE_MAP[tag];
+    if (matched) {
+      result.genreIdsMovie.push(...matched.movie);
+      result.genreIdsTv.push(...matched.tv);
+    }
+  }
+
+  result.genreIdsMovie = Array.from(new Set(result.genreIdsMovie));
+  result.genreIdsTv = Array.from(new Set(result.genreIdsTv));
+  return result;
+}
+
 export async function searchMovies(query: string, page = 1, type?: 'movie' | 'series'): Promise<CatalogResponse> {
   try {
-    const mediaType = type === 'series' ? 'tv' : 'multi';
-    const data = await tmdb<any>(`/search/${mediaType}`, { query, page, include_adult: false });
+    const trimmed = query.trim();
+    const hasHashtag = trimmed.includes('#');
+    const parsed = parseSearchHashtags(trimmed);
+    const effectiveType = parsed.forceType || type;
+
+    /* ── Сценарий 1: Чистый поиск по хештегу(ам) через TMDB Discover ── */
+    if ((hasHashtag || parsed.genreIdsMovie.length > 0 || parsed.year) && !parsed.keyword) {
+      if (effectiveType === 'movie') {
+        const params: Record<string, any> = {
+          page,
+          sort_by: parsed.sortBy || 'popularity.desc',
+          include_adult: false,
+          'vote_count.gte': parsed.minVotes || 40,
+        };
+        if (parsed.genreIdsMovie.length > 0) params.with_genres = parsed.genreIdsMovie.join(',');
+        if (parsed.year) params.primary_release_year = parsed.year;
+        if (parsed.origLang) params.with_original_language = parsed.origLang;
+
+        const data = await tmdb<any>('/discover/movie', params);
+        return {
+          ok: true,
+          page: data.page || page,
+          results: (data.results || []).map((i: any) => toMovie(i, 'movie')),
+          total_pages: Math.min(data.total_pages || 1, 500),
+          total_results: data.total_results || 0,
+        };
+      }
+
+      if (effectiveType === 'series') {
+        const params: Record<string, any> = {
+          page,
+          sort_by: parsed.sortBy || 'popularity.desc',
+          include_adult: false,
+          'vote_count.gte': parsed.minVotes || 30,
+        };
+        if (parsed.genreIdsTv.length > 0) params.with_genres = parsed.genreIdsTv.join(',');
+        if (parsed.year) params.first_air_date_year = parsed.year;
+        if (parsed.origLang) params.with_original_language = parsed.origLang;
+
+        const data = await tmdb<any>('/discover/tv', params);
+        return {
+          ok: true,
+          page: data.page || page,
+          results: (data.results || []).map((i: any) => toMovie(i, 'tv')),
+          total_pages: Math.min(data.total_pages || 1, 500),
+          total_results: data.total_results || 0,
+        };
+      }
+
+      /* Мульти-поиск по хештегу (фильмы + сериалы) */
+      const movieParams: Record<string, any> = {
+        page,
+        sort_by: parsed.sortBy || 'popularity.desc',
+        include_adult: false,
+        'vote_count.gte': parsed.minVotes || 40,
+      };
+      if (parsed.genreIdsMovie.length > 0) movieParams.with_genres = parsed.genreIdsMovie.join(',');
+      if (parsed.year) movieParams.primary_release_year = parsed.year;
+      if (parsed.origLang) movieParams.with_original_language = parsed.origLang;
+
+      const tvParams: Record<string, any> = {
+        page,
+        sort_by: parsed.sortBy || 'popularity.desc',
+        include_adult: false,
+        'vote_count.gte': parsed.minVotes || 30,
+      };
+      if (parsed.genreIdsTv.length > 0) tvParams.with_genres = parsed.genreIdsTv.join(',');
+      if (parsed.year) tvParams.first_air_date_year = parsed.year;
+      if (parsed.origLang) tvParams.with_original_language = parsed.origLang;
+
+      const [movieData, tvData] = await Promise.all([
+        tmdb<any>('/discover/movie', movieParams).catch(() => ({ results: [] })),
+        tmdb<any>('/discover/tv', tvParams).catch(() => ({ results: [] })),
+      ]);
+
+      const m = (movieData.results || []).map((i: any) => toMovie(i, 'movie'));
+      const s = (tvData.results || []).map((i: any) => toMovie(i, 'tv'));
+      const merged: Movie[] = [];
+      const maxL = Math.max(m.length, s.length);
+      for (let i = 0; i < maxL; i++) {
+        if (m[i]) merged.push(m[i]);
+        if (s[i]) merged.push(s[i]);
+      }
+
+      return {
+        ok: true,
+        page,
+        results: merged,
+        total_pages: Math.min(Math.max(movieData.total_pages || 1, tvData.total_pages || 1), 500),
+        total_results: (movieData.total_results || 0) + (tvData.total_results || 0),
+      };
+    }
+
+    /* ── Сценарий 2: Поиск по ключевому слову (с фильтрацией по хештегам если указаны) ── */
+    const searchQuery = parsed.keyword || trimmed;
+    const mediaType = effectiveType === 'series' ? 'tv' : effectiveType === 'movie' ? 'movie' : 'multi';
+    const data = await tmdb<any>(`/search/${mediaType}`, { query: searchQuery, page, include_adult: false });
 
     let results = (data.results || []).map((item: any) => toMovie(item));
 
+    // Если был указан хештег вместе со словом (напр. "Бэтмен #боевик")
+    if (parsed.genreIdsMovie.length > 0 || parsed.genreIdsTv.length > 0) {
+      results = results.filter((m: Movie) =>
+        m.genre_ids?.some((g) => parsed.genreIdsMovie.includes(g) || parsed.genreIdsTv.includes(g))
+      );
+    }
+    if (parsed.year) {
+      results = results.filter((m: Movie) => m.release_date?.startsWith(String(parsed.year)));
+    }
+
     // Фильтруем по типу если нужно
-    if (type === 'movie') results = results.filter((m: Movie) => !m.is_serial);
-    if (type === 'series') results = results.filter((m: Movie) => m.is_serial);
+    if (effectiveType === 'movie') results = results.filter((m: Movie) => !m.is_serial);
+    if (effectiveType === 'series') results = results.filter((m: Movie) => m.is_serial);
+
+    // Если текстовый поиск ничего не дал, но есть жанр — попробуем discover
+    if (results.length === 0 && (parsed.genreIdsMovie.length > 0 || parsed.genreIdsTv.length > 0)) {
+      const disc = await smartDiscover({
+        mediaType: effectiveType === 'series' ? 'tv' : 'movie',
+        genres: effectiveType === 'series' ? parsed.genreIdsTv : parsed.genreIdsMovie,
+        page,
+      });
+      if (disc.length > 0) {
+        return {
+          ok: true,
+          page,
+          results: disc,
+          total_pages: 10,
+          total_results: disc.length,
+        };
+      }
+    }
 
     return {
       ok: true,

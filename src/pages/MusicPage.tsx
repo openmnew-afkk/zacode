@@ -18,7 +18,7 @@ interface Track {
 type Tab = 'wave' | 'russian' | 'world' | 'audius' | 'liked';
 
 /* ═══════════ Константы ═══════════ */
-const APP_NAME = 'AURA';
+const APP_NAME = 'VELORA';
 
 const hashStr = (s: string): number => {
   let h = 0;
@@ -447,26 +447,21 @@ const MusicPage: React.FC = () => {
         )}
       </div>
 
-      {/* Интерактивный блок «Моя волна» (только на вкладке 'wave') */}
+      {/* Минималистичный блок «Моя волна» (только на вкладке 'wave') */}
       {tab === 'wave' && !query && (
-        <div className="mu-wave-card" onClick={startWave}>
-          <div className="mu-wave-card__glow" />
-          <div className="mu-wave-card__content">
-            <div className="mu-wave-card__badge">
-              <IconSparkles size={13} />
-              <span>Ваш вкус · Нейропоток</span>
-            </div>
-            <h2 className="mu-wave-card__title">Моя Волна</h2>
-            <p className="mu-wave-card__sub">
-              Непрерывный поток свежей русской и мировой музыки — при каждом обновлении новые треки
-            </p>
-            <div className="mu-wave-card__bar">
-              <span className="mu-wave-eq"><i /><i /><i /><i /><i /></span>
-              <button className="mu-wave-btn">
-                <IconPlay size={16} /> Слушать волну
-              </button>
+        <div className="mu-wave-mini" onClick={startWave}>
+          <div className="mu-wave-mini__left">
+            <span className="mu-wave-mini__eq">
+              <i /><i /><i /><i />
+            </span>
+            <div className="mu-wave-mini__meta">
+              <div className="mu-wave-mini__title">Моя Волна</div>
+              <div className="mu-wave-mini__sub">Персональный нейропоток</div>
             </div>
           </div>
+          <button className="mu-wave-mini__btn" aria-label="Слушать волну">
+            <IconPlay size={15} />
+          </button>
         </div>
       )}
 

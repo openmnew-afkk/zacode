@@ -7,7 +7,7 @@ import {
   generateVipToken, syncFromCloud, resolveUserAccess, MASTER_ADMINS,
   type UserGrant, type UserRole, type DurationOption
 } from '../services/accessControl';
-import AuraEmblem from '../components/AuraEmblem';
+import VeloraEmblem from '../components/VeloraEmblem';
 import './AdminPage.css';
 
 type AdminTab = 'users' | 'servers' | 'broadcast' | 'finances' | 'backup';
@@ -157,7 +157,7 @@ const AdminPage: React.FC = () => {
   /* Генерация и копирование токена */
   const handleCopyToken = (username: string, role: UserRole, dur: DurationOption) => {
     const token = generateVipToken(username, role, dur);
-    const link = `https://t.me/AuraAppBot/app?startapp=token_${token}`;
+    const link = `https://t.me/VeloraAppBot/app?startapp=token_${token}`;
     navigator.clipboard?.writeText(link).then(() => {
       showToast(`VIP-ссылка для @${username} скопирована в буфер обмена!`, 'success');
     }).catch(() => {
@@ -180,7 +180,7 @@ const AdminPage: React.FC = () => {
     try {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        localStorage.setItem('aura_access_registry_v2', JSON.stringify(parsed));
+        localStorage.setItem('velora_access_registry_v2', JSON.stringify(parsed));
         setGrants(parsed);
         showToast(`Успешно импортировано ${parsed.length} пользователей!`, 'success');
       }
@@ -209,8 +209,8 @@ const AdminPage: React.FC = () => {
     return (
       <div className="adm page">
         <div className="adm-login-wrap">
-          <AuraEmblem size="lg" className="adm-login-emblem" />
-          <h1 className="adm-login-title">AURA Control</h1>
+          <VeloraEmblem size="lg" className="adm-login-emblem" />
+          <h1 className="adm-login-title">VELORA Control</h1>
           <p className="adm-login-desc">
             Авторизация администратора системы. Если ваш никнейм зарегистрирован, доступ предоставляется автоматически.
           </p>
@@ -250,9 +250,9 @@ const AdminPage: React.FC = () => {
       <header className="adm-header">
         <div className="adm-header__top">
           <div className="adm-header__brand">
-            <AuraEmblem size="sm" />
+            <VeloraEmblem size="sm" />
             <div>
-              <div className="adm-badge">AURA MASTER PANEL</div>
+              <div className="adm-badge">VELORA MASTER PANEL</div>
               <h1 className="adm-title">Управление доступом</h1>
             </div>
           </div>
@@ -634,7 +634,7 @@ const AdminPage: React.FC = () => {
               <textarea
                 className="adm-field__textarea"
                 rows={3}
-                placeholder="Например: Добро пожаловать в AURA! Обновлены серверы вещания и музыкальная волна."
+                placeholder="Например: Добро пожаловать в VELORA! Обновлены серверы вещания и музыкальная волна."
                 value={bannerText}
                 onChange={(e) => setBannerText(e.target.value)}
               />
@@ -686,7 +686,7 @@ const AdminPage: React.FC = () => {
                 <div className="adm-stars-card__badge">ХИТ</div>
                 <div className="adm-stars-card__days">7 ДНЕЙ</div>
                 <div className="adm-stars-card__price">10 ⭐ Stars</div>
-                <div className="adm-stars-card__sub">Полный VIP Pass + Aura AI</div>
+                <div className="adm-stars-card__sub">Полный VIP Pass + Velora AI</div>
               </div>
             </div>
 

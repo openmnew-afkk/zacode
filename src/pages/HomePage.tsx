@@ -8,8 +8,8 @@ import {
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
-import AuraEmblem from '../components/AuraEmblem';
-import AuraAiEmblem from '../components/AuraAiEmblem';
+import VeloraEmblem from '../components/VeloraEmblem';
+import VeloraAiEmblem from '../components/VeloraAiEmblem';
 import './HomePage.css';
 
 /* ──────────────────────────────────────────────────────── */
@@ -520,17 +520,17 @@ const HomePage: React.FC = () => {
           <>
             <div className="hp-header__brand">
               <div className="hp-header__emblem">
-                <AuraEmblem size="sm" />
+                <VeloraEmblem size="sm" />
               </div>
               <div>
-                <h1 className="hp-header__title">AURA</h1>
+                <h1 className="hp-header__title">VELORA</h1>
                 <span className="hp-header__sub">Cinema & Sound</span>
               </div>
             </div>
             <div className="hp-header__actions">
-              {/* ✦ Aura AI кнопка */}
-              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="Aura AI" title="Aura AI — Умный подбор">
-                <AuraAiEmblem size="sm" />
+              {/* ✦ Velora AI кнопка */}
+              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="Velora AI" title="Velora AI — Умный подбор">
+                <VeloraAiEmblem size="sm" />
               </button>
               <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

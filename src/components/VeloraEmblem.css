@@ -1,0 +1,175 @@
+/* ===== VELORA Holographic Quantum Emblem ===== */
+
+.velora-emblem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Размеры */
+.velora-emblem--sm {
+  width: 28px;
+  height: 28px;
+}
+.velora-emblem--md {
+  width: 38px;
+  height: 38px;
+}
+.velora-emblem--lg {
+  width: 54px;
+  height: 54px;
+}
+.velora-emblem--hero {
+  width: 92px;
+  height: 92px;
+}
+
+/* 1. Внешний неоновый ореол */
+.velora-emblem__halo {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(6, 182, 212, 0.3) 45%, transparent 72%);
+  filter: blur(8px);
+  animation: veloraHaloPulse 4s ease-in-out infinite alternate;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+/* 2. Хроматическое кольцо (conic-gradient с вращением) */
+.velora-emblem__chroma-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    #a855f7 0deg,
+    #38bdf8 72deg,
+    #f43f5e 144deg,
+    #fbbf24 216deg,
+    #818cf8 288deg,
+    #a855f7 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: veloraRotate 6s linear infinite;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.5);
+  transform: translateZ(0);
+}
+
+/* 3. Орбитальное кольцо со спутником */
+.velora-emblem__orbit-ring {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  animation: veloraReverseRotate 9s linear infinite;
+  transform: translateZ(0);
+}
+.velora-emblem__satellite {
+  position: absolute;
+  top: -3px;
+  left: calc(50% - 3px);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #38bdf8, 0 0 14px #c084fc;
+}
+.velora-emblem--hero .velora-emblem__satellite {
+  width: 9px;
+  height: 9px;
+  top: -4.5px;
+  left: calc(50% - 4.5px);
+}
+
+/* 4. Квантовое ядро */
+.velora-emblem__core {
+  position: relative;
+  width: 58%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #c084fc 35%, #6366f1 70%, #0c081e 100%);
+  box-shadow: inset 0 0 8px rgba(255, 255, 255, 0.8),
+              0 0 20px rgba(168, 85, 247, 0.6),
+              0 0 35px rgba(56, 189, 248, 0.35);
+  animation: veloraCoreBreathe 3s ease-in-out infinite alternate;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateZ(0);
+}
+
+.velora-emblem__core-inner {
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, rgba(255, 255, 255, 0.4) 60%, transparent 100%);
+  filter: blur(1px);
+}
+
+.velora-emblem__core-flare {
+  position: absolute;
+  width: 140%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
+  filter: blur(0.5px);
+  animation: veloraFlareFlash 4.5s ease-in-out infinite;
+}
+
+/* 5. Тонкие кинематографичные лучи */
+.velora-emblem__cross {
+  position: absolute;
+  inset: -15%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, rgba(192, 132, 252, 0.25) 0%, transparent 70%),
+    radial-gradient(ellipse at center, rgba(56, 189, 248, 0.2) 0%, transparent 70%);
+  animation: veloraCrossPulse 5s ease-in-out infinite alternate;
+}
+
+/* Анимации */
+@keyframes veloraRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes veloraReverseRotate {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes veloraHaloPulse {
+  0% { opacity: 0.45; transform: scale(0.92); }
+  100% { opacity: 0.85; transform: scale(1.1); }
+}
+
+@keyframes veloraCoreBreathe {
+  0% {
+    transform: scale(0.94);
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.7),
+                0 0 14px rgba(168, 85, 247, 0.5),
+                0 0 24px rgba(56, 189, 248, 0.25);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.95),
+                0 0 24px rgba(168, 85, 247, 0.8),
+                0 0 42px rgba(56, 189, 248, 0.5);
+  }
+}
+
+@keyframes veloraFlareFlash {
+  0%, 100% { opacity: 0.3; transform: scaleX(0.7) rotate(0deg); }
+  50% { opacity: 1; transform: scaleX(1.3) rotate(180deg); }
+}
+
+@keyframes veloraCrossPulse {
+  0% { opacity: 0.3; transform: scale(0.9); }
+  100% { opacity: 0.75; transform: scale(1.15); }
+}

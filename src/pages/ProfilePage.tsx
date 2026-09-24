@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
-import AuraEmblem from '../components/AuraEmblem';
+import VeloraEmblem from '../components/VeloraEmblem';
 import RulesModal from '../components/RulesModal';
 import { resolveUserAccess } from '../services/accessControl';
 import './ProfilePage.css';
@@ -85,7 +85,7 @@ const ProfilePage: React.FC = () => {
               <span /><span /><span /><span /><span />
             </div>
           ),
-          label: 'Музыка AURA',
+          label: 'Музыка VELORA',
           sub: 'Русские и мировые хиты · Моя волна',
           action: () => navigate('/music'),
         },
@@ -194,7 +194,7 @@ const ProfilePage: React.FC = () => {
             {username && <p className="pf__username">{username}</p>}
             <div className="pf__badges">
               {effectivePremium ? (
-                <span className="pf__badge pf__badge--premium">👑 AURA VIP PRO</span>
+                <span className="pf__badge pf__badge--premium">👑 VELORA VIP PRO</span>
               ) : (
                 <span className="pf__badge">БАЗОВЫЙ УРОВЕНЬ</span>
               )}
@@ -202,7 +202,7 @@ const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          <AuraEmblem size="sm" className="pf__card-emblem" />
+          <VeloraEmblem size="sm" className="pf__card-emblem" />
         </div>
 
         <div className="pf__vip-status-bar" onClick={() => navigate('/premium')}>
@@ -305,7 +305,7 @@ const ProfilePage: React.FC = () => {
 
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
 
-      <div className="pf__footer">AURA · Все права защищены</div>
+      <div className="pf__footer">VELORA · Все права защищены</div>
     </div>
   );
 };

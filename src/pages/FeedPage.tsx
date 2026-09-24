@@ -4,7 +4,7 @@ import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { INITIAL_FEED_POSTS } from '../data/feedPosts';
 import type { FeedPost } from '../types';
-import AuraEmblem from '../components/AuraEmblem';
+import VeloraEmblem from '../components/VeloraEmblem';
 import './FeedPage.css';
 
 type FilterCategory = 'all' | 'trailer' | 'announce' | 'premiere' | 'series';
@@ -35,7 +35,7 @@ const FeedPage: React.FC = () => {
   /* Состояние реакций (хранится в памяти/local) */
   const [reactionsState, setReactionsState] = useState<Record<string, Record<string, { count: number; active: boolean }>>>(() => {
     try {
-      const saved = localStorage.getItem('aura_feed_reactions');
+      const saved = localStorage.getItem('velora_feed_reactions') || localStorage.getItem('aura_feed_reactions');
       if (saved) return JSON.parse(saved);
     } catch {}
     const init: Record<string, Record<string, { count: number; active: boolean }>> = {};
@@ -78,7 +78,7 @@ const FeedPage: React.FC = () => {
         },
       };
       try {
-        localStorage.setItem('aura_feed_reactions', JSON.stringify(nextState));
+        localStorage.setItem('velora_feed_reactions', JSON.stringify(nextState));
       } catch {}
       return nextState;
     });
@@ -86,8 +86,8 @@ const FeedPage: React.FC = () => {
 
   const handleShare = (post: FeedPost) => {
     haptic('medium');
-    const shareText = `🎬 ${post.title}\n\nСмотрите трейлер и подробности в AURA Cinema:\nhttps://t.me/AuraAppBot/app?startapp=${post.id}`;
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/AuraAppBot/app')}&text=${encodeURIComponent(shareText)}`;
+    const shareText = `🎬 ${post.title}\n\nСмотрите трейлер и подробности в VELORA Cinema:\nhttps://t.me/VeloraAppBot/app?startapp=${post.id}`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/VeloraAppBot/app')}&text=${encodeURIComponent(shareText)}`;
     openLink(shareUrl);
   };
 
@@ -103,14 +103,14 @@ const FeedPage: React.FC = () => {
         <div className="feed-header__top">
           <div className="feed-header__brand">
             <div className="feed-header__logo">
-              <AuraEmblem size="sm" />
+              <VeloraEmblem size="sm" />
             </div>
             <div>
-              <span className="feed-header__tag">✦ AURA КИНОЛЕНТА</span>
+              <span className="feed-header__tag">✦ VELORA КИНОЛЕНТА</span>
               <h1 className="feed-header__title">Новости и трейлеры</h1>
             </div>
           </div>
-          <button className="feed-header__channel-btn" onClick={() => openLink('https://t.me/AuraSupport_bot')} title="Канал AURA">
+          <button className="feed-header__channel-btn" onClick={() => openLink('https://t.me/VeloraSupport_bot')} title="Канал VELORA">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.75-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z"/>
             </svg>
@@ -153,11 +153,11 @@ const FeedPage: React.FC = () => {
               <div className="feed-card__meta-bar">
                 <div className="feed-card__channel">
                   <div className="feed-card__channel-avatar">
-                    <AuraEmblem size="sm" />
+                    <VeloraEmblem size="sm" />
                   </div>
                   <div className="feed-card__channel-info">
                     <div className="feed-card__channel-name">
-                      <span>AURA Cinema News</span>
+                      <span>VELORA Cinema News</span>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="#38bdf8">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
@@ -288,7 +288,7 @@ const FeedPage: React.FC = () => {
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M8 5v14l11-7z" />
                       </svg>
-                      Смотреть в AURA
+                      Смотреть в VELORA
                     </button>
                   )}
 

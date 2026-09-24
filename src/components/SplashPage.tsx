@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import AuraEmblem from './AuraEmblem';
+import VeloraEmblem from './VeloraEmblem';
 import './SplashPage.css';
 
 interface SplashPageProps {
@@ -46,14 +46,14 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       <div className="sp__ambient-glow" />
 
       <div className="sp__center">
-        {/* Голографическая квантовая эмблема AURA */}
+        {/* Голографическая квантовая эмблема VELORA */}
         <div className="sp__prism">
-          <AuraEmblem size="hero" className="sp__prism-emblem" />
+          <VeloraEmblem size="hero" className="sp__prism-emblem" />
         </div>
 
-        {/* Название AURA */}
+        {/* Название VELORA */}
         <div className="sp__typography">
-          <h1 className="sp__title">A U R A</h1>
+          <h1 className="sp__title">V E L O R A</h1>
           <p className="sp__subtitle">CINEMA & SOUND</p>
         </div>
 

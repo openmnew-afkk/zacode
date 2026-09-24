@@ -552,27 +552,27 @@ const MovieDetailPage: React.FC = () => {
               {watchOptions[watchIdx]?.provider === 'VidLink' ? (
                 <>
                   <span className="dp-watch-hint__badge">⚡ VidLink Pro:</span>
-                  <span className="dp-watch-hint__text">100% с VPN · Нажмите ⚙️ или 🎧 в плеере для русской дорожки</span>
+                  <span className="dp-watch-hint__text">100% с VPN · Выберите русскую дорожку (🇷🇺 в меню звука ⚙️ или 🎧)</span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Collaps' ? (
                 <>
                   <span className="dp-watch-hint__badge">🇷🇺 Collaps HD:</span>
-                  <span className="dp-watch-hint__text">LostFilm · Red Head Sound · Резка · Дубляж (выбор студии в плеере)</span>
+                  <span className="dp-watch-hint__text">LostFilm · RHS · Резка (если пишет «Недоступно в регионе» — включите Kinohub или смените VPN на Нидерланды/Германию)</span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Kinohub' ? (
                 <>
                   <span className="dp-watch-hint__badge">🎬 Kinohub:</span>
-                  <span className="dp-watch-hint__text">Агрегатор русских студий · Авто-выбор рабочих потоков</span>
+                  <span className="dp-watch-hint__text">Мульти-балансер РФ (Kodik, Alloha, Collaps) · Без блокировки по региону под VPN</span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Voidboost' ? (
                 <>
                   <span className="dp-watch-hint__badge">🍿 Voidboost HD:</span>
-                  <span className="dp-watch-hint__text">LostFilm · NewStudio · Дубляж (резервный поток РФ)</span>
+                  <span className="dp-watch-hint__text">LostFilm · NewStudio · Дубляж (резервный плеер РФ)</span>
                 </>
               ) : (
                 <>
-                  <span className="dp-watch-hint__badge">🌍 Скоростной CDN:</span>
-                  <span className="dp-watch-hint__text">Работает с любым VPN · Full HD качество</span>
+                  <span className="dp-watch-hint__badge">✨ Студии РФ:</span>
+                  <span className="dp-watch-hint__text">Альтернативный плеер с озвучками РФ и СНГ</span>
                 </>
               )}
             </div>

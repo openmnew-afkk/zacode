@@ -375,112 +375,95 @@
   50% { opacity: 0.15; }
 }
 
-/* ── Моя Волна (Интерактивная Hero-карточка) ── */
-.mu-wave-card {
-  position: relative;
-  margin: 4px 14px 18px;
-  border-radius: 24px;
-  padding: 22px 20px;
-  background: linear-gradient(135deg, rgba(88, 28, 135, 0.5) 0%, rgba(30, 27, 75, 0.7) 50%, rgba(15, 23, 42, 0.8) 100%);
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 0 12px 36px rgba(139, 92, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.mu-wave-card:active {
-  transform: scale(0.98);
-}
-.mu-wave-card__glow {
-  position: absolute;
-  top: -40px;
-  right: -40px;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(236, 72, 153, 0.45) 0%, rgba(139, 92, 246, 0.2) 60%, transparent 80%);
-  filter: blur(40px);
-  pointer-events: none;
-  animation: mu-wave-pulse 4s ease-in-out infinite alternate;
-}
-@keyframes mu-wave-pulse {
-  0%   { transform: scale(0.9) rotate(0deg); opacity: 0.6; }
-  100% { transform: scale(1.25) rotate(45deg); opacity: 1; }
-}
-.mu-wave-card__content {
-  position: relative;
-  z-index: 2;
-}
-.mu-wave-card__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  background: rgba(168, 85, 247, 0.2);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #e9d5ff;
-  font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  margin-bottom: 10px;
-}
-.mu-wave-card__title {
-  font-size: 24px;
-  font-weight: 900;
-  color: #fff;
-  letter-spacing: -0.4px;
-  margin: 0 0 6px;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
-}
-.mu-wave-card__sub {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.65);
-  margin: 0 0 18px;
-  line-height: 1.45;
-  max-width: 90%;
-}
-.mu-wave-card__bar {
+/* ── Минималистичный бар «Моя Волна» (Apple Music / Spotify Style) ── */
+.mu-wave-mini {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 2px 14px 14px;
+  height: 52px;
+  padding: 0 14px 0 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(168, 85, 247, 0.22);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
 }
-.mu-wave-eq {
+.mu-wave-mini:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(168, 85, 247, 0.35);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.mu-wave-mini:active {
+  transform: scale(0.985);
+  background: rgba(255, 255, 255, 0.05);
+}
+.mu-wave-mini__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.mu-wave-mini__eq {
   display: flex;
   align-items: flex-end;
-  gap: 3.5px;
-  height: 22px;
+  gap: 3px;
+  height: 18px;
+  flex-shrink: 0;
 }
-.mu-wave-eq i {
-  width: 4px;
+.mu-wave-mini__eq i {
+  width: 3px;
   border-radius: 999px;
   background: linear-gradient(180deg, #38bdf8, #a855f7);
-  animation: mu-eq-jump 0.8s ease-in-out infinite alternate;
+  animation: mu-mini-jump 0.8s ease-in-out infinite alternate;
 }
-.mu-wave-eq i:nth-child(1) { height: 35%; animation-delay: 0.1s; }
-.mu-wave-eq i:nth-child(2) { height: 85%; animation-delay: 0.3s; }
-.mu-wave-eq i:nth-child(3) { height: 60%; animation-delay: 0.05s; }
-.mu-wave-eq i:nth-child(4) { height: 95%; animation-delay: 0.4s; }
-.mu-wave-eq i:nth-child(5) { height: 45%; animation-delay: 0.2s; }
-@keyframes mu-eq-jump {
-  0%   { height: 25%; }
+.mu-wave-mini__eq i:nth-child(1) { height: 40%; animation-delay: 0.1s; }
+.mu-wave-mini__eq i:nth-child(2) { height: 90%; animation-delay: 0.28s; }
+.mu-wave-mini__eq i:nth-child(3) { height: 60%; animation-delay: 0.05s; }
+.mu-wave-mini__eq i:nth-child(4) { height: 100%; animation-delay: 0.38s; }
+
+@keyframes mu-mini-jump {
+  0%   { height: 30%; }
   100% { height: 100%; }
 }
-.mu-wave-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: none;
-  color: #0c0a14;
-  font-size: 13px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.3);
-  transition: transform 0.15s ease;
+.mu-wave-mini__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-.mu-wave-btn:active {
-  transform: scale(0.95);
+.mu-wave-mini__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+.mu-wave-mini__sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.48);
+  line-height: 1.2;
+}
+.mu-wave-mini__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(168, 85, 247, 0.16);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #ffffff;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.mu-wave-mini__btn:active {
+  transform: scale(0.9);
 }
