@@ -15,16 +15,6 @@ interface FilterChip {
   count: number;
 }
 
-const STORIES = [
-  { id: 'post-dune-messiah', title: 'Дюна 3', avatar: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?w=300&auto=format&fit=crop&q=80', badge: '🔥 Тизер', subtitle: 'Дени Вильнёв начал съёмки финала трилогии' },
-  { id: 'post-cliff-booth', title: 'Клифф Бут', avatar: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=300&auto=format&fit=crop&q=80', badge: '🎬 Трейлер', subtitle: 'Брэд Питт в продолжении Тарантино' },
-  { id: 'post-batman-2', title: 'Бэтмен 2', avatar: 'https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=300&auto=format&fit=crop&q=80', badge: '🦇 Готэм', subtitle: 'Роберт Паттинсон против Суда Сов' },
-  { id: 'post-peaky-blinders', title: 'Козырьки', avatar: 'https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=300&auto=format&fit=crop&q=80', badge: '🥃 Фильм', subtitle: 'Томми Шелби возвращается в Бирмингем' },
-  { id: 'post-avatar-3', title: 'Аватар 3', avatar: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=300&auto=format&fit=crop&q=80', badge: '🌊 Пепел', subtitle: 'Джеймс Кэмерон и темная сторона на\'ви' },
-  { id: 'post-stranger-things-5', title: 'Странные дела', avatar: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=300&auto=format&fit=crop&q=80', badge: '⚡ Финал', subtitle: 'Финальная схватка за Хоукинс' },
-  { id: 'post-avengers-doomsday', title: 'Мстители', avatar: 'https://images.unsplash.com/photo-1635863138275-d9b33299680b?w=300&auto=format&fit=crop&q=80', badge: '🛡 Marvel', subtitle: 'Роберт Дауни-мл. в роли Доктора Дума' },
-];
-
 const CHIPS: FilterChip[] = [
   { id: 'all', label: 'Все', icon: '🔥', count: 6 },
   { id: 'trailer', label: 'Трейлеры', icon: '🎬', count: 2 },
@@ -41,7 +31,6 @@ const FeedPage: React.FC = () => {
   const [filter, setFilter] = useState<FilterCategory>('all');
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [selectedArticle, setSelectedArticle] = useState<FeedPost | null>(null);
-  const [activeStoryIndex, setActiveStoryIndex] = useState<number | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   /* Состояние реакций */
@@ -68,19 +57,6 @@ const FeedPage: React.FC = () => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 2000);
   };
-
-  /* Авто-перелистывание историй каждые 5 сек */
-  useEffect(() => {
-    if (activeStoryIndex === null) return;
-    const timer = setTimeout(() => {
-      if (activeStoryIndex + 1 < STORIES.length) {
-        setActiveStoryIndex(activeStoryIndex + 1);
-      } else {
-        setActiveStoryIndex(null);
-      }
-    }, 5000);
-    return () => clearTimeout(timer);
-  }, [activeStoryIndex]);
 
   const handleRefresh = () => {
     haptic('medium');
@@ -140,9 +116,6 @@ const FeedPage: React.FC = () => {
     return p.category === filter;
   });
 
-  const curStory = activeStoryIndex !== null ? STORIES[activeStoryIndex] : null;
-  const curStoryPost = curStory ? posts.find((p) => p.id === curStory.id) : null;
-
   return (
     <div className="feed-page page">
       {/* ── Шапка страницы ── */}
@@ -178,26 +151,6 @@ const FeedPage: React.FC = () => {
               <span>Telegram</span>
             </button>
           </div>
-        </div>
-
-        {/* ── Сторисы (Stories Reel) ── */}
-        <div className="feed-stories">
-          {STORIES.map((s, idx) => (
-            <button
-              key={s.id}
-              className="feed-story-item"
-              onClick={() => {
-                haptic('medium');
-                setActiveStoryIndex(idx);
-              }}
-            >
-              <div className="feed-story-avatar">
-                <img src={s.avatar} alt={s.title} loading="lazy" />
-                <span className="feed-story-badge">{s.badge}</span>
-              </div>
-              <span className="feed-story-title">{s.title}</span>
-            </button>
-          ))}
         </div>
 
         {/* ── Фильтры категорий ── */}
@@ -443,107 +396,6 @@ const FeedPage: React.FC = () => {
           );
         })}
       </main>
-
-      {/* ── Полноэкранный плеер историй (Stories Viewer) — Плавный, без лагов ── */}
-      {curStory && (
-        <div className="feed-story-viewer">
-          {/* Фон с постером */}
-          <div
-            className="feed-story-viewer__bg"
-            style={{ backgroundImage: `url(${curStory.avatar})` }}
-          />
-          <div className="feed-story-viewer__veil" />
-
-          {/* Верхние полоски прогресса */}
-          <div className="feed-story-viewer__progress-bars">
-            {STORIES.map((_, i) => (
-              <div key={i} className="feed-story-viewer__bar-bg">
-                <div
-                  className={`feed-story-viewer__bar-fill ${
-                    i < activeStoryIndex!
-                      ? 'done'
-                      : i === activeStoryIndex!
-                      ? 'animating'
-                      : ''
-                  }`}
-                />
-              </div>
-            ))}
-          </div>
-
-          {/* Шапка истории */}
-          <div className="feed-story-viewer__header">
-            <div className="feed-story-viewer__author">
-              <div className="feed-story-viewer__avatar">
-                <img src={curStory.avatar} alt="" />
-              </div>
-              <div>
-                <span className="feed-story-viewer__name">{curStory.title}</span>
-                <span className="feed-story-viewer__badge">{curStory.badge}</span>
-              </div>
-            </div>
-            <button
-              className="feed-story-viewer__close"
-              onClick={() => setActiveStoryIndex(null)}
-            >
-              ✕
-            </button>
-          </div>
-
-          {/* Интерактивные зоны кликов (Назад / Вперёд) */}
-          <div
-            className="feed-story-viewer__tap-left"
-            onClick={() => {
-              haptic('light');
-              setActiveStoryIndex(Math.max(0, activeStoryIndex! - 1));
-            }}
-          />
-          <div
-            className="feed-story-viewer__tap-right"
-            onClick={() => {
-              haptic('light');
-              if (activeStoryIndex! + 1 < STORIES.length) {
-                setActiveStoryIndex(activeStoryIndex! + 1);
-              } else {
-                setActiveStoryIndex(null);
-              }
-            }}
-          />
-
-          {/* Нижняя карточка истории */}
-          <div className="feed-story-viewer__card">
-            <h2 className="feed-story-viewer__card-title">{curStory.title}</h2>
-            <p className="feed-story-viewer__card-sub">{curStory.subtitle}</p>
-
-            <div className="feed-story-viewer__card-actions">
-              {curStoryPost && (
-                <button
-                  className="feed-story-viewer__btn feed-story-viewer__btn--primary"
-                  onClick={() => {
-                    const post = curStoryPost;
-                    setActiveStoryIndex(null);
-                    setSelectedArticle(post);
-                  }}
-                >
-                  📖 Читать полностью
-                </button>
-              )}
-              {curStoryPost?.movieId && (
-                <button
-                  className="feed-story-viewer__btn feed-story-viewer__btn--secondary"
-                  onClick={() => {
-                    const id = curStoryPost.movieId;
-                    setActiveStoryIndex(null);
-                    navigate(`/movie/${id}`);
-                  }}
-                >
-                  🍿 Фильм
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── Модальный ридер полной статьи («Читать статью») ── */}
       {selectedArticle && (

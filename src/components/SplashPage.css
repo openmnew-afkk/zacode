@@ -1,139 +1,485 @@
-/* ══ Splash Screen — VELORA Minimal Dark Luxury ══ */
+/* ═══════════════════════════════════════════════════════════════════
+   🎬 VELORA ULTRA CINEMA SPLASH SCREEN — 2026 TOP TIER EDITION
+   ═══════════════════════════════════════════════════════════════════ */
+
 .sp {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #06050a;
-  transition: opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1), transform 0.42s ease;
+  background: radial-gradient(ellipse at 50% 45%, #0b0914 0%, #050409 65%, #020104 100%);
+  transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.45s ease;
   user-select: none;
   overflow: hidden;
+  box-sizing: border-box;
 }
+
 .sp--fade {
   opacity: 0;
-  transform: scale(1.03);
+  transform: scale(1.08);
+  filter: blur(14px) brightness(1.25);
   pointer-events: none;
 }
 
-/* Мягкое фоновое дыхание света */
-.sp__ambient-glow {
+/* ── 1. Кинематографичный видоискатель (HUD Frame / Scope 2.39:1) ── */
+.sp__hud-frame {
   position: absolute;
-  width: 680px;
-  height: 680px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 50%, rgba(168, 85, 247, 0.45) 0%, rgba(139, 92, 246, 0.28) 30%, rgba(56, 189, 248, 0.16) 55%, transparent 75%);
-  filter: blur(85px);
-  animation: aura-ambient 3.5s ease-in-out infinite alternate;
+  inset: 0;
+  padding: calc(env(safe-area-inset-top, 24px) + 12px) 20px calc(env(safe-area-inset-bottom, 20px) + 12px);
   pointer-events: none;
-}
-@keyframes aura-ambient {
-  0%   { transform: scale(0.92) rotate(0deg); opacity: 0.65; }
-  100% { transform: scale(1.22) rotate(20deg); opacity: 0.98; }
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 10;
+  box-sizing: border-box;
+  opacity: 0.65;
+  animation: hudFadeIn 1.2s ease-out both;
 }
 
-/* Широкоформатная анаморфная подсветка, выходящая за пределы экрана */
+@keyframes hudFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 0.65; transform: scale(1); }
+}
+
+.sp__hud-corner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.sp__hud-corner--tl { justify-content: flex-start; }
+.sp__hud-corner--tr { justify-content: flex-end; }
+.sp__hud-corner--bl { justify-content: flex-start; }
+.sp__hud-corner--br { justify-content: flex-end; }
+
+.sp__hud-bracket {
+  font-size: 14px;
+  font-weight: 300;
+  color: #c084fc;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(192, 132, 252, 0.6);
+}
+
+.sp__hud-meta {
+  font-size: 8px;
+  letter-spacing: 1.6px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+  text-transform: uppercase;
+}
+
+/* ── 2. Анаморфный луч света (70mm Cinema Lens Flare) ── */
+.sp__anamorphic-flare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 140vw;
+  height: 2px;
+  transform: translate(-50%, -50%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(56, 189, 248, 0.15) 15%,
+    rgba(168, 85, 247, 0.85) 45%,
+    #ffffff 50%,
+    rgba(244, 63, 94, 0.85) 55%,
+    rgba(56, 189, 248, 0.15) 85%,
+    transparent 100%
+  );
+  box-shadow: 0 0 28px rgba(168, 85, 247, 0.9), 0 0 60px rgba(56, 189, 248, 0.4);
+  pointer-events: none;
+  animation: anamorphicPulse 4s ease-in-out infinite alternate;
+  z-index: 1;
+}
+
+@keyframes anamorphicPulse {
+  0% {
+    opacity: 0.55;
+    transform: translate(-50%, -50%) scaleX(0.85);
+  }
+  50% {
+    opacity: 0.95;
+    transform: translate(-50%, -50%) scaleX(1.15);
+  }
+  100% {
+    opacity: 0.65;
+    transform: translate(-50%, -50%) scaleX(0.95);
+  }
+}
+
+/* ── 3. Космическая и анаморфная аура ── */
 .sp__ambient-aura {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 140vw;
-  height: 420px;
-  background: radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.24) 0%, rgba(236, 72, 153, 0.12) 35%, rgba(56, 189, 248, 0.08) 60%, transparent 75%);
-  filter: blur(75px);
+  width: 130vw;
+  height: 480px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(168, 85, 247, 0.22) 0%,
+    rgba(236, 72, 153, 0.12) 32%,
+    rgba(56, 189, 248, 0.08) 58%,
+    transparent 74%
+  );
+  filter: blur(85px);
   pointer-events: none;
-  animation: aura-anamorphic 5s ease-in-out infinite alternate;
-}
-@keyframes aura-anamorphic {
-  0%   { transform: translate(-50%, -50%) scaleX(0.85); opacity: 0.5; }
-  100% { transform: translate(-50%, -50%) scaleX(1.15); opacity: 0.85; }
+  z-index: 1;
+  animation: auraBreath 6s ease-in-out infinite alternate;
 }
 
+@keyframes auraBreath {
+  0%   { transform: translate(-50%, -50%) scale(0.92); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(1.18); opacity: 0.9; }
+}
+
+.sp__ambient-glow {
+  position: absolute;
+  width: 580px;
+  height: 580px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(168, 85, 247, 0.38) 0%,
+    rgba(139, 92, 246, 0.2) 35%,
+    transparent 70%
+  );
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 1;
+  animation: glowOrbit 8s linear infinite;
+}
+
+@keyframes glowOrbit {
+  0%   { transform: rotate(0deg) scale(0.95); }
+  50%  { transform: rotate(180deg) scale(1.12); }
+  100% { transform: rotate(360deg) scale(0.95); }
+}
+
+/* ── 4. Парящие звездные частицы (Cinema Star Dust) ── */
+.sp__particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+}
+
+.sp__particle {
+  position: absolute;
+  border-radius: 50%;
+  background: #ffffff;
+  pointer-events: none;
+  animation: floatParticle linear infinite;
+}
+
+.sp__particle.p1 { width: 3px; height: 3px; top: 75%; left: 22%; box-shadow: 0 0 10px #38bdf8; animation-duration: 4.5s; animation-delay: 0s; }
+.sp__particle.p2 { width: 4px; height: 4px; top: 82%; left: 45%; box-shadow: 0 0 12px #c084fc; animation-duration: 5.2s; animation-delay: 0.8s; }
+.sp__particle.p3 { width: 2px; height: 2px; top: 68%; left: 72%; box-shadow: 0 0 8px #ffffff; animation-duration: 3.8s; animation-delay: 1.5s; }
+.sp__particle.p4 { width: 3px; height: 3px; top: 90%; left: 85%; box-shadow: 0 0 10px #f43f5e; animation-duration: 6.0s; animation-delay: 0.4s; }
+.sp__particle.p5 { width: 2px; height: 2px; top: 60%; left: 35%; box-shadow: 0 0 6px #38bdf8; animation-duration: 4.8s; animation-delay: 2.1s; }
+.sp__particle.p6 { width: 4px; height: 4px; top: 70%; left: 58%; box-shadow: 0 0 14px #a855f7; animation-duration: 5.5s; animation-delay: 1.2s; }
+.sp__particle.p7 { width: 2px; height: 2px; top: 85%; left: 15%; box-shadow: 0 0 8px #38bdf8; animation-duration: 4.2s; animation-delay: 0.2s; }
+.sp__particle.p8 { width: 3px; height: 3px; top: 65%; left: 88%; box-shadow: 0 0 10px #ffffff; animation-duration: 5.8s; animation-delay: 1.9s; }
+
+@keyframes floatParticle {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.6);
+  }
+  30% {
+    opacity: 0.85;
+    transform: translateY(-40px) scale(1.1);
+  }
+  70% {
+    opacity: 0.7;
+    transform: translateY(-90px) scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-140px) scale(0.4);
+  }
+}
+
+/* ── 5. Центральный премиум-контейнер ── */
 .sp__center {
   position: relative;
-  z-index: 2;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 22px;
+  max-width: 90vw;
+  box-sizing: border-box;
 }
 
-/* Призма */
-.sp__prism {
+/* Сцена эмблемы */
+.sp__emblem-stage {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: prism-enter 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-@keyframes prism-enter {
-  from { opacity: 0; transform: scale(0.7) rotate(-10deg); }
-  to   { opacity: 1; transform: scale(1) rotate(0deg); }
+  animation: emblemEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Анаморфный горизонтальный луч света */
-.sp__prism-beam {
+@keyframes emblemEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.65) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.sp__emblem-backdrop {
   position: absolute;
-  width: 220px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(192, 132, 252, 0.8), transparent);
-  box-shadow: 0 0 16px rgba(168, 85, 247, 0.8);
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.22) 0%, rgba(56, 189, 248, 0.12) 50%, transparent 75%);
+  filter: blur(14px);
   pointer-events: none;
-  animation: beam-shimmer 2.2s ease-in-out infinite alternate;
-}
-@keyframes beam-shimmer {
-  0%   { width: 140px; opacity: 0.4; }
-  100% { width: 260px; opacity: 0.95; }
 }
 
-.sp__prism-svg {
-  filter: drop-shadow(0 0 16px rgba(168, 85, 247, 0.6));
+.sp__emblem-reflection {
+  position: absolute;
+  bottom: -18px;
+  width: 80px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.4) 0%, transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
 }
 
-/* Типографика */
-.sp__typography {
+/* ── 6. Бренд VELORA & Металлическое сияние ── */
+.sp__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
   text-align: center;
-  animation: text-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
-@keyframes text-enter {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+
+.sp__title-wrap {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  animation: brandEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+@keyframes brandEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .sp__title {
-  font-size: 26px;
-  font-weight: 800;
+  margin: 0;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 16px;
+  padding-left: 16px; /* Балансирует letter-spacing справа */
+  line-height: 1.1;
+  text-transform: uppercase;
   color: #ffffff;
-  letter-spacing: 12px;
-  margin: 0 0 6px 12px;
-  line-height: 1;
-  text-shadow: 0 0 24px rgba(255, 255, 255, 0.4);
+  background: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #f8fafc 35%,
+    #e2e8f0 60%,
+    #c084fc 80%,
+    #ffffff 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 24px rgba(168, 85, 247, 0.45));
 }
-.sp__subtitle {
-  font-size: 10px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.38);
-  letter-spacing: 4px;
-  margin: 0 0 0 4px;
+
+.sp__title-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.7) 48%,
+    rgba(255, 255, 255, 0.9) 50%,
+    rgba(255, 255, 255, 0.7) 52%,
+    transparent 80%
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  animation: titleShimmer 3.2s infinite ease-in-out;
+}
+
+@keyframes titleShimmer {
+  0% { transform: translateX(-150%); }
+  50%, 100% { transform: translateX(150%); }
+}
+
+/* Престиж-бейдж */
+.sp__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  animation: brandEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.sp__badge-spark {
+  color: #f43f5e;
+  font-size: 9px;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px #f43f5e);
+}
+
+.sp__badge-text {
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: rgba(255, 255, 255, 0.78);
   text-transform: uppercase;
 }
 
-/* Ультра-тонкий трек */
+/* Спецификации (4K HDR • DOLBY ATMOS • NEURAL AI) */
+.sp__specs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  animation: brandEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+}
+
+.sp__spec-chip {
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.42);
+  text-transform: uppercase;
+}
+
+.sp__spec-dot {
+  font-size: 7px;
+  color: rgba(168, 85, 247, 0.5);
+}
+
+/* ── 7. Индикатор загрузки и телеметрия ── */
+.sp__loading-module {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  width: 230px;
+  margin-top: 4px;
+  animation: brandEnter 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both;
+}
+
+.sp__telemetry-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.sp__telemetry-status {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 185px;
+}
+
+.sp__telemetry-percent {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+
+/* Лазерный трек прогресса */
 .sp__progress-track {
-  width: 140px;
-  height: 1.5px;
+  width: 100%;
+  height: 3px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 999px;
-  overflow: hidden;
-  margin-top: 10px;
-  animation: text-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+  overflow: visible;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.6);
 }
+
 .sp__progress-bar {
+  position: relative;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #a855f7, #38bdf8, #ffffff);
-  box-shadow: 0 0 8px #a855f7;
-  transition: width 0.25s ease;
+  background: linear-gradient(
+    90deg,
+    #ec4899 0%,
+    #a855f7 40%,
+    #38bdf8 80%,
+    #ffffff 100%
+  );
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.8), 0 0 20px rgba(56, 189, 248, 0.4);
+  transition: width 0.1s linear;
+}
+
+/* Светящаяся лазерная искра на конце шкалы */
+.sp__progress-spark {
+  position: absolute;
+  right: -3px;
+  top: -3.5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff,
+              0 0 16px #38bdf8,
+              0 0 26px #a855f7;
+  animation: sparkPulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes sparkPulse {
+  0%   { transform: scale(0.85); opacity: 0.85; }
+  100% { transform: scale(1.25); opacity: 1; }
+}
+
+/* ── Адаптивность для небольших экранов ── */
+@media (max-height: 640px) {
+  .sp__center {
+    gap: 16px;
+  }
+  .sp__title {
+    font-size: 26px;
+    letter-spacing: 12px;
+    padding-left: 12px;
+  }
+  .sp__hud-frame {
+    padding: 12px 14px;
+  }
+  .sp__specs {
+    display: none;
+  }
 }
