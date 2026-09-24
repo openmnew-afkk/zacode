@@ -1,98 +1,129 @@
-/* ===== FeedPage.css — КиноЛента и трейлеры в стиле Telegram каналов ===== */
+/* ===== FeedPage.css — КиноЛента и трейлеры VELORA ===== */
 
 .feed-page {
   min-height: 100vh;
   padding-bottom: 120px;
   position: relative;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 /* ── Шапка ── */
 .feed-header {
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 40;
   background: var(--bg);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  padding: 12px 16px 12px;
+  padding: 10px 14px 10px;
   padding-top: var(--header-safe-top);
+  box-sizing: border-box;
 }
 
 .feed-header__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: 8px;
+  margin-bottom: 10px;
+  width: 100%;
 }
 
 .feed-header__brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .feed-header__logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 12px var(--accent-glow);
   flex-shrink: 0;
 }
 
 .feed-header__tag {
   display: block;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
   color: var(--accent);
   text-transform: uppercase;
 }
 
 .feed-header__title {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 17px;
   font-weight: 800;
   color: var(--text);
-  margin: 1px 0 0;
-  letter-spacing: -0.3px;
+  margin: 0;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.feed-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.feed-header__reload-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.feed-header__reload-btn:active,
+.feed-header__reload-btn.spinning svg {
+  animation: feedSpin 0.6s linear infinite;
+}
+@keyframes feedSpin {
+  to { transform: rotate(360deg); }
 }
 
 .feed-header__channel-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
+  gap: 5px;
+  padding: 6px 10px;
   border-radius: 999px;
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.28);
   color: #38bdf8;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+  transition: transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
 }
 .feed-header__channel-btn:active {
   transform: scale(0.94);
-  background: rgba(56, 189, 248, 0.2);
 }
 
-/* ── Stories / Главные премьеры ── */
+/* ── Сторисы / Главные премьеры ── */
 .feed-stories {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding: 2px 0 12px;
-  margin-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 0 8px;
+  margin-bottom: 4px;
+  width: 100%;
 }
 .feed-stories::-webkit-scrollbar { display: none; }
 
@@ -100,12 +131,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   background: none;
   border: none;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.18s ease;
+  width: 58px;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 .feed-story-item:active {
   transform: scale(0.92);
@@ -113,12 +146,12 @@
 
 .feed-story-avatar {
   position: relative;
-  width: 58px;
-  height: 58px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
-  padding: 2.5px;
+  padding: 2px;
   background: linear-gradient(135deg, #f43f5e, #fb7185, #fda4af);
-  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.25);
+  box-shadow: 0 3px 10px rgba(244, 63, 94, 0.25);
 }
 .feed-story-avatar img {
   width: 100%;
@@ -126,6 +159,7 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--bg);
+  display: block;
 }
 
 .feed-story-badge {
@@ -137,17 +171,17 @@
   color: #fff;
   border: 1px solid var(--accent);
   border-radius: 999px;
-  font-size: 8.5px;
+  font-size: 8px;
   font-weight: 800;
-  padding: 1px 5px;
+  padding: 1px 4px;
   white-space: nowrap;
 }
 
 .feed-story-title {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--text-2);
-  max-width: 62px;
+  max-width: 58px;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -158,30 +192,29 @@
 .feed-chips {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 2px;
+  width: 100%;
 }
-.feed-chips::-webkit-scrollbar {
-  display: none;
-}
+.feed-chips::-webkit-scrollbar { display: none; }
 
 .feed-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 5px;
+  padding: 5px 11px;
   border-radius: 999px;
   background: var(--surface);
   border: 1px solid var(--border);
   color: var(--text-2);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.15s ease;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
 }
@@ -193,10 +226,9 @@
   border-color: var(--text);
   color: var(--bg);
 }
-
 .feed-chip__count {
-  font-size: 10px;
-  padding: 1px 6px;
+  font-size: 9.5px;
+  padding: 1px 5px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.15);
   font-weight: 800;
@@ -208,43 +240,49 @@
 
 /* ── Список постов ── */
 .feed-list {
-  max-width: 640px;
+  max-width: 560px;
   margin: 0 auto;
-  padding: 14px 14px 20px;
+  padding: 10px 12px 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* ── Карточка поста Telegram ── */
+/* ── Карточка поста ── */
 .feed-card {
-  border-radius: 18px;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+/* Шапка карточки */
 .feed-card__meta-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px 10px;
-  gap: 10px;
+  padding: 10px 12px;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .feed-card__channel {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
 .feed-card__channel-avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   display: flex;
@@ -255,40 +293,40 @@
 
 .feed-card__channel-info {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: baseline;
+  gap: 6px;
   min-width: 0;
 }
 
 .feed-card__channel-name {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 13.5px;
+  gap: 3px;
+  font-size: 13px;
   font-weight: 800;
   color: var(--text);
+  white-space: nowrap;
 }
 
-.feed-card__time-row {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.feed-card__time {
   font-size: 11px;
   color: var(--text-3);
+  white-space: nowrap;
 }
 
 .feed-card__badge {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 999px;
   background: rgba(251, 113, 133, 0.14);
   border: 1px solid rgba(251, 113, 133, 0.28);
   color: var(--accent);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-/* ── Медиа / Плеер 16:9 ── */
+/* ── Медиа 16:9 ── */
 .feed-card__media-wrap {
   position: relative;
   width: 100%;
@@ -308,45 +346,42 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
-}
-.feed-card__poster-box:hover .feed-card__poster {
-  transform: scale(1.02);
+  display: block;
 }
 
 .feed-card__poster-veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+  background: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 100%);
 }
 
 .feed-card__media-badges {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
+  top: 8px;
+  left: 8px;
+  right: 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
   z-index: 2;
 }
 
 .feed-card__duration {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 2px 6px;
+  border-radius: 5px;
   background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(6px);
   color: #fff;
 }
 
 .feed-card__sub-badge {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 2px 6px;
+  border-radius: 5px;
   background: rgba(16, 185, 129, 0.85);
   color: #fff;
 }
@@ -356,16 +391,16 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 58px;
-  height: 58px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: rgba(244, 63, 94, 0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(244, 63, 94, 0.88);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 24px rgba(244, 63, 94, 0.45);
-  transition: transform 0.2s ease, background 0.2s ease;
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.45);
+  transition: transform 0.15s ease;
   z-index: 2;
 }
 .feed-card__poster-box:active .feed-card__play-btn {
@@ -392,88 +427,181 @@
   background: rgba(0, 0, 0, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  padding: 5px 10px;
+  padding: 4px 9px;
   border-radius: 999px;
   cursor: pointer;
 }
 
 /* ── Контент поста ── */
 .feed-card__content {
-  padding: 14px;
+  padding: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.feed-card__headline {
-  font-size: 15.5px;
-  font-weight: 800;
-  line-height: 1.35;
-  color: var(--text);
+.feed-card__source-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 8px;
 }
 
+.feed-card__source-pill {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--surface-2);
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 70%;
+}
+
+.feed-card__views-pill {
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.feed-card__headline {
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.35;
+  color: var(--text);
+  margin: 0 0 6px;
+  cursor: pointer;
+  word-break: break-word;
+}
+
 .feed-card__desc {
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 12.5px;
+  line-height: 1.45;
   color: var(--text-2);
-  margin-bottom: 12px;
+  margin: 0 0 10px;
+  word-break: break-word;
+}
+
+.feed-card__facts-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.feed-card__fact-chip {
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.feed-card__fact-chip b {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .feed-card__tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 5px;
   margin-bottom: 12px;
 }
 
 .feed-card__tag-pill {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--accent);
   background: rgba(251, 113, 133, 0.08);
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 5px;
 }
 
-.feed-card__release-pill {
+/* ── Ряд 1: Основные кнопки (Всегда помещаются) ── */
+.feed-card__primary-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.feed-card__btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border-radius: 11px;
   font-size: 12px;
   font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  flex: 1;
+  text-align: center;
+}
+.feed-card__btn:active {
+  transform: scale(0.97);
+}
+
+.feed-card__btn--read {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   color: var(--text);
-  margin-bottom: 10px;
 }
 
-.feed-card__specs {
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--text-3);
-  margin-bottom: 14px;
+.feed-card__btn--watch {
+  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
 }
 
-/* ── Реакции Telegram ── */
+.feed-card__btn--trailer {
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: var(--accent);
+}
+
+/* ── Ряд 2: Тулбар (Реакции + Поделиться) ── */
+.feed-card__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .feed-card__reactions {
   display: flex;
+  align-items: center;
+  gap: 6px;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 14px;
 }
 
 .feed-reaction {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 4px;
+  padding: 4px 8px;
   border-radius: 999px;
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
-  font-size: 12.5px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -488,151 +616,257 @@
   color: var(--accent);
 }
 
-/* ── Кнопки действий ── */
-.feed-card__actions {
+.feed-card__share-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.feed-card__icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.feed-card__icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* ═══════════════════════════════════════════════
+   🌟 ПОЛНОЭКРАННЫЙ ПЛЕЕР СТОРИС (Stories Viewer)
+   ═══════════════════════════════════════════════ */
+.feed-story-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: storyFadeIn 0.2s ease both;
+}
+
+@keyframes storyFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.feed-story-viewer__bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.75);
+  transform: scale(1.03);
+  transition: transform 5s linear;
+}
+
+.feed-story-viewer__veil {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.1) 30%,
+    rgba(0, 0, 0, 0.2) 60%,
+    rgba(0, 0, 0, 0.88) 100%
+  );
+  pointer-events: none;
+}
+
+/* Полоски прогресса */
+.feed-story-viewer__progress-bars {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 10px) + 8px);
+  left: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.feed-story-viewer__bar-bg {
+  flex: 1;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.feed-story-viewer__bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #ffffff;
+  border-radius: 999px;
+}
+.feed-story-viewer__bar-fill.done {
+  width: 100%;
+}
+.feed-story-viewer__bar-fill.animating {
+  animation: storyFillProgress 5s linear forwards;
+}
+
+@keyframes storyFillProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Шапка сторис */
+.feed-story-viewer__header {
+  position: absolute;
+  top: calc(env(safe-area-inset-top, 10px) + 20px);
+  left: 14px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+}
+
+.feed-story-viewer__author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feed-story-viewer__avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid #fff;
+}
+.feed-story-viewer__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.feed-story-viewer__name {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.feed-story-viewer__badge {
+  display: block;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.feed-story-viewer__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Сенсорные зоны тапа */
+.feed-story-viewer__tap-left {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 35%;
+  z-index: 5;
+}
+
+.feed-story-viewer__tap-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 35%;
+  z-index: 5;
+}
+
+/* Нижняя карточка истории */
+.feed-story-viewer__card {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom, 16px) + 16px);
+  left: 14px;
+  right: 14px;
+  z-index: 10;
+  background: rgba(20, 16, 28, 0.82);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.feed-story-viewer__card-title {
+  font-size: 18px;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 4px;
+  line-height: 1.25;
+}
+
+.feed-story-viewer__card-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.feed-story-viewer__card-actions {
   display: flex;
   gap: 8px;
 }
 
-.feed-card__btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
+.feed-story-viewer__btn {
+  flex: 1;
   padding: 10px 14px;
   border-radius: 12px;
   font-size: 12.5px;
-  font-weight: 700;
+  font-weight: 800;
   cursor: pointer;
-  transition: all 0.18s ease;
-  -webkit-tap-highlight-color: transparent;
+  text-align: center;
+  border: none;
 }
-.feed-card__btn:active {
-  transform: scale(0.96);
-}
-
-.feed-card__btn--watch {
-  flex: 1;
-  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+.feed-story-viewer__btn--primary {
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.3);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.4);
+}
+.feed-story-viewer__btn--secondary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
-.feed-card__btn--copy,
-.feed-card__btn--share {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-}
-
-.feed-card__btn--read {
-  background: rgba(244, 63, 94, 0.12);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: var(--accent);
-}
-.feed-card__btn--read:active {
-  background: rgba(244, 63, 94, 0.22);
-}
-
-/* ── Бейджи источников и ключевые факты ── */
-.feed-card__badges-right {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.feed-card__source-pill {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  letter-spacing: 0.2px;
-}
-
-.feed-card__facts-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 10px 0 12px;
-}
-
-.feed-card__fact-chip {
-  font-size: 11px;
-  padding: 4px 9px;
-  border-radius: 8px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-}
-.feed-card__fact-chip b {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.feed-card__quote-box {
-  margin: 10px 0 12px;
-  padding: 10px 14px;
-  border-left: 3px solid var(--accent);
-  background: var(--surface-2);
-  border-radius: 4px 10px 10px 4px;
-}
-
-.feed-card__quote-text {
-  font-size: 12.5px;
-  font-style: italic;
-  line-height: 1.45;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.feed-card__quote-author {
-  font-size: 10.5px;
-  color: var(--text-3);
-  font-weight: 600;
-}
-
-.feed-header__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.feed-header__reload-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.18s ease;
-}
-.feed-header__reload-btn:active,
-.feed-header__reload-btn.spinning svg {
-  animation: feedSpin 0.7s linear infinite;
-}
-@keyframes feedSpin {
-  to { transform: rotate(360deg); }
-}
-
-/* ── Модальный ридер полной статьи («Читать статью») ── */
+/* ═══════════════════════════════════════════════
+   📖 МОДАЛЬНЫЙ РИДЕР СТАТЬИ («Читать статью»)
+   ═══════════════════════════════════════════════ */
 .feed-modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 1000;
+  z-index: 2500;
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: flex-end;
-  animation: feedFadeIn 0.25s ease both;
+  animation: feedFadeIn 0.2s ease both;
 }
 
 @keyframes feedFadeIn {
@@ -642,15 +876,15 @@
 
 .feed-modal {
   width: 100%;
-  max-height: 88vh;
-  border-radius: 24px 24px 0 0;
+  max-height: 86vh;
+  border-radius: 20px 20px 0 0;
   background: var(--bg);
   border-top: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
-  animation: feedSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.4);
+  animation: feedSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes feedSlideUp {
@@ -662,9 +896,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 18px;
+  padding: 12px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  flex-shrink: 0;
 }
 
 .feed-modal__source-row {
@@ -680,24 +915,24 @@
 }
 
 .feed-modal__source-link {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   color: var(--text-2);
   background: var(--surface-2);
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 999px;
   border: 1px solid var(--border);
   cursor: pointer;
 }
 
 .feed-modal__close {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -705,34 +940,34 @@
 }
 
 .feed-modal__body {
-  padding: 18px 18px calc(40px + env(safe-area-inset-bottom, 16px));
+  padding: 14px 16px calc(36px + env(safe-area-inset-bottom, 16px));
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 
 .feed-modal__title {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 800;
   line-height: 1.3;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .feed-modal__meta {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 11.5px;
+  gap: 6px;
+  font-size: 11px;
   color: var(--text-3);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .feed-modal__media {
   width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
   background: #000;
 }
 
@@ -743,101 +978,101 @@
 }
 
 .feed-modal__facts-grid {
-  margin-bottom: 18px;
-  padding: 14px;
-  border-radius: 16px;
+  margin-bottom: 14px;
+  padding: 12px;
+  border-radius: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
 }
 
 .feed-modal__facts-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .feed-modal__facts-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+  gap: 6px;
 }
 
 .feed-modal__fact {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 10px;
-  border-radius: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
 
 .feed-modal__fact-lbl {
-  font-size: 10px;
+  font-size: 9.5px;
   color: var(--text-3);
   font-weight: 600;
   text-transform: uppercase;
 }
 
 .feed-modal__fact-val {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--text);
 }
 
 .feed-modal__quote {
-  margin-bottom: 18px;
-  padding: 14px 16px;
-  border-left: 4px solid var(--accent);
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
   background: var(--surface);
-  border-radius: 4px 14px 14px 4px;
+  border-radius: 3px 12px 12px 3px;
 }
 
 .feed-modal__quote p {
-  font-size: 14px;
+  font-size: 13px;
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.45;
   color: var(--text);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .feed-modal__quote footer {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 .feed-modal__quote footer strong {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--accent);
 }
 .feed-modal__quote footer span {
-  font-size: 11px;
+  font-size: 10.5px;
   color: var(--text-3);
 }
 
 .feed-modal__text {
-  font-size: 14px;
-  line-height: 1.65;
+  font-size: 13.5px;
+  line-height: 1.6;
   color: var(--text-2);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 .feed-modal__text p {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .feed-modal__footer-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .feed-modal__btn {
   flex: 1;
-  padding: 12px 16px;
-  border-radius: 14px;
-  font-size: 13.5px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
   transition: transform 0.15s ease;
@@ -851,7 +1086,7 @@
   background: linear-gradient(135deg, #f43f5e, #fb7185);
   color: #fff;
   border: none;
-  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.3);
 }
 
 .feed-modal__btn--share {
@@ -869,9 +1104,9 @@
   background: var(--surface);
   border: 1px solid var(--border-light);
   color: var(--text);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 8px 18px;
+  padding: 7px 16px;
   border-radius: 999px;
   backdrop-filter: blur(16px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);

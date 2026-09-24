@@ -312,34 +312,11 @@
   flex-shrink: 0;
 }
 
-/* ── Кнопки интеграции (Яндекс Музыка & VK Музыка) ── */
 .mu-track__actions {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
-}
-
-.mu-service-btn {
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 10.5px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-.mu-service-btn:active {
-  transform: scale(0.92);
-}
-.mu-service-btn--yandex {
-  background: rgba(250, 204, 21, 0.16);
-  border: 1px solid rgba(250, 204, 21, 0.35);
-  color: #facc15;
-}
-.mu-service-btn--vk {
-  background: rgba(56, 189, 248, 0.16);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
 }
 
 .mu-track__like {

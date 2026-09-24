@@ -6,8 +6,6 @@ import {
   MoodId,
   RUSSIAN_RADIO_STREAMS,
   RUSSIAN_CHART_TOP,
-  getYandexMusicUrl,
-  getVkMusicUrl,
   RussianTrack,
 } from '../data/russianHits';
 import './MusicPage.css';
@@ -323,31 +321,7 @@ const MusicPage: React.FC = () => {
                     {t.isLiveStream ? 'Эфир' : fmtTime(t.duration)}
                   </span>
 
-                  {/* Интеграция с сервисами РФ (Яндекс Музыка & VK Музыка) */}
                   <div className="mu-track__actions">
-                    <button
-                      className="mu-service-btn mu-service-btn--yandex"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        haptic('light');
-                        openLink(getYandexMusicUrl(t.artist, t.title));
-                      }}
-                      title="Слушать в Яндекс Музыке"
-                    >
-                      Яндекс
-                    </button>
-
-                    <button
-                      className="mu-service-btn mu-service-btn--vk"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        haptic('light');
-                        openLink(getVkMusicUrl(t.artist, t.title));
-                      }}
-                      title="Слушать в VK Музыке"
-                    >
-                      VK
-                    </button>
 
                     <button
                       className={`mu-track__like ${isLiked ? 'liked' : ''}`}
