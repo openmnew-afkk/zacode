@@ -47,8 +47,8 @@
   bottom: -2px;
   width: 4px; height: 4px;
   border-radius: 50%;
-  background: #a78bfa;
-  box-shadow: 0 0 8px 2px rgba(167,139,250,0.5);
+  background: var(--accent, #fb7185);
+  box-shadow: 0 0 8px 2px var(--accent-glow, rgba(251,113,133,0.5));
 }
 
 .tab-bar__icon {

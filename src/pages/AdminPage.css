@@ -196,7 +196,7 @@
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, #a855f7, transparent);
+  background: linear-gradient(90deg, #f43f5e, transparent);
   opacity: 0.6;
 }
 .adm-metric__icon {
@@ -394,14 +394,14 @@
   box-sizing: border-box;
 }
 .adm-btn--primary {
-  background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
   border: none;
   color: #fff;
-  box-shadow: 0 4px 16px rgba(168, 85, 247, 0.35);
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
 }
 .adm-btn--primary:active {
   transform: scale(0.98);
-  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.25);
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.25);
 }
 .adm-btn--outline {
   background: rgba(255, 255, 255, 0.05);
@@ -805,7 +805,7 @@
   flex-shrink: 0;
 }
 .adm-toggle:checked {
-  background: #a855f7;
+  background: #f43f5e;
 }
 .adm-toggle::before {
   content: '';

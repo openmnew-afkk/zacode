@@ -31,7 +31,7 @@
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 4px 14px var(--accent-glow, rgba(251, 113, 133, 0.25));
   flex-shrink: 0;
 }
 .hp-header__title {
@@ -94,8 +94,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #a855f7;
-  box-shadow: 0 0 8px #a855f7, 0 0 12px rgba(168, 85, 247, 0.7);
+  background: var(--accent, #fb7185);
+  box-shadow: 0 0 8px #fb7185, 0 0 12px rgba(251, 113, 133, 0.7);
   animation: hpFeedPulse 2.2s infinite ease-in-out;
 }
 @keyframes hpFeedPulse {

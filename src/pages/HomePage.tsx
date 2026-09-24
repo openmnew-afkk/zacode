@@ -259,7 +259,7 @@ const GENRES_MOVIES = [
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user: tgUser } = useTelegram();
-  const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
+  const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium, theme, toggleTheme } = useStore();
   const watchingTracked = Object.values(tracked)
     .filter((t) => t.status === 'watching')
     .sort((a, b) => b.addedAt - a.addedAt);
@@ -404,7 +404,7 @@ const HomePage: React.FC = () => {
               <p style={{fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 6}}>Не удалось загрузить</p>
               <p style={{fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16}}>Проверьте интернет-соединение</p>
               <button
-                style={{display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'rgba(168,85,247,0.16)', border: '1px solid rgba(168,85,247,0.3)', color: '#c4b5fd', fontWeight: 700, fontSize: 13, cursor: 'pointer'}}
+                style={{display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'rgba(251,113,133,0.16)', border: '1px solid rgba(251,113,133,0.3)', color: '#fda4af', fontWeight: 700, fontSize: 13, cursor: 'pointer'}}
                 onClick={() => setRetryCount(c => c + 1)}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
@@ -539,6 +539,19 @@ const HomePage: React.FC = () => {
                   <path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
                 </svg>
                 <span className="hp-feed-badge-pulse" />
+              </button>
+              {/* 🌗 Переключатель темы (Темная / Нежная розовая) */}
+              <button
+                className="hp-header__btn hp-header__theme-btn"
+                onClick={() => { haptic('medium'); toggleTheme(); }}
+                aria-label="Сменить тему"
+                title={theme === 'dark' ? 'Включить нежную светлую тему' : 'Включить глубокую тёмную тему'}
+              >
+                {theme === 'dark' ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" fill="#f43f5e" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /></svg>
+                )}
               </button>
               <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

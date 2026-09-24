@@ -1,25 +1,28 @@
-/* ===== КиноЗал — Design System ===== */
-/* Внешние шрифты убраны: fonts.googleapis.com недоступен у части
-   провайдеров РФ и блокировал загрузку приложения через @import */
+/* ===== VELORA — Design System ===== */
+/* Темы оформления:
+ * 1. Тёмная (Obsidian & Rose Gold) — глубокий тёмный премиум фон
+ * 2. Светлая (Rose Blush) — нежная фарфоровая тема с тёплыми розовыми нотками
+ */
 
 :root {
-  --bg:             #09080a;
-  --bg-2:           #100e0c;
-  --bg-3:           #171410;
-  --surface:        rgba(255,255,255,0.04);
-  --surface-2:      rgba(255,255,255,0.06);
-  --surface-3:      rgba(255,255,255,0.09);
-  --border:         rgba(255,255,255,0.06);
-  --border-light:   rgba(255,255,255,0.10);
+  --bg:             #09080b;
+  --bg-2:           #100e13;
+  --bg-3:           #17141b;
+  --surface:        rgba(255,255,255,0.05);
+  --surface-2:      rgba(255,255,255,0.08);
+  --surface-3:      rgba(255,255,255,0.12);
+  --surface-4:      rgba(255,255,255,0.16);
+  --border:         rgba(255,255,255,0.08);
+  --border-light:   rgba(255,255,255,0.13);
   --text:           #ffffff;
-  --text-2:         rgba(255,255,255,0.72);
-  --text-3:         rgba(255,255,255,0.45);
-  --accent:         #e8b84a;
-  --accent-2:       #e23d3d;
-  --accent-3:       #f0c96a;
-  --accent-glow:    rgba(232,184,74,0.35);
-  --glass-bg:       rgba(255,255,255,0.04);
-  --glass-border:   rgba(255,255,255,0.08);
+  --text-2:         rgba(255,255,255,0.74);
+  --text-3:         rgba(255,255,255,0.48);
+  --accent:         #fb7185;
+  --accent-2:       #f43f5e;
+  --accent-3:       #fda4af;
+  --accent-glow:    rgba(251,113,133,0.32);
+  --glass-bg:       rgba(255,255,255,0.05);
+  --glass-border:   rgba(255,255,255,0.09);
   --glass-blur:     20px;
   --sat: env(safe-area-inset-top, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
@@ -128,355 +131,197 @@ button {
 }
 
 /* ═══════════════════════════════════════════════
-   💜 НЕОНОВАЯ ТЕМА (фиолетово-розовая)
+   🌸 СВЕТЛАЯ ТЕМА С РОЗОВЫМИ НОТКАМИ (Rose Blush)
    ═══════════════════════════════════════════════ */
-[data-theme='violet'] {
-  --bg:           #0e0618;
-  --bg-2:         #150a24;
-  --bg-3:         #1d0f33;
-  --surface:      rgba(168,85,247,0.07);
-  --surface-2:    rgba(168,85,247,0.11);
-  --surface-3:    rgba(168,85,247,0.16);
-  --border:       rgba(192,132,252,0.12);
-  --border-light: rgba(192,132,252,0.20);
-  --text:         #ffffff;
-  --text-2:       rgba(240,225,255,0.72);
-  --text-3:       rgba(240,225,255,0.45);
-  --accent:       #ec4899;
-  --accent-2:     #a855f7;
-  --accent-3:     #f0abfc;
-  --accent-glow:  rgba(236,72,153,0.35);
-  --glass-bg:     rgba(168,85,247,0.06);
-  --glass-border: rgba(192,132,252,0.14);
-  /* Свои радиусы — кнопки-капсулы */
-  --btn-r: 9999px;
-  --btn-grad: linear-gradient(135deg, #a855f7, #ec4899);
-  --btn-glow: 0 6px 24px rgba(236,72,153,0.35);
+[data-theme='light'],
+html.light,
+body.light {
+  --bg:             #fff5f7;
+  --bg-2:           #fef0f3;
+  --bg-3:           #fce7ec;
+  --surface:        rgba(255, 255, 255, 0.92);
+  --surface-2:      rgba(255, 240, 245, 0.95);
+  --surface-3:      rgba(253, 226, 236, 0.9);
+  --surface-4:      rgba(244, 114, 182, 0.15);
+  --border:         rgba(244, 114, 182, 0.18);
+  --border-light:   rgba(244, 114, 182, 0.28);
+  --text:           #1f1a24;
+  --text-2:         #4a4453;
+  --text-3:         #8a8194;
+  --accent:         #f43f5e;
+  --accent-2:       #fb7185;
+  --accent-3:       #fda4af;
+  --accent-glow:    rgba(244, 63, 94, 0.25);
+  --glass-bg:       rgba(255, 255, 255, 0.85);
+  --glass-border:   rgba(244, 114, 182, 0.22);
+  --glass-blur:     24px;
+  --btn-r:          16px;
+  --btn-grad:       linear-gradient(135deg, #f43f5e, #fb7185);
+  --btn-glow:       0 8px 24px rgba(244, 63, 94, 0.28);
 }
 
-[data-theme='violet'] body { background: var(--bg); }
-[data-theme='violet'] .hp,
-[data-theme='violet'] .pm,
-[data-theme='violet'] .dp,
-[data-theme='violet'] .profile-page,
-[data-theme='violet'] .fav-page,
-[data-theme='violet'] .search-page,
-[data-theme='violet'] .admin {
+[data-theme='light'] body,
+body.light {
   background: var(--bg);
+  color: var(--text);
 }
 
-/* 🔘 ДРУГОЙ СТИЛЬ КНОПОК: капсулы с неоновым градиентом */
-[data-theme='violet'] .dp-watch,
-[data-theme='violet'] .pm-subscribe,
-[data-theme='violet'] .pm-pay__btn,
-[data-theme='violet'] .pm-roulette__spin,
-[data-theme='violet'] .admin__btn {
-  background: var(--btn-grad);
-  border-radius: var(--btn-r);
-  box-shadow: var(--btn-glow);
-  letter-spacing: 0.02em;
-}
-[data-theme='violet'] .dp-watch:active,
-[data-theme='violet'] .pm-subscribe:active,
-[data-theme='violet'] .pm-pay__btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 3px 12px rgba(236,72,153,0.4);
+[data-theme='light'] .hp,
+[data-theme='light'] .pm,
+[data-theme='light'] .dp,
+[data-theme='light'] .profile-page,
+[data-theme='light'] .fav-page,
+[data-theme='light'] .search-page,
+[data-theme='light'] .admin,
+[data-theme='light'] .feed-page,
+[data-theme='light'] .music-page,
+[data-theme='light'] .aip {
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* Вторичные кнопки — призрачные капсулы */
-[data-theme='violet'] .admin__action-btn,
-[data-theme='violet'] .dp-error-btn,
-[data-theme='violet'] .profile-close {
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  border-radius: var(--btn-r);
-  color: var(--text-2);
-}
-[data-theme='violet'] .admin__action-btn--danger {
-  background: rgba(236,72,153,0.08);
-  border-color: rgba(236,72,153,0.35);
-  color: #f9a8d4;
-}
-[data-theme='violet'] .admin__logout {
-  background: rgba(236,72,153,0.1);
-  border-color: rgba(236,72,153,0.3);
-  color: #f9a8d4;
-  border-radius: var(--btn-r);
+/* Шапки и навигация в светлой теме */
+[data-theme='light'] .hp-header,
+[data-theme='light'] .feed-header,
+[data-theme='light'] .search-header,
+[data-theme='light'] .profile-header,
+[data-theme='light'] .aip-header {
+  background: rgba(255, 245, 247, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(244, 114, 182, 0.16);
 }
 
-/* Карточки — с фиолетовым оттенком */
-[data-theme='violet'] .profile-setting,
-[data-theme='violet'] .profile-section,
-[data-theme='violet'] .profile-stat,
-[data-theme='violet'] .history-item,
-[data-theme='violet'] .admin__section,
-[data-theme='violet'] .admin__stat,
-[data-theme='violet'] .admin__list-item,
-[data-theme='violet'] .pm-feature,
-[data-theme='violet'] .pm-plan,
-[data-theme='violet'] .pm-active-item,
-[data-theme='violet'] .pm-pay,
-[data-theme='violet'] .pm-pay__row,
-[data-theme='violet'] .pm-roulette,
-[data-theme='violet'] .fav-empty,
-[data-theme='violet'] .dp-row,
-[data-theme='violet'] .dp-genre {
-  background: var(--surface);
-  border-color: var(--border);
+[data-theme='light'] .hp-header__title,
+[data-theme='light'] .feed-header__title,
+[data-theme='light'] .search-header__title,
+[data-theme='light'] .profile-name,
+[data-theme='light'] .aip-header__title {
+  color: #1f1a24;
 }
 
-/* Активные состояния — розовое свечение */
-[data-theme='violet'] .pm-plan.active,
-[data-theme='violet'] .dp-season-btn.active,
-[data-theme='violet'] .dp-ep.active,
-[data-theme='violet'] .search-type.active {
-  background: rgba(236,72,153,0.15);
-  border-color: rgba(236,72,153,0.5);
-  color: #f0abfc;
-  box-shadow: 0 0 18px rgba(236,72,153,0.15);
+[data-theme='light'] .hp-header__sub,
+[data-theme='light'] .feed-header__tag {
+  color: #fb7185;
 }
 
-[data-theme='violet'] .pm-plan__badge { background: rgba(236,72,153,0.18); color: #f9a8d4; }
-[data-theme='violet'] .pm-plan__old-price { color: var(--text-3); }
-[data-theme='violet'] .pm-success {
-  background: rgba(168,85,247,0.1);
-  border-color: rgba(192,132,252,0.3);
-  color: #f0abfc;
-}
-[data-theme='violet'] .pm-success span { background: #a855f7; }
-[data-theme='violet'] .pm-promo {
-  background: rgba(236,72,153,0.1);
-  border-color: rgba(236,72,153,0.3);
-  color: #f9a8d4;
-}
-[data-theme='violet'] .pm-badge {
-  background: linear-gradient(135deg, rgba(168,85,247,0.14), rgba(236,72,153,0.12));
-  border-color: rgba(236,72,153,0.4);
-}
-[data-theme='violet'] .pm-badge__text {
-  background: linear-gradient(135deg, #c084fc, #f472b6);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Кнопки в светлой теме */
+[data-theme='light'] .dp-watch,
+[data-theme='light'] .pm-subscribe,
+[data-theme='light'] .pm-pay__btn,
+[data-theme='light'] .feed-card__btn--watch,
+[data-theme='light'] .hp-hero__btn {
+  background: linear-gradient(135deg, #f43f5e, #fb7185) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.32);
 }
 
-/* Поля ввода */
-[data-theme='violet'] .admin__input,
-[data-theme='violet'] .admin__proxy-input,
-[data-theme='violet'] .admin__textarea,
-[data-theme='violet'] .admin__select,
-[data-theme='violet'] .pm-pay__input,
-[data-theme='violet'] .hp-searchbar,
-[data-theme='violet'] .search-input-wrap,
-[data-theme='violet'] .search-input {
-  background: var(--surface);
-  border-color: var(--border);
-}
-[data-theme='violet'] .admin__input:focus,
-[data-theme='violet'] .admin__proxy-input:focus,
-[data-theme='violet'] .admin__textarea:focus {
-  border-color: rgba(236,72,153,0.6);
-}
-[data-theme='violet'] .admin__select option { background: #1d0f33; }
-
-/* TabBar — розовый неон */
-[data-theme='violet'] .tab-bar__inner {
-  background: rgba(21,10,36,0.85);
-  border-color: rgba(192,132,252,0.15);
-  box-shadow: 0 -4px 30px rgba(236,72,153,0.15);
-}
-[data-theme='violet'] .tab-bar__item--active { color: #f0abfc; }
-[data-theme='violet'] .tab-bar__item--active::before {
-  background: radial-gradient(ellipse at center bottom, rgba(236,72,153,0.2) 0%, transparent 70%);
-}
-[data-theme='violet'] .tab-bar__item--active::after {
-  background: #ec4899;
-  box-shadow: 0 0 10px 2px rgba(236,72,153,0.6);
-}
-[data-theme='violet'] .tab-bar__item--active .tab-bar__label,
-[data-theme='violet'] .tab-bar__item--premium.tab-bar__item--active,
-[data-theme='violet'] .tab-bar__item--premium.tab-bar__item--active .tab-bar__label { color: #f0abfc; }
-[data-theme='violet'] .tab-bar__item--premium.tab-bar__item--active::after { background: #ec4899; }
-
-/* Премиум-профиль — розово-фиолетовый */
-[data-theme='violet'] .profile-header--premium {
-  background:
-    radial-gradient(120% 90% at 50% -20%, rgba(236,72,153,0.16), transparent 60%),
-    linear-gradient(180deg, rgba(168,85,247,0.12), rgba(168,85,247,0.03));
-}
-[data-theme='violet'] .profile-header--premium::before {
-  background: linear-gradient(160deg, rgba(236,72,153,0.6), rgba(236,72,153,0.08) 40%, rgba(168,85,247,0.45));
-}
-[data-theme='violet'] .profile-avatar--premium {
-  border-color: rgba(244,114,182,0.75);
-  box-shadow: 0 0 24px rgba(236,72,153,0.3);
-}
-[data-theme='violet'] .profile-name--premium {
-  background: linear-gradient(92deg, #f0abfc, #fbcfe8 50%, #f0abfc);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: goldText 4s linear infinite;
-}
-[data-theme='violet'] .profile-premium-badge--gold {
-  background: linear-gradient(135deg, rgba(236,72,153,0.16), rgba(236,72,153,0.28));
-  border-color: rgba(244,114,182,0.5);
-  color: #fbcfe8 !important;
-  box-shadow: 0 4px 18px rgba(236,72,153,0.18), inset 0 1px 0 rgba(255,255,255,0.15);
-}
-[data-theme='violet'] .profile-stat--premium {
-  border-color: rgba(236,72,153,0.3);
-  background: linear-gradient(180deg, rgba(236,72,153,0.08), rgba(236,72,153,0.02));
-}
-[data-theme='violet'] .profile-setting--premium {
-  background: linear-gradient(180deg, rgba(236,72,153,0.07), rgba(236,72,153,0.02)) !important;
-  border-color: rgba(236,72,153,0.3);
-}
-[data-theme='violet'] .profile-avatar__placeholder {
-  background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(236,72,153,0.2));
-  color: #f0abfc;
+[data-theme='light'] .hp-header__btn,
+[data-theme='light'] .hp-header__feed-btn,
+[data-theme='light'] .dp-back,
+[data-theme='light'] .feed-reaction {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(244, 114, 182, 0.2);
+  color: #1f1a24;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.08);
 }
 
-/* Остальные акценты неоновой темы */
-[data-theme='violet'] .dp-fav { background: var(--surface); border-color: var(--border); }
-[data-theme='violet'] .pm-plan.active { box-shadow: 0 8px 32px rgba(236,72,153,0.18); }
-[data-theme='violet'] .profile-section { box-shadow: 0 2px 14px rgba(236,72,153,0.06); }
-[data-theme='violet'] .admin__toggle input:checked { background: #ec4899; }
-[data-theme='violet'] .admin__hint code {
-  background: rgba(168,85,247,0.16);
-  color: #d8b4fe;
-}
-[data-theme='violet'] .admin__proxy-status.ok { color: #6ee7b7; }
-[data-theme='violet'] .admin__proxy-status.fail { color: #fda4af; }
-[data-theme='violet'] .admin__list-remove {
-  background: rgba(236,72,153,0.1);
-  border-color: rgba(236,72,153,0.3);
-  color: #fda4af;
-}
-[data-theme='violet'] .admin__list-btn {
-  background: rgba(168,85,247,0.14);
-  border-color: rgba(192,132,252,0.4);
-  color: #d8b4fe;
-}
-[data-theme='violet'] .dp-fav-toast {
-  background: rgba(29,15,51,0.94);
-  border-color: rgba(236,72,153,0.45);
-  box-shadow: 0 8px 24px rgba(236,72,153,0.25);
-}
-[data-theme='violet'] .hp-header__btn {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text-2);
-}
-[data-theme='violet'] .hp-header__btn:active { background: var(--surface-2); }
-[data-theme='violet'] .hp-searchbar__input { color: var(--text); }
-[data-theme='violet'] .hp-searchbar__input::placeholder { color: var(--text-3); }
-[data-theme='violet'] .hp-searchbar__close { color: var(--text-3); }
-[data-theme='violet'] .search-input { color: var(--text); }
-[data-theme='violet'] .search-input-icon { color: var(--text-3); }
-[data-theme='violet'] .search-type {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text-2);
-}
-[data-theme='violet'] .profile-stat__value { color: var(--text); }
-[data-theme='violet'] .profile-stat__label { color: var(--text-3); }
-[data-theme='violet'] .profile-empty,
-[data-theme='violet'] .history-item__arrow { color: var(--text-3); }
-[data-theme='violet'] .pm-plan__period,
-[data-theme='violet'] .pm-plan__price { color: var(--text); }
-[data-theme='violet'] .pm-roulette__title { color: var(--text); }
-[data-theme='violet'] .pm-roulette__desc { color: var(--text-3); }
-[data-theme='violet'] .pm-roulette-result__text { color: var(--text); }
-[data-theme='violet'] .pm-pay__msg { color: #f0abfc; }
-
-/* Превью и объявление в неоновой теме */
-[data-theme='violet'] .hp-preview { background: linear-gradient(180deg, #1d0f33, #120820); }
-[data-theme='violet'] .hp-preview__btn--primary {
-  background: var(--btn-grad);
-  color: #fff;
-  border-radius: var(--btn-r);
-  box-shadow: var(--btn-glow);
-}
-[data-theme='violet'] .hp-preview__btn--fav { border-radius: var(--btn-r); }
-[data-theme='violet'] .hp-preview__btn--fav.active {
-  background: rgba(236,72,153,0.15);
-  border-color: rgba(236,72,153,0.45);
-  color: #f9a8d4;
-}
-[data-theme='violet'] .hp-ad {
-  background: linear-gradient(135deg, rgba(168,85,247,0.1), rgba(236,72,153,0.08));
-  border-color: rgba(236,72,153,0.3);
+[data-theme='light'] .feed-card,
+[data-theme='light'] .profile-section,
+[data-theme='light'] .pm-plan,
+[data-theme='light'] .history-item,
+[data-theme='light'] .mu-card,
+[data-theme='light'] .mu-track,
+[data-theme='light'] .aip-bubble--ai {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(244, 114, 182, 0.16);
+  box-shadow: 0 6px 24px rgba(244, 114, 182, 0.07);
 }
 
-/* Табы категорий на главной — стеклянный сегмент-контрол */
-[data-theme='violet'] .hp-tabs {
-  background: rgba(21, 10, 36, 0.72);
-  border-color: rgba(192,132,252,0.14);
-  box-shadow: 0 10px 30px rgba(236,72,153,0.12);
-}
-[data-theme='violet'] .hp-tab {
-  background: transparent;
-  border-color: transparent;
-  color: var(--text-3);
-}
-[data-theme='violet'] .hp-tab.active {
-  background: var(--btn-grad);
-  border-color: transparent;
-  color: #fff;
-  box-shadow: 0 4px 16px rgba(236,72,153,0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+[data-theme='light'] .tab-bar {
+  background: rgba(255, 245, 247, 0.9);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-top: 1px solid rgba(244, 114, 182, 0.2);
 }
 
-/* Кнопка «Смотреть» на Hero — неоновая капсула */
-[data-theme='violet'] .hp-hero__btn {
-  background: var(--btn-grad);
-  color: #fff;
-  border-radius: var(--btn-r);
-  box-shadow: var(--btn-glow);
+[data-theme='light'] .tab-bar__item {
+  color: rgba(31, 26, 36, 0.45);
 }
 
-/* Скелетоны и спиннер без белых выступов */
-[data-theme='violet'] {
-  --surface-4: rgba(192,132,252,0.22);
+[data-theme='light'] .tab-bar__item--active {
+  color: #f43f5e;
 }
-[data-theme='violet'] .hp-spinner {
-  border-color: rgba(168,85,247,0.2);
-  border-top-color: #ec4899;
+
+[data-theme='light'] .tab-bar__item--active::after {
+  background: #f43f5e;
+  box-shadow: 0 0 10px 2px rgba(244, 63, 94, 0.5);
 }
-[data-theme='violet'] .hp-card__title { color: var(--text); }
-[data-theme='violet'] .hp-card__year,
-[data-theme='violet'] .hp-row__title { color: var(--text); }
-[data-theme='violet'] .hp-error p { color: var(--text-2) !important; }
-[data-theme='violet'] .hp-empty,
-[data-theme='violet'] .hp-error { background: var(--surface); border-color: var(--border); }
-[data-theme='violet'] .hp-searchbar__input { color: var(--text); }
-[data-theme='violet'] .hp-header__btn { background: var(--surface); border-color: var(--border); }
-[data-theme='violet'] .hp-header__btn:active { background: var(--surface-2); }
-[data-theme='violet'] .hp-header__avatar--placeholder {
-  background: linear-gradient(135deg, rgba(168,85,247,0.35), rgba(236,72,153,0.25));
-  color: #f0abfc;
+
+[data-theme='light'] .hp-tab {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(244, 114, 182, 0.2);
+  color: #6b6375;
 }
-[data-theme='violet'] .hp-preview { border-color: var(--border-light); }
-[data-theme='violet'] .hp-preview__title { color: var(--text); }
-[data-theme='violet'] .hp-preview__meta,
-[data-theme='violet'] .hp-preview__desc { color: var(--text-3); }
-[data-theme='violet'] .hp-preview__rating { color: #f0abfc; }
-[data-theme='violet'] .hp-preview__btn--fav {
-  background: var(--surface);
-  border-color: var(--border-light);
-  color: var(--text-2);
+
+[data-theme='light'] .hp-tab.active {
+  background: #f43f5e;
+  border-color: #f43f5e;
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
 }
-[data-theme='violet'] .hp-preview__close {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text-3);
+
+[data-theme='light'] .hp-searchbar,
+[data-theme='light'] .search-input-wrap {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(244, 114, 182, 0.25);
+  color: #1f1a24;
 }
-[data-theme='violet'] .search-card p,
-[data-theme='violet'] .fav-card__title { color: var(--text); }
-[data-theme='violet'] .fav-card__year,
-[data-theme='violet'] .fav-header__sub { color: var(--text-3); }
-[data-theme='violet'] .tab-bar__badge { background: linear-gradient(135deg, #ec4899, #a855f7); }
+
+[data-theme='light'] .hp-searchbar__input,
+[data-theme='light'] .search-input {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .hp-searchbar__input::placeholder,
+[data-theme='light'] .search-input::placeholder {
+  color: rgba(31, 26, 36, 0.4);
+}
+
+[data-theme='light'] .hp-card__title,
+[data-theme='light'] .fav-card__title,
+[data-theme='light'] .search-card p,
+[data-theme='light'] .hp-row__title {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .hp-card__year,
+[data-theme='light'] .fav-card__year {
+  color: #8a8194;
+}
+
+[data-theme='light'] .global-music-bar {
+  background: rgba(255, 245, 247, 0.94);
+  border: 1px solid rgba(244, 114, 182, 0.25);
+  box-shadow: 0 8px 32px rgba(244, 114, 182, 0.15);
+}
+
+[data-theme='light'] .gmb-info__title {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .gmb-info__artist {
+  color: #8a8194;
+}
+
+[data-theme='light'] .gmb-btn {
+  color: #4a4453;
+}
+
+[data-theme='light'] .gmb-btn--play {
+  background: #f43f5e;
+  color: #ffffff;
+}
 
 /* ═══════════════════════════════════════════════
    ✨ ПОЛИРОВКА (обе темы)
@@ -495,4 +340,3 @@ button {
 
 /* Компактный музыкальный плеер: добавляем место снизу, чтобы бар ничего не перекрывал */
 .app-main--with-player { padding-bottom: 64px; }
-

@@ -189,20 +189,29 @@ export const useStore = create<AppState>((set, get) => ({
 
   /* ═══ Тема ═══ */
   theme: (() => {
-    const t = load<AppTheme>('tc_theme', 'dark');
-    // Старая светлая тема удалена — сбрасываем на тёмную
-    return t === 'violet' ? 'violet' : 'dark';
+    const t = load<string>('tc_theme', 'dark');
+    const active = t === 'light' ? 'light' : 'dark';
+    try {
+      document.documentElement.setAttribute('data-theme', active);
+      document.documentElement.classList.remove('dark', 'light');
+      document.documentElement.classList.add(active);
+    } catch {}
+    return active as AppTheme;
   })(),
   toggleTheme: () => {
-    const newTheme = get().theme === 'dark' ? 'violet' : 'dark';
+    const newTheme: AppTheme = get().theme === 'dark' ? 'light' : 'dark';
     save('tc_theme', newTheme);
     set({ theme: newTheme });
     document.documentElement.setAttribute('data-theme', newTheme);
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(newTheme);
   },
   setTheme: (theme: AppTheme) => {
     save('tc_theme', theme);
     set({ theme });
     document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.classList.remove('dark', 'light');
+    document.documentElement.classList.add(theme);
   },
 
   /* ═══ Премиум ═══ */

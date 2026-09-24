@@ -1,469 +1,462 @@
-/* ══ MusicPage — premium dark iOS ══ */
-.mu {
-  position: relative; min-height: 100vh;
-  background: #0a0a12; padding-bottom: 140px;
-  overflow-x: hidden;
+/* ══ MusicPage — Стили Яндекс Музыка / Моя Волна ══ */
+.music-page {
+  position: relative;
+  min-height: 100vh;
+  padding-bottom: 120px;
 }
 
-/* Decorative blobs */
-.mu-blob {
-  position: fixed; border-radius: 50%;
-  filter: blur(80px); pointer-events: none; opacity: 0.12;
-}
-.mu-blob--1 { width: 300px; height: 300px; top: -80px; right: -100px; background: #8b5cf6; }
-.mu-blob--2 { width: 200px; height: 200px; bottom: 20%; left: -60px; background: #ec4899; }
-.mu-blob--3 { width: 250px; height: 250px; bottom: -50px; right: -50px; background: #3b82f6; }
-
-/* Header — fade on scroll via CSS mask */
+/* ── Шапка ── */
 .mu-header {
-  position: sticky; top: 0; z-index: 50;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 12px 16px 14px;
   padding-top: var(--header-safe-top);
-  background: rgba(10,10,18,0.8);
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: opacity 0.3s;
-}
-.mu-header__brand { display: flex; align-items: center; gap: 10px; }
-.mu-header__logo {
-  width: 36px; height: 36px; border-radius: 10px;
-  background: linear-gradient(135deg, #8b5cf6, #ec4899);
-  display: flex; align-items: center; justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(139,92,246,0.25);
+  background: var(--bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
 }
 
-.mu-wave-mini {
+.mu-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.mu-header__badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+.mu-header__title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.mu-header__reload {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.mu-header__reload:active {
+  transform: scale(0.9) rotate(90deg);
+}
+
+/* ── Капсула «Моя Волна» в стиле Яндекс Музыки ── */
+.mu-yandex-wave {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.12) 0%, rgba(244, 63, 94, 0.06) 100%);
+  border: 1px solid rgba(251, 113, 133, 0.28);
+  box-shadow: 0 4px 20px rgba(251, 113, 133, 0.1);
+}
+
+.mu-yandex-wave__orb {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
+}
+
+.mu-wave-disc {
+  display: flex;
+  align-items: flex-end;
   gap: 2.5px;
   height: 18px;
 }
-.mu-wave-mini span {
-  display: block;
+.mu-wave-disc span {
   width: 2.5px;
   border-radius: 999px;
-  background: #a78bfa;
-  animation: mu-wave-bounce 0.9s ease-in-out infinite alternate;
-  transform-origin: bottom center;
-}
-.mu-wave-mini span:nth-child(1) { height: 6px; animation-delay: 0.1s; }
-.mu-wave-mini span:nth-child(2) { height: 16px; animation-delay: 0.3s; }
-.mu-wave-mini span:nth-child(3) { height: 10px; animation-delay: 0.05s; }
-.mu-wave-mini span:nth-child(4) { height: 14px; animation-delay: 0.25s; }
-.mu-wave-mini--white span {
   background: #ffffff;
+  height: 6px;
+  transition: height 0.2s ease;
 }
-@keyframes mu-wave-bounce {
+.mu-wave-disc.playing span {
+  animation: muWaveDiscBounce 0.8s ease-in-out infinite alternate;
+}
+.mu-wave-disc.playing span:nth-child(1) { animation-delay: 0.1s; height: 16px; }
+.mu-wave-disc.playing span:nth-child(2) { animation-delay: 0.3s; height: 12px; }
+.mu-wave-disc.playing span:nth-child(3) { animation-delay: 0.05s; height: 18px; }
+.mu-wave-disc.playing span:nth-child(4) { animation-delay: 0.25s; height: 10px; }
+.mu-wave-disc.playing span:nth-child(5) { animation-delay: 0.18s; height: 14px; }
+
+@keyframes muWaveDiscBounce {
   0% { transform: scaleY(0.3); }
   100% { transform: scaleY(1.15); }
 }
 
-.mu-header__title { font-size: 18px; font-weight: 800; color: #fff; margin: 0; }
-.mu-header__sub {
-  font-size: 11px; color: rgba(255,255,255,0.35);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  max-width: 180px;
-}
-.mu-header__refresh {
-  width: 36px; height: 36px; border-radius: 50%;
-  background: rgba(255,255,255,0.06); border: none;
-  color: rgba(255,255,255,0.5); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.mu-header__refresh:active { transform: scale(0.88); }
-
-/* Tabs — fade-in pills with edge dissolve */
-.mu-tabs {
-  display: flex; gap: 8px; padding: 6px 16px 12px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12px, black calc(100% - 24px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 12px, black calc(100% - 24px), transparent 100%);
-  animation: mu-fade-down 0.4s ease both;
-}
-.mu-tabs::-webkit-scrollbar { display: none; }
-@keyframes mu-fade-down { from { opacity: 0; transform: translateY(-8px) } to { opacity: 1; transform: translateY(0) } }
-
-.mu-tab {
-  display: flex; align-items: center; gap: 5px;
-  padding: 8px 16px; border-radius: 999px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.06);
-  color: rgba(255,255,255,0.5);
-  font-size: 13px; font-weight: 700;
-  cursor: pointer; transition: all 0.2s; white-space: nowrap;
-}
-.mu-tab.active {
-  background: #fff; color: #0a0a12;
-  border-color: #fff;
-}
-.mu-tab:active { transform: scale(0.95); }
-.mu-tab__count {
-  background: rgba(139,92,246,0.2);
-  color: #a78bfa; font-size: 11px; font-weight: 800;
-  padding: 1px 7px; border-radius: 999px; margin-left: 2px;
-}
-.mu-tab.active .mu-tab__count { background: rgba(139,92,246,0.15); color: #7c3aed; }
-
-/* Search */
-.mu-search {
-  display: flex; align-items: center; gap: 8px;
-  margin: 0 16px 12px; padding: 0 14px; height: 44px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.06);
-  animation: mu-fade-down 0.3s ease 0.1s both;
-}
-.mu-search__icon { color: rgba(255,255,255,0.25); display: flex; flex-shrink: 0; }
-.mu-search__input {
-  flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 14px; caret-color: #a78bfa;
-}
-.mu-search__input::placeholder { color: rgba(255,255,255,0.2); }
-.mu-search__clear {
-  width: 24px; height: 24px; border-radius: 50%;
-  background: rgba(255,255,255,0.08); border: none;
-  color: rgba(255,255,255,0.4); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-
-/* Track list */
-.mu-list { padding: 0 12px; position: relative; z-index: 2; }
-.mu-list__pad { height: 40px; }
-
-/* Track row */
-.mu-row {
-  display: flex; align-items: center; gap: 12px;
-  width: 100%; padding: 8px 10px; border-radius: 14px;
-  background: none; border: none; cursor: pointer;
-  text-align: left; transition: background 0.15s;
-  color: inherit; -webkit-tap-highlight-color: transparent;
-}
-.mu-row:active { background: rgba(255,255,255,0.04); }
-.mu-row--active {
-  background: rgba(139,92,246,0.08);
-  border: 1px solid rgba(139,92,246,0.12);
-}
-
-.mu-row__art-wrap {
-  position: relative; width: 52px; height: 52px;
-  border-radius: 12px; overflow: hidden; flex-shrink: 0;
-  background: rgba(255,255,255,0.04);
-}
-.mu-row__art { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-/* EQ bars on playing */
-.mu-row__eq {
-  position: absolute; bottom: 4px; left: 50%;
-  transform: translateX(-50%);
-  display: flex; gap: 2px; align-items: flex-end; height: 14px;
-}
-.mu-row__eq span {
-  width: 3px; border-radius: 2px;
-  background: #a78bfa;
-  animation: mu-eq 0.6s ease-in-out infinite alternate;
-}
-.mu-row__eq span:nth-child(1) { height: 60%; animation-delay: 0s; }
-.mu-row__eq span:nth-child(2) { height: 100%; animation-delay: 0.15s; }
-.mu-row__eq span:nth-child(3) { height: 40%; animation-delay: 0.3s; }
-@keyframes mu-eq {
-  0% { height: 20%; }
-  100% { height: 100%; }
-}
-
-.mu-row__info { flex: 1; min-width: 0; }
-.mu-row__title {
-  display: block; font-size: 14px; font-weight: 700; color: #fff;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.mu-row--active .mu-row__title { color: #c4b5fd; }
-
-/* Waveform bar */
-.mu-row__bar {
-  display: block; height: 3px; border-radius: 3px;
-  background: rgba(255,255,255,0.06); margin: 5px 0;
-  overflow: hidden;
-}
-.mu-row__bar i {
-  display: block; height: 100%; border-radius: 3px;
-  background: rgba(255,255,255,0.12);
-  transition: width 0.4s;
-}
-.mu-row--active .mu-row__bar i { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
-
-.mu-row__artist {
-  display: block; font-size: 11px; color: rgba(255,255,255,0.35);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
-.mu-row__like {
-  width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  color: rgba(255,255,255,0.25); cursor: pointer; flex-shrink: 0;
-  transition: all 0.15s; background: none; border: none; padding: 0;
-}
-.mu-row__like:active { transform: scale(0.85); }
-.mu-row__like--on { color: #f87171; }
-
-/* Art fallback */
-.mu-art-fallback {
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.15));
-  color: rgba(255,255,255,0.3);
-}
-
-/* Skeleton loading */
-.mu-skeletons { padding: 0 12px; }
-.mu-skel {
-  display: flex; align-items: center; gap: 12px;
-  padding: 8px 10px; margin-bottom: 4px;
-}
-.mu-skel__art { width: 52px; height: 52px; border-radius: 12px; background: rgba(255,255,255,0.06); animation: sk-pulse 1.2s ease-in-out infinite; }
-.mu-skel__lines { flex: 1; }
-.mu-skel__lines div { height: 10px; border-radius: 6px; background: rgba(255,255,255,0.06); animation: sk-pulse 1.2s ease-in-out infinite; }
-.mu-skel__lines div:first-child { width: 70%; margin-bottom: 8px; }
-.mu-skel__lines div:last-child { width: 45%; }
-
-/* Empty */
-.mu-empty {
-  display: flex; flex-direction: column; align-items: center;
-  padding: 60px 20px; gap: 8px; color: rgba(255,255,255,0.3);
-}
-.mu-empty p { margin: 0; font-size: 14px; }
-
-/* Spin animation */
-.mu-spin { animation: mu-spin-anim 1s linear infinite; }
-@keyframes mu-spin-anim { to { transform: rotate(360deg); } }
-
-/* ═══ Fullscreen player (in MusicPage) ═══ */
-.mu-full {
-  position: fixed; inset: 0; z-index: 1500;
-  display: flex; align-items: center; justify-content: center;
-  animation: mu-full-in 0.3s ease both;
-}
-@keyframes mu-full-in { from { opacity: 0 } to { opacity: 1 } }
-
-.mu-full__bg {
-  position: absolute; inset: 0;
-  background-size: cover; background-position: center;
-  filter: blur(60px) saturate(160%); transform: scale(1.4);
-  opacity: 0.25;
-}
-.mu-full__veil {
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 50% 30%, rgba(10,10,18,0.7), rgba(10,10,18,0.97));
-}
-
-.mu-full__card {
-  position: relative; z-index: 2;
-  width: calc(100% - 40px); max-width: 360px;
-  background: rgba(20,18,30,0.92);
-  backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 28px;
-  padding: 20px;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
-  animation: mu-card-up 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
-}
-@keyframes mu-card-up { from { transform: translateY(40px) scale(0.92); opacity: 0 } to { transform: translateY(0) scale(1); opacity: 1 } }
-
-.mu-full__top {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 16px;
-}
-.mu-full__close {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: rgba(255,255,255,0.06); border: none;
-  color: rgba(255,255,255,0.5); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.mu-full__brand { font-size: 11px; color: rgba(255,255,255,0.3); font-weight: 600; letter-spacing: 0.5px; }
-.mu-full__like {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: none; border: none;
-  color: rgba(255,255,255,0.4); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.mu-full__like--on { color: #f87171; }
-
-.mu-full__art {
-  width: 100%; aspect-ratio: 1; border-radius: 18px;
-  object-fit: cover; display: block;
-  margin-bottom: 16px;
-  box-shadow: 0 12px 36px rgba(0,0,0,0.5);
-}
-
-.mu-full__title {
-  font-size: 18px; font-weight: 800; color: #fff;
-  margin: 0 0 4px; text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.mu-full__artist {
-  font-size: 13px; color: rgba(255,255,255,0.4);
-  margin: 0 0 12px; text-align: center;
-}
-
-.mu-full__tags {
-  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center;
-  margin-bottom: 16px;
-}
-.mu-tag {
-  display: flex; align-items: center; gap: 4px;
-  padding: 4px 10px; border-radius: 999px;
-  background: rgba(255,255,255,0.06);
-  font-size: 11px; color: rgba(255,255,255,0.4);
-}
-
-/* Range slider */
-.mu-full__progress { margin-bottom: 12px; }
-.mu-range {
-  -webkit-appearance: none; appearance: none;
-  width: 100%; height: 4px; border-radius: 4px;
-  background: rgba(255,255,255,0.1);
-  outline: none; cursor: pointer;
-}
-.mu-range::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 14px; height: 14px;
-  border-radius: 50%; background: #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-  cursor: pointer;
-}
-.mu-range::-webkit-slider-runnable-track {
-  background: linear-gradient(90deg, #a78bfa var(--pct, 0%), rgba(255,255,255,0.1) var(--pct, 0%));
-  height: 4px; border-radius: 4px;
-}
-
-.mu-full__times {
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: rgba(255,255,255,0.3);
-  margin-top: 4px; font-variant-numeric: tabular-nums;
-}
-
-/* Controls */
-.mu-full__controls {
-  display: flex; align-items: center; justify-content: center;
-  gap: 16px; margin-top: 16px;
-}
-.mu-full__skip {
-  width: 42px; height: 42px; background: none; border: none;
-  color: rgba(255,255,255,0.7); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.mu-full__skip:active { transform: scale(0.85); }
-.mu-full__side {
-  width: 32px; height: 32px; background: none; border: none;
-  color: rgba(255,255,255,0.3); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-}
-.mu-full__side--on { color: #a78bfa; }
-.mu-full__play {
-  width: 56px; height: 56px; border-radius: 50%;
-  background: #fff; border: none; color: #0a0a12;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; box-shadow: 0 4px 16px rgba(255,255,255,0.15);
-  transition: transform 0.15s;
-}
-.mu-full__play:active { transform: scale(0.92); }
-
-@keyframes sk-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.15; }
-}
-
-/* ── Минималистичный бар «Моя Волна» (Apple Music / Spotify Style) ── */
-.mu-wave-mini {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 2px 14px 14px;
-  height: 52px;
-  padding: 0 14px 0 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(168, 85, 247, 0.22);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  -webkit-tap-highlight-color: transparent;
-}
-.mu-wave-mini:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(168, 85, 247, 0.35);
-  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-.mu-wave-mini:active {
-  transform: scale(0.985);
-  background: rgba(255, 255, 255, 0.05);
-}
-.mu-wave-mini__left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 0;
-}
-.mu-wave-mini__eq {
-  display: flex;
-  align-items: flex-end;
-  gap: 3px;
-  height: 18px;
-  flex-shrink: 0;
-}
-.mu-wave-mini__eq i {
-  width: 3px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #38bdf8, #a855f7);
-  animation: mu-mini-jump 0.8s ease-in-out infinite alternate;
-}
-.mu-wave-mini__eq i:nth-child(1) { height: 40%; animation-delay: 0.1s; }
-.mu-wave-mini__eq i:nth-child(2) { height: 90%; animation-delay: 0.28s; }
-.mu-wave-mini__eq i:nth-child(3) { height: 60%; animation-delay: 0.05s; }
-.mu-wave-mini__eq i:nth-child(4) { height: 100%; animation-delay: 0.38s; }
-
-@keyframes mu-mini-jump {
-  0%   { height: 30%; }
-  100% { height: 100%; }
-}
-.mu-wave-mini__meta {
+.mu-yandex-wave__info {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
 }
-.mu-wave-mini__title {
+
+.mu-yandex-wave__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.mu-yandex-wave__live-badge {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #f43f5e;
+  color: #fff;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.mu-yandex-wave__sub {
+  font-size: 11.5px;
+  color: var(--text-3);
+  line-height: 1.3;
+}
+
+/* ── Настроения (Mood Chips) ── */
+.mu-moods {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
+}
+.mu-moods::-webkit-scrollbar { display: none; }
+
+.mu-mood-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12px;
   font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mu-mood-chip:active {
+  transform: scale(0.95);
+}
+.mu-mood-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
   color: #ffffff;
-  line-height: 1.2;
-  letter-spacing: -0.2px;
+  box-shadow: 0 4px 14px var(--accent-glow);
 }
-.mu-wave-mini__sub {
-  font-size: 11px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.48);
-  line-height: 1.2;
+
+/* ── Поиск ── */
+.mu-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-3);
+  margin-bottom: 12px;
 }
-.mu-wave-mini__btn {
+.mu-search__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--text);
+  font-family: inherit;
+}
+.mu-search__input::placeholder {
+  color: var(--text-3);
+}
+.mu-search__clear {
+  color: var(--text-3);
+  font-size: 13px;
+  padding: 4px;
+}
+
+/* ── Вкладки ── */
+.mu-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mu-tabs::-webkit-scrollbar { display: none; }
+
+.mu-tab {
+  flex-shrink: 0;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.mu-tab:active {
+  transform: scale(0.95);
+}
+.mu-tab.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+
+/* ── Список треков ── */
+.mu-content {
+  padding: 12px 14px;
+}
+
+.mu-loading,
+.mu-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 200px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+.mu-spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--accent);
+  animation: muSpin 0.7s linear infinite;
+}
+@keyframes muSpin {
+  to { transform: rotate(360deg); }
+}
+
+.mu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mu-track {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mu-track:active {
+  transform: scale(0.985);
+}
+.mu-track.active {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.08);
+}
+
+.mu-track__play-btn {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.mu-track__cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mu-track__play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: rgba(168, 85, 247, 0.16);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #ffffff;
-  cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: 0 0 12px rgba(168, 85, 247, 0.2);
-  transition: transform 0.15s ease, background 0.15s ease;
+  opacity: 0.9;
 }
-.mu-wave-mini__btn:active {
-  transform: scale(0.9);
+
+.mu-track__playing-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 14px;
+}
+.mu-track__playing-bars span {
+  width: 2.5px;
+  border-radius: 999px;
+  background: var(--accent);
+  animation: muBarDance 0.7s ease-in-out infinite alternate;
+}
+.mu-track__playing-bars span:nth-child(1) { height: 12px; animation-delay: 0.1s; }
+.mu-track__playing-bars span:nth-child(2) { height: 8px; animation-delay: 0.25s; }
+.mu-track__playing-bars span:nth-child(3) { height: 14px; animation-delay: 0.05s; }
+
+@keyframes muBarDance {
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(1); }
+}
+
+.mu-track__meta {
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.mu-track__title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mu-track__title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mu-track__live-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.mu-track__sub-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mu-track__artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mu-track__dot { opacity: 0.5; }
+.mu-track__genre { opacity: 0.75; }
+
+.mu-track__duration {
+  font-size: 11px;
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ── Кнопки интеграции (Яндекс Музыка & VK Музыка) ── */
+.mu-track__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.mu-service-btn {
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.mu-service-btn:active {
+  transform: scale(0.92);
+}
+.mu-service-btn--yandex {
+  background: rgba(250, 204, 21, 0.16);
+  border: 1px solid rgba(250, 204, 21, 0.35);
+  color: #facc15;
+}
+.mu-service-btn--vk {
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+}
+
+.mu-track__like {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-3);
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+.mu-track__like:active {
+  transform: scale(0.85);
+}
+.mu-track__like.liked {
+  color: var(--accent);
+}
+
+/* ── Тост ── */
+.mu-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-h) + 12px);
+  transform: translateX(-50%);
+  background: var(--surface);
+  border: 1px solid var(--border-light);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 999px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  z-index: 100;
 }

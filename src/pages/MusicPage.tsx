@@ -1,10 +1,19 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useMusicStore } from '../store/musicStore';
+import {
+  YANDEX_MOODS,
+  MoodId,
+  RUSSIAN_RADIO_STREAMS,
+  RUSSIAN_CHART_TOP,
+  getYandexMusicUrl,
+  getVkMusicUrl,
+  RussianTrack,
+} from '../data/russianHits';
 import './MusicPage.css';
 
 /* ═══════════ Типы ═══════════ */
-interface Track {
+export interface Track {
   id: string;
   title: string;
   artist: string;
@@ -13,39 +22,18 @@ interface Track {
   plays: number;
   genre: string;
   streamUrl: string;
+  isLiveStream?: boolean;
 }
 
-type Tab = 'wave' | 'russian' | 'world' | 'audius' | 'liked';
+type Tab = 'wave' | 'chart' | 'live' | 'audius' | 'liked';
 
-/* ═══════════ Константы ═══════════ */
 const APP_NAME = 'VELORA';
-
-const hashStr = (s: string): number => {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-};
 
 const HOSTS_FALLBACK = [
   'https://discoveryprovider.audius.co',
   'https://audius-discovery-2.altego.net',
   'https://audius-metadata-1.figment.io',
   'https://dn1.audius.l2be.net',
-  'https://audius-dp.amsterdam.creatorseed.com',
-];
-
-const RUSSIAN_SEEDS = [
-  'Баста', 'Miyagi', 'ANNA ASTI', 'MACAN', 'Zivert', 'JONY',
-  'Три дня дождя', 'Скриптонит', 'HammAli Navai', 'Xcho', 'Markul',
-  'Хаски', 'OG Buda', 'FEDUK', 'Lizer', 'PHARAOH', 'Монеточка', 'LSP', 'Guf', 'Saluki',
-  'GONE Fludd', 'Thomas Mraz', 'Mayot', 'Кравц', 'Mary Gu', 'INSTASAMKA', 'Big Baby Tape',
-];
-
-const WORLD_SEEDS = [
-  'The Weeknd', 'Billie Eilish', 'Dua Lipa', 'Drake', 'Taylor Swift',
-  'Travis Scott', 'Coldplay', 'Post Malone', 'Kendrick Lamar', 'Bruno Mars',
-  'Ed Sheeran', 'Rihanna', 'Imagine Dragons', 'Eminem', 'Harry Styles',
-  'SZA', 'Doja Cat', 'Arctic Monkeys', 'Justin Bieber', 'Ariana Grande',
 ];
 
 const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
@@ -56,9 +44,6 @@ const fmtTime = (s: number): string => {
   const sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, '0')}`;
 };
-
-const fmtPlays = (n: number): string =>
-  n >= 1e6 ? `${(n / 1e6).toFixed(1)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(0)}K` : `${n ?? 0}`;
 
 const mapTrack = (t: any, host: string): Track => ({
   id: `au-${t.id}`,
@@ -71,131 +56,19 @@ const mapTrack = (t: any, host: string): Track => ({
   streamUrl: `${host}/v1/tracks/${t.id}/stream?app_name=${APP_NAME}`,
 });
 
-const mapItunes = (t: any): Track => ({
-  id: `it-${t.trackId}`,
-  title: t.trackName ?? 'Без названия',
-  artist: t.artistName ?? 'Неизвестный артист',
-  artwork: (t.artworkUrl100 || '').replace('100x100bb', '600x600bb'),
-  duration: t.trackTimeMillis ? Math.round(t.trackTimeMillis / 1000) : 30,
+const mapRussianTrack = (r: RussianTrack): Track => ({
+  id: r.id,
+  title: r.title,
+  artist: r.artist,
+  artwork: r.artwork,
+  duration: r.duration,
   plays: 0,
-  genre: t.primaryGenreName || 'Hit',
-  streamUrl: t.previewUrl || '',
+  genre: r.genre,
+  streamUrl: r.streamUrl,
+  isLiveStream: r.isLiveStream,
 });
 
-/* ── iTunes API ── */
-const fetchItunesSearch = async (term: string, country = 'US', limit = 35): Promise<Track[]> => {
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${country}&entity=song&media=music&limit=${limit}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  const json = await res.json();
-  return (json?.results ?? []).filter((t: any) => t.previewUrl).map(mapItunes);
-};
-
-/* ── Deezer API (JSONP fallback) ── */
-const jsonp = (url: string): Promise<any> =>
-  new Promise((resolve, reject) => {
-    const cb = `dz_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
-    const script = document.createElement('script');
-    const cleanup = () => { clearTimeout(timer); delete (window as any)[cb]; script.remove(); };
-    const timer = setTimeout(() => { cleanup(); reject(new Error('jsonp timeout')); }, 8000);
-    (window as any)[cb] = (data: any) => { cleanup(); resolve(data); };
-    script.onerror = () => { cleanup(); reject(new Error('jsonp error')); };
-    script.src = `${url}${url.includes('?') ? '&' : '?'}output=jsonp&callback=${cb}`;
-    document.head.appendChild(script);
-  });
-
-const fetchDeezerChart = async (limit = 25): Promise<Track[]> => {
-  const data = await jsonp(`https://api.deezer.com/chart/0/tracks?limit=${limit}`);
-  return (data?.data ?? [])
-    .filter((t: any) => t.preview)
-    .map((t: any) => ({
-      id: `dz-${t.id}`,
-      title: t.title || '',
-      artist: t.artist?.name || '',
-      artwork: (t.album?.cover_medium || '').replace('cover_medium', 'cover_big'),
-      duration: 30,
-      plays: t.rank ? Math.round(t.rank / 1000) : 0,
-      genre: 'Chart',
-      streamUrl: t.preview,
-    }));
-};
-
-const fetchDeezerSearch = async (q: string, limit = 20): Promise<Track[]> => {
-  const data = await jsonp(`https://api.deezer.com/search?q=${encodeURIComponent(q)}&limit=${limit}`);
-  return (data?.data ?? [])
-    .filter((t: any) => t.preview)
-    .map((t: any) => ({
-      id: `dz-${t.id}`,
-      title: t.title || '',
-      artist: t.artist?.name || '',
-      artwork: (t.album?.cover_medium || '').replace('cover_medium', 'cover_big'),
-      duration: 30,
-      plays: 0,
-      genre: 'Search',
-      streamUrl: t.preview,
-    }));
-};
-
-const dedupeTracks = (arr: Track[]): Track[] => {
-  const seen = new Set<string>();
-  return arr.filter((t) => {
-    if (!t.title || !t.streamUrl) return false;
-    const key = `${t.title.toLowerCase()}|${t.artist.toLowerCase()}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-};
-
-const shuffleArr = <T,>(arr: T[]): T[] => {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
-
-/* ═══════════ SVG-иконки ═══════════ */
-const IconPlay = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M8.5 5.9c0-1.2 1.3-1.9 2.3-1.3l9.2 5.6c1 .6 1 2 0 2.6l-9.2 5.6c-1 .6-2.3-.1-2.3-1.3V5.9z" />
-  </svg>
-);
-const IconPause = ({ size = 20 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
-    <rect x="6" y="4.5" width="4.4" height="15" rx="1.6" />
-    <rect x="13.6" y="4.5" width="4.4" height="15" rx="1.6" />
-  </svg>
-);
-const IconHeart = ({ size = 18, filled = false }: { size?: number; filled?: boolean }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? '#ec4899' : 'none'} stroke={filled ? '#ec4899' : 'currentColor'} strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-);
-const IconSearch = ({ size = 17 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="6.5" /><path d="M16.5 16.5L21 21" /></svg>
-);
-const IconRefresh = ({ size = 18, spin = false }: { size?: number; spin?: boolean }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={spin ? 'mu-spin' : undefined}>
-    <path d="M20 5v5h-5" /><path d="M4 19v-5h5" /><path d="M20 10a8 8 0 0 0-14.9-3M4 14a8 8 0 0 0 14.9 3" />
-  </svg>
-);
-const IconClose = ({ size = 14 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
-);
-const IconNote = ({ size = 22 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17.5V6.3L20 4v11.2" /><circle cx="6.5" cy="17.5" r="2.6" /><circle cx="17.5" cy="15.2" r="2.6" /></svg>
-);
-const IconWave = ({ size = 16 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M3 12h1M7 8v8M11 5v14M15 8v8M19 11v2M23 12h-1" /></svg>
-);
-const IconSparkles = ({ size = 15 }: { size?: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z" />
-  </svg>
-);
-
-/* Артворк с фолбэком */
+/* ═══════════ Артворк ═══════════ */
 const Artwork: React.FC<{ src: string; alt: string; className: string }> = ({ src, alt, className }) => {
   const [err, setErr] = useState(false);
   if (!src || err) {
@@ -210,26 +83,31 @@ const Artwork: React.FC<{ src: string; alt: string; className: string }> = ({ sr
   return <img className={className} src={src} alt={alt} loading="lazy" onError={() => setErr(true)} />;
 };
 
-/* ═══════════ Компонент ═══════════ */
+/* ═══════════ Компонент Музыки ═══════════ */
 const MusicPage: React.FC = () => {
-  const { haptic } = useTelegram();
+  const { haptic, openLink } = useTelegram();
   const {
-    currentTrack, isPlaying, progress, duration,
+    currentTrack, isPlaying, progress,
     setTrack, setPlaying,
     likedTracks, toggleLike: storeToggleLike, isLiked: storeIsLiked,
-    setExpanded,
   } = useMusicStore();
 
   const [tracks, setTracks] = useState<Track[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<Tab>('wave');
-  const [feedLabel, setFeedLabel] = useState('Персональная волна');
+  const [activeMood, setActiveMood] = useState<MoodId>('russian');
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
-  /* Загрузка Audius треков */
-  const fetchAudius = useCallback(async (limit = 40): Promise<Track[]> => {
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 2200);
+  };
+
+  /* Загрузка Audius треков (полноценные полные треки) */
+  const fetchAudius = useCallback(async (limit = 35): Promise<Track[]> => {
     let host = pick(HOSTS_FALLBACK);
     try {
       const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(4000) });
@@ -247,302 +125,276 @@ const MusicPage: React.FC = () => {
     return [];
   }, []);
 
-  /* Загрузка для каждой вкладки */
-  const loadTabFeed = useCallback(async (activeTab: Tab, mode: 'init' | 'refresh' = 'init') => {
-    if (mode === 'refresh') setRefreshing(true); else setLoading(true);
-
+  /* Загрузка контента в зависимости от вкладки и настроения */
+  const loadContent = useCallback(async () => {
+    setLoading(true);
     try {
-      if (activeTab === 'liked') {
-        setFeedLabel('Моя медиатека');
-        setLoading(false);
-        setRefreshing(false);
-        return;
+      if (tab === 'wave') {
+        // Умная волна (Яндекс Музыка Style): подмешивает треки по выбранному настроению + лайки
+        const moodFiltered = RUSSIAN_CHART_TOP.filter((t) => t.mood === activeMood || activeMood === 'russian').map(mapRussianTrack);
+        const liveFiltered = RUSSIAN_RADIO_STREAMS.filter((t) => t.mood === activeMood).map(mapRussianTrack);
+        const audiusTracks = await fetchAudius(15);
+        setTracks([...moodFiltered, ...liveFiltered, ...audiusTracks]);
+      } else if (tab === 'chart') {
+        // Главный хит-парад России
+        setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
+      } else if (tab === 'live') {
+        // 24/7 Радиовещание в HD (без ограничений по времени)
+        setTracks(RUSSIAN_RADIO_STREAMS.map(mapRussianTrack));
+      } else if (tab === 'audius') {
+        // Международные полные треки
+        const fullTracks = await fetchAudius(35);
+        setTracks(fullTracks);
+      } else if (tab === 'liked') {
+        setTracks(likedTracks);
       }
-
-      if (activeTab === 'russian') {
-        setFeedLabel('Русские хиты · Топ чарт');
-        const [a, b] = await Promise.all([
-          fetchItunesSearch(pick(RUSSIAN_SEEDS), 'RU', 25).catch(() => [] as Track[]),
-          fetchItunesSearch(pick(RUSSIAN_SEEDS), 'RU', 25).catch(() => [] as Track[]),
-        ]);
-        const list = dedupeTracks([...shuffleArr(a), ...shuffleArr(b)]);
-        setTracks(list);
-      } else if (activeTab === 'world') {
-        setFeedLabel('Мировые чарты · Global Hits');
-        const [it, dz] = await Promise.all([
-          fetchItunesSearch(pick(WORLD_SEEDS), 'US', 25).catch(() => [] as Track[]),
-          fetchDeezerChart(25).catch(() => [] as Track[]),
-        ]);
-        const list = dedupeTracks([...shuffleArr(dz), ...shuffleArr(it)]);
-        setTracks(list);
-      } else if (activeTab === 'audius') {
-        setFeedLabel('Полные лицензионные треки (Audius)');
-        const aud = await fetchAudius(45);
-        setTracks(aud.length > 0 ? shuffleArr(aud) : []);
-      } else if (activeTab === 'wave') {
-        setFeedLabel('Моя волна · Всегда новая музыка');
-        const r1 = pick(RUSSIAN_SEEDS);
-        const r2 = pick(RUSSIAN_SEEDS.filter((s) => s !== r1));
-        const w1 = pick(WORLD_SEEDS);
-        const w2 = pick(WORLD_SEEDS.filter((s) => s !== w1));
-        const [ruA, ruB, woA, woB, au] = await Promise.all([
-          fetchItunesSearch(r1, 'RU', 18).catch(() => [] as Track[]),
-          fetchItunesSearch(r2, 'RU', 18).catch(() => [] as Track[]),
-          fetchItunesSearch(w1, 'US', 18).catch(() => [] as Track[]),
-          fetchItunesSearch(w2, 'US', 18).catch(() => [] as Track[]),
-          fetchAudius(24).catch(() => [] as Track[]),
-        ]);
-        const likedIds = new Set(likedTracks.map((t) => t.id));
-        const pool = dedupeTracks(shuffleArr([...ruA, ...ruB, ...woA, ...woB, ...au]))
-          .filter((t) => !likedIds.has(t.id));
-        setTracks(pool);
-      }
-    } catch (e) {
-      console.error('Music feed load error:', e);
+    } catch {
+      setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  }, [fetchAudius, likedTracks]);
+  }, [tab, activeMood, likedTracks, fetchAudius]);
 
   useEffect(() => {
-    loadTabFeed(tab, 'init');
-  }, [tab, loadTabFeed]);
+    loadContent();
+  }, [loadContent]);
 
-  /* ── Поиск (одновременно русский + мировой + Audius) ── */
-  const handleSearch = async () => {
-    const q = query.trim();
-    if (!q) return;
-    haptic('light');
-    setLoading(true);
-
-    try {
-      const [itRu, itUs, dz, auRes] = await Promise.allSettled([
-        fetchItunesSearch(q, 'RU', 20),
-        fetchItunesSearch(q, 'US', 20),
-        fetchDeezerSearch(q, 15),
-        fetch(`${hostRef.current}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP_NAME}&limit=15`)
-          .then(r => r.json())
-          .then(j => (j?.data ?? []).map((t: any) => mapTrack(t, hostRef.current))),
-      ]);
-
-      const getVal = (r: PromiseSettledResult<Track[]>) => r.status === 'fulfilled' ? r.value : [];
-      const merged = dedupeTracks([
-        ...getVal(itRu),
-        ...getVal(itUs),
-        ...getVal(dz),
-        ...getVal(auRes),
-      ]);
-
-      setTracks(merged);
-      setFeedLabel(`Поиск: «${q}» (${merged.length})`);
-    } catch (e) {
-      console.error('Search error:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  /* ── Воспроизведение ── */
-  const list = tab === 'liked' ? likedTracks : tracks;
-
-  const playTrack = (t: Track) => {
+  /* Управление воспроизведением */
+  const handlePlayTrack = (track: Track, idx: number) => {
     haptic('medium');
-    const idx = list.indexOf(t);
-    setTrack(t, list, idx >= 0 ? idx : 0);
-    setPlaying(true);
-  };
-
-  const startWave = () => {
-    haptic('heavy');
-    if (list.length > 0) {
-      setTrack(list[0], list, 0);
+    if (currentTrack?.id === track.id) {
+      setPlaying(!isPlaying);
+    } else {
+      setTrack(track, tracks, idx);
       setPlaying(true);
     }
   };
 
-  const isLiked = (t: Track | null) => !!t && storeIsLiked(t.id);
-  const toggleLike = (t: Track) => {
+  /* Переключение настроения в Моей Волне */
+  const handleMoodSelect = (mood: MoodId) => {
     haptic('light');
-    storeToggleLike(t);
+    setActiveMood(mood);
+    showToast(`Настроение: ${YANDEX_MOODS.find((m) => m.id === mood)?.label}`);
   };
 
+  /* Фильтрация поиском */
+  const displayTracks = query.trim()
+    ? tracks.filter((t) =>
+        t.title.toLowerCase().includes(query.toLowerCase()) ||
+        t.artist.toLowerCase().includes(query.toLowerCase()) ||
+        t.genre.toLowerCase().includes(query.toLowerCase())
+      )
+    : tracks;
+
   return (
-    <div className="mu">
-      {/* Фоновые градиентные пятна */}
-      <div className="mu-blob mu-blob--1" />
-      <div className="mu-blob mu-blob--2" />
-
-      {/* Шапка */}
-      <div className="mu-header">
-        <div className="mu-header__brand">
-          <div className="mu-header__logo">
-            <div className="mu-wave-mini mu-wave-mini--white">
-              <span /><span /><span /><span />
-            </div>
-          </div>
+    <div className="music-page page">
+      {/* ── Шапка страницы ── */}
+      <header className="mu-header">
+        <div className="mu-header__top">
           <div>
-            <h1 className="mu-header__title">Музыка</h1>
-            <span className="mu-header__sub">{feedLabel}</span>
+            <span className="mu-header__badge">✦ ЗВУК И МУЗЫКА</span>
+            <h1 className="mu-header__title">Моя Волна</h1>
           </div>
-        </div>
-        <button
-          className="mu-header__refresh"
-          onClick={() => { loadTabFeed(tab, 'refresh'); haptic('medium'); }}
-          aria-label="Обновить ленту"
-        >
-          <IconRefresh spin={refreshing} />
-        </button>
-      </div>
-
-      {/* Вкладки стриминга */}
-      <div className="mu-tabs">
-        <button
-          className={`mu-tab ${tab === 'wave' ? 'active' : ''}`}
-          onClick={() => { setTab('wave'); haptic('light'); }}
-        >
-          <IconWave size={14} /> Моя волна
-        </button>
-        <button
-          className={`mu-tab ${tab === 'russian' ? 'active' : ''}`}
-          onClick={() => { setTab('russian'); haptic('light'); }}
-        >
-          Русские хиты
-        </button>
-        <button
-          className={`mu-tab ${tab === 'world' ? 'active' : ''}`}
-          onClick={() => { setTab('world'); haptic('light'); }}
-        >
-          Мировые чарты
-        </button>
-        <button
-          className={`mu-tab ${tab === 'audius' ? 'active' : ''}`}
-          onClick={() => { setTab('audius'); haptic('light'); }}
-        >
-          Полные треки
-        </button>
-        <button
-          className={`mu-tab ${tab === 'liked' ? 'active' : ''}`}
-          onClick={() => { setTab('liked'); haptic('light'); }}
-        >
-          <IconHeart size={13} filled={tab === 'liked'} /> Любимое
-          {likedTracks.length > 0 && <span className="mu-tab__count">{likedTracks.length}</span>}
-        </button>
-      </div>
-
-      {/* Поиск */}
-      <div className="mu-search">
-        <span className="mu-search__icon"><IconSearch /></span>
-        <input
-          className="mu-search__input"
-          placeholder="Поиск по артистам и трекам (РФ и мир)…"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        />
-        {query && (
-          <button className="mu-search__clear" onClick={() => { setQuery(''); loadTabFeed(tab, 'refresh'); }}>
-            <IconClose />
+          <button
+            className="mu-header__reload"
+            onClick={() => {
+              haptic('light');
+              loadContent();
+            }}
+            title="Обновить поток"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+            </svg>
           </button>
-        )}
-      </div>
+        </div>
 
-      {/* Минималистичный блок «Моя волна» (только на вкладке 'wave') */}
-      {tab === 'wave' && !query && (
-        <div className="mu-wave-mini" onClick={startWave}>
-          <div className="mu-wave-mini__left">
-            <span className="mu-wave-mini__eq">
-              <i /><i /><i /><i />
-            </span>
-            <div className="mu-wave-mini__meta">
-              <div className="mu-wave-mini__title">Моя Волна</div>
-              <div className="mu-wave-mini__sub">Персональный нейропоток</div>
+        {/* ── Капсула «Моя Волна» в стиле Яндекс Музыки ── */}
+        {tab === 'wave' && (
+          <div className="mu-yandex-wave">
+            <div className="mu-yandex-wave__orb">
+              <div className={`mu-wave-disc ${isPlaying ? 'playing' : ''}`}>
+                <span /><span /><span /><span /><span />
+              </div>
+            </div>
+            <div className="mu-yandex-wave__info">
+              <div className="mu-yandex-wave__title">
+                <span>Персональный поток музыки</span>
+                <span className="mu-yandex-wave__live-badge">Live</span>
+              </div>
+              <p className="mu-yandex-wave__sub">
+                Подстраивается под ваши лайки и настроение, как в Яндекс Музыке
+              </p>
             </div>
           </div>
-          <button className="mu-wave-mini__btn" aria-label="Слушать волну">
-            <IconPlay size={15} />
-          </button>
-        </div>
-      )}
+        )}
 
-      {/* Список треков */}
-      <div className="mu-list">
-        {loading && (
-          <div className="mu-skeletons">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="mu-skel">
-                <div className="mu-skel__art" />
-                <div className="mu-skel__lines"><div /><div /></div>
-              </div>
+        {/* ── Переключатель настроений (Mood Selector) ── */}
+        {tab === 'wave' && (
+          <div className="mu-moods">
+            {YANDEX_MOODS.map((m) => (
+              <button
+                key={m.id}
+                className={`mu-mood-chip ${activeMood === m.id ? 'active' : ''}`}
+                onClick={() => handleMoodSelect(m.id)}
+              >
+                <span className="mu-mood-chip__icon">{m.icon}</span>
+                <span className="mu-mood-chip__label">{m.label}</span>
+              </button>
             ))}
           </div>
         )}
 
-        {!loading && list.length === 0 && (
+        {/* ── Поисковая строка ── */}
+        <div className="mu-search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
+          </svg>
+          <input
+            type="text"
+            className="mu-search__input"
+            placeholder="Трек, исполнитель или жанр…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {query && (
+            <button className="mu-search__clear" onClick={() => setQuery('')}>✕</button>
+          )}
+        </div>
+
+        {/* ── Вкладки категорий ── */}
+        <div className="mu-tabs">
+          <button className={`mu-tab ${tab === 'wave' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('wave'); }}>
+            🌊 Моя Волна
+          </button>
+          <button className={`mu-tab ${tab === 'chart' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('chart'); }}>
+            🇷🇺 Чарт РФ
+          </button>
+          <button className={`mu-tab ${tab === 'live' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('live'); }}>
+            📻 Радио 24/7
+          </button>
+          <button className={`mu-tab ${tab === 'audius' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('audius'); }}>
+            🌍 Полные треки
+          </button>
+          <button className={`mu-tab ${tab === 'liked' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('liked'); }}>
+            💖 Любимые ({likedTracks.length})
+          </button>
+        </div>
+      </header>
+
+      {/* ── Список треков ── */}
+      <main className="mu-content">
+        {loading ? (
+          <div className="mu-loading">
+            <div className="mu-spinner" />
+            <span>Настраиваем волну…</span>
+          </div>
+        ) : displayTracks.length === 0 ? (
           <div className="mu-empty">
-            {tab === 'liked' ? (
-              <>
-                <div className="mu-empty__icon"><IconHeart size={36} /></div>
-                <p className="mu-empty__title">Медиатека пуста</p>
-                <p className="mu-empty__sub">Нажмите сердечко на понравившихся треках, чтобы они появились здесь</p>
-              </>
-            ) : (
-              <>
-                <div className="mu-empty__icon"><IconNote size={36} /></div>
-                <p className="mu-empty__title">Треки не найдены</p>
-                <p className="mu-empty__sub">Попробуйте ввести другой поисковый запрос</p>
-              </>
-            )}
+            <p>Ничего не найдено</p>
+            <span>Попробуйте изменить запрос или настроение</span>
+          </div>
+        ) : (
+          <div className="mu-list">
+            {displayTracks.map((t, i) => {
+              const isCurrent = currentTrack?.id === t.id;
+              const isLiked = storeIsLiked(t.id);
+
+              return (
+                <div key={t.id} className={`mu-track ${isCurrent ? 'active' : ''}`}>
+                  {/* Номер / кнопка play */}
+                  <button
+                    className="mu-track__play-btn"
+                    onClick={() => handlePlayTrack(t, i)}
+                    aria-label="Воспроизвести"
+                  >
+                    <Artwork src={t.artwork} alt={t.title} className="mu-track__cover" />
+                    <div className="mu-track__play-overlay">
+                      {isCurrent && isPlaying ? (
+                        <div className="mu-track__playing-bars">
+                          <span /><span /><span />
+                        </div>
+                      ) : (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Инфо о треке */}
+                  <div className="mu-track__meta" onClick={() => handlePlayTrack(t, i)}>
+                    <div className="mu-track__title-row">
+                      <span className="mu-track__title">{t.title}</span>
+                      {t.isLiveStream && (
+                        <span className="mu-track__live-tag">Live 24/7</span>
+                      )}
+                    </div>
+                    <div className="mu-track__sub-row">
+                      <span className="mu-track__artist">{t.artist}</span>
+                      <span className="mu-track__dot">·</span>
+                      <span className="mu-track__genre">{t.genre}</span>
+                    </div>
+                  </div>
+
+                  {/* Длительность */}
+                  <span className="mu-track__duration">
+                    {t.isLiveStream ? 'Эфир' : fmtTime(t.duration)}
+                  </span>
+
+                  {/* Интеграция с сервисами РФ (Яндекс Музыка & VK Музыка) */}
+                  <div className="mu-track__actions">
+                    <button
+                      className="mu-service-btn mu-service-btn--yandex"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        haptic('light');
+                        openLink(getYandexMusicUrl(t.artist, t.title));
+                      }}
+                      title="Слушать в Яндекс Музыке"
+                    >
+                      Яндекс
+                    </button>
+
+                    <button
+                      className="mu-service-btn mu-service-btn--vk"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        haptic('light');
+                        openLink(getVkMusicUrl(t.artist, t.title));
+                      }}
+                      title="Слушать в VK Музыке"
+                    >
+                      VK
+                    </button>
+
+                    <button
+                      className={`mu-track__like ${isLiked ? 'liked' : ''}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        haptic('medium');
+                        storeToggleLike(t);
+                      }}
+                      title="В избранное"
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={isLiked ? 'var(--accent, #fb7185)' : 'none'} stroke={isLiked ? 'var(--accent, #fb7185)' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+      </main>
 
-        {!loading && list.map((t, i) => {
-          const active = currentTrack?.id === t.id;
-          const barW = active
-            ? Math.min(100, Math.max(4, duration > 0 ? (progress / duration) * 100 : 0))
-            : 20 + (hashStr(t.id) % 55);
-
-          return (
-            <div
-              key={`${t.id}-${i}`}
-              className={`mu-row ${active ? 'mu-row--active' : ''}`}
-              onClick={() => {
-                if (active) {
-                  setExpanded(true);
-                } else {
-                  playTrack(t);
-                }
-              }}
-            >
-              <div className="mu-row__art-wrap">
-                <Artwork src={t.artwork} alt={t.title} className="mu-row__art" />
-                {active && isPlaying && (
-                  <span className="mu-row__eq">
-                    <span /><span /><span />
-                  </span>
-                )}
-              </div>
-              <div className="mu-row__info">
-                <div className="mu-row__title">{t.title}</div>
-                <div className="mu-row__bar"><i style={{ width: `${barW}%` }} /></div>
-                <div className="mu-row__artist">
-                  {t.artist}
-                  {t.genre ? ` · ${t.genre}` : ''}
-                  {active && duration > 0 ? ` · ${fmtTime(progress)} / ${fmtTime(duration)}` : ''}
-                </div>
-              </div>
-              <button
-                className={`mu-row__like ${isLiked(t) ? 'mu-row__like--on' : ''}`}
-                onClick={(e) => { e.stopPropagation(); toggleLike(t); }}
-                aria-label="В избранное"
-              >
-                <IconHeart size={18} filled={isLiked(t)} />
-              </button>
-            </div>
-          );
-        })}
-        <div className="mu-list__pad" />
-      </div>
+      {/* Тост уведомление */}
+      {toastMsg && (
+        <div className="mu-toast">
+          <span>{toastMsg}</span>
+        </div>
+      )}
     </div>
   );
 };

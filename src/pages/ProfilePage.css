@@ -114,7 +114,7 @@
   position: absolute;
   inset: -3px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, #a855f7, #ec4899, #38bdf8, #a855f7);
+  background: conic-gradient(from 0deg, #f43f5e, #fb7185, #fda4af, #f43f5e);
   z-index: 0;
 }
 .pf__avatar {
@@ -177,7 +177,7 @@
   width: 17px;
   height: 17px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #a855f7, #ec4899);
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
   font-size: 10px;
   color: #fff;
   font-weight: 900;

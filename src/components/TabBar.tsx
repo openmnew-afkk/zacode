@@ -34,12 +34,12 @@ const tabs: TabDef[] = [
               d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z"
               fill="url(#tabAiGrad)"
             />
-            <circle cx="18.5" cy="5.5" r="2" fill="#c084fc" />
+            <circle cx="18.5" cy="5.5" r="2" fill="#fb7185" />
             <defs>
               <linearGradient id="tabAiGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#e9d5ff" />
-                <stop offset="0.5" stopColor="#c084fc" />
-                <stop offset="1" stopColor="#7c3aed" />
+                <stop stopColor="#fbcfe8" />
+                <stop offset="0.5" stopColor="#fb7185" />
+                <stop offset="1" stopColor="#e11d48" />
               </linearGradient>
             </defs>
           </>

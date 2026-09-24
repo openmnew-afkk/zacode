@@ -66,7 +66,7 @@ export interface WatchHistoryItem {
   watchedAt: number;
 }
 
-export type AppTheme = 'dark' | 'violet';
+export type AppTheme = 'dark' | 'light';
 
 /* Статусы просмотра (дневник киномана) */
 export type WatchStatus = 'want' | 'watching' | 'watched' | 'dropped';
