@@ -24,16 +24,34 @@ const tabs: TabDef[] = [
     ),
   },
   {
-    path: '/feed',
-    label: 'Лента',
+    path: '/ai',
+    label: 'КиноИИ',
     icon: (active) => (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
         {active ? (
-          <path d="M19.82 2H4.18C2.97 2 2 2.97 2 4.18v15.64C2 21.03 2.97 22 4.18 22h15.64c1.21 0 2.18-.97 2.18-2.18V4.18C22 2.97 21.03 2 19.82 2zM10 16V8l6 4-6 4z" fill="currentColor" />
+          <>
+            <path
+              d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z"
+              fill="url(#tabAiGrad)"
+            />
+            <circle cx="18.5" cy="5.5" r="2" fill="#c084fc" />
+            <defs>
+              <linearGradient id="tabAiGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#e9d5ff" />
+                <stop offset="0.5" stopColor="#c084fc" />
+                <stop offset="1" stopColor="#7c3aed" />
+              </linearGradient>
+            </defs>
+          </>
         ) : (
           <>
-            <rect x="2.5" y="2.5" width="19" height="19" rx="4.5" stroke="currentColor" strokeWidth="1.8" />
-            <polygon points="10,8 16,12 10,16" fill="currentColor" />
+            <path
+              d="M12 2.5C12 7.75 7.75 12 2.5 12C7.75 12 12 16.25 12 21.5C12 16.25 16.25 12 21.5 12C16.25 12 12 7.75 12 2.5Z"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinejoin="round"
+            />
+            <circle cx="18" cy="6" r="1.5" fill="currentColor" opacity="0.8" />
           </>
         )}
       </svg>

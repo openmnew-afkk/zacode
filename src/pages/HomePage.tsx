@@ -9,7 +9,6 @@ import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
-import VeloraAiEmblem from '../components/VeloraAiEmblem';
 import './HomePage.css';
 
 /* ──────────────────────────────────────────────────────── */
@@ -528,9 +527,18 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div className="hp-header__actions">
-              {/* ✦ Velora AI кнопка */}
-              <button className="hp-ai-circle" onClick={() => navigate('/ai')} aria-label="Velora AI" title="Velora AI — Умный подбор">
-                <VeloraAiEmblem size="sm" />
+              {/* 📰 Новости кино и новинки (Кинолента) */}
+              <button
+                className="hp-header__feed-btn"
+                onClick={() => navigate('/feed')}
+                aria-label="Новости и новинки"
+                title="Новости кино и новинки"
+              >
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="3.5" width="18" height="17" rx="4" stroke="currentColor" strokeWidth="1.8" />
+                  <path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+                <span className="hp-feed-badge-pulse" />
               </button>
               <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">

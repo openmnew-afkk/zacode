@@ -1,11 +1,11 @@
 /* ===== Источники просмотра и мульти-балансеры видео =====
  *
  * Оптимизировано для воспроизведения под VPN и с русской озвучкой:
- *  1. VidLink Pro — скоростной 4K/1080p CDN (ЕДИНСТВЕННЫЙ международный сервер, 100% с любым VPN, выбор русской дорожки)
- *  2. Kinohub / Kinobox — агрегатор балансеров РФ (Kodik, Alloha, Collaps, VideoCDN), работает без блокировок
- *  3. Collaps HD (Delivembed) — российский балансер со студиями (LostFilm, RHS, Резка, Дубляж)
- *  4. Voidboost HD — проверенное зеркало со студийными переводами РФ
- *  5. Alloha / Резка — альтернативный российский плеер со студийными дорожками
+ *  1. Collaps HD (Delivembed) — Сервер №1 (LostFilm, RHS, Резка, Дубляж, NewStudio)
+ *  2. Voidboost HD — официальный плеер HDRezka со студийными переводами РФ (без переходов на сторонние сайты)
+ *  3. Alloha / Резка — альтернативный российский балансер со студийными дорожками
+ *  4. Lumex HD — российский CDN плеер с дубляжом
+ *  5. Global 4K (США) — ЕДИНСТВЕННЫЙ американский сервер (100% стабилен с любым VPN США, 4K/1080p, оригинал + субтитры)
  */
 import type { WatchOption } from '../types';
 
@@ -25,12 +25,12 @@ export interface WatchBuildParams {
 
 /**
  * Генерация списка проверенных серверов для просмотра фильма или сериала.
- * Требование: ровно 1 американский (VidLink Pro), все остальные — российские балансеры.
+ * Требование: Collaps — №1, ровно 1 американский (Global 4K), все остальные — российские балансеры.
  */
 export function buildWatchOptions({
   tmdbId,
   imdbId = '',
-  title,
+  title: _title,
   isSerial,
   season = 1,
   episode = 1,
@@ -40,42 +40,11 @@ export function buildWatchOptions({
 
   const opts: WatchOption[] = [];
 
-  /* 1. VidLink Pro — единственный международный/американский сервер (100% стабилен с любым VPN, 4K/1080p, русская дорожка в меню звука) */
-  opts.push({
-    id: 'vidlink',
-    label: 'VidLink Pro',
-    sublabel: '⚡ 4K/1080p · Выбор русской дорожки (🇷🇺 в ⚙️/🎧) · 100% с любым VPN',
-    url: isSerial
-      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`
-      : `https://vidlink.pro/movie/${cleanTmdb}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`,
-    type: 'iframe',
-    lang: 'ru',
-    provider: 'VidLink',
-    flag: '⚡',
-    quality: '4K/1080p',
-  });
-
-  /* 2. Kinohub / Kinobox — главный мульти-балансер РФ (Kodik, Alloha, Collaps, VideoCDN) без регионального блока под VPN */
-  const kinohubUrl = cleanImdb
-    ? `https://on.kinohub.vip/?imdb=${cleanImdb}&title=${encodeURIComponent(title || '')}`
-    : `https://on.kinohub.vip/?title=${encodeURIComponent(title || '')}`;
-  opts.push({
-    id: 'kinohub',
-    label: 'Kinohub',
-    sublabel: '🎬 Мульти-балансер РФ (Kodik, Alloha, Collaps) · Без блокировки по региону',
-    url: kinohubUrl,
-    type: 'iframe',
-    lang: 'ru',
-    provider: 'Kinohub',
-    flag: '🎬',
-    quality: 'Full HD',
-  });
-
-  /* 3. Collaps HD — главный студийный балансер РФ (LostFilm, Red Head Sound, Резка, Дубляж) */
+  /* 1. Collaps HD — СЕРВЕР №1 (главный студийный балансер РФ: LostFilm, Red Head Sound, Резка, Дубляж) */
   opts.push({
     id: 'collaps',
     label: 'Collaps HD',
-    sublabel: '🇷🇺 LostFilm · Red Head Sound · Резка · Дубляж (Серверы РФ/Европы)',
+    sublabel: '🇷🇺 LostFilm · Red Head Sound · Резка · Дубляж (Сервер №1)',
     url: isSerial
       ? cleanImdb
         ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
@@ -90,11 +59,11 @@ export function buildWatchOptions({
     quality: '1080p',
   });
 
-  /* 4. Voidboost HD — проверенное зеркало со студийными переводами РФ */
+  /* 2. Voidboost HD — проверенный плеер со студийными переводами РФ (HDRezka, LostFilm, Дубляж), без редиректов */
   opts.push({
     id: 'voidboost',
     label: 'Voidboost HD',
-    sublabel: '🍿 LostFilm · NewStudio · Дубляж (Резерв РФ)',
+    sublabel: '🍿 HDRezka · LostFilm · NewStudio · Дубляж (РФ)',
     url: cleanImdb
       ? `https://voidboost.net/embed/${cleanImdb}`
       : isSerial
@@ -107,11 +76,11 @@ export function buildWatchOptions({
     quality: '1080p',
   });
 
-  /* 5. Alloha / Резка — альтернативный российский балансер */
+  /* 3. Alloha / Резка — альтернативный российский балансер со студийными дорожками */
   opts.push({
     id: 'alloha',
     label: 'Alloha / Резка',
-    sublabel: '✨ Студийные озвучки · Автопоиск озвучек РФ',
+    sublabel: '✨ Студийные озвучки РФ · Альтернативный поток',
     url: cleanImdb
       ? `https://stream.voidboost.cc/embed/${cleanImdb}`
       : isSerial
@@ -122,6 +91,38 @@ export function buildWatchOptions({
     provider: 'Alloha',
     flag: '✨',
     quality: 'Full HD',
+  });
+
+  /* 4. Lumex HD — российский CDN плеер с дубляжом */
+  opts.push({
+    id: 'lumex',
+    label: 'Lumex HD',
+    sublabel: '🎥 Российский видео-CDN · Дубляж Full HD',
+    url: cleanImdb
+      ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
+      : isSerial
+        ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
+        : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`,
+    type: 'iframe',
+    lang: 'ru',
+    provider: 'Lumex',
+    flag: '🎥',
+    quality: 'Full HD',
+  });
+
+  /* 5. Global 4K (США) — ЕДИНСТВЕННЫЙ американский сервер (100% стабилен с любым VPN США, оригинал + субтитры) */
+  opts.push({
+    id: 'global-us',
+    label: 'Global 4K (США)',
+    sublabel: '🇺🇸 100% с любым VPN (США) · Скоростной CDN · Оригинал + субтитры',
+    url: isSerial
+      ? `https://embed.su/embed/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://embed.su/embed/movie/${cleanTmdb}`,
+    type: 'iframe',
+    lang: 'multi',
+    provider: 'GlobalUS',
+    flag: '🇺🇸',
+    quality: '4K/1080p',
   });
 
   return opts;
@@ -155,16 +156,6 @@ export function switchSourceUrl(
   const cleanTmdb = tmdbId.replace(/^(tv|movie)-/, '');
   const cleanImdb = imdbId.startsWith('tt') ? imdbId : '';
 
-  if (base.provider === 'VidLink') {
-    return isSerial
-      ? `https://vidlink.pro/tv/${cleanTmdb}/${season}/${episode}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`
-      : `https://vidlink.pro/movie/${cleanTmdb}?primaryColor=7c3aed&secondaryColor=a855f7&iconColor=ffffff`;
-  }
-  if (base.provider === 'Kinohub') {
-    return cleanImdb
-      ? `https://on.kinohub.vip/?imdb=${cleanImdb}`
-      : `https://kinobox.in/movie/${cleanTmdb}`;
-  }
   if (base.provider === 'Collaps') {
     return cleanImdb
       ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
@@ -185,6 +176,18 @@ export function switchSourceUrl(
       : isSerial
         ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
         : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`;
+  }
+  if (base.provider === 'Lumex') {
+    return cleanImdb
+      ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
+      : isSerial
+        ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
+        : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`;
+  }
+  if (base.provider === 'GlobalUS' || base.provider === 'VidLink') {
+    return isSerial
+      ? `https://embed.su/embed/tv/${cleanTmdb}/${season}/${episode}`
+      : `https://embed.su/embed/movie/${cleanTmdb}`;
   }
   return base.url;
 }
