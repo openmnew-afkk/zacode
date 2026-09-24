@@ -263,6 +263,10 @@ const GENRES_MOVIES = [
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user: tgUser } = useTelegram();
+  const hasRussianAccess = checkRussianAccess(tgUser?.username);
+  const isRus = (m?: Movie | null) => Boolean(m?.is_russian || (m?.id && String(m.id).startsWith('rus-')));
+  const availableTabs = hasRussianAccess ? TABS : TABS.filter(t => t.id !== 'russian');
+
   const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium, theme, toggleTheme } = useStore();
   const watchingTracked = Object.values(tracked)
     .filter((t) => t.status === 'watching')
@@ -274,6 +278,13 @@ const HomePage: React.FC = () => {
   const searchRef = useRef<HTMLInputElement>(null);
   const [preview, setPreview] = useState<Movie | null>(null);
   const [lockedMovie, setLockedMovie] = useState<Movie | null>(null);
+
+  // Если доступ закрыт, а вкладка стоит на russian — возвращаем на home
+  useEffect(() => {
+    if (tab === 'russian' && !hasRussianAccess) {
+      setTab('home');
+    }
+  }, [tab, hasRussianAccess]);
 
   // Блокируем скролл страницы под открытым превью или модалкой
   useEffect(() => {
@@ -307,8 +318,7 @@ const HomePage: React.FC = () => {
   const handleMovieClick = (id: string) => {
     const all = [...trending, ...trendMovies, ...trendSeries, ...topMovies, ...topSeries, ...nowPlaying, ...russianCinema, ...searchResults];
     const movie = all.find(m => m.id === id);
-    const isRus = movie?.is_russian || (movie?.id && String(movie.id).startsWith('rus-'));
-    if (isRus && !checkRussianAccess(tgUser?.username)) {
+    if (isRus(movie) && !hasRussianAccess) {
       haptic('heavy');
       setLockedMovie(movie || ({ id, title: 'Российское кино', is_russian: true } as Movie));
       return;
@@ -378,12 +388,13 @@ const HomePage: React.FC = () => {
     const t = setTimeout(async () => {
       try {
         const res = await searchMovies(query.trim());
-        setSearchResults(res.results);
+        const filtered = hasRussianAccess ? res.results : res.results.filter(m => !isRus(m));
+        setSearchResults(filtered);
       } catch {}
       setSearchLoading(false);
     }, 400);
     return () => clearTimeout(t);
-  }, [query]);
+  }, [query, hasRussianAccess]);
 
   const heroMovies = trending.length ? trending : trendMovies;
 
@@ -404,7 +415,9 @@ const HomePage: React.FC = () => {
             <div className="hp-empty">Введите название фильма или сериала</div>
           )}
           <div className="hp-grid">
-            {searchResults.map(m => <Card key={m.id} movie={m} onClick={() => go(m.id)} onLongPress={openPreview} />)}
+            {(hasRussianAccess ? searchResults : searchResults.filter(m => !isRus(m))).map(m => (
+              <Card key={m.id} movie={m} onClick={() => go(m.id)} onLongPress={openPreview} />
+            ))}
           </div>
         </div>
       );
@@ -449,7 +462,10 @@ const HomePage: React.FC = () => {
               ))}
             </div>
           )}
-          <Row title="🇷🇺 Российские сериалы и фильмы" movies={russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          {/* 🇷🇺 Российские сериалы и фильмы: скрыты для всех, кроме тех, кому выдан доступ по нику */}
+          {hasRussianAccess && (
+            <Row title="🇷🇺 Российские сериалы и фильмы" movies={russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          )}
           <Row title="Тренды недели" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Сейчас в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
           <Row title="Топ фильмов всех времён" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
@@ -646,7 +662,7 @@ const HomePage: React.FC = () => {
       {/* ── Вкладки — теперь строго НИЖЕ плавающих фильмов и ближе к каталогу! ── */}
       {!showSearch && (
         <div className="hp-tabs">
-          {TABS.map(t => (
+          {availableTabs.map(t => (
             <button key={t.id} className={`hp-tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
               {t.label}
             </button>

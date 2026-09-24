@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchMovies } from '../api/catalog';
+import { useTelegram } from '../hooks/useTelegram';
+import { checkRussianAccess } from '../services/accessControl';
 import type { Movie } from '../types';
 import './SearchPage.css';
 
@@ -27,6 +29,15 @@ const HASHTAG_CHIPS = [
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const { user: tgUser } = useTelegram();
+  const hasRussianAccess = checkRussianAccess(tgUser?.username);
+  const isRus = (m?: Movie | null) =>
+    Boolean(
+      m?.is_russian ||
+      (m?.id && String(m.id).startsWith('rus-')) ||
+      (m?.countries && m.countries.some((c) => /россия|russia|ссср|ussr/i.test(c)))
+    );
+
   const [query, setQuery] = useState('');
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,12 +52,13 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       try {
         const res = await searchMovies(query.trim(), 1, searchType);
-        setMovies(res.results);
+        const filtered = hasRussianAccess ? res.results : res.results.filter(m => !isRus(m));
+        setMovies(filtered);
       } catch { setMovies([]); }
       setLoading(false);
     }, 380);
     return () => clearTimeout(debounceRef.current);
-  }, [query, searchType]);
+  }, [query, searchType, hasRussianAccess]);
 
   const isEmpty = !loading && movies.length === 0 && query.trim().length > 0;
   const isInitial = !loading && query.trim().length === 0;

@@ -158,35 +158,73 @@ const MusicPage: React.FC = () => {
     }
   }, [loadContent, query]);
 
-  /* Поиск через студийный каталог iTunes без рекламы */
+  /* Полноценный поиск: локальные хиты РФ + Audius каталог полных треков */
   useEffect(() => {
     if (!query.trim()) return;
+
+    const q = query.trim().toLowerCase();
+
+    // Мгновенный локальный поиск по чарту РФ и радиостанциям
+    const localHits: Track[] = [
+      ...RUSSIAN_CHART_TOP.map(mapRussianTrack),
+      ...RUSSIAN_RADIO_STREAMS.map(mapRussianTrack),
+    ].filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        t.artist.toLowerCase().includes(q) ||
+        t.genre.toLowerCase().includes(q)
+    );
+
+    if (localHits.length > 0) {
+      setTracks(localHits);
+    }
+
     const timer = setTimeout(async () => {
       try {
         setLoading(true);
-        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query.trim())}&country=RU&entity=song&limit=25`, {
-          signal: AbortSignal.timeout(6000),
-        });
-        const data = await res.json();
-        if (data?.results?.length > 0) {
-          const itunesResults: Track[] = data.results.filter((r: any) => r.previewUrl).map((r: any) => ({
-            id: `it-${r.trackId}`,
-            title: r.trackName,
-            artist: r.artistName,
-            artwork: r.artworkUrl100 ? r.artworkUrl100.replace('100x100bb', '600x600bb') : '',
-            duration: r.trackTimeMillis ? Math.round(r.trackTimeMillis / 1000) : 30,
-            plays: 0,
-            genre: r.primaryGenreName || 'Track',
-            streamUrl: r.previewUrl,
-          }));
-          if (itunesResults.length > 0) {
-            setTracks(itunesResults);
+        let host = hostRef.current || 'https://discoveryprovider.audius.co';
+        try {
+          const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(3000) });
+          const json = await res.json();
+          if (Array.isArray(json?.data) && json.data[0]) host = json.data[0];
+        } catch {}
+        hostRef.current = host;
+
+        const res = await fetch(
+          `${host}/v1/tracks/search?query=${encodeURIComponent(query.trim())}&app_name=${APP_NAME}&limit=35`,
+          { signal: AbortSignal.timeout(6500) }
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          const audiusResults: Track[] = (data?.data ?? []).map((t: any) => mapTrack(t, host));
+
+          // Объединяем локальные совпадения + результаты глобального каталога без дублей
+          const seen = new Set<string>();
+          const combined: Track[] = [];
+
+          for (const item of [...localHits, ...audiusResults]) {
+            if (!seen.has(item.id)) {
+              seen.add(item.id);
+              combined.push(item);
+            }
+          }
+
+          if (combined.length > 0) {
+            setTracks(combined);
+          } else if (localHits.length === 0) {
+            setTracks([]);
           }
         }
-      } catch {} finally {
+      } catch {
+        if (localHits.length > 0) {
+          setTracks(localHits);
+        }
+      } finally {
         setLoading(false);
       }
-    }, 450);
+    }, 400);
+
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -208,14 +246,8 @@ const MusicPage: React.FC = () => {
     showToast(`Настроение: ${YANDEX_MOODS.find((m) => m.id === mood)?.label}`);
   };
 
-  /* Фильтрация поиском */
-  const displayTracks = query.trim()
-    ? tracks.filter((t) =>
-        t.title.toLowerCase().includes(query.toLowerCase()) ||
-        t.artist.toLowerCase().includes(query.toLowerCase()) ||
-        t.genre.toLowerCase().includes(query.toLowerCase())
-      )
-    : tracks;
+  /* Отображаемые треки */
+  const displayTracks = tracks;
 
   return (
     <div className="music-page page">
