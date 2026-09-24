@@ -25,7 +25,7 @@ export interface Track {
 
 type Tab = 'wave' | 'chart' | 'live' | 'audius' | 'liked';
 
-const APP_NAME = 'VELORA';
+const APP_NAME = 'ZENOVA';
 
 const HOSTS_FALLBACK = [
   'https://discoveryprovider.audius.co',

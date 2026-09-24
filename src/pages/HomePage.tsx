@@ -587,7 +587,7 @@ const HomePage: React.FC = () => {
                 <VeloraEmblem size="sm" />
               </div>
               <div>
-                <h1 className="hp-header__title">VELORA</h1>
+                <h1 className="hp-header__title">ZENOVA</h1>
                 <span className="hp-header__sub">Cinema & Sound</span>
               </div>
             </div>

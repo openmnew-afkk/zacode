@@ -1,4 +1,4 @@
-/* ===== VELORA Access Control — Автономная система прав по @username =====
+/* ===== ZENOVA Access Control — Автономная система прав по @username =====
  *
  * Архитектура без выделенного бэкенд-сервера и без платных API:
  *  1. Мастер-список в коде: @MikySauce и доверенные никнеймы всегда имеют полный доступ.
@@ -30,12 +30,13 @@ export const MASTER_ADMINS: string[] = ['MikySauce'];
 export const MASTER_MODERATORS: string[] = [];
 export const MASTER_VIPS: string[] = [];
 
-const REGISTRY_STORAGE_KEY = 'velora_access_registry_v2';
-const LEGACY_STORAGE_KEY = 'aura_access_registry_v2';
-const KV_ENDPOINT_KEY = 'velora_kv_sync_url';
+const REGISTRY_STORAGE_KEY = 'zenova_access_registry_v2';
+const LEGACY_STORAGE_KEY = 'velora_access_registry_v2';
+const ANCIENT_STORAGE_KEY = 'aura_access_registry_v2';
+const KV_ENDPOINT_KEY = 'zenova_kv_sync_url';
 
 /** Бесплатный серверless-шлюз для мгновенной синхронизации реестра без VPS (kvdb / raw json) */
-const DEFAULT_KV_URL = 'https://kvdb.io/4y9pQz8tW2mXb6v7cJ1a/velora_users';
+const DEFAULT_KV_URL = 'https://kvdb.io/4y9pQz8tW2mXb6v7cJ1a/zenova_users';
 
 export function normalizeUsername(u: string): string {
   return (u || '').trim().replace(/^@/, '').toLowerCase();
@@ -44,7 +45,7 @@ export function normalizeUsername(u: string): string {
 /** Загрузка локального реестра с поддержкой переноса из aura_... */
 export function getStoredGrants(): UserGrant[] {
   try {
-    const raw = localStorage.getItem(REGISTRY_STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+    const raw = localStorage.getItem(REGISTRY_STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY) || localStorage.getItem(ANCIENT_STORAGE_KEY);
     if (!raw) return [];
     return JSON.parse(raw);
   } catch {
@@ -242,12 +243,12 @@ export function generateVipToken(username: string, role: UserRole, duration: Dur
   const clean = normalizeUsername(username);
   const payload = `${clean}:${role}:${duration}:${Date.now()}`;
   const encoded = btoa(unescape(encodeURIComponent(payload))).replace(/=/g, '');
-  return `VELORA-${encoded}`;
+  return `ZENOVA-${encoded}`;
 }
 
 export function parseVipToken(token: string): { username: string; role: UserRole; duration: DurationOption } | null {
   try {
-    const raw = token.replace(/^(VELORA-|AURA-)/, '').trim();
+    const raw = token.replace(/^(ZENOVA-|VELORA-|AURA-)/i, '').trim();
     const decoded = decodeURIComponent(escape(atob(raw)));
     const [username, role, duration] = decoded.split(':');
     if (username && role && duration) {

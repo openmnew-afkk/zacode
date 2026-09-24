@@ -36,7 +36,7 @@ const FeedPage: React.FC = () => {
   /* Состояние реакций */
   const [reactionsState, setReactionsState] = useState<Record<string, Record<string, { count: number; active: boolean }>>>(() => {
     try {
-      const saved = localStorage.getItem('velora_feed_reactions');
+      const saved = localStorage.getItem('zenova_feed_reactions') || localStorage.getItem('velora_feed_reactions');
       if (saved) return JSON.parse(saved);
     } catch {}
     const init: Record<string, Record<string, { count: number; active: boolean }>> = {};
@@ -88,7 +88,7 @@ const FeedPage: React.FC = () => {
         },
       };
       try {
-        localStorage.setItem('velora_feed_reactions', JSON.stringify(nextState));
+        localStorage.setItem('zenova_feed_reactions', JSON.stringify(nextState));
       } catch {}
       return nextState;
     });
@@ -96,14 +96,14 @@ const FeedPage: React.FC = () => {
 
   const handleShare = (post: FeedPost) => {
     haptic('medium');
-    const shareText = `🎬 ${post.title}\n\nПодробности в VELORA Cinema:\nhttps://t.me/VeloraAppBot/app?startapp=${post.id}`;
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/VeloraAppBot/app')}&text=${encodeURIComponent(shareText)}`;
+    const shareText = `🎬 ${post.title}\n\nПодробности в ZENOVA Cinema:\nhttps://t.me/ZenovaAppBot/app?startapp=${post.id}`;
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('https://t.me/ZenovaAppBot/app')}&text=${encodeURIComponent(shareText)}`;
     openLink(shareUrl);
   };
 
   const handleCopyLink = (post: FeedPost) => {
     haptic('light');
-    const url = `https://t.me/VeloraAppBot/app?startapp=${post.id}`;
+    const url = `https://t.me/ZenovaAppBot/app?startapp=${post.id}`;
     if (navigator.clipboard) {
       navigator.clipboard.writeText(url).then(() => showToast('Ссылка скопирована'));
     } else {
@@ -126,7 +126,7 @@ const FeedPage: React.FC = () => {
               <VeloraEmblem size="sm" />
             </div>
             <div>
-              <span className="feed-header__tag">✦ VELORA JOURNAL</span>
+              <span className="feed-header__tag">✦ ZENOVA JOURNAL</span>
               <h1 className="feed-header__title">Новости кино</h1>
             </div>
           </div>
@@ -142,7 +142,7 @@ const FeedPage: React.FC = () => {
             </button>
             <button
               className="feed-header__channel-btn"
-              onClick={() => openLink('https://t.me/VeloraSupport_bot')}
+              onClick={() => openLink('https://t.me/ZenovaSupport_bot')}
               title="Канал в Telegram"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -195,7 +195,7 @@ const FeedPage: React.FC = () => {
                   </div>
                   <div className="feed-card__channel-info">
                     <div className="feed-card__channel-name">
-                      <span>VELORA</span>
+                      <span>ZENOVA</span>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="#38bdf8">
                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                       </svg>
@@ -211,25 +211,123 @@ const FeedPage: React.FC = () => {
 
               {/* Медиа трейлера 16:9 */}
               <div className="feed-card__media-wrap">
-                {isVideoPlaying && post.youtubeId ? (
-                  <div className="feed-card__player-container">
-                    <iframe
-                      src={`https://www.youtube-nocookie.com/embed/${post.youtubeId}?autoplay=1&playsinline=1&enablejsapi=1&rel=0&modestbranding=1&cc_load_policy=1&hl=ru`}
-                      className="feed-card__frame"
-                      title={post.title}
-                      allowFullScreen
-                      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                    />
-                    <button
-                      className="feed-card__close-video"
-                      onClick={() => {
-                        haptic('light');
-                        setActiveVideoId(null);
-                      }}
-                    >
-                      ✕ Закрыть видео
-                    </button>
-                  </div>
+                {isVideoPlaying ? (
+                  post.rutubeId ? (
+                    <div className="feed-card__player-container">
+                      <div className="feed-card__player-topbar">
+                        <div className="feed-card__player-tag">
+                          <span className="feed-card__player-dot" />
+                          <span>RuTube HD · Дубляж</span>
+                        </div>
+                        <div className="feed-card__player-tools">
+                          {post.youtubeId && (
+                            <button
+                              className="feed-card__yt-quick-btn"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                haptic('light');
+                                openLink(`https://www.youtube.com/watch?v=${post.youtubeId}`);
+                              }}
+                              title="Открыть в приложении YouTube"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="#ff0000">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                              </svg>
+                              <span>YouTube ↗</span>
+                            </button>
+                          )}
+                          <button
+                            className="feed-card__close-video"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              haptic('light');
+                              setActiveVideoId(null);
+                            }}
+                            aria-label="Закрыть видео"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                      <iframe
+                        src={`https://rutube.ru/play/embed/${post.rutubeId}/?skinColor=6366f1`}
+                        className="feed-card__frame"
+                        title={post.title}
+                        allowFullScreen
+                        allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                      />
+                    </div>
+                  ) : post.videoUrl ? (
+                    <div className="feed-card__player-container">
+                      <div className="feed-card__player-topbar">
+                        <div className="feed-card__player-tag">
+                          <span className="feed-card__player-dot" />
+                          <span>Трейлер 1080p</span>
+                        </div>
+                        <div className="feed-card__player-tools">
+                          <button
+                            className="feed-card__close-video"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              haptic('light');
+                              setActiveVideoId(null);
+                            }}
+                            aria-label="Закрыть видео"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                      <video
+                        src={post.videoUrl}
+                        playsInline
+                        controls
+                        autoPlay
+                        className="feed-card__frame"
+                        poster={post.posterUrl}
+                      />
+                    </div>
+                  ) : post.youtubeId ? (
+                    <div className="feed-card__yt-box">
+                      <img src={post.posterUrl} alt={post.title} className="feed-card__poster" />
+                      <div className="feed-card__poster-veil" />
+                      <div className="feed-card__yt-inner">
+                        <div className="feed-card__yt-badge">🎬 Официальный трейлер</div>
+                        <p className="feed-card__yt-text">Смотрите без входа в аккаунт и ограничений</p>
+                        <div className="feed-card__yt-action-row">
+                          <button
+                            className="feed-card__yt-btn feed-card__yt-btn--primary"
+                            onClick={() => {
+                              haptic('medium');
+                              openLink(`https://www.youtube.com/watch?v=${post.youtubeId}`);
+                            }}
+                          >
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="#ff0000">
+                              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            <span>Открыть в YouTube ↗</span>
+                          </button>
+                          {post.movieId && (
+                            <button
+                              className="feed-card__yt-btn feed-card__yt-btn--catalog"
+                              onClick={() => {
+                                haptic('medium');
+                                navigate(`/movie/${post.movieId}`);
+                              }}
+                            >
+                              🎬 Фильм в ZENOVA
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        className="feed-card__close-video"
+                        onClick={() => setActiveVideoId(null)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : null
                 ) : (
                   <div
                     className="feed-card__poster-box"
@@ -315,10 +413,38 @@ const FeedPage: React.FC = () => {
                       <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
                       <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
                     </svg>
-                    Читать статью
+                    Читать
                   </button>
 
-                  {post.movieId ? (
+                  {(post.rutubeId || post.videoUrl) ? (
+                    <button
+                      className={`feed-card__btn ${activeVideoId === post.id ? 'feed-card__btn--active' : 'feed-card__btn--trailer'}`}
+                      onClick={() => {
+                        haptic('medium');
+                        setActiveVideoId(activeVideoId === post.id ? null : post.id);
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                      {activeVideoId === post.id ? '✕ Свернуть' : 'Трейлер HD'}
+                    </button>
+                  ) : post.youtubeId ? (
+                    <button
+                      className="feed-card__btn feed-card__btn--trailer"
+                      onClick={() => {
+                        haptic('medium');
+                        openLink(`https://www.youtube.com/watch?v=${post.youtubeId}`);
+                      }}
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="#ff0000">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      YouTube ↗
+                    </button>
+                  ) : null}
+
+                  {post.movieId && (
                     <button
                       className="feed-card__btn feed-card__btn--watch"
                       onClick={() => {
@@ -326,22 +452,12 @@ const FeedPage: React.FC = () => {
                         navigate(`/movie/${post.movieId}`);
                       }}
                     >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                       Смотреть
                     </button>
-                  ) : post.youtubeId ? (
-                    <button
-                      className="feed-card__btn feed-card__btn--trailer"
-                      onClick={() => {
-                        haptic('medium');
-                        setActiveVideoId(activeVideoId === post.id ? null : post.id);
-                      }}
-                    >
-                      {activeVideoId === post.id ? '✕ Свернуть' : '▶ Трейлер'}
-                    </button>
-                  ) : null}
+                  )}
                 </div>
 
                 {/* ── Тулбар: Реакции + Поделиться ── */}
@@ -434,17 +550,56 @@ const FeedPage: React.FC = () => {
               </div>
 
               {/* Медиа трейлера в модалке */}
-              {selectedArticle.youtubeId && (
+              {selectedArticle.rutubeId ? (
                 <div className="feed-modal__media">
                   <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${selectedArticle.youtubeId}?playsinline=1&rel=0&modestbranding=1&cc_load_policy=1&hl=ru`}
+                    src={`https://rutube.ru/play/embed/${selectedArticle.rutubeId}/?skinColor=6366f1`}
                     className="feed-modal__frame"
                     title={selectedArticle.title}
                     allowFullScreen
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                   />
+                  {selectedArticle.youtubeId && (
+                    <div className="feed-modal__yt-quick">
+                      <button
+                        className="feed-modal__yt-quick-btn"
+                        onClick={() => openLink(`https://www.youtube.com/watch?v=${selectedArticle.youtubeId}`)}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#ff0000">
+                          <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        </svg>
+                        <span>Открыть трейлер в приложении YouTube ↗</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
+              ) : selectedArticle.videoUrl ? (
+                <div className="feed-modal__media">
+                  <video
+                    src={selectedArticle.videoUrl}
+                    controls
+                    playsInline
+                    className="feed-modal__frame"
+                    poster={selectedArticle.posterUrl}
+                  />
+                </div>
+              ) : selectedArticle.youtubeId ? (
+                <div className="feed-modal__media feed-modal__media--yt-fallback">
+                  <img src={selectedArticle.posterUrl} alt={selectedArticle.title} className="feed-modal__yt-poster" />
+                  <div className="feed-modal__yt-veil" />
+                  <div className="feed-modal__yt-box">
+                    <button
+                      className="feed-modal__yt-btn"
+                      onClick={() => openLink(`https://www.youtube.com/watch?v=${selectedArticle.youtubeId}`)}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="#ff0000">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      <span>Смотреть трейлер в приложении YouTube ↗</span>
+                    </button>
+                  </div>
+                </div>
+              ) : null}
 
               {/* Сетка ключевых фактов */}
               {selectedArticle.keyFacts && (
@@ -493,7 +648,7 @@ const FeedPage: React.FC = () => {
                       navigate(`/movie/${selectedArticle.movieId}`);
                     }}
                   >
-                    Смотреть в каталоге
+                    🎬 Смотреть фильм в ZENOVA
                   </button>
                 )}
                 <button

@@ -8,7 +8,7 @@ interface VeloraAiEmblemProps {
 
 export const VeloraAiEmblem: React.FC<VeloraAiEmblemProps> = ({ size = 'md', className = '' }) => {
   return (
-    <div className={`velora-ai-emblem velora-ai-emblem--${size} ${className}`} aria-label="Velora AI Neural Emblem">
+    <div className={`velora-ai-emblem velora-ai-emblem--${size} ${className}`} aria-label="ZENOVA AI Neural Emblem">
       {/* Внешний рассеянный неоновый ореол нейросети */}
       <div className="velora-ai-emblem__halo" />
 
@@ -31,4 +31,5 @@ export const VeloraAiEmblem: React.FC<VeloraAiEmblemProps> = ({ size = 'md', cla
   );
 };
 
+export const ZenovaAiEmblem = VeloraAiEmblem;
 export default VeloraAiEmblem;

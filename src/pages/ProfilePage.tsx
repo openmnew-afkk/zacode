@@ -85,7 +85,7 @@ const ProfilePage: React.FC = () => {
               <span /><span /><span /><span /><span />
             </div>
           ),
-          label: 'Музыка VELORA',
+          label: 'Музыка ZENOVA',
           sub: 'Русские и мировые хиты · Моя волна',
           action: () => navigate('/music'),
         },
@@ -208,7 +208,7 @@ const ProfilePage: React.FC = () => {
             {username && <p className="pf__username">{username}</p>}
             <div className="pf__badges">
               {effectivePremium ? (
-                <span className="pf__badge pf__badge--premium">👑 VELORA VIP PRO</span>
+                <span className="pf__badge pf__badge--premium">👑 ZENOVA VIP PRO</span>
               ) : (
                 <span className="pf__badge">БАЗОВЫЙ УРОВЕНЬ</span>
               )}
@@ -319,7 +319,7 @@ const ProfilePage: React.FC = () => {
 
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
 
-      <div className="pf__footer">VELORA · Все права защищены</div>
+      <div className="pf__footer">ZENOVA · Все права защищены</div>
     </div>
   );
 };

@@ -124,7 +124,9 @@ export interface FeedPost {
   specs?: string;
   posterUrl: string;
   gallery?: string[];
+  rutubeId?: string;
   youtubeId?: string;
+  videoUrl?: string;
   duration?: string;
   hasSubtitles?: boolean;
   movieId?: string;

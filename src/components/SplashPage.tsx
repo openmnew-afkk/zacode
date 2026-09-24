@@ -47,7 +47,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
 
         {/* Минималистичная премиум-типографика */}
         <div className="sp__brand">
-          <h1 className="sp__title">VELORA</h1>
+          <h1 className="sp__title">ZENOVA</h1>
           <p className="sp__subtitle">CINEMA & SOUND</p>
         </div>
 

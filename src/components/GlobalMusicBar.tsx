@@ -77,7 +77,7 @@ const GlobalMusicBar: React.FC = () => {
   const handleShare = () => {
     setShowMenu(false);
     if (!currentTrack) return;
-    const text = `Слушаю трек: ${currentTrack.title} — ${currentTrack.artist} в VELORA!`;
+    const text = `Слушаю трек: ${currentTrack.title} — ${currentTrack.artist} в ZENOVA!`;
     const shareUrl = window.location.href;
     if (navigator.share) {
       navigator.share({ title: currentTrack.title, text, url: shareUrl }).catch(() => {});
@@ -163,7 +163,7 @@ const GlobalMusicBar: React.FC = () => {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6"/></svg>
           </button>
           <div className="gfull__header-center">
-            <span className="gfull__now-label">VELORA SOUND</span>
+            <span className="gfull__now-label">ZENOVA SOUND</span>
             <span className="gfull__quality-tag">HD 320 KBPS</span>
           </div>
           <button className="gfull__btn-sm" onClick={() => setShowMenu(true)} aria-label="Меню трека" title="Опции трека">

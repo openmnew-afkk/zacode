@@ -44,7 +44,7 @@ const features: FeatureItem[] = [
         <circle cx="12" cy="12" r="2.2" />
       </svg>
     ),
-    title: 'Безлимитный Velora AI',
+    title: 'Безлимитный ZENOVA AI',
     desc: 'Персональный кино-сомелье с мгновенным подбором',
   },
   {
@@ -74,7 +74,7 @@ const features: FeatureItem[] = [
         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
       </svg>
     ),
-    title: 'Золотой статус VELORA VIP',
+    title: 'Золотой статус ZENOVA VIP',
     desc: 'Эксклюзивная карточка профиля и приоритетная поддержка',
   },
 ];
@@ -208,7 +208,7 @@ const PremiumPage: React.FC = () => {
           <div className="pm-active-card">
             <VeloraEmblem size="lg" className="pm-active-card__emblem" />
             <div className="pm-active-card__header">
-              <span className="pm-active-card__tag">VELORA VIP PASS</span>
+              <span className="pm-active-card__tag">ZENOVA VIP PASS</span>
               <h1 className="pm-active-card__title">Премиум активен</h1>
               <p className="pm-active-card__sub">
                 {isAdmin
@@ -231,7 +231,7 @@ const PremiumPage: React.FC = () => {
             </div>
             <div className="pm-active-item">
               <span className="pm-active-check">✓</span>
-              <span>Безлимитный нейросетевой ассистент Velora AI</span>
+              <span>Безлимитный нейросетевой ассистент ZENOVA AI</span>
             </div>
             <div className="pm-active-item">
               <span className="pm-active-check">✓</span>
@@ -267,12 +267,12 @@ const PremiumPage: React.FC = () => {
         <div className="pm-header-wrap">
           <VeloraEmblem size="md" className="pm-top-emblem" />
           <div className="pm-badge">
-            <span className="pm-badge__text">VELORA VIP</span>
+            <span className="pm-badge__text">ZENOVA VIP</span>
           </div>
         </div>
 
         <h1 className="pm-title">
-          Выберите тариф <span>VELORA VIP</span>
+          Выберите тариф <span>ZENOVA VIP</span>
         </h1>
         <p className="pm-subtitle">
           2 дня бесплатно для новых зрителей · Оплата звёздами Telegram Stars или картой

@@ -8,7 +8,7 @@ interface VeloraEmblemProps {
 
 export const VeloraEmblem: React.FC<VeloraEmblemProps> = ({ size = 'md', className = '' }) => {
   return (
-    <div className={`velora-emblem velora-emblem--${size} ${className}`} aria-label="VELORA Emblem">
+    <div className={`velora-emblem velora-emblem--${size} ${className}`} aria-label="ZENOVA Emblem">
       {/* Внешний диффузный неоновый ореол */}
       <div className="velora-emblem__halo" />
 
@@ -32,4 +32,5 @@ export const VeloraEmblem: React.FC<VeloraEmblemProps> = ({ size = 'md', classNa
   );
 };
 
+export const ZenovaEmblem = VeloraEmblem;
 export default VeloraEmblem;
