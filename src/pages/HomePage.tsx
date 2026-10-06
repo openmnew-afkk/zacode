@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
-  getRussianCinema,
+  getRussianCinema, discoverMovies,
 } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
@@ -77,11 +77,27 @@ const Row: React.FC<{
   loading?: boolean;
   onMovieClick: (id: string) => void;
   onMovieLongPress?: (m: Movie) => void;
-}> = ({ title, movies, loading, onMovieClick, onMovieLongPress }) => {
+  onTitleClick?: () => void;
+}> = ({ title, movies, loading, onMovieClick, onMovieLongPress, onTitleClick }) => {
   if (!loading && movies.length === 0) return null;
   return (
     <div className="hp-row">
-      <h3 className="hp-row__title">{title}</h3>
+      <div
+        className={`hp-row__header${onTitleClick ? ' hp-row__header--clickable' : ''}`}
+        onClick={onTitleClick}
+        role={onTitleClick ? 'button' : undefined}
+        tabIndex={onTitleClick ? 0 : undefined}
+      >
+        <h3 className="hp-row__title">{title}</h3>
+        {onTitleClick && (
+          <span className="hp-row__more">
+            <span className="hp-row__more-text">Все</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </span>
+        )}
+      </div>
       <div className="hp-row__scroll">
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
@@ -262,7 +278,7 @@ const GENRES_MOVIES = [
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user: tgUser } = useTelegram();
+  const { user: tgUser, haptic, showBackButton } = useTelegram();
   const hasRussianAccess = checkRussianAccess(tgUser?.username);
   const isRus = (m?: Movie | null) => Boolean(m?.is_russian || (m?.id && String(m.id).startsWith('rus-')));
   const availableTabs = hasRussianAccess ? TABS : TABS.filter(t => t.id !== 'russian');
@@ -271,7 +287,6 @@ const HomePage: React.FC = () => {
   const watchingTracked = Object.values(tracked)
     .filter((t) => t.status === 'watching')
     .sort((a, b) => b.addedAt - a.addedAt);
-  const { haptic } = useTelegram();
   const [tab, setTab] = useState('home');
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -299,6 +314,55 @@ const HomePage: React.FC = () => {
     setPreview(m);
   }, [haptic]);
 
+  /* ── Состояние открытой категории / подборки ── */
+  interface CategoryData {
+    id: string;
+    title: string;
+    initialMovies: Movie[];
+    genreId?: number;
+    type?: 'movie' | 'series';
+  }
+
+  const [activeCategory, setActiveCategory] = useState<CategoryData | null>(null);
+  const [catSearch, setCatSearch] = useState('');
+  const [catSort, setCatSort] = useState<'default' | 'rating' | 'newest' | 'movies' | 'series'>('default');
+  const [extraCatMovies, setExtraCatMovies] = useState<Movie[]>([]);
+  const [catPage, setCatPage] = useState(1);
+  const [catLoadingMore, setCatLoadingMore] = useState(false);
+  const [catHasMore, setCatHasMore] = useState(true);
+
+  // Нативная кнопка "Назад" в Telegram для закрытия категории
+  useEffect(() => {
+    if (activeCategory) {
+      const cleanup = showBackButton(() => {
+        haptic('light');
+        setActiveCategory(null);
+        setCatSearch('');
+        setCatSort('default');
+      });
+      return cleanup;
+    }
+  }, [activeCategory, showBackButton, haptic]);
+
+  const openCategory = useCallback((id: string, title: string, movies: Movie[], genreId?: number, type?: 'movie' | 'series') => {
+    haptic('light');
+    setActiveCategory({ id, title, initialMovies: movies, genreId, type });
+    setCatSearch('');
+    setCatSort('default');
+    setExtraCatMovies([]);
+    setCatPage(1);
+    setCatHasMore(Boolean(genreId || id.startsWith('trend') || id.startsWith('top') || id.startsWith('now')));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [haptic]);
+
+  const closeCategory = useCallback(() => {
+    haptic('light');
+    setActiveCategory(null);
+    setCatSearch('');
+    setCatSort('default');
+    setExtraCatMovies([]);
+  }, [haptic]);
+
   // Данные для каждой секции
   const [trending, setTrending] = useState<Movie[]>([]);
   const [trendMovies, setTrendMovies] = useState<Movie[]>([]);
@@ -315,8 +379,100 @@ const HomePage: React.FC = () => {
   const [loadError, setLoadError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
+  const allCatMovies = useMemo(() => {
+    if (!activeCategory) return [];
+    const map = new Map<string, Movie>();
+    for (const m of activeCategory.initialMovies) {
+      if (hasRussianAccess || !isRus(m)) map.set(m.id, m);
+    }
+    for (const m of extraCatMovies) {
+      if (hasRussianAccess || !isRus(m)) map.set(m.id, m);
+    }
+    return Array.from(map.values());
+  }, [activeCategory, extraCatMovies, hasRussianAccess]);
+
+  const hasMixedTypes = useMemo(() => {
+    if (!activeCategory) return false;
+    let hasM = false;
+    let hasS = false;
+    for (const m of allCatMovies) {
+      if (m.is_serial) hasS = true;
+      else hasM = true;
+      if (hasM && hasS) return true;
+    }
+    return false;
+  }, [activeCategory, allCatMovies]);
+
+  const filteredCategoryMovies = useMemo(() => {
+    if (!activeCategory) return [];
+    let list = [...allCatMovies];
+
+    const q = catSearch.trim().toLowerCase();
+    if (q) {
+      list = list.filter(m =>
+        (m.title && m.title.toLowerCase().includes(q)) ||
+        (m.original_title && m.original_title.toLowerCase().includes(q))
+      );
+    }
+
+    if (catSort === 'movies') {
+      list = list.filter(m => !m.is_serial);
+    } else if (catSort === 'series') {
+      list = list.filter(m => m.is_serial);
+    }
+
+    if (catSort === 'rating') {
+      list.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+    } else if (catSort === 'newest') {
+      list.sort((a, b) => {
+        const yearA = parseInt(a.release_date?.slice(0, 4) || '0', 10);
+        const yearB = parseInt(b.release_date?.slice(0, 4) || '0', 10);
+        return yearB - yearA;
+      });
+    }
+
+    return list;
+  }, [activeCategory, allCatMovies, catSearch, catSort]);
+
+  const loadMoreCategory = async () => {
+    if (!activeCategory || catLoadingMore) return;
+    setCatLoadingMore(true);
+    const nextPage = catPage + 1;
+    try {
+      let newItems: Movie[] = [];
+      if (activeCategory.genreId) {
+        const res = await getPopularByGenre(activeCategory.genreId, nextPage);
+        newItems = res.results || [];
+      } else if (activeCategory.id.includes('top_movies') || activeCategory.id === 'topMovies') {
+        const res = await discoverMovies({ page: nextPage, sort_by: 'vote_average.desc' });
+        newItems = res.results || [];
+      } else if (activeCategory.id.includes('trend') || activeCategory.id.includes('now')) {
+        const res = await discoverMovies({ page: nextPage, sort_by: 'popularity.desc' });
+        newItems = res.results || [];
+      }
+
+      if (newItems.length > 0) {
+        const existingIds = new Set(allCatMovies.map(m => m.id));
+        const filtered = newItems.filter(m => !existingIds.has(m.id));
+        if (filtered.length > 0) {
+          setExtraCatMovies(prev => [...prev, ...filtered]);
+          setCatPage(nextPage);
+        } else {
+          setCatHasMore(false);
+        }
+      } else {
+        setCatHasMore(false);
+      }
+    } catch (err) {
+      console.error('Failed to load more category movies', err);
+      setCatHasMore(false);
+    } finally {
+      setCatLoadingMore(false);
+    }
+  };
+
   const handleMovieClick = (id: string) => {
-    const all = [...trending, ...trendMovies, ...trendSeries, ...topMovies, ...topSeries, ...nowPlaying, ...russianCinema, ...searchResults];
+    const all = [...trending, ...trendMovies, ...trendSeries, ...topMovies, ...topSeries, ...nowPlaying, ...russianCinema, ...searchResults, ...allCatMovies];
     const movie = all.find(m => m.id === id);
     if (isRus(movie) && !hasRussianAccess) {
       haptic('heavy');
@@ -423,6 +579,127 @@ const HomePage: React.FC = () => {
       );
     }
 
+    if (activeCategory) {
+      return (
+        <div className="hp-cat-view">
+          <div className="hp-cat-top">
+            <button className="hp-cat-back-btn" onClick={closeCategory} aria-label="Назад">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+              <span>Назад</span>
+            </button>
+            <div className="hp-cat-badge">
+              {filteredCategoryMovies.length} {filteredCategoryMovies.length === 1 ? 'проект' : filteredCategoryMovies.length < 5 ? 'проекта' : 'проектов'}
+            </div>
+          </div>
+
+          <div className="hp-cat-hero-title">
+            <h2 className="hp-cat-heading">{activeCategory.title}</h2>
+          </div>
+
+          <div className="hp-cat-search-wrap">
+            <div className="hp-cat-search">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-cat-search__icon">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              <input
+                type="text"
+                className="hp-cat-search__input"
+                placeholder={`Поиск в «${activeCategory.title}»...`}
+                value={catSearch}
+                onChange={(e) => setCatSearch(e.target.value)}
+              />
+              {catSearch && (
+                <button className="hp-cat-search__clear" onClick={() => setCatSearch('')} aria-label="Очистить">
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="hp-cat-chips">
+            <button
+              className={`hp-cat-chip ${catSort === 'default' ? 'active' : ''}`}
+              onClick={() => { haptic('light'); setCatSort('default'); }}
+            >
+              Все
+            </button>
+            <button
+              className={`hp-cat-chip ${catSort === 'rating' ? 'active' : ''}`}
+              onClick={() => { haptic('light'); setCatSort('rating'); }}
+            >
+              ★ Топ рейтинг
+            </button>
+            <button
+              className={`hp-cat-chip ${catSort === 'newest' ? 'active' : ''}`}
+              onClick={() => { haptic('light'); setCatSort('newest'); }}
+            >
+              ⚡ Сначала новые
+            </button>
+            {hasMixedTypes && (
+              <>
+                <button
+                  className={`hp-cat-chip ${catSort === 'movies' ? 'active' : ''}`}
+                  onClick={() => { haptic('light'); setCatSort('movies'); }}
+                >
+                  🎬 Фильмы
+                </button>
+                <button
+                  className={`hp-cat-chip ${catSort === 'series' ? 'active' : ''}`}
+                  onClick={() => { haptic('light'); setCatSort('series'); }}
+                >
+                  📺 Сериалы
+                </button>
+              </>
+            )}
+          </div>
+
+          {filteredCategoryMovies.length > 0 ? (
+            <div className="hp-grid hp-cat-grid">
+              {filteredCategoryMovies.map((m) => (
+                <Card key={m.id} movie={m} onClick={() => go(m.id)} onLongPress={openPreview} />
+              ))}
+            </div>
+          ) : (
+            <div className="hp-cat-empty">
+              <div className="hp-cat-empty__icon">🔍</div>
+              <p className="hp-cat-empty__title">Ничего не найдено</p>
+              <p className="hp-cat-empty__sub">По запросу «{catSearch}» ничего не найдено в этой категории</p>
+              <button className="hp-cat-empty__btn" onClick={() => setCatSearch('')}>
+                Очистить поиск
+              </button>
+            </div>
+          )}
+
+          {catHasMore && !catSearch.trim() && (
+            <div className="hp-cat-more-wrap">
+              <button
+                className="hp-cat-more-btn"
+                disabled={catLoadingMore}
+                onClick={loadMoreCategory}
+              >
+                {catLoadingMore ? (
+                  <>
+                    <div className="hp-spinner" style={{ width: 16, height: 16, borderWidth: 2 }} />
+                    <span>Загружаем еще...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Загрузить ещё +20</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
     if (tab === 'home') {
       return (
         <>
@@ -464,14 +741,57 @@ const HomePage: React.FC = () => {
           )}
           {/* 🇷🇺 Российские сериалы и фильмы: скрыты для всех, кроме тех, кому выдан доступ по нику */}
           {hasRussianAccess && (
-            <Row title="🇷🇺 Российские сериалы и фильмы" movies={russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+            <Row
+              title="🇷🇺 Российские сериалы и фильмы"
+              movies={russianCinema}
+              loading={loadingMain}
+              onMovieClick={go}
+              onMovieLongPress={openPreview}
+              onTitleClick={() => openCategory('rus', '🇷🇺 Российские сериалы и фильмы', russianCinema)}
+            />
           )}
-          <Row title="Тренды недели" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Сейчас в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Топ фильмов всех времён" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Лучшие сериалы" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row
+            title="Тренды недели"
+            movies={trending}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('trends', 'Тренды недели', trending)}
+          />
+          <Row
+            title="Сейчас в кино"
+            movies={nowPlaying}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('nowPlaying', 'Сейчас в кино', nowPlaying, undefined, 'movie')}
+          />
+          <Row
+            title="Топ фильмов всех времён"
+            movies={topMovies}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('topMovies', 'Топ фильмов всех времён', topMovies, undefined, 'movie')}
+          />
+          <Row
+            title="Лучшие сериалы"
+            movies={topSeries}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('topSeries', 'Лучшие сериалы', topSeries, undefined, 'series')}
+          />
           {GENRES_MOVIES.map(g => (
-            <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+            <Row
+              key={g.id}
+              title={g.name}
+              movies={genreRows[g.id] || []}
+              loading={!genreRows[g.id] && loadingMain}
+              onMovieClick={go}
+              onMovieLongPress={openPreview}
+              onTitleClick={() => openCategory('genre-' + g.id, g.name, genreRows[g.id] || [], g.id, 'movie')}
+            />
           ))}
         </>
       );
@@ -514,9 +834,30 @@ const HomePage: React.FC = () => {
               )}
             </div>
           </div>
-          <Row title="🔥 Горячие новинки РФ" movies={russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="📺 Топовые сериалы РФ" movies={rusSeries.length > 0 ? rusSeries : russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="🎬 Российские фильмы" movies={rusMovies.length > 0 ? rusMovies : russianCinema} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row
+            title="🔥 Горячие новинки РФ"
+            movies={russianCinema}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('rus_hot', '🔥 Горячие новинки РФ', russianCinema)}
+          />
+          <Row
+            title="📺 Топовые сериалы РФ"
+            movies={rusSeries.length > 0 ? rusSeries : russianCinema}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('rus_series', '📺 Топовые сериалы РФ', rusSeries.length > 0 ? rusSeries : russianCinema, undefined, 'series')}
+          />
+          <Row
+            title="🎬 Российские фильмы"
+            movies={rusMovies.length > 0 ? rusMovies : russianCinema}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('rus_movies', '🎬 Российские фильмы', rusMovies.length > 0 ? rusMovies : russianCinema, undefined, 'movie')}
+          />
         </>
       );
     }
@@ -524,11 +865,40 @@ const HomePage: React.FC = () => {
     if (tab === 'movies') {
       return (
         <>
-          <Row title="Тренды — Фильмы" movies={trendMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Сейчас в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Лучшие фильмы" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row
+            title="Тренды — Фильмы"
+            movies={trendMovies}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('trend_movies', 'Тренды — Фильмы', trendMovies, undefined, 'movie')}
+          />
+          <Row
+            title="Сейчас в кино"
+            movies={nowPlaying}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('now_movies', 'Сейчас в кино', nowPlaying, undefined, 'movie')}
+          />
+          <Row
+            title="Лучшие фильмы"
+            movies={topMovies}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('top_movies', 'Лучшие фильмы', topMovies, undefined, 'movie')}
+          />
           {GENRES_MOVIES.map(g => (
-            <Row key={g.id} title={g.name} movies={genreRows[g.id] || []} loading={!genreRows[g.id] && loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+            <Row
+              key={g.id}
+              title={g.name}
+              movies={genreRows[g.id] || []}
+              loading={!genreRows[g.id] && loadingMain}
+              onMovieClick={go}
+              onMovieLongPress={openPreview}
+              onTitleClick={() => openCategory('genre-' + g.id, g.name, genreRows[g.id] || [], g.id, 'movie')}
+            />
           ))}
         </>
       );
@@ -537,8 +907,22 @@ const HomePage: React.FC = () => {
     if (tab === 'series') {
       return (
         <>
-          <Row title="Тренды — Сериалы" movies={trendSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Топ сериалов" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row
+            title="Тренды — Сериалы"
+            movies={trendSeries}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('trend_series', 'Тренды — Сериалы', trendSeries, undefined, 'series')}
+          />
+          <Row
+            title="Топ сериалов"
+            movies={topSeries}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('top_series', 'Топ сериалов', topSeries, undefined, 'series')}
+          />
         </>
       );
     }
@@ -546,8 +930,22 @@ const HomePage: React.FC = () => {
     if (tab === 'top') {
       return (
         <>
-          <Row title="Лучшие фильмы всех времён" movies={topMovies} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Лучшие сериалы" movies={topSeries} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row
+            title="Лучшие фильмы всех времён"
+            movies={topMovies}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('top_movies_all', 'Лучшие фильмы всех времён', topMovies, undefined, 'movie')}
+          />
+          <Row
+            title="Лучшие сериалы"
+            movies={topSeries}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('top_series_all', 'Лучшие сериалы', topSeries, undefined, 'series')}
+          />
         </>
       );
     }
@@ -555,8 +953,22 @@ const HomePage: React.FC = () => {
     if (tab === 'new') {
       return (
         <>
-          <Row title="Новинки в кино" movies={nowPlaying} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
-          <Row title="Тренды" movies={trending} loading={loadingMain} onMovieClick={go} onMovieLongPress={openPreview} />
+          <Row
+            title="Новинки в кино"
+            movies={nowPlaying}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('new_movies', 'Новинки в кино', nowPlaying, undefined, 'movie')}
+          />
+          <Row
+            title="Тренды"
+            movies={trending}
+            loading={loadingMain}
+            onMovieClick={go}
+            onMovieLongPress={openPreview}
+            onTitleClick={() => openCategory('new_trends', 'Тренды', trending)}
+          />
         </>
       );
     }
@@ -655,15 +1067,15 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* ── Плавающие фильмы (Hero баннер) — строго ВЫШЕ вкладок! ── */}
-      {!showSearch && tab === 'home' && heroMovies.length > 0 && (
+      {!showSearch && !activeCategory && tab === 'home' && heroMovies.length > 0 && (
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
       {/* ── Вкладки — теперь строго НИЖЕ плавающих фильмов и ближе к каталогу! ── */}
-      {!showSearch && (
+      {!showSearch && !activeCategory && (
         <div className="hp-tabs">
           {availableTabs.map(t => (
-            <button key={t.id} className={`hp-tab ${tab === t.id ? 'active' : ''}`} onClick={() => setTab(t.id)}>
+            <button key={t.id} className={`hp-tab ${tab === t.id ? 'active' : ''}`} onClick={() => { setTab(t.id); setActiveCategory(null); }}>
               {t.label}
             </button>
           ))}
