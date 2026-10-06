@@ -39,7 +39,7 @@ const MandatorySubModal: React.FC<MandatorySubModalProps> = ({
     setVisited(true);
     setErrorMsg('');
 
-    const url = mandatorySub.channelUrl || `https://t.me/${(mandatorySub.channelUsername || 'MikySauce').replace(/^@/, '')}`;
+    const url = mandatorySub.channelUrl || `https://t.me/${(mandatorySub.channelUsername || 'ZenovaCinema').replace(/^@/, '')}`;
     const tg = (window as any).Telegram?.WebApp;
 
     if (tg?.openTelegramLink && url.includes('t.me/')) {
@@ -115,7 +115,7 @@ const MandatorySubModal: React.FC<MandatorySubModalProps> = ({
             <span className="zsub-channel-card__handle">
               {mandatorySub.channelUsername?.startsWith('@')
                 ? mandatorySub.channelUsername
-                : `@${mandatorySub.channelUsername || 'MikySauce'}`}
+                : `@${mandatorySub.channelUsername || 'ZenovaCinema'}`}
             </span>
           </div>
           <span className="zsub-channel-card__verified">✓ Проверен</span>

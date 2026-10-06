@@ -1,7 +1,7 @@
 /* ===== ZENOVA Access Control — Автономная система прав по @username =====
  *
  * Архитектура без выделенного бэкенд-сервера и без платных API:
- *  1. Мастер-список в коде: @MikySauce и доверенные никнеймы всегда имеют полный доступ.
+ *  1. Мастер-список в коде: доверенные никнеймы администраторов.
  *  2. Локальный и облачный реестр (Serverless KV / localStorage):
  *     Администратор выдаёт права любому @username в 1 клик прямо из админки.
  *  3. Автоматическое распознавание Telegram-аккаунта:
@@ -26,7 +26,7 @@ export interface UserGrant {
 }
 
 /* ═══════════ Мастер-списки в коде ═══════════ */
-export const MASTER_ADMINS: string[] = ['MikySauce'];
+export const MASTER_ADMINS: string[] = ['ZenovaAdmin', 'admin'];
 export const MASTER_MODERATORS: string[] = [];
 export const MASTER_VIPS: string[] = [];
 
@@ -176,7 +176,7 @@ export function grantAccessToUser(
     expiry,
     durationLabel: label,
     grantedAt: Date.now(),
-    grantedBy: grantedBy || 'MikySauce',
+    grantedBy: grantedBy || 'ZenovaAdmin',
     note,
     hasRussianAccess,
   };

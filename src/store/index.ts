@@ -13,6 +13,9 @@ import {
   resetUserSubscribed,
   type MandatorySubConfig,
   pullCloudData,
+  getLocalBlockedMovies,
+  saveLocalBlockedMovies,
+  isMovieBlockedLocally,
 } from '../services/cloudSync';
 
 /* ── localStorage helpers ── */
@@ -37,7 +40,7 @@ async function hashPassword(pass: string): Promise<string> {
 }
 
 /* ── Admin username ── */
-const ADMIN_USERNAMES = ['MikySauce'];
+const ADMIN_USERNAMES = ['ZenovaAdmin', 'admin'];
 
 /* ── Премиум: срок действия ── */
 const PREMIUM_EXPIRY_KEY = 'tc_premium_expiry';
@@ -128,6 +131,12 @@ interface AppState {
   isChannelSubscribed: boolean;
   setChannelSubscribed: (val: boolean) => void;
   syncCloudState: () => Promise<void>;
+
+  /* Стоп-лист по требованию правообладателей (Notice & Takedown) */
+  blockedMovieIds: string[];
+  addBlockedMovieId: (id: string) => void;
+  removeBlockedMovieId: (id: string) => void;
+  isMovieBlocked: (idOrKinopoisk: string | number) => boolean;
 
   /* ═══ Мини-бэкенд (центральный конфиг) ═══ */
   /** Реквизиты оплаты премиума (задаёт админ) */
@@ -339,6 +348,29 @@ export const useStore = create<AppState>((set, get) => ({
     else resetUserSubscribed();
     set({ isChannelSubscribed: val });
   },
+
+  /* ═══ Стоп-лист по требованию правообладателей ═══ */
+  blockedMovieIds: getLocalBlockedMovies(),
+  addBlockedMovieId: (id: string) => {
+    const clean = id.trim();
+    if (!clean) return;
+    const current = get().blockedMovieIds;
+    if (current.includes(clean)) return;
+    const updated = [...current, clean];
+    saveLocalBlockedMovies(updated);
+    set({ blockedMovieIds: updated });
+  },
+  removeBlockedMovieId: (id: string) => {
+    const updated = get().blockedMovieIds.filter((x) => x !== id.trim());
+    saveLocalBlockedMovies(updated);
+    set({ blockedMovieIds: updated });
+  },
+  isMovieBlocked: (idOrKinopoisk: string | number) => {
+    if (!idOrKinopoisk) return false;
+    const str = String(idOrKinopoisk).toLowerCase().trim();
+    return get().blockedMovieIds.some((x) => String(x).toLowerCase().trim() === str);
+  },
+
   syncCloudState: async () => {
     try {
       const cloud = await pullCloudData();
@@ -346,6 +378,10 @@ export const useStore = create<AppState>((set, get) => ({
         if (cloud.mandatorySub) {
           saveLocalMandatorySub(cloud.mandatorySub);
           set({ mandatorySub: cloud.mandatorySub });
+        }
+        if (cloud.blockedMovieIds) {
+          saveLocalBlockedMovies(cloud.blockedMovieIds);
+          set({ blockedMovieIds: cloud.blockedMovieIds });
         }
         if (cloud.announcement !== undefined) {
           save('tc_announcement', cloud.announcement);

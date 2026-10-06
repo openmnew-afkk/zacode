@@ -105,7 +105,7 @@ const PremiumPage: React.FC = () => {
   const [payMsg, setPayMsg] = useState('');
   const [payLoading, setPayLoading] = useState(false);
 
-  const isAdmin = telegramUsername === 'MikySauce';
+  const isAdmin = telegramUsername === 'ZenovaAdmin';
 
   /* Остаток дней премиума */
   const daysLeft = premiumExpiry
@@ -426,20 +426,11 @@ const PremiumPage: React.FC = () => {
                   <span className="pm-pay__copy">Telegram Stars</span>
                 </div>
 
-                {requisites.sbp && (
-                  <div className="pm-pay__row" onClick={() => { navigator.clipboard?.writeText(requisites.sbp); haptic('light'); }}>
+                {requisites.crypto && (
+                  <div className="pm-pay__row" onClick={() => { navigator.clipboard?.writeText(requisites.crypto); haptic('light'); }}>
                     <div className="pm-pay__row-left">
-                      <span className="pm-pay__label">Перевод СБП (рубли)</span>
-                      <span className="pm-pay__value">{requisites.sbp}</span>
-                    </div>
-                    <span className="pm-pay__copy">Скопировать</span>
-                  </div>
-                )}
-                {requisites.card && (
-                  <div className="pm-pay__row" onClick={() => { navigator.clipboard?.writeText(requisites.card); haptic('light'); }}>
-                    <div className="pm-pay__row-left">
-                      <span className="pm-pay__label">Банковская карта</span>
-                      <span className="pm-pay__value">{requisites.card}</span>
+                      <span className="pm-pay__label">USDT TRC-20 / TON кошелёк</span>
+                      <span className="pm-pay__value">{requisites.crypto}</span>
                     </div>
                     <span className="pm-pay__copy">Скопировать</span>
                   </div>

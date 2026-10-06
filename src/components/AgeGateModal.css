@@ -1,0 +1,129 @@
+/* ===== AgeGateModal Styles — Liquid Glass iOS ===== */
+
+.zage-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(4, 3, 7, 0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: zageFadeIn 0.25s ease-out;
+}
+
+.zage-modal {
+  width: 100%;
+  max-width: 360px;
+  background: linear-gradient(180deg, rgba(26, 18, 28, 0.95) 0%, rgba(13, 10, 18, 0.98) 100%);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: 26px;
+  padding: 28px 22px 20px;
+  box-sizing: border-box;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(244, 63, 94, 0.15);
+  animation: zageScaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zage-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(244, 63, 94, 0.12);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.zage-icon {
+  font-size: 32px;
+}
+
+.zage-badge {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fb7185;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.zage-title {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0 0 10px;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.zage-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 8px;
+}
+
+.zage-sub {
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 20px;
+}
+
+.zage-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zage-btn {
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.zage-btn:active {
+  transform: scale(0.97);
+}
+
+.zage-btn--confirm {
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  color: #fff;
+  box-shadow: 0 4px 18px rgba(244, 63, 94, 0.35);
+}
+
+.zage-btn--cancel {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.zage-footer {
+  margin-top: 16px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+@keyframes zageFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zageScaleUp {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}

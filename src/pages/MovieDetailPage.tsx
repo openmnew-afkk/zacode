@@ -6,6 +6,7 @@ import type { MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { checkRussianAccess } from '../services/accessControl';
+import AgeGateModal, { isAgeVerified } from '../components/AgeGateModal';
 import './MovieDetailPage.css';
 
 /* Статусы дневника */
@@ -177,6 +178,7 @@ const MovieDetailPage: React.FC = () => {
   const {
     addFavorite, removeFavorite, addToHistory,
     setTrackedStatus, setPersonalRating, getStatus, getRating,
+    isMovieBlocked,
   } = useStore();
 
   const [movie, setMovie] = useState<MovieDetail | null>(null);
@@ -189,6 +191,7 @@ const MovieDetailPage: React.FC = () => {
   const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
   const [showTrailer, setShowTrailer] = useState(false);
   const [showWatch, setShowWatch] = useState(false);
+  const [showAgeGate, setShowAgeGate] = useState(false);
   const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
   const [watchIdx, setWatchIdx] = useState(0);
 
@@ -321,6 +324,61 @@ const MovieDetailPage: React.FC = () => {
   const isRussianRestricted = isRussianMovie && !hasRussianAccess;
   const canWatch = !isRussianRestricted;
 
+  const startWatching = () => {
+    setWatchOptions(buildWatchOptions({
+      tmdbId,
+      imdbId: movie?.imdbID,
+      kinopoiskId: movie?.kinopoisk_id,
+      title: movie?.title || '',
+      isSerial,
+    }));
+    setWatchIdx(0);
+    setShowWatch(true);
+  };
+
+  const handleWatchClick = () => {
+    haptic('medium');
+    const isAdult =
+      Boolean((movie as any)?.adult) ||
+      Boolean(movie?.genres?.some((g) => g.toLowerCase().includes('эротика') || g.toLowerCase().includes('18+')));
+
+    if (isAdult && !isAgeVerified()) {
+      setShowAgeGate(true);
+      return;
+    }
+    startWatching();
+  };
+
+  const isBlocked =
+    isMovieBlocked(compositeId) ||
+    isMovieBlocked(tmdbId) ||
+    (movie?.kinopoisk_id && isMovieBlocked(movie.kinopoisk_id)) ||
+    (movie?.id && isMovieBlocked(movie.id));
+
+  if (!loading && movie && isBlocked) {
+    return (
+      <div className="dp page">
+        <header className="dp-header">
+          <button className="dp-back" onClick={() => navigate(-1)} aria-label="Назад">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M14 5l-7 6 7 6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+        </header>
+        <div style={{ padding: '80px 24px', textAlign: 'center' }}>
+          <div style={{ fontSize: '54px', marginBottom: '16px' }}>⚖️</div>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: '0 0 10px', color: '#fff' }}>Доступ ограничен правообладателем</h2>
+          <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '13px', lineHeight: 1.6, maxWidth: '380px', margin: '0 auto 24px' }}>
+            Данное аудиовизуальное произведение исключено из каталога сервиса по официальному обращению правообладателя в соответствии с Федеральным законом № 149-ФЗ и ст. 1253.1 ГК РФ (Notice & Takedown).
+          </p>
+          <button className="dp-watch" style={{ maxWidth: '240px', margin: '0 auto' }} onClick={() => navigate('/')}>
+            ← Вернуться в каталог
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dp page">
       {/* ── Фон ── */}
@@ -372,7 +430,7 @@ const MovieDetailPage: React.FC = () => {
                 className="dp-watch dp-watch--locked"
                 onClick={() => {
                   haptic('heavy');
-                  window.open('https://t.me/MikySauce', '_blank');
+                  window.open('https://t.me/ZenovaSupport_bot', '_blank');
                 }}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -384,18 +442,7 @@ const MovieDetailPage: React.FC = () => {
             ) : canWatch ? (
               <button
                 className="dp-watch"
-                onClick={() => {
-                  haptic('medium');
-                  setWatchOptions(buildWatchOptions({
-                    tmdbId,
-                    imdbId: movie.imdbID,
-                    kinopoiskId: movie.kinopoisk_id,
-                    title: movie.title,
-                    isSerial,
-                  }));
-                  setWatchIdx(0);
-                  setShowWatch(true);
-                }}
+                onClick={handleWatchClick}
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
@@ -466,13 +513,13 @@ const MovieDetailPage: React.FC = () => {
               Ваш ник: <span className="dp-rus-restricted__nick">@{tgUser?.username || 'без_ника'}</span>.
             </p>
             <a
-              href="https://t.me/MikySauce"
+              href="https://t.me/ZenovaSupport_bot"
               target="_blank"
               rel="noreferrer"
               className="dp-rus-restricted__btn"
               onClick={() => haptic('medium')}
             >
-              💬 Запросить доступ у @MikySauce
+              💬 Запросить доступ у поддержки (@ZenovaSupport_bot)
             </a>
           </div>
         </div>
@@ -699,6 +746,16 @@ const MovieDetailPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {showAgeGate && (
+        <AgeGateModal
+          onConfirm={() => {
+            setShowAgeGate(false);
+            startWatching();
+          }}
+          onCancel={() => setShowAgeGate(false)}
+        />
+      )}
     </div>
   );
 };

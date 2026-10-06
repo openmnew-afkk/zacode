@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { searchMovies } from '../api/catalog';
 import { useTelegram } from '../hooks/useTelegram';
 import { checkRussianAccess } from '../services/accessControl';
+import { useStore } from '../store';
 import type { Movie } from '../types';
 import './SearchPage.css';
 
@@ -30,6 +31,7 @@ const HASHTAG_CHIPS = [
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
   const { user: tgUser } = useTelegram();
+  const { isMovieBlocked } = useStore();
   const hasRussianAccess = checkRussianAccess(tgUser?.username);
   const isRus = (m?: Movie | null) =>
     Boolean(
@@ -52,13 +54,16 @@ const SearchPage: React.FC = () => {
       setLoading(true);
       try {
         const res = await searchMovies(query.trim(), 1, searchType);
-        const filtered = hasRussianAccess ? res.results : res.results.filter(m => !isRus(m));
+        const russianFiltered = hasRussianAccess ? res.results : res.results.filter(m => !isRus(m));
+        const filtered = russianFiltered.filter(
+          m => !isMovieBlocked(m.id) && !(m.kinopoisk_id && isMovieBlocked(m.kinopoisk_id))
+        );
         setMovies(filtered);
       } catch { setMovies([]); }
       setLoading(false);
     }, 380);
     return () => clearTimeout(debounceRef.current);
-  }, [query, searchType, hasRussianAccess]);
+  }, [query, searchType, hasRussianAccess, isMovieBlocked]);
 
   const isEmpty = !loading && movies.length === 0 && query.trim().length > 0;
   const isInitial = !loading && query.trim().length === 0;

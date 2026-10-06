@@ -17,7 +17,7 @@ import MandatorySubModal from '../components/MandatorySubModal';
 import VeloraEmblem from '../components/VeloraEmblem';
 import './AdminPage.css';
 
-type AdminTab = 'users' | 'servers' | 'channel' | 'broadcast' | 'finances' | 'backup';
+type AdminTab = 'users' | 'channel' | 'takedown' | 'servers' | 'broadcast' | 'finances' | 'backup';
 
 const ROLE_LABELS: Record<UserRole, { label: string; badge: string; color: string; icon: string }> = {
   admin: { label: 'Администратор', badge: 'ADMIN', color: '#ec4899', icon: '👑' },
@@ -43,6 +43,7 @@ const AdminPage: React.FC = () => {
     announcement, setAnnouncement, adsEnabled, setAdsEnabled,
     requisites, prices, activatePremiumForever,
     mandatorySub, setMandatorySub,
+    blockedMovieIds, addBlockedMovieId, removeBlockedMovieId,
   } = useStore();
 
   /* Авторизация */
@@ -79,15 +80,16 @@ const AdminPage: React.FC = () => {
   const [subText, setSubText] = useState(mandatorySub.subText);
   const [previewSubModal, setPreviewSubModal] = useState(false);
 
+  /* Стоп-лист правообладателей (Notice & Takedown) */
+  const [newBlockedId, setNewBlockedId] = useState('');
+
   /* Облачная БД */
   const sbConf = getSupabaseConfig();
   const [sbUrl, setSbUrl] = useState(sbConf?.url || '');
   const [sbKey, setSbKey] = useState(sbConf?.anonKey || '');
   const [customKv, setCustomKv] = useState(getCustomKvUrl());
 
-  /* Реквизиты */
-  const [card, setCard] = useState(requisites.card);
-  const [sbp, setSbp] = useState(requisites.sbp);
+  /* Реквизиты (Только анонимная крипта) */
   const [crypto, setCrypto] = useState(requisites.crypto);
 
   /* Проверка прав пользователя */
@@ -150,7 +152,7 @@ const AdminPage: React.FC = () => {
       targetUsername,
       selectedRole,
       selectedDuration,
-      telegramUsername || 'MikySauce',
+      telegramUsername || 'ZenovaAdmin',
       grantNote,
       grantRussianAccess
     );
@@ -238,6 +240,7 @@ const AdminPage: React.FC = () => {
       announcement: text,
       adsEnabled,
       mandatorySub,
+      blockedMovieIds,
       updatedAt: Date.now(),
       updatedBy: telegramUsername || 'Admin',
     });
@@ -259,10 +262,49 @@ const AdminPage: React.FC = () => {
       announcement: bannerActive ? bannerText.trim() : '',
       adsEnabled,
       mandatorySub: updated,
+      blockedMovieIds,
       updatedAt: Date.now(),
       updatedBy: telegramUsername || 'Admin',
     });
     showToast('Настройки канала и ОП сохранены в облачную БД!', 'success');
+  };
+
+  /* Добавление в стоп-лист правообладателей (Notice & Takedown) */
+  const handleAddBlockedId = async () => {
+    const clean = newBlockedId.trim();
+    if (!clean) {
+      showToast('Введите ID тайтла (Кинопоиск или TMDB)', 'error');
+      return;
+    }
+    addBlockedMovieId(clean);
+    setNewBlockedId('');
+    const updatedList = Array.from(new Set([...blockedMovieIds, clean]));
+    await pushCloudData({
+      grants,
+      announcement: bannerActive ? bannerText.trim() : '',
+      adsEnabled,
+      mandatorySub,
+      blockedMovieIds: updatedList,
+      updatedAt: Date.now(),
+      updatedBy: telegramUsername || 'Admin',
+    });
+    showToast(`Тайтл ID «${clean}» добавлен в Стоп-лист и скрыт!`, 'success');
+  };
+
+  /* Удаление из стоп-листа правообладателей */
+  const handleRemoveBlockedId = async (id: string) => {
+    removeBlockedMovieId(id);
+    const updatedList = blockedMovieIds.filter((x) => x !== id);
+    await pushCloudData({
+      grants,
+      announcement: bannerActive ? bannerText.trim() : '',
+      adsEnabled,
+      mandatorySub,
+      blockedMovieIds: updatedList,
+      updatedAt: Date.now(),
+      updatedBy: telegramUsername || 'Admin',
+    });
+    showToast(`Тайтл ID «${id}» удален из Стоп-листа`, 'info');
   };
 
   /* Сохранение конфигурации облачной базы */
@@ -361,7 +403,7 @@ const AdminPage: React.FC = () => {
         <div className="adm-session-bar">
           <div className="adm-session-user">
             <span className="adm-session-dot" />
-            <span>Сессия: <strong>@{telegramUsername || 'MikySauce'}</strong> (Супер-Администратор)</span>
+            <span>Сессия: <strong>@{telegramUsername || 'Admin'}</strong> (Супер-Администратор)</span>
           </div>
           <span className="adm-session-tag">Без серверов и API</span>
         </div>
@@ -380,9 +422,9 @@ const AdminPage: React.FC = () => {
           <div className="adm-metric__lbl">VIP по нику</div>
         </div>
         <div className="adm-metric">
-          <span className="adm-metric__icon">⚡</span>
-          <div className="adm-metric__val">6</div>
-          <div className="adm-metric__lbl">VPN Серверов</div>
+          <span className="adm-metric__icon">🛡️</span>
+          <div className="adm-metric__val">{blockedMovieIds.length}</div>
+          <div className="adm-metric__lbl">Стоп-лист DMCA</div>
         </div>
         <div className="adm-metric">
           <span className="adm-metric__icon">🌍</span>
@@ -407,6 +449,9 @@ const AdminPage: React.FC = () => {
         <button className={`adm-tab ${tab === 'channel' ? 'active' : ''}`} onClick={() => setTab('channel')}>
           📢 Канал и ОП
         </button>
+        <button className={`adm-tab ${tab === 'takedown' ? 'active' : ''}`} onClick={() => setTab('takedown')}>
+          🛡️ DMCA и Защита
+        </button>
         <button className={`adm-tab ${tab === 'servers' ? 'active' : ''}`} onClick={() => setTab('servers')}>
           🎬 Серверы (VPN)
         </button>
@@ -414,7 +459,7 @@ const AdminPage: React.FC = () => {
           💬 Объявление
         </button>
         <button className={`adm-tab ${tab === 'finances' ? 'active' : ''}`} onClick={() => setTab('finances')}>
-          💳 Тарифы Stars
+          ⭐ Тарифы Stars
         </button>
         <button className={`adm-tab ${tab === 'backup' ? 'active' : ''}`} onClick={() => setTab('backup')}>
           ☁️ Облачная БД
@@ -708,7 +753,7 @@ const AdminPage: React.FC = () => {
                 <input
                   className="adm-field__input"
                   type="text"
-                  placeholder="@MikySauce или имя_канала"
+                  placeholder="@ZenovaCinema или имя_канала"
                   value={subChannelUsername}
                   onChange={(e) => setSubChannelUsername(e.target.value)}
                 />
@@ -719,7 +764,7 @@ const AdminPage: React.FC = () => {
                 <input
                   className="adm-field__input"
                   type="text"
-                  placeholder="https://t.me/MikySauce"
+                  placeholder="https://t.me/ZenovaCinema"
                   value={subChannelUrl}
                   onChange={(e) => setSubChannelUrl(e.target.value)}
                 />
@@ -769,6 +814,94 @@ const AdminPage: React.FC = () => {
               <div className="adm-info-callout__title">💎 Почему эта фича продаёт проект за 200,000+ ₽</div>
               <p className="adm-info-callout__text">
                 В Telegram Mini App трафик на канал — это главный источник денег. Покупатели готовых онлайн-кинотеатров берут их, чтобы мгновенно заливать себе тысячи подписчиков. 10 000 просмотров фильма = до 7 000 новых живых подписчиков в канал покупателя!
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── ВКЛАДКА: DMCA И ЮРИДИЧЕСКАЯ ЗАЩИТА (NOTICE & TAKEDOWN) ── */}
+      {tab === 'takedown' && (
+        <div className="adm-tab-content">
+          <div className="adm-card">
+            <div className="adm-card__header">
+              <h2 className="adm-card__title">🛡️ Стоп-лист правообладателей (Notice & Takedown)</h2>
+              <span className="adm-card__sub">
+                Защита по ст. 1253.1 ГК РФ (Информационный посредник): мгновенное скрытие тайтла по первому запросу
+              </span>
+            </div>
+
+            <div className="adm-info-callout" style={{ marginBottom: '16px' }}>
+              <div className="adm-info-callout__title">⚖️ Юридическая безопасность владельца</div>
+              <p className="adm-info-callout__text">
+                Если официальный правообладатель (Кинопоиск, Premier, Start, Иви, АЗАПИ) присылает претензию — вы не спорите, а вставляете ID фильма/сериала ниже и нажимаете «Заблокировать». После этого тайтл мгновенно исключается из каталога, поиска и плееров. Добросовестное удаление в течение 24 часов освобождает от гражданской и уголовной ответственности!
+              </p>
+            </div>
+
+            <div className="adm-form-grid">
+              <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="adm-field__label">ID фильма или сериала (Кинопоиск ID / TMDB ID / Название)</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <input
+                    className="adm-field__input"
+                    type="text"
+                    placeholder="Например: 535341 или 123456"
+                    value={newBlockedId}
+                    onChange={(e) => setNewBlockedId(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddBlockedId()}
+                  />
+                  <button className="adm-btn adm-btn--primary" onClick={handleAddBlockedId} style={{ flexShrink: 0 }}>
+                    🚫 Заблокировать
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <h3 className="adm-section-subtitle" style={{ marginTop: '20px' }}>
+              Активный стоп-лист заблокированных тайтлов ({blockedMovieIds.length})
+            </h3>
+
+            {blockedMovieIds.length === 0 ? (
+              <div className="adm-empty-box" style={{ padding: '24px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>
+                Стоп-лист пуст. Претензий от правообладателей не поступало.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '12px' }}>
+                {blockedMovieIds.map((id) => (
+                  <div
+                    key={id}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 14px',
+                      background: 'rgba(239, 68, 68, 0.08)',
+                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                      borderRadius: '12px',
+                    }}
+                  >
+                    <div>
+                      <strong style={{ color: '#fca5a5', fontSize: '13px' }}>ID: {id}</strong>
+                      <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginLeft: '10px' }}>
+                        Скрыт из плеера, поиска и каталога
+                      </span>
+                    </div>
+                    <button
+                      className="adm-btn adm-btn--outline"
+                      style={{ padding: '4px 10px', fontSize: '11px' }}
+                      onClick={() => handleRemoveBlockedId(id)}
+                    >
+                      Разблокировать
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="adm-backup-box" style={{ marginTop: '20px' }}>
+              <strong>🔞 Федеральный закон № 436-ФЗ (Возрастной ценз 18+)</strong>
+              <p>
+                В приложении включено обязательное диалоговое подтверждение совершеннолетия при открытии контента с рейтингом 18+. Порнографические материалы строго исключены из архитектуры в соответствии со ст. 242 УК РФ.
               </p>
             </div>
           </div>
@@ -937,36 +1070,17 @@ const AdminPage: React.FC = () => {
               </div>
             </div>
 
-            <h3 className="adm-section-subtitle">Реквизиты для альтернативной оплаты</h3>
+            <h3 className="adm-section-subtitle">Безопасный кошелёк (Криптовалюта USDT)</h3>
+            <p className="adm-card__sub" style={{ marginBottom: '14px' }}>
+              🔒 Банковские карты РФ и СБП отключены для исключения рисков по ст. 146 и 171 УК РФ. Рекомендуется использовать официальные Telegram Stars и анонимный криптовалютный адрес.
+            </p>
             <div className="adm-form-grid">
-              <div className="adm-field">
-                <label className="adm-field__label">Номер карты (рубли)</label>
+              <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="adm-field__label">USDT TRC-20 / TON кошелек</label>
                 <input
                   className="adm-field__input"
                   type="text"
-                  placeholder="2200 0000 0000 0000"
-                  value={card}
-                  onChange={(e) => setCard(e.target.value)}
-                />
-              </div>
-
-              <div className="adm-field">
-                <label className="adm-field__label">Номер СБП (телефон + банк)</label>
-                <input
-                  className="adm-field__input"
-                  type="text"
-                  placeholder="+7 (900) 000-00-00 (Тинькофф/Сбер)"
-                  value={sbp}
-                  onChange={(e) => setSbp(e.target.value)}
-                />
-              </div>
-
-              <div className="adm-field">
-                <label className="adm-field__label">USDT TRC-20 кошелек</label>
-                <input
-                  className="adm-field__input"
-                  type="text"
-                  placeholder="T..."
+                  placeholder="T... или UQ..."
                   value={crypto}
                   onChange={(e) => setCrypto(e.target.value)}
                 />
@@ -976,7 +1090,7 @@ const AdminPage: React.FC = () => {
             <button
               className="adm-btn adm-btn--primary"
               onClick={() => {
-                showToast('Реквизиты сохранены локально!', 'success');
+                showToast('Крипто-реквизиты сохранены локально!', 'success');
               }}
             >
               💾 Сохранить реквизиты

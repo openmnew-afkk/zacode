@@ -17,8 +17,8 @@ import {
 
 export interface MandatorySubConfig {
   enabled: boolean;
-  channelUsername: string; // @zenova_cinema или MikySauce
-  channelUrl: string;      // https://t.me/MikySauce
+  channelUsername: string; // @zenova_cinema или канал
+  channelUrl: string;      // https://t.me/ZenovaCinema
   channelTitle: string;    // ZENOVA | Cinema & Sound
   subText: string;         // Текст призыва к подписке
 }
@@ -28,6 +28,7 @@ export interface AppCloudData {
   announcement: string;
   adsEnabled: boolean;
   mandatorySub: MandatorySubConfig;
+  blockedMovieIds?: string[]; // Stop-list для требований правообладателей (Notice & Takedown)
   updatedAt: number;
   updatedBy?: string;
 }
@@ -38,12 +39,13 @@ const SUPABASE_URL_KEY = 'zenova_supabase_url';
 const SUPABASE_KEY_KEY = 'zenova_supabase_key';
 const CUSTOM_KV_URL_KEY = 'zenova_custom_kv_url';
 const SUB_CONFIRMED_KEY = 'zenova_channel_subscribed_v1';
+const BLOCKED_MOVIES_KEY = 'zenova_blocked_movies_v1';
 
 /* Дефолтные настройки обязательной подписки */
 export const DEFAULT_MANDATORY_SUB: MandatorySubConfig = {
   enabled: false,
-  channelUsername: '@MikySauce',
-  channelUrl: 'https://t.me/MikySauce',
+  channelUsername: '@ZenovaCinema',
+  channelUrl: 'https://t.me/ZenovaCinema',
   channelTitle: 'ZENOVA Cinema & Sound',
   subText: 'Подпишитесь на наш официальный Telegram-канал, чтобы смотреть новинки кино, сериалы и слушать музыку без ограничений!',
 };
@@ -54,6 +56,7 @@ const DEFAULT_CLOUD_DATA: AppCloudData = {
   announcement: '',
   adsEnabled: true,
   mandatorySub: DEFAULT_MANDATORY_SUB,
+  blockedMovieIds: [],
   updatedAt: Date.now(),
   updatedBy: 'System',
 };
@@ -252,6 +255,7 @@ function saveLocalCache(data: AppCloudData): void {
   try {
     localStorage.setItem(CLOUD_CACHE_KEY, JSON.stringify(data));
     if (data.mandatorySub) saveLocalMandatorySub(data.mandatorySub);
+    if (data.blockedMovieIds) saveLocalBlockedMovies(data.blockedMovieIds);
   } catch {}
 }
 
@@ -264,5 +268,30 @@ function getLocalCache(): AppCloudData {
     ...DEFAULT_CLOUD_DATA,
     grants: getStoredGrants(),
     mandatorySub: getLocalMandatorySub(),
+    blockedMovieIds: getLocalBlockedMovies(),
   };
 }
+
+/* ═══════════ Блокировка тайтлов по требованию правообладателей (Notice & Takedown) ═══════════ */
+export function getLocalBlockedMovies(): string[] {
+  try {
+    const raw = localStorage.getItem(BLOCKED_MOVIES_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalBlockedMovies(ids: string[]): void {
+  try {
+    localStorage.setItem(BLOCKED_MOVIES_KEY, JSON.stringify(ids));
+  } catch {}
+}
+
+export function isMovieBlockedLocally(idOrKinopoisk: string | number): boolean {
+  if (!idOrKinopoisk) return false;
+  const list = getLocalBlockedMovies();
+  const str = String(idOrKinopoisk).toLowerCase().trim();
+  return list.some((item) => String(item).toLowerCase().trim() === str);
+}
+
