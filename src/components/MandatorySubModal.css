@@ -1,0 +1,266 @@
+/* ===== ZENOVA — Окно обязательной подписки на канал (ОП) ===== */
+
+.zsub-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(4, 3, 8, 0.88);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: zsubFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes zsubFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.zsub-modal {
+  position: relative;
+  width: 100%;
+  max-width: 350px;
+  background: linear-gradient(175deg, rgba(22, 18, 30, 0.94) 0%, rgba(12, 10, 18, 0.97) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  padding: 28px 22px 22px;
+  text-align: center;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(255, 255, 255, 0.18) inset;
+  animation: zsubSlideUp 0.32s cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+
+@keyframes zsubSlideUp {
+  from { transform: translateY(14px) scale(0.96); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.zsub-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.zsub-close:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Эмблема */
+.zsub-emblem-wrap {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.zsub-emblem-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.45) 0%, rgba(2, 132, 199, 0.25) 70%, transparent 100%);
+  filter: blur(14px);
+  z-index: 0;
+  animation: zsubGlowPulse 2.8s infinite ease-in-out;
+}
+@keyframes zsubGlowPulse {
+  0%, 100% { transform: scale(0.95); opacity: 0.6; }
+  50% { transform: scale(1.15); opacity: 0.95; }
+}
+.zsub-emblem {
+  position: relative;
+  z-index: 1;
+  width: 68px;
+  height: 68px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+.zsub-tg-badge {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  border: 2px solid #14111d;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.5);
+}
+
+/* Бейджи и тексты */
+.zsub-badge {
+  display: inline-block;
+  padding: 4px 11px;
+  border-radius: 999px;
+  background: rgba(251, 113, 133, 0.14);
+  border: 1px solid rgba(251, 113, 133, 0.28);
+  color: #fda4af;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.zsub-title {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  color: #ffffff;
+  margin: 0 0 8px;
+  line-height: 1.25;
+}
+
+.zsub-desc {
+  font-size: 13px;
+  line-height: 1.48;
+  color: rgba(255, 255, 255, 0.68);
+  margin: 0 0 16px;
+  padding: 0 4px;
+}
+
+/* Карточка канала */
+.zsub-channel-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  margin-bottom: 16px;
+  text-align: left;
+}
+.zsub-channel-card__info {
+  display: flex;
+  flex-direction: column;
+}
+.zsub-channel-card__label {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 600;
+}
+.zsub-channel-card__handle {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #38bdf8;
+  font-family: monospace;
+}
+.zsub-channel-card__verified {
+  font-size: 11px;
+  font-weight: 700;
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.12);
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.zsub-error {
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(244, 63, 94, 0.14);
+  border: 1px solid rgba(244, 63, 94, 0.28);
+  color: #fda4af;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 14px;
+}
+
+/* Кнопки */
+.zsub-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.zsub-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.zsub-btn:active {
+  transform: scale(0.97);
+}
+
+.zsub-btn--primary {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.4);
+}
+.zsub-btn--primary.zsub-btn--visited {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: none;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.zsub-btn--verify {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+.zsub-btn--verify:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.zsub-spinner-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.zsub-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  animation: zsubSpin 0.7s linear infinite;
+}
+@keyframes zsubSpin {
+  to { transform: rotate(360deg); }
+}
+
+.zsub-footer {
+  margin-top: 16px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+}

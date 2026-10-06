@@ -14,6 +14,7 @@ import FeedPage from './pages/FeedPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
+import MandatorySubModal from './components/MandatorySubModal';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
 
@@ -21,8 +22,13 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, setTelegramUsername } = useStore();
+  const { theme, setTelegramUsername, syncCloudState } = useStore();
   const { currentTrack } = useMusicStore();
+
+  /* ═══ Фоновая облачная синхронизация при запуске (0 мс задержки) ═══ */
+  useEffect(() => {
+    syncCloudState?.().catch(() => {});
+  }, [syncCloudState]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -52,6 +58,7 @@ function App() {
   return (
     <div className="app-root">
       {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
+      <MandatorySubModal />
 
       <div className={`app-main ${currentTrack ? 'app-main--with-player' : ''}`}>
         <Routes location={location}>

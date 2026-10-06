@@ -8,10 +8,16 @@ import {
   toggleRussianAccessForUser, checkRussianAccess,
   type UserGrant, type UserRole, type DurationOption
 } from '../services/accessControl';
+import {
+  pushCloudData, pullCloudData,
+  getSupabaseConfig, saveSupabaseConfig,
+  getCustomKvUrl, saveCustomKvUrl,
+} from '../services/cloudSync';
+import MandatorySubModal from '../components/MandatorySubModal';
 import VeloraEmblem from '../components/VeloraEmblem';
 import './AdminPage.css';
 
-type AdminTab = 'users' | 'servers' | 'broadcast' | 'finances' | 'backup';
+type AdminTab = 'users' | 'servers' | 'channel' | 'broadcast' | 'finances' | 'backup';
 
 const ROLE_LABELS: Record<UserRole, { label: string; badge: string; color: string; icon: string }> = {
   admin: { label: 'Администратор', badge: 'ADMIN', color: '#ec4899', icon: '👑' },
@@ -36,6 +42,7 @@ const AdminPage: React.FC = () => {
     isAdmin, adminLogin, adminLogout, telegramUsername,
     announcement, setAnnouncement, adsEnabled, setAdsEnabled,
     requisites, prices, activatePremiumForever,
+    mandatorySub, setMandatorySub,
   } = useStore();
 
   /* Авторизация */
@@ -63,6 +70,20 @@ const AdminPage: React.FC = () => {
   /* Объявление */
   const [bannerText, setBannerText] = useState(announcement);
   const [bannerActive, setBannerActive] = useState(!!announcement);
+
+  /* Канал и Обязательная подписка (ОП) */
+  const [subEnabled, setSubEnabled] = useState(mandatorySub.enabled);
+  const [subChannelUsername, setSubChannelUsername] = useState(mandatorySub.channelUsername);
+  const [subChannelUrl, setSubChannelUrl] = useState(mandatorySub.channelUrl);
+  const [subChannelTitle, setSubChannelTitle] = useState(mandatorySub.channelTitle);
+  const [subText, setSubText] = useState(mandatorySub.subText);
+  const [previewSubModal, setPreviewSubModal] = useState(false);
+
+  /* Облачная БД */
+  const sbConf = getSupabaseConfig();
+  const [sbUrl, setSbUrl] = useState(sbConf?.url || '');
+  const [sbKey, setSbKey] = useState(sbConf?.anonKey || '');
+  const [customKv, setCustomKv] = useState(getCustomKvUrl());
 
   /* Реквизиты */
   const [card, setCard] = useState(requisites.card);
@@ -209,9 +230,66 @@ const AdminPage: React.FC = () => {
   };
 
   /* Сохранение объявления */
-  const handleSaveBroadcast = () => {
-    setAnnouncement(bannerActive ? bannerText : '');
-    showToast('Глобальное объявление обновлено!', 'success');
+  const handleSaveBroadcast = async () => {
+    const text = bannerActive ? bannerText.trim() : '';
+    setAnnouncement(text);
+    await pushCloudData({
+      grants,
+      announcement: text,
+      adsEnabled,
+      mandatorySub,
+      updatedAt: Date.now(),
+      updatedBy: telegramUsername || 'Admin',
+    });
+    showToast(bannerActive ? 'Глобальное объявление опубликовано!' : 'Объявление скрыто!', 'success');
+  };
+
+  /* Сохранение настроек канала и ОП */
+  const handleSaveChannelSettings = async () => {
+    const updated = {
+      enabled: subEnabled,
+      channelUsername: subChannelUsername.trim(),
+      channelUrl: subChannelUrl.trim(),
+      channelTitle: subChannelTitle.trim(),
+      subText: subText.trim(),
+    };
+    setMandatorySub(updated);
+    await pushCloudData({
+      grants,
+      announcement: bannerActive ? bannerText.trim() : '',
+      adsEnabled,
+      mandatorySub: updated,
+      updatedAt: Date.now(),
+      updatedBy: telegramUsername || 'Admin',
+    });
+    showToast('Настройки канала и ОП сохранены в облачную БД!', 'success');
+  };
+
+  /* Сохранение конфигурации облачной базы */
+  const handleSaveCloudConfig = () => {
+    saveSupabaseConfig(sbUrl, sbKey);
+    saveCustomKvUrl(customKv);
+    showToast('Параметры облачной БД сохранены!', 'success');
+  };
+
+  /* Принудительная синхронизация */
+  const handleForceSync = async () => {
+    showToast('Синхронизируем базу с облаком…', 'info');
+    const cloud = await pullCloudData();
+    if (cloud) {
+      if (cloud.grants) setGrants(cloud.grants);
+      if (cloud.mandatorySub) {
+        setMandatorySub(cloud.mandatorySub);
+        setSubEnabled(cloud.mandatorySub.enabled);
+        setSubChannelUsername(cloud.mandatorySub.channelUsername);
+        setSubChannelUrl(cloud.mandatorySub.channelUrl);
+        setSubChannelTitle(cloud.mandatorySub.channelTitle);
+        setSubText(cloud.mandatorySub.subText);
+      }
+      showToast(`Синхронизация завершена! Пользователей: ${cloud.grants?.length || grants.length}`, 'success');
+    } else {
+      showToast('Загружено из локального кэша', 'info');
+    }
   };
 
   /* Фильтрация списка пользователей */
@@ -326,17 +404,20 @@ const AdminPage: React.FC = () => {
         <button className={`adm-tab ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>
           👥 Доступ по нику
         </button>
+        <button className={`adm-tab ${tab === 'channel' ? 'active' : ''}`} onClick={() => setTab('channel')}>
+          📢 Канал и ОП
+        </button>
         <button className={`adm-tab ${tab === 'servers' ? 'active' : ''}`} onClick={() => setTab('servers')}>
           🎬 Серверы (VPN)
         </button>
         <button className={`adm-tab ${tab === 'broadcast' ? 'active' : ''}`} onClick={() => setTab('broadcast')}>
-          📢 Объявление
+          💬 Объявление
         </button>
         <button className={`adm-tab ${tab === 'finances' ? 'active' : ''}`} onClick={() => setTab('finances')}>
           💳 Тарифы Stars
         </button>
         <button className={`adm-tab ${tab === 'backup' ? 'active' : ''}`} onClick={() => setTab('backup')}>
-          ⚙️ Синхронизация
+          ☁️ Облачная БД
         </button>
       </div>
 
@@ -597,6 +678,103 @@ const AdminPage: React.FC = () => {
         </div>
       )}
 
+      {/* ── ВКЛАДКА: ОБЯЗАТЕЛЬНАЯ ПОДПИСКА НА КАНАЛ (ОП) ── */}
+      {tab === 'channel' && (
+        <div className="adm-tab-content">
+          <div className="adm-card">
+            <div className="adm-card__header">
+              <h2 className="adm-card__title">📢 Обязательная подписка (ОП) на Telegram-канал</h2>
+              <span className="adm-card__sub">
+                Ключевой модуль монетизации и роста: каждый зритель подписывается на ваш канал перед просмотром
+              </span>
+            </div>
+
+            <div className="adm-switch-row">
+              <div>
+                <strong>Включить обязательную подписку (ОП)</strong>
+                <p>Если включено — все пользователи видят модальное окно с подпиской перед просмотром видео</p>
+              </div>
+              <input
+                type="checkbox"
+                className="adm-toggle"
+                checked={subEnabled}
+                onChange={(e) => setSubEnabled(e.target.checked)}
+              />
+            </div>
+
+            <div className="adm-form-grid">
+              <div className="adm-field">
+                <label className="adm-field__label">Username канала в Telegram</label>
+                <input
+                  className="adm-field__input"
+                  type="text"
+                  placeholder="@MikySauce или имя_канала"
+                  value={subChannelUsername}
+                  onChange={(e) => setSubChannelUsername(e.target.value)}
+                />
+              </div>
+
+              <div className="adm-field">
+                <label className="adm-field__label">Прямая ссылка на канал</label>
+                <input
+                  className="adm-field__input"
+                  type="text"
+                  placeholder="https://t.me/MikySauce"
+                  value={subChannelUrl}
+                  onChange={(e) => setSubChannelUrl(e.target.value)}
+                />
+              </div>
+
+              <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="adm-field__label">Название канала в модальном окне</label>
+                <input
+                  className="adm-field__input"
+                  type="text"
+                  placeholder="Например: ZENOVA Cinema & Sound"
+                  value={subChannelTitle}
+                  onChange={(e) => setSubChannelTitle(e.target.value)}
+                />
+              </div>
+
+              <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="adm-field__label">Текст призыва к подписке</label>
+                <textarea
+                  className="adm-field__textarea"
+                  rows={3}
+                  placeholder="Подпишитесь на наш официальный Telegram-канал, чтобы смотреть новинки кино, сериалы и слушать музыку без рекламы."
+                  value={subText}
+                  onChange={(e) => setSubText(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
+              <button
+                className="adm-btn adm-btn--primary"
+                style={{ flex: 1, minWidth: '180px' }}
+                onClick={handleSaveChannelSettings}
+              >
+                💾 Сохранить и применить
+              </button>
+              <button
+                className="adm-btn adm-btn--outline"
+                style={{ flex: 1, minWidth: '180px' }}
+                onClick={() => setPreviewSubModal(true)}
+              >
+                👁️ Предпросмотр окна ОП
+              </button>
+            </div>
+
+            <div className="adm-info-callout" style={{ marginTop: '20px' }}>
+              <div className="adm-info-callout__title">💎 Почему эта фича продаёт проект за 200,000+ ₽</div>
+              <p className="adm-info-callout__text">
+                В Telegram Mini App трафик на канал — это главный источник денег. Покупатели готовых онлайн-кинотеатров берут их, чтобы мгновенно заливать себе тысячи подписчиков. 10 000 просмотров фильма = до 7 000 новых живых подписчиков в канал покупателя!
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ── ВКЛАДКА 2: СЕРВЕРЫ И ПЛЕЕРЫ (ПРИОРИТЕТ ДЛЯ VPN) ── */}
       {tab === 'servers' && (
         <div className="adm-tab-content">
@@ -807,52 +985,103 @@ const AdminPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── ВКЛАДКА 5: СИНХРОНИЗАЦИЯ И ЭКСПОРТ ── */}
+      {/* ── ВКЛАДКА 5: ОБЛАЧНАЯ БАЗА ДАННЫХ И СИНХРОНИЗАЦИЯ ── */}
       {tab === 'backup' && (
         <div className="adm-tab-content">
           <div className="adm-card">
             <div className="adm-card__header">
-              <h2 className="adm-card__title">⚙️ Автономность и экспорт базы</h2>
-              <span className="adm-card__sub">Управляйте базой пользователей без зависимости от серверов</span>
+              <h2 className="adm-card__title">☁️ Серверная БД без серверов (Serverless)</h2>
+              <span className="adm-card__sub">
+                Глобальная синхронизация VIP-доступа, каналов и объявлений через бесплатный Supabase REST API
+              </span>
             </div>
 
-            <div className="adm-backup-actions">
+            <div className="adm-form-grid">
+              <div className="adm-field">
+                <label className="adm-field__label">Supabase URL (REST API)</label>
+                <input
+                  className="adm-field__input"
+                  type="text"
+                  placeholder="https://xyzcompany.supabase.co"
+                  value={sbUrl}
+                  onChange={(e) => setSbUrl(e.target.value)}
+                />
+              </div>
+
+              <div className="adm-field">
+                <label className="adm-field__label">Supabase Anon Public Key</label>
+                <input
+                  className="adm-field__input"
+                  type="password"
+                  placeholder="eyJhbGciOiJIUzI1NiIsIn..."
+                  value={sbKey}
+                  onChange={(e) => setSbKey(e.target.value)}
+                />
+              </div>
+
+              <div className="adm-field" style={{ gridColumn: '1 / -1' }}>
+                <label className="adm-field__label">Пользовательский KV / Edge Endpoint (Опционально)</label>
+                <input
+                  className="adm-field__input"
+                  type="text"
+                  placeholder="https://my-edge-kv.worker.dev/zenova"
+                  value={customKv}
+                  onChange={(e) => setCustomKv(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '16px', flexWrap: 'wrap' }}>
+              <button
+                className="adm-btn adm-btn--primary"
+                style={{ flex: 1, minWidth: '180px' }}
+                onClick={handleSaveCloudConfig}
+              >
+                💾 Сохранить параметры БД
+              </button>
+              <button
+                className="adm-btn adm-btn--outline"
+                style={{ flex: 1, minWidth: '180px' }}
+                onClick={handleForceSync}
+              >
+                🔄 Синхронизировать прямо сейчас
+              </button>
+            </div>
+
+            <div className="adm-backup-actions" style={{ marginTop: '20px' }}>
               <div className="adm-backup-box">
                 <strong>📥 Экспорт в JSON</strong>
-                <p>Скопируйте текущий список выданных прав и VIP-аккаунтов для сохранения резервной копии.</p>
+                <p>Скопируйте текущий список выданных прав и VIP-аккаунтов для резервной копии.</p>
                 <button className="adm-btn adm-btn--outline" onClick={handleExportJson}>
-                  📋 Скопировать базу в JSON
+                  📋 Скопировать JSON
                 </button>
               </div>
 
               <div className="adm-backup-box">
                 <strong>📤 Импорт из JSON</strong>
-                <p>Восстановите базу пользователей на новом устройстве или после очистки кэша браузера.</p>
+                <p>Восстановите базу пользователей на новом устройстве или после очистки кэша.</p>
                 <button className="adm-btn adm-btn--outline" onClick={handleImportJson}>
-                  Вставить JSON базы
+                  📥 Вставить JSON
                 </button>
               </div>
             </div>
 
-            <div className="adm-backup-box" style={{ marginTop: '16px' }}>
-              <strong>☁️ Облачная фоновая синхронизация (Serverless KV)</strong>
-              <p>
-                Все изменения автоматически отправляются в бесплатный распределённый KV-шлюз и загружаются клиентами за 50 мс без содержания собственных VPS!
+            <div className="adm-info-callout" style={{ marginTop: '20px' }}>
+              <div className="adm-info-callout__title">🚀 Преимущество перед покупателем: 0 ₽ расходов в месяц!</div>
+              <p className="adm-info-callout__text">
+                Проекту не нужен дорогой VPS или сложный бэкенд на Python/Node.js, который падает от нагрузки. Архитектура построена на прямых защищённых запросах к Supabase REST API (бесплатный PostgreSQL до 500 МБ и 50,000 MAU) + локальное кэширование и Telegram CloudStorage.
               </p>
-              <button
-                className="adm-btn adm-btn--primary"
-                onClick={() => {
-                  syncFromCloud().then((u) => {
-                    setGrants(u);
-                    showToast(`Синхронизация завершена. Всего пользователей: ${u.length}`, 'success');
-                  });
-                }}
-              >
-                🔄 Синхронизировать прямо сейчас
-              </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Модальное окно предпросмотра ОП для администратора */}
+      {previewSubModal && (
+        <MandatorySubModal
+          previewMode
+          onClosePreview={() => setPreviewSubModal(false)}
+        />
       )}
     </div>
   );

@@ -5,6 +5,15 @@ import type { Movie, WatchHistoryItem, AppTheme, WatchStatus, TrackedItem } from
 import type { BackendConfig, Requisites, Prices } from '../api/backend';
 import { findLocalGrant } from '../api/backend';
 import { resolveUserAccess, MASTER_ADMINS } from '../services/accessControl';
+import {
+  getLocalMandatorySub,
+  saveLocalMandatorySub,
+  isUserSubscribed,
+  markUserSubscribed,
+  resetUserSubscribed,
+  type MandatorySubConfig,
+  pullCloudData,
+} from '../services/cloudSync';
 
 /* ── localStorage helpers ── */
 const load = <T>(key: string, fallback: T): T => {
@@ -112,6 +121,13 @@ interface AppState {
   /* Объявления */
   announcement: string;
   setAnnouncement: (text: string) => void;
+
+  /* Обязательная подписка на Telegram-канал (ОП) */
+  mandatorySub: MandatorySubConfig;
+  setMandatorySub: (cfg: Partial<MandatorySubConfig>) => void;
+  isChannelSubscribed: boolean;
+  setChannelSubscribed: (val: boolean) => void;
+  syncCloudState: () => Promise<void>;
 
   /* ═══ Мини-бэкенд (центральный конфиг) ═══ */
   /** Реквизиты оплаты премиума (задаёт админ) */
@@ -309,6 +325,39 @@ export const useStore = create<AppState>((set, get) => ({
   /* ═══ Объявления ═══ */
   announcement: load<string>('tc_announcement', ''),
   setAnnouncement: (text: string) => { save('tc_announcement', text); set({ announcement: text }); },
+
+  /* ═══ Обязательная подписка на канал (ОП) ═══ */
+  mandatorySub: getLocalMandatorySub(),
+  setMandatorySub: (cfg) => {
+    const updated = { ...get().mandatorySub, ...cfg };
+    saveLocalMandatorySub(updated);
+    set({ mandatorySub: updated });
+  },
+  isChannelSubscribed: isUserSubscribed(),
+  setChannelSubscribed: (val) => {
+    if (val) markUserSubscribed(get().telegramUsername);
+    else resetUserSubscribed();
+    set({ isChannelSubscribed: val });
+  },
+  syncCloudState: async () => {
+    try {
+      const cloud = await pullCloudData();
+      if (cloud) {
+        if (cloud.mandatorySub) {
+          saveLocalMandatorySub(cloud.mandatorySub);
+          set({ mandatorySub: cloud.mandatorySub });
+        }
+        if (cloud.announcement !== undefined) {
+          save('tc_announcement', cloud.announcement);
+          set({ announcement: cloud.announcement });
+        }
+        if (cloud.adsEnabled !== undefined) {
+          save('tc_ads', cloud.adsEnabled);
+          set({ adsEnabled: cloud.adsEnabled });
+        }
+      }
+    } catch {}
+  },
 
   /* ═══ Мини-бэкенд (центральный конфиг) ═══ */
   requisites: { ...DEFAULT_REQUISITES },
