@@ -22,7 +22,6 @@ export interface Movie {
   popularity: number;
   adult: boolean;
   quality?: string;
-  is_russian?: boolean;
   kinopoisk_id?: number | string;
 }
 

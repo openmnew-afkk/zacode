@@ -1,367 +1,245 @@
-/* ══ MusicPage — Стили Яндекс Музыка / Моя Волна ══ */
-.music-page {
+/* ═══════════════════════════════════════════════════════════════════════════
+ *   Apple Music — Liquid Glass Cupertino Styles
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.music-page.apple-music-page {
   position: relative;
   min-height: 100vh;
   padding-bottom: 120px;
+  background: radial-gradient(circle at 50% 0%, rgba(250, 35, 59, 0.08) 0%, transparent 60%), var(--bg);
 }
 
-/* ── Шапка ── */
-.mu-header {
+/* ── Шапка Apple Music ── */
+.apple-header {
   position: sticky;
   top: 0;
   z-index: 40;
   padding: 12px 16px 14px;
   padding-top: var(--header-safe-top);
-  background: var(--bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
+  background: rgba(10, 10, 18, 0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.mu-header__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.mu-header__badge {
+.apple-brand__badge {
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.08em;
-  color: var(--accent);
+  letter-spacing: 0.12em;
+  color: #fa233b;
   text-transform: uppercase;
+  display: block;
+  margin-bottom: 2px;
 }
 
-.mu-header__title {
-  font-family: var(--font-display);
-  font-size: 22px;
+.apple-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-display);
+  font-size: 26px;
   font-weight: 800;
-  color: var(--text);
-  margin-top: 2px;
+  color: #ffffff;
+  letter-spacing: -0.02em;
 }
 
-.mu-header__reload {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-.mu-header__reload:active {
-  transform: scale(0.9) rotate(90deg);
+/* ── Поиск Apple Music ── */
+.apple-search {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(12px);
+  transition: all 0.2s ease;
 }
 
+.apple-search:focus-within {
+  border-color: rgba(250, 35, 59, 0.55);
+  box-shadow: 0 0 16px rgba(250, 35, 59, 0.2);
+  background: rgba(255, 255, 255, 0.09);
+}
 
-
-/* ── Настроения (Mood Chips) ── */
-.mu-moods {
+/* ── Вкладки Apple Tabs ── */
+.apple-tabs {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 10px;
   scrollbar-width: none;
+  margin-top: 10px;
 }
-.mu-moods::-webkit-scrollbar { display: none; }
+.apple-tabs::-webkit-scrollbar { display: none; }
 
-.mu-mood-chip {
+.apple-tab {
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  padding: 7px 15px;
   border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  font-size: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.mu-mood-chip:active {
+
+.apple-tab:active {
   transform: scale(0.95);
 }
-.mu-mood-chip.active {
-  background: var(--accent);
-  border-color: var(--accent);
+
+.apple-tab.active {
+  background: #fa233b;
+  border-color: #fa233b;
   color: #ffffff;
-  box-shadow: 0 4px 14px var(--accent-glow);
+  box-shadow: 0 4px 16px rgba(250, 35, 59, 0.4);
 }
 
-/* ── Поиск ── */
-.mu-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-3);
-  margin-bottom: 12px;
-}
-.mu-search__input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 13px;
-  color: var(--text);
-  font-family: inherit;
-}
-.mu-search__input::placeholder {
-  color: var(--text-3);
-}
-.mu-search__clear {
-  color: var(--text-3);
-  font-size: 13px;
-  padding: 4px;
-}
-
-/* ── Вкладки ── */
-.mu-tabs {
+/* ── Селектор категорий ── */
+.apple-categories {
   display: flex;
   gap: 8px;
   overflow-x: auto;
+  padding-top: 10px;
   scrollbar-width: none;
 }
-.mu-tabs::-webkit-scrollbar { display: none; }
+.apple-categories::-webkit-scrollbar { display: none; }
 
-.mu-tab {
+.apple-cat-chip {
   flex-shrink: 0;
-  padding: 6px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
   border-radius: 999px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.65);
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.mu-tab:active {
+
+.apple-cat-chip:active {
   transform: scale(0.95);
 }
-.mu-tab.active {
-  background: var(--text);
-  border-color: var(--text);
-  color: var(--bg);
+
+.apple-cat-chip.active {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #ffffff;
 }
 
-/* ── Список треков ── */
-.mu-content {
-  padding: 12px 14px;
-}
-
-.mu-loading,
-.mu-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  min-height: 200px;
-  color: var(--text-3);
+.apple-cat-chip__icon {
   font-size: 13px;
 }
 
-.mu-spinner {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2.5px solid var(--border);
-  border-top-color: var(--accent);
-  animation: muSpin 0.7s linear infinite;
-}
-@keyframes muSpin {
-  to { transform: rotate(360deg); }
-}
-
-.mu-live-note {
-  padding: 10px 14px;
-  border-radius: 12px;
-  background: rgba(56, 189, 248, 0.08);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  font-size: 11.5px;
-  color: #38bdf8;
-  line-height: 1.4;
-  margin-bottom: 6px;
-}
-
-.mu-list {
+/* ── Баннер радио ── */
+.apple-radio-banner {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(250, 35, 59, 0.14) 0%, rgba(139, 92, 246, 0.08) 100%);
+  border: 1px solid rgba(250, 35, 59, 0.25);
+  margin-bottom: 12px;
 }
 
-.mu-track {
+.apple-radio-banner__icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.apple-radio-banner strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.apple-radio-banner p {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.65);
+  margin: 2px 0 0;
+}
+
+/* ── Список треков Apple Music ── */
+.apple-track {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 8px 10px;
   border-radius: 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.mu-track:active {
+
+.apple-track:active {
   transform: scale(0.985);
-}
-.mu-track.active {
-  border-color: rgba(251, 113, 133, 0.45);
-  background: rgba(251, 113, 133, 0.08);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.mu-track__play-btn {
+.apple-track.active {
+  border-color: rgba(250, 35, 59, 0.5);
+  background: rgba(250, 35, 59, 0.1);
+  box-shadow: 0 4px 20px rgba(250, 35, 59, 0.12);
+}
+
+.apple-track__play-btn {
   position: relative;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   border-radius: 10px;
   overflow: hidden;
   flex-shrink: 0;
-}
-.mu-track__cover {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.mu-track__play-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.9;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
-.mu-track__playing-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 14px;
-}
-.mu-track__playing-bars span {
-  width: 2.5px;
-  border-radius: 999px;
-  background: var(--accent);
-  animation: muBarDance 0.7s ease-in-out infinite alternate;
-}
-.mu-track__playing-bars span:nth-child(1) { height: 12px; animation-delay: 0.1s; }
-.mu-track__playing-bars span:nth-child(2) { height: 8px; animation-delay: 0.25s; }
-.mu-track__playing-bars span:nth-child(3) { height: 14px; animation-delay: 0.05s; }
-
-@keyframes muBarDance {
-  0% { transform: scaleY(0.2); }
-  100% { transform: scaleY(1); }
+.apple-playing-bars span {
+  background: #fa233b !important;
 }
 
-.mu-track__meta {
-  flex: 1;
-  min-width: 0;
-  cursor: pointer;
-}
-
-.mu-track__title-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mu-track__title {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mu-track__live-tag {
-  font-size: 9.5px;
+/* ── Бейджи Lossless & Spatial Audio ── */
+.apple-badge-lossless {
+  display: inline-block;
+  font-size: 9px;
   font-weight: 800;
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.12);
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: 1px 5px;
   border-radius: 4px;
   text-transform: uppercase;
   flex-shrink: 0;
 }
 
-.mu-track__sub-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 2px;
-  font-size: 11.5px;
-  color: var(--text-3);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.mu-track__artist {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mu-track__dot { opacity: 0.5; }
-.mu-track__genre { opacity: 0.75; }
-
-.mu-track__duration {
-  font-size: 11px;
-  color: var(--text-3);
-  font-variant-numeric: tabular-nums;
+.apple-badge-spatial {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
   flex-shrink: 0;
 }
 
-.mu-track__actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+.apple-like-btn {
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.18s ease;
 }
 
-.mu-track__like {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-3);
-  cursor: pointer;
-  transition: transform 0.15s ease, color 0.15s ease;
-}
-.mu-track__like:active {
-  transform: scale(0.85);
-}
-.mu-track__like.liked {
-  color: var(--accent);
+.apple-like-btn.liked {
+  color: #fa233b !important;
 }
 
-/* ── Тост ── */
-.mu-toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(var(--tabbar-h) + 12px);
-  transform: translateX(-50%);
-  background: var(--surface);
-  border: 1px solid var(--border-light);
-  color: var(--text);
-  font-size: 12px;
-  font-weight: 700;
-  padding: 8px 16px;
-  border-radius: 999px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  z-index: 100;
+.apple-spinner {
+  border-top-color: #fa233b !important;
+}
+
+.apple-toast {
+  background: rgba(20, 20, 30, 0.88);
+  border-color: rgba(250, 35, 59, 0.3);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
 }

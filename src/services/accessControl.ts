@@ -22,7 +22,6 @@ export interface UserGrant {
   grantedAt: number;
   grantedBy: string;
   note?: string;
-  hasRussianAccess?: boolean; // Допуск к русским фильмам и сериалам
 }
 
 /* ═══════════ Мастер-списки в коде ═══════════ */
@@ -92,7 +91,6 @@ export function resolveUserAccess(username: string): {
   isAdmin: boolean;
   isModerator: boolean;
   isVip: boolean;
-  hasRussianAccess: boolean;
   role: UserRole;
   expiry: number | null;
   grantInfo?: UserGrant;
@@ -105,7 +103,6 @@ export function resolveUserAccess(username: string): {
       isAdmin: true,
       isModerator: false,
       isVip: true,
-      hasRussianAccess: true,
       role: 'admin',
       expiry: null,
     };
@@ -122,7 +119,6 @@ export function resolveUserAccess(username: string): {
         isAdmin: found.role === 'admin',
         isModerator: found.role === 'moderator',
         isVip: found.role === 'vip' || found.role === 'admin' || found.role === 'moderator',
-        hasRussianAccess: found.hasRussianAccess ?? (found.role === 'admin' || found.role === 'vip'),
         role: found.role,
         expiry: found.expiry,
         grantInfo: found,
@@ -134,16 +130,9 @@ export function resolveUserAccess(username: string): {
     isAdmin: false,
     isModerator: false,
     isVip: false,
-    hasRussianAccess: false,
     role: 'user',
     expiry: null,
   };
-}
-
-/** Быстрая проверка доступа к российскому контенту */
-export function checkRussianAccess(username?: string | null): boolean {
-  if (!username) return false;
-  return resolveUserAccess(username).hasRussianAccess;
 }
 
 /** Быстрая проверка статуса администратора */
@@ -160,8 +149,7 @@ export function grantAccessToUser(
   role: UserRole,
   duration: DurationOption,
   grantedBy: string,
-  note = '',
-  hasRussianAccess = true
+  note = ''
 ): UserGrant | null {
   const clean = normalizeUsername(rawUsername);
   if (!clean) return null;
@@ -178,38 +166,11 @@ export function grantAccessToUser(
     grantedAt: Date.now(),
     grantedBy: grantedBy || 'ZenovaAdmin',
     note,
-    hasRussianAccess,
   };
 
   grants.unshift(newGrant);
   saveGrants(grants);
   return newGrant;
-}
-
-/** Переключить допуск к русскому кино для пользователя */
-export function toggleRussianAccessForUser(rawUsername: string, enable?: boolean): boolean {
-  const clean = normalizeUsername(rawUsername);
-  if (!clean) return false;
-  const grants = getStoredGrants();
-  let found = grants.find((g) => g.username === clean);
-
-  if (!found) {
-    found = {
-      username: clean,
-      displayName: rawUsername.trim().startsWith('@') ? rawUsername.trim() : `@${rawUsername.trim()}`,
-      role: 'vip',
-      expiry: null,
-      durationLabel: 'Бессрочно',
-      grantedAt: Date.now(),
-      grantedBy: 'Admin',
-      hasRussianAccess: enable ?? true,
-    };
-    grants.unshift(found);
-  } else {
-    found.hasRussianAccess = enable !== undefined ? enable : !found.hasRussianAccess;
-  }
-  saveGrants(grants);
-  return !!found.hasRussianAccess;
 }
 
 /**

@@ -5,7 +5,6 @@ import { buildWatchOptions, isRestrictedContent } from '../api/watch';
 import type { MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
-import { checkRussianAccess } from '../services/accessControl';
 import AgeGateModal, { isAgeVerified } from '../components/AgeGateModal';
 import './MovieDetailPage.css';
 
@@ -314,15 +313,7 @@ const MovieDetailPage: React.FC = () => {
   const inList = status !== null;
   const whereLinks = whereToWatch(movie.title);
 
-  /* РФ контент: просмотр выдается индивидуально администратором по нику */
-  const isRussianMovie = Boolean(
-    movie.is_russian ||
-    (movie.id && String(movie.id).startsWith('rus-')) ||
-    (movie.countries && movie.countries.some((c) => /россия|russia|ссср|ussr/i.test(c)))
-  );
-  const hasRussianAccess = checkRussianAccess(tgUser?.username);
-  const isRussianRestricted = isRussianMovie && !hasRussianAccess;
-  const canWatch = !isRussianRestricted;
+  const canWatch = true;
 
   const startWatching = () => {
     setWatchOptions(buildWatchOptions({
@@ -415,7 +406,6 @@ const MovieDetailPage: React.FC = () => {
             {movie.release_date && <span>{movie.release_date.slice(0, 4)}</span>}
             {movie.runtime ? <span>{movie.runtime} мин</span> : null}
             {isSerial && <span className="dp-meta--serial">Сериал</span>}
-            {isRussianMovie && <span className="dp-meta--rus">🇷🇺 РФ</span>}
           </div>
 
           <div className="dp-genres">
@@ -425,21 +415,7 @@ const MovieDetailPage: React.FC = () => {
           </div>
 
           <div className="dp-actions">
-            {isRussianRestricted ? (
-              <button
-                className="dp-watch dp-watch--locked"
-                onClick={() => {
-                  haptic('heavy');
-                  window.open('https://t.me/ZenovaSupport_bot', '_blank');
-                }}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                Доступ по нику
-              </button>
-            ) : canWatch ? (
+            {canWatch ? (
               <button
                 className="dp-watch"
                 onClick={handleWatchClick}
@@ -496,39 +472,7 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Плашка доступа к РФ контенту (по нику) ── */}
-      {isRussianRestricted ? (
-        <div className="dp-rus-restricted">
-          <div className="dp-rus-restricted__icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fb7185" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-            </svg>
-          </div>
-          <div className="dp-rus-restricted__body">
-            <div className="dp-rus-restricted__title">🇷🇺 Доступ к контенту РФ ограничен</div>
-            <p className="dp-rus-restricted__text">
-              Просмотр российских сериалов и новинок кино выдаётся администратором индивидуально для вашего ника в Telegram.
-              <br />
-              Ваш ник: <span className="dp-rus-restricted__nick">@{tgUser?.username || 'без_ника'}</span>.
-            </p>
-            <a
-              href="https://t.me/ZenovaSupport_bot"
-              target="_blank"
-              rel="noreferrer"
-              className="dp-rus-restricted__btn"
-              onClick={() => haptic('medium')}
-            >
-              💬 Запросить доступ у поддержки (@ZenovaSupport_bot)
-            </a>
-          </div>
-        </div>
-      ) : isRussianMovie && hasRussianAccess ? (
-        <div className="dp-rus-granted">
-          <span className="dp-rus-granted__badge">✓ Доступ к РФ контенту активен</span>
-          <span className="dp-rus-granted__sub">Для вашего аккаунта @{tgUser?.username} разблокированы все российские серверы</span>
-        </div>
-      ) : null}
+
 
       {/* ── Дневник: статусы ── */}
       <div className="dp-section">
@@ -570,7 +514,7 @@ const MovieDetailPage: React.FC = () => {
       <div className="dp-section">
         <h3 className="dp-section__title">Где посмотреть</h3>
         <p className="dp-where__hint">
-          {isRussianRestricted ? 'Легальные площадки для этого тайтла' : 'Поиск по легальным сервисам'}
+          'Поиск по легальным сервисам'
         </p>
         <div className="dp-where">
           {whereLinks.map((s) => (
@@ -637,9 +581,9 @@ const MovieDetailPage: React.FC = () => {
             <div className="dp-watch-hint">
               {watchOptions[watchIdx]?.provider === 'Collaps' ? (
                 <>
-                  <span className="dp-watch-hint__badge">🇷🇺 Collaps HD (Сервер №1):</span>
+                  <span className="dp-watch-hint__badge">⚡ Collaps HD (Сервер №1):</span>
                   <span className="dp-watch-hint__text">
-                    LostFilm · RHS · Резка · Дубляж. При ошибке «Недоступно для вашего региона: US» — в VPN выберите <b>Нидерланды/Германию/РФ</b> или переключитесь на альтернативный сервер ниже.
+                    LostFilm · RHS · Резка · Дубляж. При ошибке «Недоступно для вашего региона: US» — в VPN выберите сервер Европы/США или переключитесь на альтернативный сервер ниже.
                   </span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Voidboost' ? (
@@ -650,12 +594,12 @@ const MovieDetailPage: React.FC = () => {
               ) : watchOptions[watchIdx]?.provider === 'Alloha' ? (
                 <>
                   <span className="dp-watch-hint__badge">✨ Alloha / Резка:</span>
-                  <span className="dp-watch-hint__text">Студийные озвучки РФ · Альтернативный поток</span>
+                  <span className="dp-watch-hint__text">Студийные озвучки · Альтернативный поток</span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Lumex' ? (
                 <>
                   <span className="dp-watch-hint__badge">🎥 Lumex HD:</span>
-                  <span className="dp-watch-hint__text">Российский видео-CDN · Дубляж Full HD</span>
+                  <span className="dp-watch-hint__text">Скоростной видео-CDN · Дубляж Full HD</span>
                 </>
               ) : (
                 <>
@@ -700,7 +644,7 @@ const MovieDetailPage: React.FC = () => {
               </div>
             )}
             <div className="dp-watch-sources-wrap">
-              <span className="dp-watch-sources-title">Серверы вещания (с поддержкой VPN и русской озвучки):</span>
+              <span className="dp-watch-sources-title">Серверы вещания (4K / 1080p, поддержка VPN и озвучки):</span>
               <div className="dp-watch-sources">
                 {watchOptions.map((o, i) => (
                   <button
