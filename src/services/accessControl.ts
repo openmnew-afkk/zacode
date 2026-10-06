@@ -146,6 +146,12 @@ export function checkRussianAccess(username?: string | null): boolean {
   return resolveUserAccess(username).hasRussianAccess;
 }
 
+/** Быстрая проверка статуса администратора */
+export function checkAdminAccess(username?: string | null): boolean {
+  if (!username) return false;
+  return resolveUserAccess(username).isAdmin;
+}
+
 /**
  * Добавить или обновить права для пользователя по @username
  */

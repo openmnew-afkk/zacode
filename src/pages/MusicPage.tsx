@@ -8,6 +8,7 @@ import {
   RUSSIAN_CHART_TOP,
   RussianTrack,
 } from '../data/russianHits';
+import { checkAdminAccess } from '../services/accessControl';
 import './MusicPage.css';
 
 /* ═══════════ Типы ═══════════ */
@@ -83,7 +84,8 @@ const Artwork: React.FC<{ src: string; alt: string; className: string }> = ({ sr
 
 /* ═══════════ Компонент Музыки ═══════════ */
 const MusicPage: React.FC = () => {
-  const { haptic, openLink } = useTelegram();
+  const { haptic, openLink, user: tgUser } = useTelegram();
+  const isAdmin = checkAdminAccess(tgUser?.username);
   const {
     currentTrack, isPlaying, progress,
     setTrack, setPlaying,
@@ -94,8 +96,24 @@ const MusicPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<Tab>('wave');
-  const [activeMood, setActiveMood] = useState<MoodId>('russian');
+  const [activeMood, setActiveMood] = useState<MoodId>(isAdmin ? 'russian' : 'drive');
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const visibleMoods = isAdmin ? YANDEX_MOODS : YANDEX_MOODS.filter((m) => m.id !== 'russian');
+
+  // Если обычный пользователь оказался на вкладке чарта РФ — переключаем на безопасную волну
+  useEffect(() => {
+    if (tab === 'chart' && !isAdmin) {
+      setTab('wave');
+    }
+  }, [tab, isAdmin]);
+
+  // Защита от выбора русского настроения обычным пользователем
+  useEffect(() => {
+    if (!isAdmin && activeMood === 'russian') {
+      setActiveMood('drive');
+    }
+  }, [isAdmin, activeMood]);
 
   const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
 
@@ -128,13 +146,21 @@ const MusicPage: React.FC = () => {
     setLoading(true);
     try {
       if (tab === 'wave') {
-        // Умная волна (Яндекс Музыка Style): подмешивает только РЕАЛЬНЫЕ студийные треки по выбранному настроению без рекламы!
-        const moodFiltered = RUSSIAN_CHART_TOP.filter((t) => t.mood === activeMood || activeMood === 'russian').map(mapRussianTrack);
-        const audiusTracks = await fetchAudius(20);
-        setTracks([...moodFiltered, ...audiusTracks]);
+        if (isAdmin) {
+          const moodFiltered = RUSSIAN_CHART_TOP.filter((t) => t.mood === activeMood || activeMood === 'russian').map(mapRussianTrack);
+          const audiusTracks = await fetchAudius(20);
+          setTracks([...moodFiltered, ...audiusTracks]);
+        } else {
+          // Для обычных пользователей: безопасный глобальный каталог без копирайта РФ
+          const fullTracks = await fetchAudius(35);
+          setTracks(fullTracks);
+        }
       } else if (tab === 'chart') {
-        // Главный хит-парад России (100% реальные песни, 0 радиорекламы)
-        setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
+        if (isAdmin) {
+          setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
+        } else {
+          setTracks([]);
+        }
       } else if (tab === 'live') {
         // 24/7 Прямой эфир FM-радиостанций
         setTracks(RUSSIAN_RADIO_STREAMS.map(mapRussianTrack));
@@ -146,11 +172,15 @@ const MusicPage: React.FC = () => {
         setTracks(likedTracks);
       }
     } catch {
-      setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
+      if (isAdmin) {
+        setTracks(RUSSIAN_CHART_TOP.map(mapRussianTrack));
+      } else {
+        setTracks(RUSSIAN_RADIO_STREAMS.map(mapRussianTrack));
+      }
     } finally {
       setLoading(false);
     }
-  }, [tab, activeMood, likedTracks, fetchAudius]);
+  }, [tab, activeMood, likedTracks, fetchAudius, isAdmin]);
 
   useEffect(() => {
     if (!query.trim()) {
@@ -158,15 +188,15 @@ const MusicPage: React.FC = () => {
     }
   }, [loadContent, query]);
 
-  /* Полноценный поиск: локальные хиты РФ + Audius каталог полных треков */
+  /* Полноценный поиск: локальные хиты РФ (только для админа) + Audius каталог полных треков */
   useEffect(() => {
     if (!query.trim()) return;
 
     const q = query.trim().toLowerCase();
 
-    // Мгновенный локальный поиск по чарту РФ и радиостанциям
+    // Локальный поиск по чарту РФ (ТОЛЬКО для администратора!) и радиостанциям
     const localHits: Track[] = [
-      ...RUSSIAN_CHART_TOP.map(mapRussianTrack),
+      ...(isAdmin ? RUSSIAN_CHART_TOP.map(mapRussianTrack) : []),
       ...RUSSIAN_RADIO_STREAMS.map(mapRussianTrack),
     ].filter(
       (t) =>
@@ -226,7 +256,7 @@ const MusicPage: React.FC = () => {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, isAdmin]);
 
   /* Управление воспроизведением */
   const handlePlayTrack = (track: Track, idx: number) => {
@@ -276,7 +306,7 @@ const MusicPage: React.FC = () => {
         {/* ── Переключатель настроений (Mood Selector) ── */}
         {tab === 'wave' && (
           <div className="mu-moods">
-            {YANDEX_MOODS.map((m) => (
+            {visibleMoods.map((m) => (
               <button
                 key={m.id}
                 className={`mu-mood-chip ${activeMood === m.id ? 'active' : ''}`}
@@ -311,14 +341,16 @@ const MusicPage: React.FC = () => {
           <button className={`mu-tab ${tab === 'wave' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('wave'); }}>
             🌊 Моя Волна
           </button>
-          <button className={`mu-tab ${tab === 'chart' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('chart'); }}>
-            🇷🇺 Чарт РФ
+          {isAdmin && (
+            <button className={`mu-tab ${tab === 'chart' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('chart'); }}>
+              🇷🇺 Чарт РФ
+            </button>
+          )}
+          <button className={`mu-tab ${tab === 'audius' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('audius'); }}>
+            🌍 Мировой топ
           </button>
           <button className={`mu-tab ${tab === 'live' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('live'); }}>
             📻 Радио 24/7
-          </button>
-          <button className={`mu-tab ${tab === 'audius' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('audius'); }}>
-            🌍 Полные треки
           </button>
           <button className={`mu-tab ${tab === 'liked' ? 'active' : ''}`} onClick={() => { haptic('light'); setTab('liked'); }}>
             💖 Любимые ({likedTracks.length})

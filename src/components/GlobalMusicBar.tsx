@@ -32,11 +32,19 @@ const GlobalMusicBar: React.FC = () => {
     const unsubDur = audioEngine.onDurationChange((dur) => {
       setDuration(dur);
     });
+    const unsubErr = audioEngine.onError(() => {
+      setPlaying(false);
+      showToastMsg('Ошибка аудиопотока. Следующий трек…');
+      setTimeout(() => {
+        nextTrack();
+      }, 1000);
+    });
 
     return () => {
       unsubEnd();
       unsubTime();
       unsubDur();
+      unsubErr();
     };
   }, [nextTrack, setProgress, setDuration]);
 
@@ -186,10 +194,26 @@ const GlobalMusicBar: React.FC = () => {
           </div>
         </div>
 
-        {/* Track info */}
+        {/* Track info with prominent inline like button */}
         <div className="gfull__info">
-          <div className="gfull__title">{currentTrack.title}</div>
-          <div className="gfull__artist">{currentTrack.artist}</div>
+          <div className="gfull__info-text">
+            <div className="gfull__title">{currentTrack.title}</div>
+            <div className="gfull__artist">{currentTrack.artist}</div>
+          </div>
+          <button
+            className={`gfull__like-btn ${liked ? 'active' : ''}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleLike(currentTrack);
+              showToastMsg(liked ? 'Удалено из избранного' : 'Добавлено в избранное');
+            }}
+            aria-label="Мне нравится"
+            title="Мне нравится"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill={liked ? 'var(--accent, #fb7185)' : 'none'} stroke={liked ? 'var(--accent, #fb7185)' : 'rgba(255,255,255,0.7)'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
         </div>
 
         {/* Seek bar */}
@@ -341,6 +365,19 @@ const GlobalMusicBar: React.FC = () => {
           <div className="gbar__artist">{currentTrack.artist}</div>
         </div>
         <div className="gbar__btns" onClick={(e) => e.stopPropagation()}>
+          <button
+            className={`gbar__btn gbar__btn--like ${liked ? 'liked' : ''}`}
+            onClick={() => {
+              toggleLike(currentTrack);
+              showToastMsg(liked ? 'Удалено из избранного' : 'Добавлено в избранное');
+            }}
+            aria-label="Мне нравится"
+            title="Мне нравится"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'var(--accent, #fb7185)' : 'none'} stroke={liked ? 'var(--accent, #fb7185)' : 'currentColor'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </button>
           <button className="gbar__btn gbar__btn--play" onClick={() => setPlaying(!isPlaying)} aria-label="Play/Pause">
             {isPlaying ? (
               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>

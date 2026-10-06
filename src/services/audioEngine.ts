@@ -3,6 +3,7 @@
 type AudioEventCallback = () => void;
 type AudioTimeCallback = (time: number) => void;
 type AudioDurationCallback = (duration: number) => void;
+type AudioErrorCallback = (err: any) => void;
 
 class GlobalAudioEngine {
   private audio: HTMLAudioElement | null = null;
@@ -10,11 +11,16 @@ class GlobalAudioEngine {
   private onEndCallbacks = new Set<AudioEventCallback>();
   private onTimeCallbacks = new Set<AudioTimeCallback>();
   private onDurationCallbacks = new Set<AudioDurationCallback>();
+  private onErrorCallbacks = new Set<AudioErrorCallback>();
 
   private init() {
     if (this.audio) return this.audio;
     const a = new Audio();
     a.preload = 'auto';
+    // Настройки для мобильного WebKit / Telegram WebApp
+    (a as any).playsInline = true;
+    a.setAttribute('playsinline', 'true');
+    a.setAttribute('webkit-playsinline', 'true');
 
     a.addEventListener('ended', () => {
       this.onEndCallbacks.forEach((cb) => cb());
@@ -30,8 +36,18 @@ class GlobalAudioEngine {
       this.onDurationCallbacks.forEach((cb) => cb(dur));
     });
 
+    a.addEventListener('error', (e) => {
+      console.warn('Audio playback error', e);
+      this.onErrorCallbacks.forEach((cb) => cb(e));
+    });
+
     this.audio = a;
     return a;
+  }
+
+  onError(cb: AudioErrorCallback) {
+    this.onErrorCallbacks.add(cb);
+    return () => this.onErrorCallbacks.delete(cb);
   }
 
   onEnded(cb: AudioEventCallback) {
