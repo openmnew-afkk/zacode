@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
-  discoverMovies,
+  discoverMovies, discoverSeries,
 } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
@@ -344,7 +344,7 @@ const HomePage: React.FC = () => {
     setCatSort('default');
     setExtraCatMovies([]);
     setCatPage(1);
-    setCatHasMore(Boolean(genreId || id.startsWith('trend') || id.startsWith('top') || id.startsWith('now')));
+    setCatHasMore(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [haptic]);
 
@@ -432,24 +432,35 @@ const HomePage: React.FC = () => {
     const nextPage = catPage + 1;
     try {
       let newItems: Movie[] = [];
+      const catId = (activeCategory.id || '').toLowerCase();
+      const isSeries = activeCategory.type === 'series' || catId.includes('series');
+      const isTop = catId.includes('top');
+
       if (activeCategory.genreId) {
         const res = await getPopularByGenre(activeCategory.genreId, nextPage);
         newItems = res.results || [];
-      } else if (activeCategory.id.includes('top_movies') || activeCategory.id === 'topMovies') {
-        const res = await discoverMovies({ page: nextPage, sort_by: 'vote_average.desc' });
+      } else if (isSeries) {
+        const res = await discoverSeries({
+          page: nextPage,
+          sort_by: isTop ? 'vote_average.desc' : 'popularity.desc',
+        });
         newItems = res.results || [];
-      } else if (activeCategory.id.includes('trend') || activeCategory.id.includes('now')) {
-        const res = await discoverMovies({ page: nextPage, sort_by: 'popularity.desc' });
+      } else {
+        const res = await discoverMovies({
+          page: nextPage,
+          sort_by: isTop ? 'vote_average.desc' : 'popularity.desc',
+        });
         newItems = res.results || [];
       }
 
-      if (newItems.length > 0) {
+      if (newItems && newItems.length > 0) {
         const existingIds = new Set(allCatMovies.map(m => m.id));
         const filtered = newItems.filter(m => !existingIds.has(m.id));
         if (filtered.length > 0) {
           setExtraCatMovies(prev => [...prev, ...filtered]);
-          setCatPage(nextPage);
-        } else {
+        }
+        setCatPage(nextPage);
+        if (nextPage > 50) {
           setCatHasMore(false);
         }
       } else {
@@ -457,7 +468,7 @@ const HomePage: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load more category movies', err);
-      setCatHasMore(false);
+      setCatPage(nextPage);
     } finally {
       setCatLoadingMore(false);
     }

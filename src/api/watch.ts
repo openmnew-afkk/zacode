@@ -43,11 +43,11 @@ export function buildWatchOptions({
 
   const opts: WatchOption[] = [];
 
-  /* 1. Collaps HD — СЕРВЕР №1 (главный студийный балансер РФ: LostFilm, Red Head Sound, Резка, Дубляж) */
+  /* 1. Плеер 1 — СЕРВЕР №1 (главный студийный балансер: LostFilm, Red Head Sound, Резка, Дубляж) */
   opts.push({
     id: 'collaps',
-    label: 'Collaps HD',
-    sublabel: '🇷🇺 LostFilm · Red Head Sound · Резка · Дубляж (Сервер №1)',
+    label: 'Плеер 1',
+    sublabel: '⚡ Ultra HD 4K · Дубляж и студии (Основной)',
     url: cleanKp
       ? `https://api.delivembed.cc/embed/kp/${cleanKp}?host=delivembed.cc`
       : isSerial
@@ -60,15 +60,15 @@ export function buildWatchOptions({
     type: 'iframe',
     lang: 'ru',
     provider: 'Collaps',
-    flag: '🇷🇺',
-    quality: '1080p',
+    flag: '⚡',
+    quality: '4K/1080p',
   });
 
-  /* 2. Voidboost HD — проверенный плеер со студийными переводами РФ (HDRezka, LostFilm, Дубляж), без редиректов */
+  /* 2. Плеер 2 — проверенный плеер со студийными переводами (HDRezka, LostFilm, Дубляж), без редиректов */
   opts.push({
     id: 'voidboost',
-    label: 'Voidboost HD',
-    sublabel: '🍿 HDRezka · LostFilm · NewStudio · Дубляж (РФ)',
+    label: 'Плеер 2',
+    sublabel: '🍿 Full HD · Все переводы (Резерв #1)',
     url: cleanKp
       ? `https://voidboost.net/embed/${cleanKp}`
       : cleanImdb
@@ -83,11 +83,11 @@ export function buildWatchOptions({
     quality: '1080p',
   });
 
-  /* 3. Alloha / Резка — альтернативный российский балансер со студийными дорожками */
+  /* 3. Плеер 3 — альтернативный балансер со студийными дорожками */
   opts.push({
     id: 'alloha',
-    label: 'Alloha / Резка',
-    sublabel: '✨ Студийные озвучки РФ · Альтернативный поток',
+    label: 'Плеер 3',
+    sublabel: '✨ Full HD · Альтернативный поток (Резерв #2)',
     url: cleanKp
       ? `https://stream.voidboost.cc/embed/${cleanKp}`
       : cleanImdb
@@ -102,11 +102,11 @@ export function buildWatchOptions({
     quality: 'Full HD',
   });
 
-  /* 4. Lumex HD — российский CDN плеер с дубляжом */
+  /* 4. Плеер 4 — скоростной CDN плеер с дубляжом */
   opts.push({
     id: 'lumex',
-    label: 'Lumex HD',
-    sublabel: '🎥 Российский видео-CDN · Дубляж Full HD',
+    label: 'Плеер 4',
+    sublabel: '🎥 Скоростной видео-CDN · Full HD (Резерв #3)',
     url: cleanKp
       ? `https://v1727192800.lumex.news/embed/${cleanKp}`
       : cleanImdb
@@ -121,12 +121,12 @@ export function buildWatchOptions({
     quality: 'Full HD',
   });
 
-  /* 5. Kinobox — мульти-плеер по Кинопоиску для РФ */
+  /* 5. Плеер 5 — мульти-поток */
   if (cleanKp) {
     opts.push({
       id: 'kinobox',
-      label: 'Кинобокс HD',
-      sublabel: '🎬 Плееры РФ (HDRezka, Kodik, Collaps)',
+      label: 'Плеер 5',
+      sublabel: '🎬 Мульти-поток · HD (Резерв #4)',
       url: `https://kinobox.tv/embed?kinopoisk=${cleanKp}`,
       type: 'iframe',
       lang: 'ru',
@@ -136,11 +136,11 @@ export function buildWatchOptions({
     });
   }
 
-  /* 6. Global 4K (США) — ЕДИНСТВЕННЫЙ американский сервер (100% стабилен с любым VPN США, оригинал + субтитры) */
+  /* 6. Международный сервер (100% стабилен с любым VPN США, оригинал + субтитры) */
   opts.push({
     id: 'global-us',
-    label: 'Global 4K (США)',
-    sublabel: '🇺🇸 100% с любым VPN (США) · Скоростной CDN · Оригинал + субтитры',
+    label: cleanKp ? 'Плеер 6' : 'Плеер 5',
+    sublabel: '🇺🇸 Скоростной поток (США / VPN) · 4K/1080p',
     url: isSerial
       ? `https://embed.su/embed/tv/${cleanTmdb}/${season}/${episode}`
       : `https://embed.su/embed/movie/${cleanTmdb}`,

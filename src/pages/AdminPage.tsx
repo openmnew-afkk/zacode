@@ -409,7 +409,7 @@ const AdminPage: React.FC = () => {
         </div>
         <div className="adm-metric">
           <span className="adm-metric__icon">🌍</span>
-          <div className="adm-metric__val">VidLink #1</div>
+          <div className="adm-metric__val">Плеер 1 (4K)</div>
           <div className="adm-metric__lbl">Режим под VPN</div>
         </div>
       </div>
@@ -859,7 +859,7 @@ const AdminPage: React.FC = () => {
               <div>
                 <strong>Приоритет потоков активен:</strong>
                 <p>
-                  1-м по умолчанию открывается <strong>VidLink Pro</strong> (4K/1080p со студийной озвучкой), который идеально работает под любым VPN без сбоев. Резервный плеер Collaps смещён на резервную позицию для пользователей без VPN.
+                  1-м по умолчанию открывается <strong>Плеер 1</strong> (Ultra HD 4K со студийными озвучками). В случае блокировки или работы под VPN пользователи могут переключиться на Плеер 2, 3, 4 или 5 в один клик.
                 </p>
               </div>
             </div>
@@ -868,66 +868,55 @@ const AdminPage: React.FC = () => {
               <div className="adm-server-card adm-server-card--active">
                 <div className="adm-server-card__top">
                   <span className="adm-server-card__flag">⚡</span>
-                  <div className="adm-server-card__name">1. VidLink Pro (Основной)</div>
-                  <span className="adm-server-card__status adm-server-card__status--green">Работает на ура с VPN</span>
+                  <div className="adm-server-card__name">1. Плеер 1 (Основной)</div>
+                  <span className="adm-server-card__status adm-server-card__status--green">Ultra HD 4K</span>
                 </div>
                 <p className="adm-server-card__desc">
-                  Ультраскоростной 4K/1080p плеер со студийным дубляжом и аудиодорожками. Стабильно отдаёт поток через европейские и американские IP-адреса VPN.
-                </p>
-              </div>
-
-              <div className="adm-server-card adm-server-card--active">
-                <div className="adm-server-card__top">
-                  <span className="adm-server-card__flag">💎</span>
-                  <div className="adm-server-card__name">2. VidSrc PM (Резерв #1)</div>
-                  <span className="adm-server-card__status adm-server-card__status--green">Работает с VPN</span>
-                </div>
-                <p className="adm-server-card__desc">
-                  Прямой скоростной CDN-поток без ограничений по регионам.
-                </p>
-              </div>
-
-              <div className="adm-server-card adm-server-card--active">
-                <div className="adm-server-card__top">
-                  <span className="adm-server-card__flag">🚀</span>
-                  <div className="adm-server-card__name">3. VidSrc SH (Резерв #2)</div>
-                  <span className="adm-server-card__status adm-server-card__status--green">Работает с VPN</span>
-                </div>
-                <p className="adm-server-card__desc">
-                  Альтернативное зеркало международного вещания.
+                  Главный студийный балансер: LostFilm, Red Head Sound, Резка, профессиональный дубляж 4K/1080p.
                 </p>
               </div>
 
               <div className="adm-server-card adm-server-card--active">
                 <div className="adm-server-card__top">
                   <span className="adm-server-card__flag">🍿</span>
-                  <div className="adm-server-card__name">4. 2Embed HD (Архив)</div>
+                  <div className="adm-server-card__name">2. Плеер 2 (Резерв #1)</div>
                   <span className="adm-server-card__status adm-server-card__status--green">Работает с VPN</span>
                 </div>
                 <p className="adm-server-card__desc">
-                  Мировая библиотека сериалов и фильмов с переключением серий.
+                  Full HD со студийными переводами (HDRezka, LostFilm, Дубляж), без редиректов.
                 </p>
               </div>
 
               <div className="adm-server-card adm-server-card--active">
                 <div className="adm-server-card__top">
-                  <span className="adm-server-card__flag">🌐</span>
-                  <div className="adm-server-card__name">5. MultiEmbed (Ротатор)</div>
+                  <span className="adm-server-card__flag">✨</span>
+                  <div className="adm-server-card__name">3. Плеер 3 (Резерв #2)</div>
                   <span className="adm-server-card__status adm-server-card__status--green">Работает с VPN</span>
                 </div>
                 <p className="adm-server-card__desc">
-                  Автоматический балансировщик запасных стримов.
+                  Альтернативный скоростной поток со всеми звуковыми дорожками.
                 </p>
               </div>
 
-              <div className="adm-server-card">
+              <div className="adm-server-card adm-server-card--active">
                 <div className="adm-server-card__top">
-                  <span className="adm-server-card__flag">🇷🇺</span>
-                  <div className="adm-server-card__name">6. Collaps HD (РФ)</div>
-                  <span className="adm-server-card__status adm-server-card__status--amber">Только БЕЗ VPN</span>
+                  <span className="adm-server-card__flag">🎥</span>
+                  <div className="adm-server-card__name">4. Плеер 4 (Резерв #3)</div>
+                  <span className="adm-server-card__status adm-server-card__status--green">Работает с VPN</span>
                 </div>
                 <p className="adm-server-card__desc">
-                  Российский CDN с озвучками LostFilm/RHS. Блокирует зарубежные IP-адреса датацентров VPN, поэтому используется только без VPN.
+                  Скоростной видео-CDN с мгновенной буферизацией и дубляжом Full HD.
+                </p>
+              </div>
+
+              <div className="adm-server-card adm-server-card--active">
+                <div className="adm-server-card__top">
+                  <span className="adm-server-card__flag">🇺🇸</span>
+                  <div className="adm-server-card__name">5. Плеер 5 (Зарубежный / VPN)</div>
+                  <span className="adm-server-card__status adm-server-card__status--green">100% с любым VPN</span>
+                </div>
+                <p className="adm-server-card__desc">
+                  Международный скоростной CDN. Оригинальные дорожки в 4K + субтитры, стабилен из любой точки мира.
                 </p>
               </div>
             </div>

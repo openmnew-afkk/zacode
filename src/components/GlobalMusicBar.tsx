@@ -106,19 +106,14 @@ const GlobalMusicBar: React.FC = () => {
     });
   };
 
-  const openYandexMusic = () => {
-    setShowMenu(false);
-    if (!currentTrack) return;
-    const q = `${currentTrack.artist} ${currentTrack.title}`;
-    window.open(`https://music.yandex.ru/search?text=${encodeURIComponent(q)}`, '_blank');
-  };
-
-  const openVkMusic = () => {
-    setShowMenu(false);
-    if (!currentTrack) return;
-    const q = `${currentTrack.artist} ${currentTrack.title}`;
-    window.open(`https://vk.com/audio?q=${encodeURIComponent(q)}`, '_blank');
-  };
+  /* Блокируем скролл страницы под открытым плеером */
+  useEffect(() => {
+    if (isExpanded) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [isExpanded]);
 
   const openAppleMusic = () => {
     setShowMenu(false);
@@ -312,14 +307,6 @@ const GlobalMusicBar: React.FC = () => {
 
               {/* Внешние сервисы */}
               <div className="gfull__sheet-group">
-                <button className="gfull__sheet-btn" onClick={openYandexMusic}>
-                  <span className="gfull__service-tag yandex">Я</span>
-                  <span>Открыть в Яндекс Музыке</span>
-                </button>
-                <button className="gfull__sheet-btn" onClick={openVkMusic}>
-                  <span className="gfull__service-tag vk">VK</span>
-                  <span>Открыть в VK Музыке</span>
-                </button>
                 <button className="gfull__sheet-btn" onClick={openAppleMusic}>
                   <span className="gfull__service-tag apple"></span>
                   <span>Открыть в Apple Music</span>

@@ -31,9 +31,9 @@ type Tab = 'listen' | 'chart' | 'radio' | 'library';
 const APP_NAME = 'ZENOVA';
 
 const HOSTS_FALLBACK = [
-  'https://discoveryprovider.audius.co',
-  'https://audius-discovery-2.altego.net',
+  'https://api.audius.co',
   'https://audius-metadata-1.figment.io',
+  'https://audius-discovery-2.altego.net',
   'https://dn1.audius.l2be.net',
 ];
 
@@ -61,15 +61,15 @@ const mapAppleTrack = (a: AppleTrack): Track => ({
   album: a.album,
 });
 
-const mapAudiusTrack = (t: any, host: string): Track => ({
+const mapAudiusTrack = (t: any, _host: string): Track => ({
   id: `au-${t.id}`,
   title: t.title ?? 'Без названия',
   artist: t.user?.name ?? 'Неизвестный артист',
-  artwork: t.artwork?.['480x480'] || t.artwork?.['150x150'] || '',
+  artwork: t.artwork?.['480x480'] || t.artwork?.['1000x1000'] || t.artwork?.['150x150'] || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
   duration: t.duration ?? 0,
   plays: t.play_count ?? 0,
-  genre: t.genre || 'Lossless Stream',
-  streamUrl: `${host}/v1/tracks/${t.id}/stream?app_name=${APP_NAME}`,
+  genre: t.genre || 'Lossless Full Stream',
+  streamUrl: `https://api.audius.co/v1/tracks/${t.id}/stream?app_name=${APP_NAME}`,
   isLossless: true,
   isSpatial: false,
 });
@@ -193,29 +193,24 @@ const MusicPage: React.FC = () => {
       try {
         setLoading(true);
 
-        // 1. Поиск по официальному Apple Music каталогу (миллионы треков)
-        const appleResults = await searchAppleMusicCatalog(query.trim(), 25);
-        const mappedApple = appleResults.map(mapAppleTrack);
-
-        // 2. Дополнительный поиск по полным стримам Audius
+        // 1. Поиск по полным студийным трекам Audius (полные версии 3–5 минут без ограничений)
         let audiusResults: Track[] = [];
         try {
-          const host = hostRef.current || 'https://discoveryprovider.audius.co';
           const res = await fetch(
-            `${host}/v1/tracks/search?query=${encodeURIComponent(query.trim())}&app_name=${APP_NAME}&limit=20`,
+            `https://api.audius.co/v1/tracks/search?query=${encodeURIComponent(query.trim())}&app_name=${APP_NAME}&limit=35`,
             { signal: AbortSignal.timeout(6000) }
           );
           if (res.ok) {
             const data = await res.json();
-            audiusResults = (data?.data ?? []).map((t: any) => mapAudiusTrack(t, host));
+            audiusResults = (data?.data ?? []).map((t: any) => mapAudiusTrack(t, 'https://api.audius.co'));
           }
         } catch {}
 
-        // Объединяем результаты без дубликатов
+        // 2. Объединяем результаты без дубликатов: сначала точные хиты, затем найденные полные треки
         const seen = new Set<string>();
         const combined: Track[] = [];
 
-        for (const item of [...mappedApple, ...localHits, ...audiusResults]) {
+        for (const item of [...localHits, ...audiusResults]) {
           if (!seen.has(item.id)) {
             seen.add(item.id);
             combined.push(item);
@@ -225,7 +220,9 @@ const MusicPage: React.FC = () => {
         if (combined.length > 0) {
           setTracks(combined);
         } else if (localHits.length === 0) {
-          setTracks([]);
+          // Если в Audius ничего не нашлось, пробуем Apple каталог
+          const appleResults = await searchAppleMusicCatalog(query.trim(), 20);
+          setTracks(appleResults.map(mapAppleTrack));
         }
       } catch {
         if (localHits.length > 0) {

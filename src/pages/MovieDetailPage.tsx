@@ -581,38 +581,38 @@ const MovieDetailPage: React.FC = () => {
             <div className="dp-watch-hint">
               {watchOptions[watchIdx]?.provider === 'Collaps' ? (
                 <>
-                  <span className="dp-watch-hint__badge">⚡ Collaps HD (Сервер №1):</span>
+                  <span className="dp-watch-hint__badge">⚡ Плеер 1 (Основной):</span>
                   <span className="dp-watch-hint__text">
-                    LostFilm · RHS · Резка · Дубляж. При ошибке «Недоступно для вашего региона: US» — в VPN выберите сервер Европы/США или переключитесь на альтернативный сервер ниже.
+                    Ultra HD 4K · Дубляж и студийные озвучки. Если видео не запускается под вашим VPN — переключитесь на Плеер 2 или Плеер 3 ниже.
                   </span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Voidboost' ? (
                 <>
-                  <span className="dp-watch-hint__badge">🍿 Voidboost HD:</span>
-                  <span className="dp-watch-hint__text">HDRezka · LostFilm · NewStudio · Дубляж (без регионального блока под VPN)</span>
+                  <span className="dp-watch-hint__badge">🍿 Плеер 2 (Резерв #1):</span>
+                  <span className="dp-watch-hint__text">Full HD · Студийные переводы и дубляж (отлично работает под любым VPN)</span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Alloha' ? (
                 <>
-                  <span className="dp-watch-hint__badge">✨ Alloha / Резка:</span>
-                  <span className="dp-watch-hint__text">Студийные озвучки · Альтернативный поток</span>
+                  <span className="dp-watch-hint__badge">✨ Плеер 3 (Резерв #2):</span>
+                  <span className="dp-watch-hint__text">Full HD · Альтернативный скоростной поток</span>
                 </>
               ) : watchOptions[watchIdx]?.provider === 'Lumex' ? (
                 <>
-                  <span className="dp-watch-hint__badge">🎥 Lumex HD:</span>
+                  <span className="dp-watch-hint__badge">🎥 Плеер 4 (Резерв #3):</span>
                   <span className="dp-watch-hint__text">Скоростной видео-CDN · Дубляж Full HD</span>
                 </>
               ) : (
                 <>
-                  <span className="dp-watch-hint__badge">🇺🇸 Global 4K (США):</span>
-                  <span className="dp-watch-hint__text">100% стабилен с любым VPN (США) · Скоростной CDN · Оригинал + субтитры</span>
+                  <span className="dp-watch-hint__badge">🌐 Альтернативный плеер:</span>
+                  <span className="dp-watch-hint__text">100% стабилен с любым VPN · Скоростной CDN</span>
                 </>
               )}
             </div>
 
-            {/* Быстрый помощник при ошибке региона US на Collaps */}
+            {/* Быстрый помощник при ошибке региона */}
             {watchOptions[watchIdx]?.provider === 'Collaps' && (
               <div className="dp-watch-vpn-quick">
-                <span className="dp-watch-vpn-quick__label">🛡️ Пишет «Регион US»? Переключите сервер в 1 клик:</span>
+                <span className="dp-watch-vpn-quick__label">🛡️ Не запускается видео? Переключите плеер в 1 клик:</span>
                 <div className="dp-watch-vpn-quick__btns">
                   {watchOptions.slice(1, 4).map((o, idx) => (
                     <button
