@@ -1,9 +1,16 @@
-/* ===== Global Audio Engine — надёжный одиночный аудиоплеер ===== */
+/* ===== Global Audio Engine — надёжный одиночный аудиоплеер с MediaSession ===== */
 
 type AudioEventCallback = () => void;
 type AudioTimeCallback = (time: number) => void;
 type AudioDurationCallback = (duration: number) => void;
 type AudioErrorCallback = (err: any) => void;
+
+export interface TrackMetadata {
+  title: string;
+  artist: string;
+  album?: string;
+  artwork: string;
+}
 
 class GlobalAudioEngine {
   private audio: HTMLAudioElement | null = null;
@@ -12,6 +19,12 @@ class GlobalAudioEngine {
   private onTimeCallbacks = new Set<AudioTimeCallback>();
   private onDurationCallbacks = new Set<AudioDurationCallback>();
   private onErrorCallbacks = new Set<AudioErrorCallback>();
+  private onNextCallback: (() => void) | null = null;
+  private onPrevCallback: (() => void) | null = null;
+  private onPlayPauseCallback: ((playing: boolean) => void) | null = null;
+  private currentMeta: TrackMetadata | null = null;
+  private fallbackUrl: string | null = null;
+  private hasTriedFallback = false;
 
   private init() {
     if (this.audio) return this.audio;
@@ -29,6 +42,7 @@ class GlobalAudioEngine {
     a.addEventListener('timeupdate', () => {
       const cur = a.currentTime || 0;
       this.onTimeCallbacks.forEach((cb) => cb(cur));
+      this.updateMediaSessionPosition(cur, a.duration || 0);
     });
 
     a.addEventListener('durationchange', () => {
@@ -36,13 +50,115 @@ class GlobalAudioEngine {
       this.onDurationCallbacks.forEach((cb) => cb(dur));
     });
 
+    a.addEventListener('play', () => {
+      this.setMediaSessionPlaybackState('playing');
+      this.onPlayPauseCallback?.(true);
+    });
+
+    a.addEventListener('pause', () => {
+      this.setMediaSessionPlaybackState('paused');
+      this.onPlayPauseCallback?.(false);
+    });
+
     a.addEventListener('error', (e) => {
       console.warn('Audio playback error', e);
+      if (!this.hasTriedFallback && this.fallbackUrl && this.fallbackUrl !== this.currentUrl) {
+        this.tryFallback(a.playbackRate || 1.0, e).catch(() => {});
+        return;
+      }
       this.onErrorCallbacks.forEach((cb) => cb(e));
     });
 
+    this.setupMediaSessionHandlers();
+
     this.audio = a;
     return a;
+  }
+
+  /* ═══ Подключение MediaSession API (шторка iOS/Android и Lock Screen) ═══ */
+  private setupMediaSessionHandlers() {
+    if (!('mediaSession' in navigator)) return;
+
+    try {
+      navigator.mediaSession.setActionHandler('play', () => {
+        this.resume();
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        this.pause();
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        this.onPrevCallback?.();
+      });
+      navigator.mediaSession.setActionHandler('nexttrack', () => {
+        this.onNextCallback?.();
+      });
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime !== undefined && isFinite(details.seekTime)) {
+          this.seek(details.seekTime);
+        }
+      });
+      navigator.mediaSession.setActionHandler('seekforward', (details) => {
+        const offset = details.seekOffset || 10;
+        this.seek(this.getCurrentTime() + offset);
+      });
+      navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+        const offset = details.seekOffset || 10;
+        this.seek(Math.max(0, this.getCurrentTime() - offset));
+      });
+      navigator.mediaSession.setActionHandler('stop', () => {
+        this.stop();
+      });
+    } catch (err) {
+      console.debug('MediaSession handlers init error:', err);
+    }
+  }
+
+  public setNavigationHandlers(onNext: () => void, onPrev: () => void, onPlayPause?: (p: boolean) => void) {
+    this.onNextCallback = onNext;
+    this.onPrevCallback = onPrev;
+    if (onPlayPause) this.onPlayPauseCallback = onPlayPause;
+  }
+
+  public updateMetadata(meta: TrackMetadata) {
+    this.currentMeta = meta;
+    if (!('mediaSession' in navigator)) return;
+
+    try {
+      const art = meta.artwork || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: meta.title || 'ZENOVA Sound',
+        artist: meta.artist || 'Неизвестный исполнитель',
+        album: meta.album || 'ZENOVA Волна',
+        artwork: [
+          { src: art, sizes: '96x96', type: 'image/jpeg' },
+          { src: art, sizes: '128x128', type: 'image/jpeg' },
+          { src: art, sizes: '192x192', type: 'image/jpeg' },
+          { src: art, sizes: '256x256', type: 'image/jpeg' },
+          { src: art, sizes: '512x512', type: 'image/jpeg' },
+        ],
+      });
+    } catch {}
+  }
+
+  private setMediaSessionPlaybackState(state: 'playing' | 'paused' | 'none') {
+    if ('mediaSession' in navigator) {
+      try {
+        navigator.mediaSession.playbackState = state;
+      } catch {}
+    }
+  }
+
+  private updateMediaSessionPosition(currentTime: number, duration: number) {
+    if (!('mediaSession' in navigator) || !duration || duration <= 0 || !isFinite(duration)) return;
+    try {
+      if ('setPositionState' in navigator.mediaSession) {
+        navigator.mediaSession.setPositionState({
+          duration: Math.max(0, duration),
+          playbackRate: this.audio?.playbackRate || 1.0,
+          position: Math.max(0, Math.min(currentTime, duration)),
+        });
+      }
+    } catch {}
   }
 
   onError(cb: AudioErrorCallback) {
@@ -65,16 +181,24 @@ class GlobalAudioEngine {
     return () => this.onDurationCallbacks.delete(cb);
   }
 
-  playTrack(url: string, speed = 1.0): Promise<void> {
+  playTrack(url: string, speed = 1.0, metadata?: TrackMetadata, fallbackUrl?: string): Promise<void> {
     const a = this.init();
+    this.fallbackUrl = fallbackUrl || null;
+    this.hasTriedFallback = false;
+
+    if (metadata) {
+      this.updateMetadata(metadata);
+    }
 
     // Если этот же трек уже загружен — просто возобновляем
     if (this.currentUrl === url && a.src) {
       a.playbackRate = speed;
-      return a.play().catch(() => {});
+      return a.play().catch((err) => {
+        return this.tryFallback(speed, err);
+      });
     }
 
-    // Полная остановка предыдущего потока, чтобы звуки не накладывались
+    // Полная остановка предыдущего потока
     try {
       a.pause();
       a.currentTime = 0;
@@ -83,7 +207,27 @@ class GlobalAudioEngine {
     this.currentUrl = url;
     a.src = url;
     a.playbackRate = speed;
-    return a.play().catch(() => {});
+    return a.play().catch((err) => {
+      console.warn('Playback play() promise rejected:', err);
+      return this.tryFallback(speed, err);
+    });
+  }
+
+  private tryFallback(speed: number, originalErr: any): Promise<void> {
+    if (!this.hasTriedFallback && this.fallbackUrl && this.fallbackUrl !== this.currentUrl && this.audio) {
+      this.hasTriedFallback = true;
+      console.info('Switching to fallback audio stream:', this.fallbackUrl);
+      this.currentUrl = this.fallbackUrl;
+      this.audio.src = this.fallbackUrl;
+      this.audio.playbackRate = speed;
+      return this.audio.play().catch((fallbackErr) => {
+        console.warn('Fallback stream also rejected:', fallbackErr);
+        this.onErrorCallbacks.forEach((cb) => cb(fallbackErr));
+        return Promise.reject(fallbackErr);
+      });
+    }
+    this.onErrorCallbacks.forEach((cb) => cb(originalErr));
+    return Promise.reject(originalErr);
   }
 
   pause() {
@@ -103,6 +247,8 @@ class GlobalAudioEngine {
 
   /** Полный сброс и освобождение аудиобуфера */
   stop() {
+    this.fallbackUrl = null;
+    this.hasTriedFallback = false;
     if (this.audio) {
       try {
         this.audio.pause();
@@ -112,6 +258,7 @@ class GlobalAudioEngine {
       } catch {}
     }
     this.currentUrl = '';
+    this.setMediaSessionPlaybackState('none');
   }
 
   seek(time: number) {
@@ -140,3 +287,4 @@ class GlobalAudioEngine {
 }
 
 export const audioEngine = new GlobalAudioEngine();
+

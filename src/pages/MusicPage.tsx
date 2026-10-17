@@ -1,43 +1,16 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useMusicStore } from '../store/musicStore';
 import {
-  APPLE_CATEGORIES,
-  APPLE_RADIO_STATIONS,
-  APPLE_GLOBAL_TOP,
-  searchAppleMusicCatalog,
-  AppleTrack,
-} from '../services/appleMusic';
+  WAVE_MOODS,
+  LIVE_RADIO_STATIONS,
+  CURATED_TRACKS,
+  MusicTrack,
+  searchOnlineServices,
+} from '../services/yandexWave';
 import './MusicPage.css';
 
-/* ═══════════ Типы ═══════════ */
-export interface Track {
-  id: string;
-  title: string;
-  artist: string;
-  artwork: string;
-  duration: number;
-  plays: number;
-  genre: string;
-  streamUrl: string;
-  isLiveStream?: boolean;
-  isLossless?: boolean;
-  isSpatial?: boolean;
-  album?: string;
-}
-
-type Tab = 'listen' | 'chart' | 'radio' | 'library';
-
-const APP_NAME = 'ZENOVA';
-
-const HOSTS_FALLBACK = [
-  'https://api.audius.co',
-  'https://audius-metadata-1.figment.io',
-  'https://audius-discovery-2.altego.net',
-  'https://dn1.audius.l2be.net',
-];
-
-const pick = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+type Tab = 'wave' | 'chart' | 'radio' | 'library';
 
 const fmtTime = (s: number): string => {
   if (!s || !isFinite(s)) return '0:00';
@@ -46,407 +19,426 @@ const fmtTime = (s: number): string => {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 };
 
-const mapAppleTrack = (a: AppleTrack): Track => ({
-  id: a.id,
-  title: a.title,
-  artist: a.artist,
-  artwork: a.artwork,
-  duration: a.duration,
-  plays: 0,
-  genre: a.genre,
-  streamUrl: a.streamUrl,
-  isLiveStream: a.isLiveRadio,
-  isLossless: a.isLossless ?? true,
-  isSpatial: a.isSpatial ?? true,
-  album: a.album,
-});
-
-const mapAudiusTrack = (t: any, _host: string): Track => ({
-  id: `au-${t.id}`,
-  title: t.title ?? 'Без названия',
-  artist: t.user?.name ?? 'Неизвестный артист',
-  artwork: t.artwork?.['480x480'] || t.artwork?.['1000x1000'] || t.artwork?.['150x150'] || 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80',
-  duration: t.duration ?? 0,
-  plays: t.play_count ?? 0,
-  genre: t.genre || 'Lossless Full Stream',
-  streamUrl: `https://api.audius.co/v1/tracks/${t.id}/stream?app_name=${APP_NAME}`,
-  isLossless: true,
-  isSpatial: false,
-});
-
-/* ═══════════ Артворк ═══════════ */
-const Artwork: React.FC<{ src: string; alt: string; className: string }> = ({ src, alt, className }) => {
-  const [err, setErr] = useState(false);
-  if (!src || err) {
-    return (
-      <div className={`${className} mu-art-fallback`}>
-        <div className="mu-wave-mini">
-          <span /><span /><span />
-        </div>
-      </div>
-    );
-  }
-  return <img className={className} src={src} alt={alt} loading="lazy" onError={() => setErr(true)} />;
-};
-
-/* ═══════════ Компонент Apple Music ═══════════ */
 const MusicPage: React.FC = () => {
   const { haptic } = useTelegram();
   const {
-    currentTrack, isPlaying,
-    setTrack, setPlaying,
-    likedTracks, toggleLike: storeToggleLike, isLiked: storeIsLiked,
+    currentTrack,
+    isPlaying,
+    setTrack,
+    setPlaying,
+    likedTracks,
+    toggleLike,
+    isLiked,
+    setExpanded,
   } = useMusicStore();
 
-  const [tracks, setTracks] = useState<Track[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<Tab>('wave');
+  const [activeMood, setActiveMood] = useState<string>('all');
   const [query, setQuery] = useState('');
-  const [tab, setTab] = useState<Tab>('listen');
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [searchResults, setSearchResults] = useState<MusicTrack[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
 
-  const hostRef = useRef<string>(HOSTS_FALLBACK[0]);
+  const searchDebounceRef = useRef<any>(null);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 2200);
   };
 
-  /* Загрузка Audius треков (глобальный стриминговый бекенд) */
-  const fetchAudius = useCallback(async (limit = 35): Promise<Track[]> => {
-    let host = pick(HOSTS_FALLBACK);
-    try {
-      const res = await fetch('https://api.audius.co', { signal: AbortSignal.timeout(4000) });
-      const json = await res.json();
-      if (Array.isArray(json?.data) && json.data[0]) host = json.data[0];
-    } catch {}
-    hostRef.current = host;
-    try {
-      const res = await fetch(`${host}/v1/tracks/trending?app_name=${APP_NAME}&limit=${limit}`, { signal: AbortSignal.timeout(7000) });
-      if (res.ok) {
-        const json = await res.json();
-        return (json?.data ?? []).map((t: any) => mapAudiusTrack(t, host));
-      }
-    } catch {}
-    return [];
-  }, []);
-
-  /* Загрузка контента в зависимости от выбранного таба */
-  const loadContent = useCallback(async () => {
-    setLoading(true);
-    try {
-      if (tab === 'listen') {
-        const topCurated = APPLE_GLOBAL_TOP.map(mapAppleTrack);
-        let filtered = topCurated;
-        if (activeCategory !== 'all') {
-          filtered = topCurated.filter(
-            (t) => APPLE_GLOBAL_TOP.find((a) => a.id === t.id)?.category === activeCategory
-          );
-        }
-        const audiusTracks = await fetchAudius(25);
-        setTracks([...filtered, ...audiusTracks]);
-      } else if (tab === 'chart') {
-        // Официальный Топ-100 Global
-        setTracks(APPLE_GLOBAL_TOP.map(mapAppleTrack));
-      } else if (tab === 'radio') {
-        // Прямой эфир Apple Music 1 и радиостанций 24/7
-        setTracks(APPLE_RADIO_STATIONS.map(mapAppleTrack));
-      } else if (tab === 'library') {
-        // Медиатека пользователя
-        setTracks(likedTracks);
-      }
-    } catch {
-      setTracks(APPLE_GLOBAL_TOP.map(mapAppleTrack));
-    } finally {
-      setLoading(false);
-    }
-  }, [tab, activeCategory, likedTracks, fetchAudius]);
-
+  /* Интеллектуальный поиск по локальной базе и онлайн открытому каталогу */
   useEffect(() => {
-    if (!query.trim()) {
-      loadContent();
-    }
-  }, [loadContent, query]);
-
-  /*  Полноценный мировой поиск через Apple Music (iTunes Search API) + Audius */
-  useEffect(() => {
-    if (!query.trim()) return;
-
-    const q = query.trim().toLowerCase();
-
-    // Быстрый поиск по локальному топу Apple Music и радиостанциям
-    const localHits: Track[] = [
-      ...APPLE_GLOBAL_TOP.map(mapAppleTrack),
-      ...APPLE_RADIO_STATIONS.map(mapAppleTrack),
-    ].filter(
-      (t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.artist.toLowerCase().includes(q) ||
-        t.genre.toLowerCase().includes(q)
-    );
-
-    if (localHits.length > 0) {
-      setTracks(localHits);
+    const q = query.trim();
+    if (!q) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
     }
 
-    const timer = setTimeout(async () => {
+    if (searchDebounceRef.current) {
+      clearTimeout(searchDebounceRef.current);
+    }
+
+    setIsSearching(true);
+    searchDebounceRef.current = setTimeout(async () => {
       try {
-        setLoading(true);
-
-        // 1. Поиск по полным студийным трекам Audius (полные версии 3–5 минут без ограничений)
-        let audiusResults: Track[] = [];
-        try {
-          const res = await fetch(
-            `https://api.audius.co/v1/tracks/search?query=${encodeURIComponent(query.trim())}&app_name=${APP_NAME}&limit=35`,
-            { signal: AbortSignal.timeout(6000) }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            audiusResults = (data?.data ?? []).map((t: any) => mapAudiusTrack(t, 'https://api.audius.co'));
-          }
-        } catch {}
-
-        // 2. Объединяем результаты без дубликатов: сначала точные хиты, затем найденные полные треки
-        const seen = new Set<string>();
-        const combined: Track[] = [];
-
-        for (const item of [...localHits, ...audiusResults]) {
-          if (!seen.has(item.id)) {
-            seen.add(item.id);
-            combined.push(item);
-          }
-        }
-
-        if (combined.length > 0) {
-          setTracks(combined);
-        } else if (localHits.length === 0) {
-          // Если в Audius ничего не нашлось, пробуем Apple каталог
-          const appleResults = await searchAppleMusicCatalog(query.trim(), 20);
-          setTracks(appleResults.map(mapAppleTrack));
-        }
-      } catch {
-        if (localHits.length > 0) {
-          setTracks(localHits);
-        }
+        const onlineTracks = await searchOnlineServices(q, 20);
+        setSearchResults(onlineTracks);
+      } catch (e) {
+        setSearchResults([]);
       } finally {
-        setLoading(false);
+        setIsSearching(false);
       }
-    }, 380);
+    }, 450);
 
-    return () => clearTimeout(timer);
+    return () => {
+      if (searchDebounceRef.current) {
+        clearTimeout(searchDebounceRef.current);
+      }
+    };
   }, [query]);
 
-  /* Воспроизведение */
-  const handlePlayTrack = (track: Track, idx: number) => {
+  /* Фильтрация треков для отображения */
+  const displayedTracks = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    // Если введён поисковый запрос
+    if (q) {
+      const localMatches = [...CURATED_TRACKS, ...LIVE_RADIO_STATIONS].filter(
+        (t) =>
+          t.title.toLowerCase().includes(q) ||
+          t.artist.toLowerCase().includes(q) ||
+          (t.album && t.album.toLowerCase().includes(q)) ||
+          t.genre.toLowerCase().includes(q)
+      );
+
+      // Объединяем локальные совпадения и найденные онлайн треки без дубликатов
+      const combined = [...localMatches];
+      searchResults.forEach((st) => {
+        if (!combined.some((item) => item.title.toLowerCase() === st.title.toLowerCase() && item.artist.toLowerCase() === st.artist.toLowerCase())) {
+          combined.push(st);
+        }
+      });
+      return combined;
+    }
+
+    if (tab === 'radio') {
+      return LIVE_RADIO_STATIONS;
+    }
+
+    if (tab === 'library') {
+      return likedTracks as MusicTrack[];
+    }
+
+    if (tab === 'chart') {
+      return CURATED_TRACKS;
+    }
+
+    // Вкладка 'wave' (Моя Волна)
+    let list = [...CURATED_TRACKS, ...LIVE_RADIO_STATIONS];
+    if (activeMood !== 'all') {
+      list = list.filter((t) => t.mood === activeMood);
+    }
+    return list;
+  }, [tab, activeMood, query, likedTracks, searchResults]);
+
+  /* Запуск воспроизведения трека */
+  const handlePlayTrack = (track: MusicTrack, idx: number) => {
     haptic('medium');
     if (currentTrack?.id === track.id) {
       setPlaying(!isPlaying);
     } else {
-      setTrack(track, tracks, idx);
+      setTrack(track as any, displayedTracks as any[], idx);
       setPlaying(true);
     }
   };
 
-  /* Выбор категории */
-  const handleCategorySelect = (catId: string) => {
-    haptic('light');
-    setActiveCategory(catId);
-    const cat = APPLE_CATEGORIES.find((c) => c.id === catId);
-    if (cat) showToast(`${cat.icon} ${cat.label}`);
+  /* Запуск Моей Волны по большой кнопке/сфере */
+  const handleStartWave = () => {
+    haptic('heavy');
+    if (displayedTracks.length > 0) {
+      const first = displayedTracks[0];
+      setTrack(first as any, displayedTracks as any[], 0);
+      setPlaying(true);
+      const mood = WAVE_MOODS.find((m) => m.id === activeMood);
+      showToast(`🌊 Моя Волна запущена: ${mood?.label || 'Персональный поток'}`);
+    }
   };
 
+  const currentMoodObj = WAVE_MOODS.find((m) => m.id === activeMood) || WAVE_MOODS[0];
+
   return (
-    <div className="music-page page apple-music-page">
-      {/* ── Шапка страницы в стиле Apple Music ── */}
-      <header className="mu-header apple-header">
-        <div className="mu-header__top">
-          <div className="apple-brand">
-            <span className="apple-brand__badge"> MUSIC · LOSSLESS AUDIO</span>
-            <h1 className="mu-header__title apple-title">Apple Music</h1>
+    <div className="music-page page ym-music-page">
+      {/* ── Премиальная шапка в стиле Яндекс Музыки ── */}
+      <header className="ym-header">
+        <div className="ym-header__top">
+          <div className="ym-brand">
+            <div className="ym-brand__badge-row">
+              <span className="ym-brand__badge">✦ МОЯ ВОЛНА · ЯНДЕКС СТИЛЬ</span>
+              <span className="ym-source-tag">ZENOVA SOUND</span>
+            </div>
+            <h1 className="ym-brand__title">
+              {tab === 'wave' && 'Моя Волна'}
+              {tab === 'chart' && 'Топ Чарты'}
+              {tab === 'radio' && 'Прямой Эфир'}
+              {tab === 'library' && 'Коллекция'}
+            </h1>
           </div>
-          <button
-            className="mu-header__reload"
-            onClick={() => {
-              haptic('light');
-              loadContent();
-            }}
-            title="Обновить каталог"
+
+          <div
+            className={`ym-header__equalizer ${isPlaying ? 'playing' : ''}`}
+            onClick={() => currentTrack && setExpanded(true)}
+            title={currentTrack ? 'Развернуть плеер' : undefined}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-            </svg>
-          </button>
+            <span /><span /><span /><span />
+          </div>
         </div>
 
-        {/* ── Поисковая строка ── */}
-        <div className="mu-search apple-search">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        {/* ── Умный поисковик ── */}
+        <div className="ym-search">
+          <svg className="ym-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
           </svg>
           <input
             type="text"
-            className="mu-search__input"
-            placeholder="Исполнитель, трек, альбом (мировой поиск Apple Music)…"
+            className="ym-search__input"
+            placeholder="Трек, исполнитель, радио или саундтрек…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          {query && (
-            <button className="mu-search__clear" onClick={() => setQuery('')}>✕</button>
+          {isSearching && (
+            <div className="ym-search__spinner" />
+          )}
+          {query && !isSearching && (
+            <button
+              className="ym-search__clear"
+              onClick={() => setQuery('')}
+              aria-label="Очистить поиск"
+            >
+              ✕
+            </button>
           )}
         </div>
 
-        {/* ── Вкладки разделов ── */}
-        <div className="mu-tabs apple-tabs">
+        {/* ── Навигационные вкладки сервиса ── */}
+        <div className="ym-tabs">
           <button
-            className={`mu-tab apple-tab ${tab === 'listen' ? 'active' : ''}`}
-            onClick={() => { haptic('light'); setTab('listen'); }}
+            className={`ym-tab ${tab === 'wave' ? 'active' : ''}`}
+            onClick={() => { haptic('light'); setTab('wave'); }}
           >
-             Слушать сейчас
+            <span className="ym-tab__icon">🌊</span>
+            <span>Моя Волна</span>
           </button>
           <button
-            className={`mu-tab apple-tab ${tab === 'chart' ? 'active' : ''}`}
+            className={`ym-tab ${tab === 'chart' ? 'active' : ''}`}
             onClick={() => { haptic('light'); setTab('chart'); }}
           >
-            📈 Топ-100 Global
+            <span className="ym-tab__icon">🔥</span>
+            <span>Топ Хиты</span>
           </button>
           <button
-            className={`mu-tab apple-tab ${tab === 'radio' ? 'active' : ''}`}
+            className={`ym-tab ${tab === 'radio' ? 'active' : ''}`}
             onClick={() => { haptic('light'); setTab('radio'); }}
           >
-            📻 Радио 24/7
+            <span className="ym-tab__icon">📻</span>
+            <span>Радио 24/7</span>
           </button>
           <button
-            className={`mu-tab apple-tab ${tab === 'library' ? 'active' : ''}`}
+            className={`ym-tab ${tab === 'library' ? 'active' : ''}`}
             onClick={() => { haptic('light'); setTab('library'); }}
           >
-            💖 Медиатека ({likedTracks.length})
+            <span className="ym-tab__icon">💖</span>
+            <span>Любимое ({likedTracks.length})</span>
           </button>
         </div>
 
-        {/* ── Селектор категорий (только для раздела "Слушать сейчас") ── */}
-        {tab === 'listen' && !query && (
-          <div className="apple-categories">
-            {APPLE_CATEGORIES.map((c) => (
+        {/* ── Селектор настроений Моей Волны ── */}
+        {tab === 'wave' && !query && (
+          <div className="ym-moods">
+            {WAVE_MOODS.map((m) => (
               <button
-                key={c.id}
-                className={`apple-cat-chip ${activeCategory === c.id ? 'active' : ''}`}
-                onClick={() => handleCategorySelect(c.id)}
+                key={m.id}
+                className={`ym-mood-chip ${activeMood === m.id ? 'active' : ''}`}
+                onClick={() => {
+                  haptic('light');
+                  setActiveMood(m.id);
+                  showToast(`${m.icon} Режим Волны: ${m.label}`);
+                }}
               >
-                <span className="apple-cat-chip__icon">{c.icon}</span>
-                <span className="apple-cat-chip__label">{c.label}</span>
+                <span className="ym-mood-chip__icon">{m.icon}</span>
+                <span className="ym-mood-chip__label">{m.label}</span>
               </button>
             ))}
           </div>
         )}
       </header>
 
-      {/* ── Список треков ── */}
-      <main className="mu-content">
-        {tab === 'radio' && !loading && (
-          <div className="apple-radio-banner">
-            <div className="apple-radio-banner__icon">📻</div>
-            <div>
-              <strong>Apple Music 1 & Curated Live Radio</strong>
-              <p>Прямой эфир радиостанций в качестве Lossless без рекламы и пауз.</p>
+      {/* ── Интерактивная живая сфера "Моя Волна" в стиле Яндекс Музыки ── */}
+      {tab === 'wave' && !query && (
+        <section className="ym-wave-card" onClick={handleStartWave}>
+          <div className="ym-wave-sphere-wrap">
+            <div
+              className={`ym-wave-sphere ${isPlaying ? 'playing' : ''}`}
+              style={{ background: currentMoodObj.gradient }}
+            >
+              <div className="ym-wave-glow" />
+              <div className="ym-wave-pulse" />
+              <div className="ym-wave-center-icon">
+                {isPlaying ? (
+                  <div className="ym-wave-equalizer">
+                    <span /><span /><span /><span />
+                  </div>
+                ) : (
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="#ffffff">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+              </div>
             </div>
+          </div>
+          <div className="ym-wave-card__info">
+            <span className="ym-wave-card__badge">
+              {currentMoodObj.icon} {currentMoodObj.label}
+            </span>
+            <h2 className="ym-wave-card__title">
+              {isPlaying ? 'Волна звучит сейчас' : 'Включить Мою Волну'}
+            </h2>
+            <p className="ym-wave-card__desc">{currentMoodObj.description}</p>
+          </div>
+        </section>
+      )}
+
+      {/* ── Баннер радиостанций ── */}
+      {tab === 'radio' && !query && (
+        <div className="ym-radio-banner">
+          <div className="ym-radio-banner__icon">📻</div>
+          <div className="ym-radio-banner__content">
+            <strong>Прямой эфир топ-радиостанций в HD качестве</strong>
+            <p>100% стабильные открытые HTTPS-потоки без задержек и рекламы 24/7.</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Баннер библиотеки избранного ── */}
+      {tab === 'library' && !query && (
+        <div className="ym-library-banner">
+          <div className="ym-library-banner__icon">💖</div>
+          <div className="ym-library-banner__content">
+            <strong>Ваша персональная медиатека</strong>
+            <p>{likedTracks.length > 0 ? `Сохранено ${likedTracks.length} треков` : 'Нажимайте на сердечко у любого трека, чтобы добавить его сюда'}</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Список треков / Результаты поиска ── */}
+      <main className="ym-list">
+        {query && (
+          <div className="ym-list-header">
+            <span className="ym-list-header__title">
+              {isSearching ? 'Ищем по сервисам…' : `Найдено треков: ${displayedTracks.length}`}
+            </span>
           </div>
         )}
 
-        {loading ? (
-          <div className="mu-loading">
-            <div className="mu-spinner apple-spinner" />
-            <span>Загрузка каталога Apple Music…</span>
-          </div>
-        ) : tracks.length === 0 ? (
-          <div className="mu-empty">
-            <p>Ничего не найдено</p>
-            <span>Попробуйте ввести другого исполнителя или название трека</span>
+        {displayedTracks.length === 0 ? (
+          <div className="ym-empty">
+            <div className="ym-empty__icon">🎵</div>
+            <p className="ym-empty__title">Ничего не найдено</p>
+            <span className="ym-empty__sub">
+              {tab === 'library'
+                ? 'Вы пока не сохранили ни одного трека в любимые'
+                : 'Попробуйте изменить запрос или выберите другое настроение'}
+            </span>
           </div>
         ) : (
-          <div className="mu-list">
-            {tracks.map((t, i) => {
-              const isCurrent = currentTrack?.id === t.id;
-              const isLiked = storeIsLiked(t.id);
+          displayedTracks.map((t, idx) => {
+            const isCurrent = currentTrack?.id === t.id;
+            const liked = isLiked(t.id);
 
-              return (
-                <div key={t.id} className={`mu-track apple-track ${isCurrent ? 'active' : ''}`}>
-                  {/* Номер / кнопка play */}
-                  <button
-                    className="mu-track__play-btn apple-track__play-btn"
-                    onClick={() => handlePlayTrack(t, i)}
-                    aria-label="Воспроизвести"
-                  >
-                    <Artwork src={t.artwork} alt={t.title} className="mu-track__cover" />
-                    <div className="mu-track__play-overlay">
-                      {isCurrent && isPlaying ? (
-                        <div className="mu-track__playing-bars apple-playing-bars">
-                          <span /><span /><span />
-                        </div>
-                      ) : (
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Инфо о треке */}
-                  <div className="mu-track__meta" onClick={() => handlePlayTrack(t, i)}>
-                    <div className="mu-track__title-row">
-                      <span className="mu-track__title">{t.title}</span>
-                      {t.isLiveStream && (
-                        <span className="mu-track__live-tag">Live 24/7</span>
-                      )}
-                      {t.isLossless && !t.isLiveStream && (
-                        <span className="apple-badge-lossless">Lossless</span>
-                      )}
-                      {t.isSpatial && !t.isLiveStream && (
-                        <span className="apple-badge-spatial">Spatial</span>
-                      )}
-                    </div>
-                    <div className="mu-track__sub-row">
-                      <span className="mu-track__artist">{t.artist}</span>
-                      {t.album && (
-                        <>
-                          <span className="mu-track__dot">·</span>
-                          <span className="mu-track__album">{t.album}</span>
-                        </>
-                      )}
-                      <span className="mu-track__dot">·</span>
-                      <span className="mu-track__genre">{t.genre}</span>
-                    </div>
+            return (
+              <div
+                key={t.id}
+                className={`ym-track ${isCurrent ? 'active' : ''}`}
+                onClick={() => handlePlayTrack(t, idx)}
+              >
+                {/* Номер в чарте для Топ-100 */}
+                {tab === 'chart' && !query && (
+                  <div className={`ym-track__rank ${idx < 3 ? 'ym-track__rank--top' : ''}`}>
+                    {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
                   </div>
+                )}
 
-                  {/* Длительность */}
-                  <span className="mu-track__duration">
-                    {t.isLiveStream ? 'Эфир' : fmtTime(t.duration)}
-                  </span>
-
-                  <div className="mu-track__actions">
-                    <button
-                      className={`mu-track__like apple-like-btn ${isLiked ? 'liked' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        haptic('medium');
-                        storeToggleLike(t);
-                      }}
-                      title="В медиатеку"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill={isLiked ? '#fa233b' : 'none'} stroke={isLiked ? '#fa233b' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                {/* Обложка с кнопкой Play и эквалайзером */}
+                <div className="ym-track__art-wrap">
+                  <img
+                    src={t.artwork}
+                    alt={t.title}
+                    className="ym-track__art"
+                    loading="lazy"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src =
+                        'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
+                    }}
+                  />
+                  <div className={`ym-track__overlay ${isCurrent ? 'force-show' : ''}`}>
+                    {isCurrent && isPlaying ? (
+                      <div className="ym-track__bars">
+                        <span /><span /><span />
+                      </div>
+                    ) : (
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
+                        <path d="M8 5v14l11-7z" />
                       </svg>
-                    </button>
+                    )}
                   </div>
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Метаданные трека */}
+                <div className="ym-track__meta">
+                  <div className="ym-track__title-row">
+                    <span className="ym-track__title">{t.title}</span>
+                    {t.isLiveRadio && (
+                      <span className="ym-badge-live">Live</span>
+                    )}
+                    {t.source === 'itunes' && (
+                      <span className="ym-badge-source ym-badge-source--apple">Apple</span>
+                    )}
+                    {t.source === 'yandex' && (
+                      <span className="ym-badge-source ym-badge-source--ym">Яндекс</span>
+                    )}
+                    {t.source === 'radio' && (
+                      <span className="ym-badge-source ym-badge-source--radio">FM HD</span>
+                    )}
+                  </div>
+                  <div className="ym-track__sub">
+                    <span className="ym-track__artist">{t.artist}</span>
+                    {t.genre && (
+                      <>
+                        <span className="ym-track__dot">·</span>
+                        <span className="ym-track__genre">{t.genre}</span>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Длительность или статус эфира */}
+                <span className="ym-track__dur">
+                  {t.isLiveRadio ? 'Эфир' : fmtTime(t.duration)}
+                </span>
+
+                {/* Кнопка "Мне нравится" (сердечко) */}
+                <button
+                  className={`ym-track__like ${liked ? 'liked' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    haptic('medium');
+                    toggleLike(t as any);
+                    showToast(liked ? 'Удалено из медиатеки' : 'Добавлено в Мою Коллекцию 💖');
+                  }}
+                  aria-label="Мне нравится"
+                >
+                  <svg
+                    width="19"
+                    height="19"
+                    viewBox="0 0 24 24"
+                    fill={liked ? 'var(--accent, #fb7185)' : 'none'}
+                    stroke={liked ? 'var(--accent, #fb7185)' : 'currentColor'}
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                  </svg>
+                </button>
+              </div>
+            );
+          })
         )}
       </main>
 
-      {/* Тост уведомление */}
+      {/* Быстрое тост-уведомление */}
       {toastMsg && (
-        <div className="mu-toast apple-toast">
+        <div className="ym-toast">
           <span>{toastMsg}</span>
         </div>
       )}

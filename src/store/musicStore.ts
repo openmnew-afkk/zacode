@@ -2,15 +2,20 @@
 import { create } from 'zustand';
 import { audioEngine } from '../services/audioEngine';
 
-interface Track {
+export interface Track {
   id: string;
   title: string;
   artist: string;
   artwork: string;
   duration: number;
-  plays: number;
-  genre: string;
+  plays?: number;
+  genre?: string;
   streamUrl: string;
+  fallbackUrl?: string;
+  album?: string;
+  isLiveRadio?: boolean;
+  source?: string;
+  mood?: string;
 }
 
 interface MusicState {

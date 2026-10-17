@@ -87,7 +87,7 @@ export const APPLE_RADIO_STATIONS: AppleTrack[] = [
     artwork: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&auto=format&fit=crop&q=80',
     duration: 0,
     genre: 'Lo-Fi',
-    streamUrl: 'https://pub0302.101.ru:8443/stream/air/aac/64/200',
+    streamUrl: 'https://streams.ilovemusic.de/iloveradio17.mp3',
     isLossless: true,
     isSpatial: false,
     isLiveRadio: true,

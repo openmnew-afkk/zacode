@@ -8,7 +8,7 @@ const GlobalMusicBar: React.FC = () => {
     currentTrack, isPlaying, progress, duration,
     setPlaying, nextTrack, prevTrack, toggleLike, isLiked,
     setProgress, setDuration, shuffleOn, repeatOn, toggleShuffle, toggleRepeat,
-    closeTrack, isExpanded, setExpanded,
+    closeTrack, isExpanded, setExpanded, seekSignal,
   } = useMusicStore();
 
   const [imgError, setImgError] = useState(false);
@@ -20,6 +20,13 @@ const GlobalMusicBar: React.FC = () => {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
   };
+
+  /* Реагируем на внешний сигнал перемотки (seekTo) */
+  useEffect(() => {
+    if (seekSignal) {
+      audioEngine.seek(seekSignal.value);
+    }
+  }, [seekSignal]);
 
   /* Подключаем слушатели одиночного аудио-движка */
   useEffect(() => {
@@ -48,7 +55,16 @@ const GlobalMusicBar: React.FC = () => {
     };
   }, [nextTrack, setProgress, setDuration]);
 
-  /* Загрузка и воспроизведение трека */
+  /* Подключаем слушатели навигации MediaSession (наушники, шторка, авто) */
+  useEffect(() => {
+    audioEngine.setNavigationHandlers(
+      () => nextTrack(),
+      () => prevTrack(),
+      (playing) => setPlaying(playing)
+    );
+  }, [nextTrack, prevTrack, setPlaying]);
+
+  /* Загрузка и воспроизведение трека с авто-фолбэком */
   useEffect(() => {
     if (!currentTrack) {
       audioEngine.stop();
@@ -56,7 +72,17 @@ const GlobalMusicBar: React.FC = () => {
     }
 
     setImgError(false);
-    audioEngine.playTrack(currentTrack.streamUrl, speed)
+    audioEngine.playTrack(
+      currentTrack.streamUrl,
+      speed,
+      {
+        title: currentTrack.title,
+        artist: currentTrack.artist,
+        album: currentTrack.album || 'ZENOVA Sound',
+        artwork: currentTrack.artwork,
+      },
+      currentTrack.fallbackUrl
+    )
       .then(() => setPlaying(true))
       .catch(() => {});
   }, [currentTrack?.id]);
@@ -115,11 +141,32 @@ const GlobalMusicBar: React.FC = () => {
     }
   }, [isExpanded]);
 
+  const openYandexMusic = () => {
+    setShowMenu(false);
+    if (!currentTrack) return;
+    const q = `${currentTrack.artist} ${currentTrack.title}`;
+    window.open(`https://music.yandex.ru/search?text=${encodeURIComponent(q)}`, '_blank');
+  };
+
+  const openVkMusic = () => {
+    setShowMenu(false);
+    if (!currentTrack) return;
+    const q = `${currentTrack.artist} ${currentTrack.title}`;
+    window.open(`https://vk.com/audio?q=${encodeURIComponent(q)}`, '_blank');
+  };
+
   const openAppleMusic = () => {
     setShowMenu(false);
     if (!currentTrack) return;
     const q = `${currentTrack.artist} ${currentTrack.title}`;
     window.open(`https://music.apple.com/us/search?term=${encodeURIComponent(q)}`, '_blank');
+  };
+
+  const openSoundCloud = () => {
+    setShowMenu(false);
+    if (!currentTrack) return;
+    const q = `${currentTrack.artist} ${currentTrack.title}`;
+    window.open(`https://soundcloud.com/search?q=${encodeURIComponent(q)}`, '_blank');
   };
 
   const changeSpeed = (s: number) => {
@@ -307,9 +354,21 @@ const GlobalMusicBar: React.FC = () => {
 
               {/* Внешние сервисы */}
               <div className="gfull__sheet-group">
+                <button className="gfull__sheet-btn" onClick={openYandexMusic}>
+                  <span className="gfull__service-tag yandex">Я</span>
+                  <span>Открыть в Яндекс Музыке</span>
+                </button>
+                <button className="gfull__sheet-btn" onClick={openVkMusic}>
+                  <span className="gfull__service-tag vk">VK</span>
+                  <span>Открыть в VK Музыке</span>
+                </button>
                 <button className="gfull__sheet-btn" onClick={openAppleMusic}>
                   <span className="gfull__service-tag apple"></span>
                   <span>Открыть в Apple Music</span>
+                </button>
+                <button className="gfull__sheet-btn" onClick={openSoundCloud}>
+                  <span className="gfull__service-tag soundcloud">☁️</span>
+                  <span>Открыть в SoundCloud</span>
                 </button>
               </div>
 

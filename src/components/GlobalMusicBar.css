@@ -664,6 +664,10 @@
   background: #ffffff;
   color: #000000;
 }
+.gfull__service-tag.soundcloud {
+  background: #ff5500;
+  color: #ffffff;
+}
 
 .gfull__sheet-cancel {
   border-radius: 16px;
