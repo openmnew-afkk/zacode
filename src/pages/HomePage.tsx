@@ -938,16 +938,15 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div className="hp-header__actions">
-              {/* 📰 Новости кино и новинки (Кинолента) */}
+              {/* ✦ Журнал обновлений приложения */}
               <button
                 className="hp-header__feed-btn"
                 onClick={() => navigate('/feed')}
-                aria-label="Новости и новинки"
-                title="Новости кино и новинки"
+                aria-label="Что нового"
+                title="Что нового в приложении"
               >
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="3.5" width="18" height="17" rx="4" stroke="currentColor" strokeWidth="1.8" />
-                  <path d="M7 8h10M7 12h10M7 16h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                  <path d="M12 2l2.4 6.2L21 9.3l-4.8 4.3 1.4 6.4L12 16.7l-5.6 3.3 1.4-6.4L3 9.3l6.6-1.1L12 2z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
                 </svg>
                 <span className="hp-feed-badge-pulse" />
               </button>
