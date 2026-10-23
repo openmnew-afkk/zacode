@@ -25,6 +25,7 @@ class GlobalAudioEngine {
   private currentMeta: TrackMetadata | null = null;
   private fallbackUrl: string | null = null;
   private hasTriedFallback = false;
+  private isChangingTrack = false;
 
   private init() {
     if (this.audio) return this.audio;
@@ -36,6 +37,7 @@ class GlobalAudioEngine {
     a.setAttribute('webkit-playsinline', 'true');
 
     a.addEventListener('ended', () => {
+      if (this.isChangingTrack) return;
       this.onEndCallbacks.forEach((cb) => cb());
     });
 
@@ -56,11 +58,14 @@ class GlobalAudioEngine {
     });
 
     a.addEventListener('pause', () => {
+      // Игнорируем технические паузы при смене трека, чтобы не ломать глобальный стейт
+      if (this.isChangingTrack) return;
       this.setMediaSessionPlaybackState('paused');
       this.onPlayPauseCallback?.(false);
     });
 
     a.addEventListener('error', (e) => {
+      if (this.isChangingTrack && !a.currentSrc) return;
       console.warn('Audio playback error', e);
       if (!this.hasTriedFallback && this.fallbackUrl && this.fallbackUrl !== this.currentUrl) {
         this.tryFallback(a.playbackRate || 1.0, e).catch(() => {});
@@ -190,41 +195,62 @@ class GlobalAudioEngine {
       this.updateMetadata(metadata);
     }
 
-    // Если этот же трек уже загружен — просто возобновляем
+    // Если этот же трек уже загружен — просто возобновляем воспроизведение
     if (this.currentUrl === url && a.src) {
       a.playbackRate = speed;
       return a.play().catch((err) => {
+        if (err?.name === 'AbortError') return;
+        if (err?.name === 'NotAllowedError') {
+          this.onPlayPauseCallback?.(false);
+          return;
+        }
         return this.tryFallback(speed, err);
       });
     }
 
-    // Полная остановка предыдущего потока
-    try {
-      a.pause();
-      a.currentTime = 0;
-    } catch {}
-
+    this.isChangingTrack = true;
     this.currentUrl = url;
     a.src = url;
     a.playbackRate = speed;
-    return a.play().catch((err) => {
-      console.warn('Playback play() promise rejected:', err);
-      return this.tryFallback(speed, err);
-    });
+
+    return a.play()
+      .then(() => {
+        this.isChangingTrack = false;
+      })
+      .catch((err) => {
+        this.isChangingTrack = false;
+        if (err?.name === 'AbortError') {
+          return;
+        }
+        if (err?.name === 'NotAllowedError') {
+          this.onPlayPauseCallback?.(false);
+          return;
+        }
+        console.warn('Playback play() promise rejected:', err);
+        return this.tryFallback(speed, err);
+      });
   }
 
   private tryFallback(speed: number, originalErr: any): Promise<void> {
+    if (originalErr?.name === 'AbortError') return Promise.resolve();
     if (!this.hasTriedFallback && this.fallbackUrl && this.fallbackUrl !== this.currentUrl && this.audio) {
       this.hasTriedFallback = true;
       console.info('Switching to fallback audio stream:', this.fallbackUrl);
       this.currentUrl = this.fallbackUrl;
+      this.isChangingTrack = true;
       this.audio.src = this.fallbackUrl;
       this.audio.playbackRate = speed;
-      return this.audio.play().catch((fallbackErr) => {
-        console.warn('Fallback stream also rejected:', fallbackErr);
-        this.onErrorCallbacks.forEach((cb) => cb(fallbackErr));
-        return Promise.reject(fallbackErr);
-      });
+      return this.audio.play()
+        .then(() => {
+          this.isChangingTrack = false;
+        })
+        .catch((fallbackErr) => {
+          this.isChangingTrack = false;
+          if (fallbackErr?.name === 'AbortError') return;
+          console.warn('Fallback stream also rejected:', fallbackErr);
+          this.onErrorCallbacks.forEach((cb) => cb(fallbackErr));
+          return Promise.reject(fallbackErr);
+        });
     }
     this.onErrorCallbacks.forEach((cb) => cb(originalErr));
     return Promise.reject(originalErr);
@@ -240,7 +266,13 @@ class GlobalAudioEngine {
 
   resume(): Promise<void> {
     if (this.audio && this.audio.src) {
-      return this.audio.play().catch(() => {});
+      return this.audio.play().catch((err) => {
+        if (err?.name === 'AbortError') return;
+        if (err?.name === 'NotAllowedError') {
+          this.onPlayPauseCallback?.(false);
+          return;
+        }
+      });
     }
     return Promise.resolve();
   }
@@ -249,6 +281,7 @@ class GlobalAudioEngine {
   stop() {
     this.fallbackUrl = null;
     this.hasTriedFallback = false;
+    this.isChangingTrack = false;
     if (this.audio) {
       try {
         this.audio.pause();

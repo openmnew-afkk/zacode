@@ -76,11 +76,12 @@ export const useMusicStore = create<MusicState>((set, get) => ({
   setDuration: (v) => set({ duration: v }),
 
   nextTrack: () => {
-    const { queue, queueIndex, shuffleOn, repeatOn } = get();
+    const { queue, queueIndex, shuffleOn } = get();
     if (!queue.length) return;
     let next: number;
-    if (repeatOn) { next = queueIndex; }
-    else if (shuffleOn) {
+    // Повтор одного трека обрабатывается в плеере (перезапуск того же аудио),
+    // здесь — только переход к следующему/случайному
+    if (shuffleOn) {
       if (queue.length <= 1) { next = 0; }
       else {
         do { next = Math.floor(Math.random() * queue.length); } while (next === queueIndex);

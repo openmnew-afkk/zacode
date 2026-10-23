@@ -1,245 +1,1017 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- *   Apple Music — Liquid Glass Cupertino Styles
+ *  🌊 ZENOVA SOUND — Моя Волна (стиль Яндекс Музыки в дизайн-системе ZENOVA)
+ *  Тёмная тема Obsidian & Rose Gold + поддержка светлой Rose Blush
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-.music-page.apple-music-page {
+/* ── Корень страницы ── */
+.ym-music-page {
   position: relative;
   min-height: 100vh;
-  padding-bottom: 120px;
-  background: radial-gradient(circle at 50% 0%, rgba(250, 35, 59, 0.08) 0%, transparent 60%), var(--bg);
+  padding: 0 16px 96px;
+  background:
+    radial-gradient(ellipse 120% 50% at 50% -8%, rgba(251, 113, 133, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 40% at 85% 12%, rgba(168, 85, 247, 0.08) 0%, transparent 60%),
+    var(--bg);
+  color: var(--text);
 }
 
-/* ── Шапка Apple Music ── */
-.apple-header {
+/* ═══════════════════════ Шапка ═══════════════════════ */
+
+.ym-header {
   position: sticky;
   top: 0;
   z-index: 40;
-  padding: 12px 16px 14px;
+  margin: 0 -16px;
+  padding: 10px 16px 12px;
   padding-top: var(--header-safe-top);
-  background: rgba(10, 10, 18, 0.82);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(9, 8, 11, 0.78);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border);
 }
 
-.apple-brand__badge {
-  font-size: 10px;
+.ym-header__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ym-brand {
+  min-width: 0;
+}
+
+.ym-brand__badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+
+.ym-brand__badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9.5px;
   font-weight: 800;
-  letter-spacing: 0.12em;
-  color: #fa233b;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  display: block;
-  margin-bottom: 2px;
+  color: var(--accent);
+  background: rgba(251, 113, 133, 0.1);
+  border: 1px solid rgba(251, 113, 133, 0.28);
+  border-radius: var(--r-full);
+  padding: 3px 9px;
 }
 
-.apple-title {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', var(--font-display);
-  font-size: 26px;
+.ym-source-tag {
+  font-size: 9.5px;
   font-weight: 800;
-  color: #ffffff;
+  letter-spacing: 0.16em;
+  color: var(--text-3);
+  text-transform: uppercase;
+}
+
+.ym-brand__title {
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 800;
   letter-spacing: -0.02em;
+  color: var(--text);
+  line-height: 1.1;
 }
 
-/* ── Поиск Apple Music ── */
-.apple-search {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
-  backdrop-filter: blur(12px);
-  transition: all 0.2s ease;
-}
-
-.apple-search:focus-within {
-  border-color: rgba(250, 35, 59, 0.55);
-  box-shadow: 0 0 16px rgba(250, 35, 59, 0.2);
-  background: rgba(255, 255, 255, 0.09);
-}
-
-/* ── Вкладки Apple Tabs ── */
-.apple-tabs {
+/* Мини-эквалайзер в шапке */
+.ym-header__equalizer {
   display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  margin-top: 10px;
-}
-.apple-tabs::-webkit-scrollbar { display: none; }
-
-.apple-tab {
-  flex-shrink: 0;
-  padding: 7px 15px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 12.5px;
-  font-weight: 700;
+  align-items: flex-end;
+  gap: 3px;
+  height: 26px;
+  padding: 6px 10px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+  transition: transform 0.2s var(--ease-spring), border-color 0.2s ease;
 }
 
-.apple-tab:active {
-  transform: scale(0.95);
+.ym-header__equalizer:active {
+  transform: scale(0.92);
 }
 
-.apple-tab.active {
-  background: #fa233b;
-  border-color: #fa233b;
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(250, 35, 59, 0.4);
+.ym-header__equalizer span {
+  width: 3px;
+  border-radius: 2px;
+  background: var(--text-3);
+  height: 6px;
+  transition: background 0.3s ease;
 }
 
-/* ── Селектор категорий ── */
-.apple-categories {
+.ym-header__equalizer.playing span {
+  background: var(--accent);
+  animation: ym-eq-bounce 0.9s ease-in-out infinite;
+}
+
+.ym-header__equalizer.playing span:nth-child(1) { animation-delay: 0s; }
+.ym-header__equalizer.playing span:nth-child(2) { animation-delay: 0.22s; }
+.ym-header__equalizer.playing span:nth-child(3) { animation-delay: 0.1s; }
+.ym-header__equalizer.playing span:nth-child(4) { animation-delay: 0.34s; }
+
+@keyframes ym-eq-bounce {
+  0%, 100% { height: 5px; }
+  50%      { height: 14px; }
+}
+
+/* ═══════════════════════ Поиск ═══════════════════════ */
+
+.ym-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 0 14px;
+  height: 44px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.ym-search:focus-within {
+  border-color: rgba(251, 113, 133, 0.55);
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.12);
+  background: var(--surface-2);
+}
+
+.ym-search__icon {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+
+.ym-search:focus-within .ym-search__icon {
+  color: var(--accent);
+}
+
+.ym-search__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.ym-search__input::placeholder {
+  color: var(--text-3);
+}
+
+.ym-search__spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(251, 113, 133, 0.25);
+  border-top-color: var(--accent);
+  animation: ym-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes ym-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ym-search__clear {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text-2);
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: transform 0.15s var(--ease-spring);
+}
+
+.ym-search__clear:active {
+  transform: scale(0.85);
+}
+
+/* ═══════════════════════ Вкладки ═══════════════════════ */
+
+.ym-tabs {
   display: flex;
   gap: 8px;
+  margin-top: 12px;
   overflow-x: auto;
-  padding-top: 10px;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
-.apple-categories::-webkit-scrollbar { display: none; }
 
-.apple-cat-chip {
+.ym-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ym-tab {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font-body);
+  transition: all 0.22s var(--ease-spring);
+}
+
+.ym-tab:active {
+  transform: scale(0.94);
+}
+
+.ym-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 5px 18px var(--accent-glow);
+}
+
+.ym-tab__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* ═══════════════════════ Настроения Волны ═══════════════════════ */
+
+.ym-moods {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  padding-bottom: 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ym-moods::-webkit-scrollbar {
+  display: none;
+}
+
+.ym-mood-chip {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 13px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.65);
+  padding: 7px 13px;
+  border-radius: var(--r-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
   font-size: 12px;
   font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.22s var(--ease-spring);
+}
+
+.ym-mood-chip:active {
+  transform: scale(0.93);
+}
+
+.ym-mood-chip.active {
+  background: rgba(251, 113, 133, 0.16);
+  border-color: rgba(251, 113, 133, 0.5);
+  color: var(--text);
+  box-shadow: 0 3px 14px rgba(251, 113, 133, 0.18);
+}
+
+.ym-mood-chip__icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.ym-mood-chip__label {
+  white-space: nowrap;
+}
+
+/* ═══════════════════════ Сфера «Моя Волна» ═══════════════════════ */
+
+.ym-wave-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-top: 16px;
+  padding: 18px 18px;
+  border-radius: var(--r-lg);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s var(--ease-spring), border-color 0.2s ease;
 }
 
-.apple-cat-chip:active {
-  transform: scale(0.95);
+.ym-wave-card:active {
+  transform: scale(0.98);
 }
 
-.apple-cat-chip.active {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #ffffff;
-}
-
-.apple-cat-chip__icon {
-  font-size: 13px;
-}
-
-/* ── Баннер радио ── */
-.apple-radio-banner {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(250, 35, 59, 0.14) 0%, rgba(139, 92, 246, 0.08) 100%);
-  border: 1px solid rgba(250, 35, 59, 0.25);
-  margin-bottom: 12px;
-}
-
-.apple-radio-banner__icon {
-  font-size: 24px;
+.ym-wave-sphere-wrap {
+  position: relative;
+  width: 118px;
+  height: 118px;
   flex-shrink: 0;
-}
-
-.apple-radio-banner strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.apple-radio-banner p {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.65);
-  margin: 2px 0 0;
-}
-
-/* ── Список треков Apple Music ── */
-.apple-track {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+}
+
+.ym-wave-sphere {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  box-shadow:
+    inset 0 -14px 28px rgba(0, 0, 0, 0.35),
+    inset 0 10px 22px rgba(255, 255, 255, 0.22),
+    0 14px 34px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s var(--ease-spring);
+}
+
+.ym-wave-sphere.playing {
+  animation: ym-sphere-breathe 3.2s ease-in-out infinite;
+}
+
+@keyframes ym-sphere-breathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.045); }
+}
+
+/* Свечение вокруг сферы */
+.ym-wave-glow {
+  position: absolute;
+  inset: -22px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.28) 0%, transparent 68%);
+  filter: blur(6px);
+  animation: ym-glow-pulse 3.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ym-glow-pulse {
+  0%, 100% { opacity: 0.55; transform: scale(0.96); }
+  50%      { opacity: 1;    transform: scale(1.06); }
+}
+
+/* Пульсирующее кольцо */
+.ym-wave-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ym-wave-sphere.playing .ym-wave-pulse {
+  animation: ym-pulse-ring 2.4s ease-out infinite;
+}
+
+@keyframes ym-pulse-ring {
+  0%   { transform: scale(1);    opacity: 0.6; }
+  100% { transform: scale(1.55); opacity: 0; }
+}
+
+.ym-wave-center-icon {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.4));
+}
+
+/* Эквалайзер в центре сферы */
+.ym-wave-equalizer {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 26px;
+}
+
+.ym-wave-equalizer span {
+  width: 5px;
+  border-radius: 3px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.65);
+  animation: ym-wave-bar 0.95s ease-in-out infinite;
+}
+
+.ym-wave-equalizer span:nth-child(1) { animation-delay: 0s;    height: 12px; }
+.ym-wave-equalizer span:nth-child(2) { animation-delay: 0.18s; height: 22px; }
+.ym-wave-equalizer span:nth-child(3) { animation-delay: 0.36s; height: 16px; }
+.ym-wave-equalizer span:nth-child(4) { animation-delay: 0.54s; height: 20px; }
+
+@keyframes ym-wave-bar {
+  0%, 100% { transform: scaleY(0.45); }
+  50%      { transform: scaleY(1); }
+}
+
+.ym-wave-card__info {
+  min-width: 0;
+  flex: 1;
+}
+
+.ym-wave-card__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.3);
+  border-radius: var(--r-full);
+  padding: 4px 11px;
+  margin-bottom: 9px;
+}
+
+.ym-wave-card__title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.ym-wave-card__desc {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ═══════════════════════ Баннеры (радио / медиатека) ═══════════════════════ */
+
+.ym-radio-banner,
+.ym-library-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(251, 113, 133, 0.25);
+  background: linear-gradient(135deg, rgba(251, 113, 133, 0.13) 0%, rgba(168, 85, 247, 0.07) 100%);
+}
+
+.ym-library-banner {
+  border-color: rgba(244, 114, 182, 0.3);
+  background: linear-gradient(135deg, rgba(244, 114, 182, 0.14) 0%, rgba(251, 113, 133, 0.06) 100%);
+}
+
+.ym-radio-banner__icon,
+.ym-library-banner__icon {
+  font-size: 26px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 10px rgba(251, 113, 133, 0.35));
+}
+
+.ym-radio-banner__content,
+.ym-library-banner__content {
+  min-width: 0;
+}
+
+.ym-radio-banner__content strong,
+.ym-library-banner__content strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.ym-radio-banner__content p,
+.ym-library-banner__content p {
+  margin-top: 3px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+/* ═══════════════════════ Список треков ═══════════════════════ */
+
+.ym-list {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ym-list-header {
+  margin-bottom: 2px;
+}
+
+.ym-list-header__title {
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* ── Строка трека ── */
+.ym-track {
+  display: flex;
+  align-items: center;
+  gap: 11px;
   padding: 8px 10px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.18s var(--ease-spring), background 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
 }
 
-.apple-track:active {
+.ym-track:active {
   transform: scale(0.985);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--surface-2);
 }
 
-.apple-track.active {
-  border-color: rgba(250, 35, 59, 0.5);
-  background: rgba(250, 35, 59, 0.1);
-  box-shadow: 0 4px 20px rgba(250, 35, 59, 0.12);
+.ym-track.active {
+  border-color: rgba(251, 113, 133, 0.5);
+  background: rgba(251, 113, 133, 0.1);
+  box-shadow: 0 4px 20px rgba(251, 113, 133, 0.14);
 }
 
-.apple-track__play-btn {
+/* Ранг в чарте */
+.ym-track__rank {
+  width: 26px;
+  flex-shrink: 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-3);
+}
+
+.ym-track__rank--top {
+  font-size: 17px;
+  filter: drop-shadow(0 2px 6px rgba(251, 191, 36, 0.45));
+}
+
+/* Обложка */
+.ym-track__art-wrap {
   position: relative;
   width: 48px;
   height: 48px;
-  border-radius: 10px;
+  border-radius: 11px;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  background: var(--surface-2);
 }
 
-.apple-playing-bars span {
-  background: #fa233b !important;
+.ym-track__art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-/* ── Бейджи Lossless & Spatial Audio ── */
-.apple-badge-lossless {
-  display: inline-block;
-  font-size: 9px;
+.ym-track__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.ym-track:hover .ym-track__overlay,
+.ym-track:active .ym-track__overlay,
+.ym-track__overlay.force-show {
+  opacity: 1;
+}
+
+.ym-track.active .ym-track__overlay {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Бары «играет сейчас» на обложке */
+.ym-track__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 16px;
+}
+
+.ym-track__bars span {
+  width: 3.5px;
+  border-radius: 2px;
+  background: #ffffff;
+  animation: ym-eq-bounce 0.85s ease-in-out infinite;
+}
+
+.ym-track__bars span:nth-child(1) { animation-delay: 0s; }
+.ym-track__bars span:nth-child(2) { animation-delay: 0.25s; }
+.ym-track__bars span:nth-child(3) { animation-delay: 0.12s; }
+
+/* Метаданные */
+.ym-track__meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.ym-track__title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ym-track__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ym-track.active .ym-track__title {
+  color: var(--accent);
+}
+
+.ym-badge-live {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 8.5px;
   font-weight: 800;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 1px 5px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  flex-shrink: 0;
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
+  border-radius: 5px;
+  padding: 2px 6px;
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
-.apple-badge-spatial {
-  display: inline-block;
-  font-size: 9px;
+.ym-badge-source {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  font-size: 8.5px;
   font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  padding: 1px 5px;
-  border-radius: 4px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  border-radius: 5px;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+}
+
+.ym-badge-source--apple {
+  color: #f5f5f7;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.ym-badge-source--ym {
+  color: #ffffff;
+  background: rgba(255, 51, 102, 0.22);
+  border-color: rgba(255, 51, 102, 0.45);
+}
+
+.ym-badge-source--radio {
+  color: #a5f3fc;
+  background: rgba(34, 211, 238, 0.12);
+  border-color: rgba(34, 211, 238, 0.35);
+}
+
+.ym-badge-source--audius {
+  color: #6ee7b7;
+  background: rgba(16, 185, 129, 0.12);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.ym-badge-source--archive {
+  color: #fcd34d;
+  background: rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
+.ym-track__sub {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 2px;
+  min-width: 0;
+}
+
+.ym-track__artist {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ym-track__dot {
+  color: var(--text-3);
+  font-size: 11px;
   flex-shrink: 0;
 }
 
-.apple-like-btn {
-  color: rgba(255, 255, 255, 0.4);
-  transition: all 0.18s ease;
+.ym-track__genre {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.apple-like-btn.liked {
-  color: #fa233b !important;
+/* Длительность */
+.ym-track__dur {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-3);
 }
 
-.apple-spinner {
-  border-top-color: #fa233b !important;
+/* Лайк */
+.ym-track__like {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--text-3);
+  transition: transform 0.18s var(--ease-spring), color 0.2s ease, background 0.2s ease;
 }
 
-.apple-toast {
-  background: rgba(20, 20, 30, 0.88);
-  border-color: rgba(250, 35, 59, 0.3);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+.ym-track__like:active {
+  transform: scale(0.8);
+}
+
+.ym-track__like.liked {
+  color: var(--accent);
+  background: rgba(251, 113, 133, 0.12);
+}
+
+/* ═══════════════════════ Скелетоны загрузки ═══════════════════════ */
+
+.ym-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 10px;
+  border-radius: var(--r-md);
+}
+
+.ym-skeleton-row__art {
+  width: 48px;
+  height: 48px;
+  border-radius: 11px;
+  flex-shrink: 0;
+}
+
+.ym-skeleton-row__lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ym-skeleton-row__line {
+  height: 11px;
+  border-radius: 6px;
+}
+
+/* ── Сентинел бесконечной прокрутки ── */
+.ym-list-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 56px;
+  color: var(--text-3);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════ Пустое состояние ═══════════════════════ */
+
+.ym-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 52px 24px;
+  text-align: center;
+}
+
+.ym-empty__icon {
+  font-size: 46px;
+  margin-bottom: 14px;
+  filter: drop-shadow(0 6px 18px rgba(251, 113, 133, 0.3));
+}
+
+.ym-empty__title {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.ym-empty__sub {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.55;
+  color: var(--text-3);
+  max-width: 280px;
+}
+
+/* ═══════════════════════ Тост ═══════════════════════ */
+
+.ym-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--tabbar-h) + 76px);
+  transform: translateX(-50%);
+  z-index: 90;
+  max-width: calc(100vw - 48px);
+  padding: 10px 18px;
+  border-radius: var(--r-full);
+  background: rgba(20, 16, 24, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: ym-toast-in 0.28s var(--ease-spring) both;
+}
+
+@keyframes ym-toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px) scale(0.92); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   🌸 Светлая тема (Rose Blush) — ym-*
+   ═══════════════════════════════════════════════════════════════ */
+
+[data-theme='light'] .ym-music-page {
+  background:
+    radial-gradient(ellipse 120% 50% at 50% -8%, rgba(244, 63, 94, 0.1) 0%, transparent 55%),
+    var(--bg);
+}
+
+[data-theme='light'] .ym-header {
+  background: rgba(255, 245, 247, 0.88);
+  border-bottom-color: rgba(244, 114, 182, 0.2);
+}
+
+[data-theme='light'] .ym-brand__title {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .ym-brand__badge {
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+[data-theme='light'] .ym-search {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(244, 114, 182, 0.25);
+}
+
+[data-theme='light'] .ym-search__input {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .ym-search__input::placeholder {
+  color: #8a8194;
+}
+
+[data-theme='light'] .ym-tab {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(244, 114, 182, 0.22);
+  color: #6b6375;
+}
+
+[data-theme='light'] .ym-tab.active {
+  background: linear-gradient(135deg, #f43f5e, #fb7185);
+  border-color: transparent;
+  color: #ffffff;
+}
+
+[data-theme='light'] .ym-mood-chip {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(244, 114, 182, 0.2);
+  color: #4a4453;
+}
+
+[data-theme='light'] .ym-mood-chip.active {
+  background: #f43f5e;
+  border-color: #f43f5e;
+  color: #ffffff;
+}
+
+[data-theme='light'] .ym-wave-card {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(244, 114, 182, 0.24);
+}
+
+[data-theme='light'] .ym-wave-card__title {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .ym-wave-card__desc {
+  color: #4a4453;
+}
+
+[data-theme='light'] .ym-radio-banner,
+[data-theme='light'] .ym-library-banner {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(244, 63, 94, 0.24);
+}
+
+[data-theme='light'] .ym-radio-banner__content strong,
+[data-theme='light'] .ym-library-banner__content strong {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .ym-radio-banner__content p,
+[data-theme='light'] .ym-library-banner__content p {
+  color: #6b6375;
+}
+
+[data-theme='light'] .ym-track {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(244, 114, 182, 0.16);
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.06);
+}
+
+[data-theme='light'] .ym-track:active {
+  background: rgba(253, 226, 236, 0.9);
+}
+
+[data-theme='light'] .ym-track.active {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.45);
+}
+
+[data-theme='light'] .ym-track__title {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .ym-track.active .ym-track__title {
+  color: #f43f5e;
+}
+
+[data-theme='light'] .ym-track__artist {
+  color: #6b6375;
+}
+
+[data-theme='light'] .ym-empty__title {
+  color: #1f1a24;
+}
+
+[data-theme='light'] .ym-toast {
+  background: rgba(255, 245, 247, 0.96);
+  border-color: rgba(244, 63, 94, 0.35);
+  color: #1f1a24;
 }

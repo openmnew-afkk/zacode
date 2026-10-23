@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useMusicStore } from '../store/musicStore';
 import { audioEngine } from '../services/audioEngine';
 import './GlobalMusicBar.css';
@@ -16,6 +16,9 @@ const GlobalMusicBar: React.FC = () => {
   const [toast, setToast] = useState('');
   const [speed, setSpeed] = useState<number>(1.0);
 
+  const currentTrackIdRef = useRef<string | null>(null);
+  const consecutiveErrorsRef = useRef(0);
+
   const showToastMsg = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
@@ -31,20 +34,38 @@ const GlobalMusicBar: React.FC = () => {
   /* Подключаем слушатели одиночного аудио-движка */
   useEffect(() => {
     const unsubEnd = audioEngine.onEnded(() => {
+      consecutiveErrorsRef.current = 0;
+      // Повтор трека: перезапускаем текущий, не переходя к следующему
+      const state = useMusicStore.getState();
+      if (state.repeatOn && state.currentTrack) {
+        audioEngine.seek(0);
+        audioEngine.resume().catch(() => {});
+        state.setPlaying(true);
+        return;
+      }
       nextTrack();
     });
     const unsubTime = audioEngine.onTimeUpdate((time) => {
+      consecutiveErrorsRef.current = 0;
       setProgress(time);
     });
     const unsubDur = audioEngine.onDurationChange((dur) => {
-      setDuration(dur);
+      if (isFinite(dur) && dur > 0) {
+        setDuration(dur);
+      }
     });
     const unsubErr = audioEngine.onError(() => {
       setPlaying(false);
-      showToastMsg('Ошибка аудиопотока. Следующий трек…');
-      setTimeout(() => {
-        nextTrack();
-      }, 1000);
+      consecutiveErrorsRef.current += 1;
+      if (consecutiveErrorsRef.current <= 2) {
+        showToastMsg('Ошибка аудиопотока. Следующий трек…');
+        setTimeout(() => {
+          nextTrack();
+        }, 1200);
+      } else {
+        showToastMsg('Поток временно недоступен');
+        consecutiveErrorsRef.current = 0;
+      }
     });
 
     return () => {
@@ -53,7 +74,7 @@ const GlobalMusicBar: React.FC = () => {
       unsubDur();
       unsubErr();
     };
-  }, [nextTrack, setProgress, setDuration]);
+  }, [nextTrack, setProgress, setDuration, setPlaying]);
 
   /* Подключаем слушатели навигации MediaSession (наушники, шторка, авто) */
   useEffect(() => {
@@ -64,38 +85,40 @@ const GlobalMusicBar: React.FC = () => {
     );
   }, [nextTrack, prevTrack, setPlaying]);
 
-  /* Загрузка и воспроизведение трека с авто-фолбэком */
+  /* Загрузка и воспроизведение трека с авто-фолбэком при смене трека */
   useEffect(() => {
     if (!currentTrack) {
+      currentTrackIdRef.current = null;
       audioEngine.stop();
       return;
     }
 
-    setImgError(false);
-    audioEngine.playTrack(
-      currentTrack.streamUrl,
-      speed,
-      {
-        title: currentTrack.title,
-        artist: currentTrack.artist,
-        album: currentTrack.album || 'ZENOVA Sound',
-        artwork: currentTrack.artwork,
-      },
-      currentTrack.fallbackUrl
-    )
-      .then(() => setPlaying(true))
-      .catch(() => {});
-  }, [currentTrack?.id]);
+    if (currentTrackIdRef.current !== currentTrack.id) {
+      currentTrackIdRef.current = currentTrack.id;
+      setImgError(false);
+      audioEngine.playTrack(
+        currentTrack.streamUrl,
+        speed,
+        {
+          title: currentTrack.title,
+          artist: currentTrack.artist,
+          album: currentTrack.album || 'ZENOVA Sound',
+          artwork: currentTrack.artwork,
+        },
+        currentTrack.fallbackUrl
+      ).catch(() => {});
+    }
+  }, [currentTrack?.id, speed]);
 
-  /* Пауза / возобновление */
+  /* Пауза / возобновление для текущего трека */
   useEffect(() => {
-    if (!currentTrack) return;
+    if (!currentTrack || currentTrackIdRef.current !== currentTrack.id) return;
     if (isPlaying) {
       audioEngine.resume().catch(() => {});
     } else {
       audioEngine.pause();
     }
-  }, [isPlaying, currentTrack]);
+  }, [isPlaying]);
 
   /* Закрытие плеера с гарантированной остановкой звука */
   const handleClosePlayer = (e?: React.MouseEvent) => {
@@ -175,14 +198,16 @@ const GlobalMusicBar: React.FC = () => {
     showToastMsg(`Скорость: ${s}x`);
   };
 
-  const pct = duration > 0 ? (progress / duration) * 100 : 0;
+  const isLive = Boolean(currentTrack.isLiveRadio);
+  const pct = isLive ? 100 : (duration > 0 && isFinite(duration) ? Math.min(100, Math.max(0, (progress / duration) * 100)) : 0);
   const liked = isLiked(currentTrack.id);
   const fmt = (s: number) => {
-    if (!s || !isFinite(s)) return '0:00';
+    if (!s || !isFinite(s) || s < 0) return '0:00';
     return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
   };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isLive || !duration || !isFinite(duration)) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration;
     audioEngine.seek(pos);
@@ -214,7 +239,7 @@ const GlobalMusicBar: React.FC = () => {
           </button>
           <div className="gfull__header-center">
             <span className="gfull__now-label">ZENOVA SOUND</span>
-            <span className="gfull__quality-tag">HD 320 KBPS</span>
+            <span className="gfull__quality-tag">{isLive ? 'LIVE HD' : 'HD STREAM'}</span>
           </div>
           <button className="gfull__btn-sm" onClick={() => setShowMenu(true)} aria-label="Меню трека" title="Опции трека">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="6" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/></svg>
@@ -223,16 +248,18 @@ const GlobalMusicBar: React.FC = () => {
 
         {/* Artwork with ambient aura glow */}
         <div className="gfull__art-container">
-          <div className="gfull__art-aura" />
-          <div className="gfull__art">
-            {art ? (
-              <img src={art} alt="" onError={() => setImgError(true)} />
-            ) : (
-              <div className="gfull__art-ph">
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17.5V6.3L20 4v11.2" /><circle cx="6.5" cy="17.5" r="2.6" /><circle cx="17.5" cy="15.2" r="2.6" /></svg>
-              </div>
-            )}
-            <div className="gfull__art-gradient" />
+          <div className="gfull__art-wrap">
+            <div className="gfull__art-aura" />
+            <div className="gfull__art">
+              {art ? (
+                <img src={art} alt="" onError={() => setImgError(true)} />
+              ) : (
+                <div className="gfull__art-ph">
+                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17.5V6.3L20 4v11.2" /><circle cx="6.5" cy="17.5" r="2.6" /><circle cx="17.5" cy="15.2" r="2.6" /></svg>
+                </div>
+              )}
+              <div className="gfull__art-gradient" />
+            </div>
           </div>
         </div>
 
@@ -260,14 +287,23 @@ const GlobalMusicBar: React.FC = () => {
 
         {/* Seek bar */}
         <div className="gfull__seek-wrap">
-          <div className="gfull__seek" onClick={handleSeek}>
+          <div className={`gfull__seek ${isLive ? 'gfull__seek--live' : ''}`} onClick={handleSeek}>
             <div className="gfull__seek-fill" style={{ width: `${pct}%` }}>
-              <div className="gfull__seek-thumb" />
+              {!isLive && <div className="gfull__seek-thumb" />}
             </div>
           </div>
           <div className="gfull__times">
-            <span>{fmt(progress)}</span>
-            <span>-{fmt(Math.max(0, duration - progress))}</span>
+            {isLive ? (
+              <>
+                <span className="gfull__live-badge">● В ПРЯМОМ ЭФИРЕ</span>
+                <span>24/7 СТРИМ</span>
+              </>
+            ) : (
+              <>
+                <span>{fmt(progress)}</span>
+                <span>-{fmt(Math.max(0, duration - progress))}</span>
+              </>
+            )}
           </div>
         </div>
 

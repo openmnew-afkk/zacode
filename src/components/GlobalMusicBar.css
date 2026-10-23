@@ -160,13 +160,14 @@
   right: 0;
   bottom: 0;
   width: 100vw;
+  max-width: 520px;
+  margin: 0 auto;
   height: 100vh;
   height: 100dvh;
   max-height: 100dvh;
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   background: #090810;
   animation: gfull-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
   padding: calc(env(safe-area-inset-top, 12px) + 6px) 16px calc(env(safe-area-inset-bottom, 12px) + 12px);
@@ -213,7 +214,11 @@
   100% { transform: translateX(-50%) scale(1.2) rotate(30deg); opacity: 0.8; }
 }
 
-.gfull > * {
+/* Контент плеера поверх декоративных слоёв.
+   ВАЖНО: bg/overlay/aurora исключены — у них position: absolute,
+   которое нельзя перебивать relative (иначе они встают в поток
+   и сдвигают весь интерфейс плеера вниз). */
+.gfull > *:not(.gfull__bg):not(.gfull__overlay):not(.gfull__aurora) {
   position: relative;
   z-index: 2;
 }
@@ -280,14 +285,16 @@
   border-radius: 999px;
 }
 
-/* Art with dynamic gradient aura */
+/* Art with dynamic gradient aura — центрируется в оставшемся пространстве */
 .gfull__art-container {
   position: relative;
-  width: min(200px, 24vh, 58vw);
-  height: min(200px, 24vh, 58vw);
-  aspect-ratio: 1;
-  margin: 0 auto;
-  flex-shrink: 1;
+  z-index: 2;
+  flex: 1;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 16px;
 }
 .gfull__art-aura {
   position: absolute;
@@ -302,6 +309,12 @@
 @keyframes art-aura-pulse {
   0%   { opacity: 0.5; transform: scale(0.95); }
   100% { opacity: 0.85; transform: scale(1.05); }
+}
+
+.gfull__art-wrap {
+  position: relative;
+  width: min(300px, 82vw, 34dvh + 120px);
+  height: min(300px, 82vw, 34dvh + 120px);
 }
 
 .gfull__art {
@@ -420,15 +433,29 @@
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
-.gfull__times {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.35);
-  margin-top: 5px;
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
+.gfull__seek--live {
+  cursor: default;
+  background: rgba(244, 63, 94, 0.2);
 }
+.gfull__seek--live .gfull__seek-fill {
+  background: linear-gradient(90deg, #f43f5e, #fb7185, #f43f5e);
+  background-size: 200% 100%;
+  animation: live-seek-pulse 2s ease infinite;
+}
+@keyframes live-seek-pulse {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.gfull__live-badge {
+  color: #f43f5e !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
 
 /* Controls */
 .gfull__controls {
