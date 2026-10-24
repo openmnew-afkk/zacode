@@ -699,3 +699,172 @@
   transform: scale(0.98);
 }
 
+
+/* ═══════════════════════════════════════════════
+   🌸 Светлая тема (Rose Blush) — pm-*
+   ═══════════════════════════════════════════════ */
+
+[data-theme='light'] .pm {
+  background: var(--bg) !important;
+}
+
+[data-theme='light'] .pm-title {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-subtitle {
+  color: #6b6375 !important;
+}
+
+[data-theme='light'] .pm-feature {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(244, 114, 182, 0.16) !important;
+  box-shadow: 0 2px 12px rgba(244, 114, 182, 0.07) !important;
+}
+
+[data-theme='light'] .pm-feature__title {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-feature__desc {
+  color: #6b6375 !important;
+}
+
+[data-theme='light'] .pm-promo {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border: 1px solid rgba(244, 63, 94, 0.22) !important;
+  color: #e11d48 !important;
+}
+
+[data-theme='light'] .pm-promo__spark {
+  color: #e11d48 !important;
+}
+
+/* Карточки тарифов */
+[data-theme='light'] .pm-tier-panel {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  box-shadow: 0 4px 24px rgba(244, 114, 182, 0.09) !important;
+}
+
+[data-theme='light'] .pm-tier-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1.5px solid rgba(244, 114, 182, 0.2) !important;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.07) !important;
+}
+
+[data-theme='light'] .pm-tier-card__days {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-tier-card.active {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-color: #f43f5e !important;
+  box-shadow: 0 6px 22px rgba(244, 63, 94, 0.18) !important;
+}
+
+[data-theme='light'] .pm-tier-card.disabled {
+  opacity: 0.55;
+}
+
+/* Цены и подписи внутри карточек */
+[data-theme='light'] .pm-tier-card__price,
+[data-theme='light'] .pm-tier-card__val,
+[data-theme='light'] .pm-tier-card__per,
+[data-theme='light'] .pm-tier-card__note {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-extra-plans {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+}
+
+[data-theme='light'] .pm-extra-plan__label {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-extra-plan__price {
+  color: #e11d48 !important;
+}
+
+/* Плашки бейджей тарифов */
+[data-theme='light'] .pm-tier-card__badge--green {
+  background: rgba(34, 197, 94, 0.14) !important;
+  color: #16a34a !important;
+}
+
+[data-theme='light'] .pm-tier-card__badge--blue {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #0284c7 !important;
+}
+
+[data-theme='light'] .pm-tier-card__badge--gold,
+[data-theme='light'] .pm-tier-card__badge--hot {
+  background: rgba(245, 158, 11, 0.15) !important;
+  color: #b45309 !important;
+}
+
+/* Экономия */
+[data-theme='light'] .pm-save-badge {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+}
+
+/* Активная подписка */
+[data-theme='light'] .pm-active-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  box-shadow: 0 8px 28px rgba(244, 114, 182, 0.12) !important;
+}
+
+[data-theme='light'] .pm-active-card__title {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-active-card__sub {
+  color: #6b6375 !important;
+}
+
+[data-theme='light'] .pm-active-item {
+  color: #4a4453 !important;
+}
+
+/* Юридическая ссылка */
+[data-theme='light'] .pm-legal-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #6b6375 !important;
+}
+
+/* Шторка оплаты */
+[data-theme='light'] .pm-pay {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-pay__instruction,
+[data-theme='light'] .pm-pay__copy,
+[data-theme='light'] .pm-pay__msg {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-pay__label,
+[data-theme='light'] .pm-pay__req {
+  color: #6b6375 !important;
+}
+
+[data-theme='light'] .pm-pay__input {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .pm-pay__cancel {
+  background: rgba(255, 255, 255, 0.92) !important;
+  color: #4a4453 !important;
+}
+
+[data-theme='light'] .pm-pay__handle {
+  background: rgba(244, 114, 182, 0.4) !important;
+}

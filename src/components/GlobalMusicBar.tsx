@@ -47,7 +47,10 @@ const GlobalMusicBar: React.FC = () => {
     });
     const unsubTime = audioEngine.onTimeUpdate((time) => {
       consecutiveErrorsRef.current = 0;
-      setProgress(time);
+      // Во время drag-перемотки позиция следует за пальцем, не за потоком
+      if (!isDraggingRef.current) {
+        setProgress(time);
+      }
     });
     const unsubDur = audioEngine.onDurationChange((dur) => {
       if (isFinite(dur) && dur > 0) {
@@ -206,12 +209,39 @@ const GlobalMusicBar: React.FC = () => {
     return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
   };
 
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (isLive || !duration || !isFinite(duration)) return;
+  /* ── Drag-перемотка (мышь + палец) ── */
+  const [isDraggingSeek, setIsDraggingSeek] = useState(false);
+  const isDraggingRef = useRef(false);
+
+  const posFromEvent = (e: React.PointerEvent<HTMLDivElement>): number => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration;
-    audioEngine.seek(pos);
+    const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    return ratio * duration;
+  };
+
+  const handleSeekPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isLive || !duration || !isFinite(duration)) return;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    isDraggingRef.current = true;
+    setIsDraggingSeek(true);
+    const pos = posFromEvent(e);
     setProgress(pos);
+    audioEngine.seek(pos);
+  };
+
+  const handleSeekPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    const pos = posFromEvent(e);
+    setProgress(pos);
+  };
+
+  const handleSeekPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingRef.current) return;
+    isDraggingRef.current = false;
+    setIsDraggingSeek(false);
+    const pos = posFromEvent(e);
+    setProgress(pos);
+    audioEngine.seek(pos);
   };
 
   const art = currentTrack.artwork && !imgError ? currentTrack.artwork : '';
@@ -255,7 +285,7 @@ const GlobalMusicBar: React.FC = () => {
                 <img src={art} alt="" onError={() => setImgError(true)} />
               ) : (
                 <div className="gfull__art-ph">
-                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17.5V6.3L20 4v11.2" /><circle cx="6.5" cy="17.5" r="2.6" /><circle cx="17.5" cy="15.2" r="2.6" /></svg>
+                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M9 17.5V6.3L20 4v11.2" /><circle cx="6.5" cy="17.5" r="2.6" /><circle cx="17.5" cy="15.2" r="2.6" /></svg>
                 </div>
               )}
               <div className="gfull__art-gradient" />
@@ -279,7 +309,7 @@ const GlobalMusicBar: React.FC = () => {
             aria-label="Мне нравится"
             title="Мне нравится"
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill={liked ? 'var(--accent, #fb7185)' : 'none'} stroke={liked ? 'var(--accent, #fb7185)' : 'rgba(255,255,255,0.7)'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill={liked ? 'var(--accent, #fb7185)' : 'none'} stroke={liked ? 'var(--accent, #fb7185)' : 'currentColor'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
@@ -287,15 +317,28 @@ const GlobalMusicBar: React.FC = () => {
 
         {/* Seek bar */}
         <div className="gfull__seek-wrap">
-          <div className={`gfull__seek ${isLive ? 'gfull__seek--live' : ''}`} onClick={handleSeek}>
-            <div className="gfull__seek-fill" style={{ width: `${pct}%` }}>
-              {!isLive && <div className="gfull__seek-thumb" />}
+          <div
+            className={`gfull__seek ${isLive ? 'gfull__seek--live' : ''} ${isDraggingSeek ? 'gfull__seek--dragging' : ''}`}
+            onPointerDown={handleSeekPointerDown}
+            onPointerMove={handleSeekPointerMove}
+            onPointerUp={handleSeekPointerUp}
+            onPointerCancel={handleSeekPointerUp}
+            role="slider"
+            aria-label="Перемотка трека"
+            aria-valuemin={0}
+            aria-valuemax={Math.round(duration) || 0}
+            aria-valuenow={Math.round(progress)}
+          >
+            <div className="gfull__seek-track">
+              <div className="gfull__seek-fill" style={{ width: `${pct}%` }}>
+                {!isLive && <div className="gfull__seek-thumb" />}
+              </div>
             </div>
           </div>
           <div className="gfull__times">
             {isLive ? (
               <>
-                <span className="gfull__live-badge">● В ПРЯМОМ ЭФИРЕ</span>
+                <span className="gfull__live-badge">В ПРЯМОМ ЭФИРЕ</span>
                 <span>24/7 СТРИМ</span>
               </>
             ) : (

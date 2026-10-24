@@ -1,6 +1,10 @@
-/* ══ GlobalMusicBar — mini capsule + fullscreen player ══ */
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  GlobalMusicBar — мини-капсула + полноэкранный плеер
+ *  Построен на дизайн-токенах global.css → обе темы работают из коробки
+ * ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Mini bar capsule ── */
+/* ═══════════ Мини-капсула (над TabBar) ═══════════ */
+
 .gbar {
   position: fixed;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
@@ -9,20 +13,22 @@
   max-width: 480px;
   margin: 0 auto;
   z-index: 900;
-  background: rgba(18, 16, 26, 0.92);
+  background: var(--glass-bg);
   backdrop-filter: blur(28px) saturate(190%);
   -webkit-backdrop-filter: blur(28px) saturate(190%);
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--glass-border);
   overflow: hidden;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.7), 0 2px 10px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   animation: gbar-up 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
+
 .gbar:active {
   transform: scale(0.985);
 }
+
 @keyframes gbar-up {
   from { transform: translateY(22px); opacity: 0; }
   to   { transform: translateY(0); opacity: 1; }
@@ -30,15 +36,17 @@
 
 .gbar__progress {
   height: 2.5px;
-  background: linear-gradient(90deg, #a78bfa, #ec4899);
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
   transition: width 0.4s linear;
 }
+
 .gbar__inner {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
 }
+
 .gbar__art {
   width: 42px;
   height: 42px;
@@ -46,30 +54,34 @@
   overflow: hidden;
   flex-shrink: 0;
   position: relative;
-  background: rgba(139, 92, 246, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
 }
+
 .gbar__art img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
+
 .gbar__art-ph {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  color: var(--text-3);
 }
+
 .gbar__art-pulse {
   position: absolute;
   inset: 0;
   border-radius: 11px;
-  border: 2px solid rgba(167, 139, 250, 0.55);
+  border: 2px solid var(--accent-glow);
   animation: gbar-pulse 2s ease-out infinite;
 }
+
 @keyframes gbar-pulse {
   0%   { transform: scale(1); opacity: 0.75; }
   70%  { transform: scale(1.14); opacity: 0; }
@@ -80,18 +92,20 @@
   flex: 1;
   min-width: 0;
 }
+
 .gbar__title {
   font-size: 13px;
   font-weight: 700;
-  color: #fff;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.25;
 }
+
 .gbar__artist {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -104,13 +118,14 @@
   gap: 5px;
   flex-shrink: 0;
 }
+
 .gbar__btn {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface);
   border: none;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -119,40 +134,43 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
+
 .gbar__btn:active {
   transform: scale(0.86);
 }
+
 .gbar__btn--like {
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-3);
 }
+
 .gbar__btn--like:hover,
 .gbar__btn--like.liked {
-  color: var(--accent, #fb7185);
+  color: var(--accent);
 }
 
 .gbar__btn--play {
-  background: #ffffff;
-  color: #0c0b14;
-  box-shadow: 0 3px 12px rgba(255, 255, 255, 0.22);
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.2);
 }
+
 .gbar__btn--play:active {
-  background: rgba(255, 255, 255, 0.88);
+  opacity: 0.88;
 }
+
 .gbar__btn--close {
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.55);
+  background: var(--surface);
+  color: var(--text-3);
   margin-left: 2px;
 }
-.gbar__btn--close:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
-}
+
 .gbar__btn--close:active {
-  background: rgba(239, 68, 68, 0.22);
+  background: rgba(239, 68, 68, 0.18);
   color: #f87171;
 }
 
-/* ── Fullscreen player ── */
+/* ═══════════ Полноэкранный плеер ═══════════ */
+
 .gfull {
   position: fixed;
   top: 0;
@@ -168,53 +186,58 @@
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  background: #090810;
+  background: var(--bg);
   animation: gfull-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
-  padding: calc(env(safe-area-inset-top, 12px) + 6px) 16px calc(env(safe-area-inset-bottom, 12px) + 12px);
+  padding: calc(env(safe-area-inset-top, 12px) + 6px) 20px calc(env(safe-area-inset-bottom, 12px) + 14px);
   box-sizing: border-box;
   overflow: hidden;
 }
+
 @keyframes gfull-up {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
 }
 
+/* Размытая обложка как фон */
 .gfull__bg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(65px) saturate(160%);
-  transform: scale(1.4);
-  opacity: 0.25;
+  filter: blur(70px) saturate(170%);
+  transform: scale(1.45);
+  opacity: 0.28;
 }
+
+/* Затемняющий слой поверх фона */
 .gfull__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(9, 8, 16, 0.55) 0%, rgba(9, 8, 16, 0.96) 100%);
+  background: linear-gradient(180deg, rgba(9, 8, 11, 0.5) 0%, rgba(9, 8, 11, 0.82) 55%, rgba(9, 8, 11, 0.96) 100%);
 }
 
-/* Dynamic Aurora glow mesh */
+/* Ambient-свечение */
 .gfull__aurora {
   position: absolute;
-  top: 15%;
+  top: 12%;
   left: 50%;
   transform: translateX(-50%);
   width: 340px;
   height: 340px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(236, 72, 153, 0.25) 50%, rgba(56, 189, 248, 0.15) 75%, transparent 100%);
+  background: radial-gradient(circle, var(--accent-glow) 0%, rgba(168, 85, 247, 0.2) 50%, transparent 75%);
   filter: blur(80px);
   pointer-events: none;
-  opacity: 0.65;
+  opacity: 0.6;
   animation: aura-sway 6s ease-in-out infinite alternate;
 }
+
 @keyframes aura-sway {
-  0% { transform: translateX(-50%) scale(0.9) rotate(0deg); opacity: 0.45; }
-  100% { transform: translateX(-50%) scale(1.2) rotate(30deg); opacity: 0.8; }
+  0%   { transform: translateX(-50%) scale(0.9) rotate(0deg); opacity: 0.4; }
+  100% { transform: translateX(-50%) scale(1.2) rotate(30deg); opacity: 0.75; }
 }
 
-/* Контент плеера поверх декоративных слоёв.
+/* Контент поверх декоративных слоёв.
    ВАЖНО: bg/overlay/aurora исключены — у них position: absolute,
    которое нельзя перебивать relative (иначе они встают в поток
    и сдвигают весь интерфейс плеера вниз). */
@@ -223,69 +246,84 @@
   z-index: 2;
 }
 
-/* Handle */
+/* ── Ручка сворачивания ── */
 .gfull__handle {
-  padding: 4px 0 2px;
+  padding: 4px 0 6px;
   text-align: center;
   cursor: pointer;
-}
-.gfull__handle-bar {
-  width: 38px;
-  height: 4.5px;
-  background: rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
-  margin: 0 auto;
+  flex-shrink: 0;
 }
 
-/* Header */
+.gfull__handle-bar {
+  width: 40px;
+  height: 4.5px;
+  background: var(--border-light);
+  border-radius: 999px;
+  margin: 0 auto;
+  transition: background 0.2s ease, width 0.2s ease;
+}
+
+.gfull__handle:active .gfull__handle-bar {
+  background: var(--text-3);
+  width: 52px;
+}
+
+/* ── Шапка ── */
 .gfull__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 6px;
+  flex-shrink: 0;
 }
+
 .gfull__header-center {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
 }
+
 .gfull__btn-sm {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
+
 .gfull__btn-sm:active {
   transform: scale(0.88);
+  background: var(--surface-2);
 }
+
 .gfull__now-label {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-2);
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 2.2px;
 }
+
 .gfull__quality-tag {
   font-size: 8.5px;
   font-weight: 800;
   letter-spacing: 0.8px;
-  color: #fa233b;
-  background: rgba(250, 35, 59, 0.15);
-  border: 1px solid rgba(250, 35, 59, 0.3);
-  padding: 1px 7px;
+  color: var(--accent);
+  background: rgba(251, 113, 133, 0.12);
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  padding: 2px 8px;
   border-radius: 999px;
 }
 
-/* Art with dynamic gradient aura — центрируется в оставшемся пространстве */
+/* ── Обложка (центрируется в свободном пространстве) ── */
 .gfull__art-container {
   position: relative;
   z-index: 2;
@@ -294,272 +332,371 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 12px 0 16px;
-}
-.gfull__art-aura {
-  position: absolute;
-  inset: -14px;
-  border-radius: 36px;
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.55) 0%, rgba(236, 72, 153, 0.4) 50%, rgba(56, 189, 248, 0.35) 100%);
-  filter: blur(32px);
-  opacity: 0.7;
-  pointer-events: none;
-  animation: art-aura-pulse 4s ease-in-out infinite alternate;
-}
-@keyframes art-aura-pulse {
-  0%   { opacity: 0.5; transform: scale(0.95); }
-  100% { opacity: 0.85; transform: scale(1.05); }
+  margin: 10px 0 14px;
 }
 
 .gfull__art-wrap {
   position: relative;
-  width: min(300px, 82vw, 34dvh + 120px);
-  height: min(300px, 82vw, 34dvh + 120px);
+  width: min(290px, 78vw, 36dvh + 90px);
+  height: min(290px, 78vw, 36dvh + 90px);
+}
+
+.gfull__art-aura {
+  position: absolute;
+  inset: -16px;
+  border-radius: 40px;
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.5) 0%, rgba(251, 113, 133, 0.38) 50%, rgba(168, 85, 247, 0.32) 100%);
+  filter: blur(34px);
+  opacity: 0.65;
+  pointer-events: none;
+  animation: art-aura-pulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes art-aura-pulse {
+  0%   { opacity: 0.45; transform: scale(0.95); }
+  100% { opacity: 0.8; transform: scale(1.05); }
 }
 
 .gfull__art {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 24px;
+  border-radius: 26px;
   overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
-  background: rgba(139, 92, 246, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.55);
+  background: var(--surface-2);
+  border: 1px solid var(--border-light);
 }
+
 .gfull__art img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
+
 .gfull__art-ph {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 64px;
+  color: var(--text-3);
 }
+
 .gfull__art-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 45%, rgba(9, 8, 16, 0.75) 100%);
-  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 45%, rgba(0, 0, 0, 0.28) 100%);
+  border-radius: 26px;
   pointer-events: none;
 }
 
-/* Info with inline like button */
+/* ── Название и лайк ── */
 .gfull__info {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 8px;
+  flex-shrink: 0;
   text-align: left;
 }
+
 .gfull__info-text {
   flex: 1;
   min-width: 0;
 }
+
 .gfull__title {
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 800;
-  color: #fff;
-  margin-bottom: 2px;
-  letter-spacing: -0.2px;
+  color: var(--text);
+  margin-bottom: 3px;
+  letter-spacing: -0.3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .gfull__artist {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 13.5px;
+  color: var(--text-2);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .gfull__like-btn {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.65);
+  color: var(--text-2);
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
+
 .gfull__like-btn:active {
   transform: scale(0.85);
 }
+
 .gfull__like-btn.active {
-  background: rgba(250, 35, 59, 0.16);
-  border-color: rgba(250, 35, 59, 0.35);
-  color: #fa233b;
-  box-shadow: 0 0 16px rgba(250, 35, 59, 0.25);
+  background: rgba(251, 113, 133, 0.14);
+  border-color: rgba(251, 113, 133, 0.45);
+  color: var(--accent);
+  box-shadow: 0 0 18px var(--accent-glow);
 }
 
-/* Seek */
+/* ── Перемотка ── */
 .gfull__seek-wrap {
-  margin-bottom: 8px;
+  margin-top: 16px;
+  flex-shrink: 0;
 }
+
 .gfull__seek {
-  height: 4.5px;
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  cursor: pointer;
   position: relative;
+  height: 22px;                /* увеличенная зона касания */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  touch-action: none;          /* drag принадлежит нам, не скроллу */
+  -webkit-tap-highlight-color: transparent;
 }
+
+.gfull__seek-track {
+  position: relative;
+  width: 100%;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: visible;
+  transition: height 0.15s ease;
+}
+
+/* Активная перемотка — трек чуть толще */
+.gfull__seek:active .gfull__seek-track {
+  height: 7px;
+}
+
 .gfull__seek-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #fa233b, #f472b6, #ffffff);
-  position: relative;
-  transition: width 0.35s linear;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  box-shadow: 0 0 12px var(--accent-glow);
+  transition: width 0.25s linear;
 }
+
+/* Во время drag — позиция следует за пальцем мгновенно */
+.gfull__seek--dragging .gfull__seek-fill,
+.gfull__seek--dragging .gfull__seek-thumb {
+  transition: none;
+}
+
 .gfull__seek-thumb {
   position: absolute;
-  right: -6px;
-  top: -4.5px;
-  width: 13.5px;
-  height: 13.5px;
+  right: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  background: #ffffff;
+  border: 2.5px solid var(--accent);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s ease;
 }
+
+.gfull__seek:active .gfull__seek-thumb {
+  transform: translateY(-50%) scale(1.25);
+}
+
+/* Прямой эфир — полоса пульсирует, перемотка отключена */
 .gfull__seek--live {
   cursor: default;
-  background: rgba(244, 63, 94, 0.2);
+  pointer-events: none;
 }
+
+.gfull__seek--live .gfull__seek-track {
+  background: rgba(244, 63, 94, 0.18);
+}
+
 .gfull__seek--live .gfull__seek-fill {
-  background: linear-gradient(90deg, #f43f5e, #fb7185, #f43f5e);
+  width: 100% !important;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent), var(--accent-2));
   background-size: 200% 100%;
   animation: live-seek-pulse 2s ease infinite;
 }
+
 @keyframes live-seek-pulse {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-.gfull__live-badge {
-  color: #f43f5e !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.5px;
-  display: inline-flex;
+
+.gfull__times {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
+.gfull__live-badge {
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
 
-/* Controls */
+/* Мигающая точка эфира */
+.gfull__live-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-2);
+  animation: live-dot 1.4s ease infinite;
+}
+
+@keyframes live-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--accent-glow); }
+  50%      { opacity: 0.55; box-shadow: 0 0 0 4px transparent; }
+}
+
+/* ── Управление ── */
 .gfull__controls {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 8px;
+  gap: 18px;
+  margin-top: 14px;
+  flex-shrink: 0;
 }
+
 .gfull__ctrl {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, opacity 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
+
 .gfull__ctrl:active {
   transform: scale(0.85);
 }
+
 .gfull__ctrl-sm {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.35);
+  color: var(--text-3);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  transition: color 0.18s ease;
+  transition: color 0.18s ease, transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
+
+.gfull__ctrl-sm:active {
+  transform: scale(0.85);
+}
+
 .gfull__ctrl-sm.active {
-  color: #fa233b;
+  color: var(--accent);
+  filter: drop-shadow(0 0 6px var(--accent-glow));
 }
 
 .gfull__play {
-  width: 58px;
-  height: 58px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: #ffffff;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
   border: none;
-  color: #090810;
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.22);
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 30px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s ease;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
 }
+
 .gfull__play:active {
   transform: scale(0.92);
+  box-shadow: 0 6px 20px var(--accent-glow);
 }
 
-/* Bottom */
+/* ── Нижний ряд: скорость + лайк ── */
 .gfull__bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 4px;
-  margin-top: 0;
+  padding: 0 2px;
+  margin-top: 16px;
+  flex-shrink: 0;
 }
+
 .gfull__speeds {
   display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 3px;
+  background: var(--surface);
   padding: 3px 6px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
 }
+
 .gfull__speed-pill {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-3);
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 8px;
+  padding: 5px 9px;
   border-radius: 999px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
+
 .gfull__speed-pill.active {
-  background: rgba(255, 255, 255, 0.18);
-  color: #fff;
+  background: var(--surface-3);
+  color: var(--text);
 }
 
 .gfull__action {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.65);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-2);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -567,21 +704,24 @@
   padding: 0;
   transition: all 0.18s ease;
 }
+
 .gfull__action:active {
   transform: scale(0.88);
 }
+
 .gfull__action--liked {
-  color: #ec4899;
-  background: rgba(236, 72, 153, 0.18);
-  border-color: rgba(236, 72, 153, 0.35);
+  color: var(--accent);
+  background: rgba(251, 113, 133, 0.12);
+  border-color: rgba(251, 113, 133, 0.4);
 }
 
-/* ── iOS Action Sheet Modal ── */
+/* ═══════════ iOS Action Sheet (меню трека) ═══════════ */
+
 .gfull__sheet-backdrop {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -590,6 +730,7 @@
   padding: 12px 14px calc(env(safe-area-inset-bottom, 12px) + 12px);
   animation: sheet-fade 0.22s ease both;
 }
+
 @keyframes sheet-fade {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -603,6 +744,7 @@
   gap: 8px;
   animation: sheet-up 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
 @keyframes sheet-up {
   from { transform: translateY(100%); }
   to   { transform: translateY(0); }
@@ -611,37 +753,39 @@
 .gfull__sheet-header {
   text-align: center;
   padding: 14px 16px 12px;
-  background: rgba(30, 26, 42, 0.95);
+  background: var(--bg-3);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 16px 16px 0 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border);
 }
+
 .gfull__sheet-title {
   display: block;
   font-size: 14px;
   font-weight: 800;
-  color: #fff;
+  color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .gfull__sheet-sub {
   display: block;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--text-3);
   margin-top: 2px;
 }
 
 .gfull__sheet-group {
-  background: rgba(30, 26, 42, 0.95);
+  background: var(--bg-3);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 16px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
 .gfull__sheet-btn {
@@ -649,8 +793,8 @@
   padding: 15px 18px;
   background: none;
   border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  color: #38bdf8;
+  border-top: 1px solid var(--border);
+  color: var(--text);
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -661,11 +805,13 @@
   transition: background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
+
 .gfull__sheet-btn:first-child {
   border-top: none;
 }
+
 .gfull__sheet-btn:active {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-2);
 }
 
 .gfull__service-tag {
@@ -678,37 +824,40 @@
   font-size: 12px;
   font-weight: 900;
   flex-shrink: 0;
+  color: #fff;
 }
+
 .gfull__service-tag.yandex {
   background: #fc3f1d;
-  color: #fff;
 }
+
 .gfull__service-tag.vk {
   background: #0077ff;
-  color: #fff;
 }
+
 .gfull__service-tag.apple {
   background: #ffffff;
   color: #000000;
 }
+
 .gfull__service-tag.soundcloud {
   background: #ff5500;
-  color: #ffffff;
 }
 
 .gfull__sheet-cancel {
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
+
 .gfull__sheet-cancel-btn {
   width: 100%;
   padding: 16px;
-  background: rgba(36, 32, 50, 0.98);
+  background: var(--bg-3);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: none;
-  color: #f43f5e;
+  color: var(--accent);
   font-size: 16.5px;
   font-weight: 700;
   cursor: pointer;
@@ -716,11 +865,13 @@
   transition: background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }
+
 .gfull__sheet-cancel-btn:active {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--surface-2);
 }
 
-/* ── Toast Notification ── */
+/* ═══════════ Тост ═══════════ */
+
 .gfull__toast {
   position: fixed;
   top: calc(env(safe-area-inset-top, 20px) + 20px);
@@ -729,19 +880,55 @@
   z-index: 2500;
   padding: 10px 20px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--surface-3);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  border: 1px solid var(--border-light);
+  color: var(--text);
   font-size: 13.5px;
   font-weight: 700;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
   animation: toast-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
   pointer-events: none;
   white-space: nowrap;
 }
+
 @keyframes toast-in {
   from { opacity: 0; transform: translate(-50%, -10px); }
   to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ═══════════ 🌸 Светлая тема (Rose Blush) ═══════════ */
+
+[data-theme='light'] .gfull__bg {
+  opacity: 0.16;
+}
+
+[data-theme='light'] .gfull__overlay {
+  background: linear-gradient(180deg, rgba(255, 245, 247, 0.72) 0%, rgba(255, 245, 247, 0.92) 55%, rgba(255, 245, 247, 0.99) 100%);
+}
+
+[data-theme='light'] .gfull__aurora {
+  opacity: 0.35;
+}
+
+[data-theme='light'] .gfull__art-gradient {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, transparent 50%, rgba(31, 26, 36, 0.1) 100%);
+}
+
+[data-theme='light'] .gfull__art {
+  box-shadow: 0 20px 50px rgba(244, 63, 94, 0.18);
+}
+
+[data-theme='light'] .gfull__seek-track {
+  background: rgba(244, 114, 182, 0.25);
+}
+
+[data-theme='light'] .gfull__seek-thumb {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(244, 63, 94, 0.35);
+}
+
+[data-theme='light'] .gfull__sheet-backdrop {
+  background: rgba(255, 245, 247, 0.6);
 }
