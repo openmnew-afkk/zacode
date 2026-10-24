@@ -1032,7 +1032,7 @@ const HomePage: React.FC = () => {
               </div>
             )}
             <div className="hp-preview__tags">
-              {preview.vote_average > 0 && <span className="hp-preview__tag">★ {preview.vote_average.toFixed(1)}</span>}
+              {preview.vote_average > 0 && <span className="hp-preview__tag hp-preview__tag--accent">★ {preview.vote_average.toFixed(1)}</span>}
               {preview.release_date && <span className="hp-preview__tag">{preview.release_date.slice(0, 4)}</span>}
               <span className="hp-preview__tag">{preview.is_serial ? 'Сериал' : 'Фильм'}</span>
             </div>
@@ -1041,7 +1041,7 @@ const HomePage: React.FC = () => {
                 className="hp-preview__btn hp-preview__btn--primary"
                 onClick={() => { setPreview(null); navigate(`/movie/${preview.id}`); }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginRight: 6 }}><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
                 Смотреть
               </button>
               <button

@@ -60,9 +60,17 @@ const MoviePreview: React.FC<Props> = ({ movie, children }) => {
               {/* Gradient fade */}
               <div className="mpv-poster__fade" />
 
+              {/* Type badge */}
+              <div className="mpv-type-badge">
+                {movie.type === 'series' ? 'Сериал' : 'Фильм'}
+              </div>
+
               {/* Rating badge */}
               {rating && (
-                <div className="mpv-rating-badge">⭐ {rating}</div>
+                <div className="mpv-rating-badge">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.5l7.1-.6L12 2z"/></svg>
+                  {rating}
+                </div>
               )}
             </div>
 
@@ -73,15 +81,13 @@ const MoviePreview: React.FC<Props> = ({ movie, children }) => {
               {/* Meta row */}
               {(year || runtime) && (
                 <div className="mpv-meta">
-                  {movie.type === 'series' ? '📺 Сериал' : '🎬 Фильм'}
-                  {year && <span className="mpv-dot">·</span>}
                   {year && <span>{year}</span>}
-                  {runtime && <span className="mpv-dot">·</span>}
+                  {year && runtime && <span className="mpv-dot">·</span>}
                   {runtime && <span>{runtime} мин</span>}
                 </div>
               )}
 
-              {/* Genre tags like photo 1 */}
+              {/* Genre tags */}
               {genres.length > 0 && (
                 <div className="mpv-tags">
                   {genres.map((g) => (
@@ -101,9 +107,16 @@ const MoviePreview: React.FC<Props> = ({ movie, children }) => {
                   className="mpv-btn-watch"
                   onClick={() => { close(); navigate(`/movie/${movie.id}`); }}
                 >
-                  ▶ Смотреть
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  Смотреть
                 </button>
-                <button className="mpv-btn-close" onClick={close}>✕</button>
+                <button className="mpv-btn-close" onClick={close} aria-label="Закрыть">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
           </div>

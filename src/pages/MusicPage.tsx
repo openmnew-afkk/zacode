@@ -22,6 +22,21 @@ const fmtTime = (s: number): string => {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 };
 
+/** Тасовка Фишера—Йетса: каждый запуск Волны звучит по-новому */
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/** Случайная стартовая страница трендов (0–3), чтобы при каждом открытии были новые треки */
+function randomBaseOffset(): number {
+  return Math.floor(Math.random() * 4) * PAGE;
+}
+
 const MusicPage: React.FC = () => {
   const { haptic } = useTelegram();
   const {
@@ -54,6 +69,8 @@ const MusicPage: React.FC = () => {
   const iaPageRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadMoreFnRef = useRef<() => void>(() => {});
+  /* Случайный стартовый offset плейлиста (запоминается для бесконечной прокрутки) */
+  const baseOffsetRef = useRef<Record<string, number>>({});
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -76,7 +93,7 @@ const MusicPage: React.FC = () => {
     return [];
   }, []);
 
-  /* Первичная загрузка плейлиста */
+  /* Первичная загрузка плейлиста — со случайной страницы и в случайном порядке */
   useEffect(() => {
     if ((tab !== 'wave' && tab !== 'chart') || searchMode) return;
     if (playlists[listKey]) return;
@@ -84,8 +101,16 @@ const MusicPage: React.FC = () => {
     let alive = true;
     setListLoading(true);
 
-    fetchListPage(listKey, 0)
-      .then((tracks) => { if (alive) setPlaylists((p) => ({ ...p, [listKey]: tracks })); })
+    // Для запросов-настроений offset не важен, для трендов — случайная страница
+    const isTrending = listKey === 'chart' || (() => {
+      const mood = WAVE_MOODS.find((m) => m.id === listKey.slice(5));
+      return Boolean(mood && !mood.query);
+    })();
+    const base = isTrending ? randomBaseOffset() : 0;
+    baseOffsetRef.current[listKey] = base;
+
+    fetchListPage(listKey, base)
+      .then((tracks) => { if (alive) setPlaylists((p) => ({ ...p, [listKey]: shuffleArray(tracks) })); })
       .catch(() => { if (alive) setPlaylists((p) => ({ ...p, [listKey]: [] })); })
       .finally(() => { if (alive) setListLoading(false); });
 
@@ -146,9 +171,11 @@ const MusicPage: React.FC = () => {
     setLoadingMore(true);
     try {
       const current = playlists[listKey] || [];
-      const offset = current.filter((t) => !t.isLiveRadio).length;
+      // offset = случайная база этой сессии + сколько уже загрузили
+      const base = baseOffsetRef.current[listKey] || 0;
+      const offset = base + current.filter((t) => !t.isLiveRadio).length;
       const next = await fetchListPage(listKey, offset);
-      const fresh = next.filter((t) => !current.some((c) => c.id === t.id));
+      const fresh = shuffleArray(next.filter((t) => !current.some((c) => c.id === t.id)));
       if (fresh.length === 0) {
         setExhausted((e) => ({ ...e, [listKey]: true }));
       } else {
@@ -251,12 +278,16 @@ const MusicPage: React.FC = () => {
       showToast('🌊 Подбираем треки для Волны…');
       return;
     }
-    if (displayedTracks.length > 0) {
-      const first = displayedTracks[0];
-      setTrack(first as any, displayedTracks as any[], 0);
+    // Стартуем со случайного трека (не радио), чтобы каждое включение было новым
+    const musicOnly = displayedTracks.filter((t) => !t.isLiveRadio);
+    const pool = musicOnly.length > 0 ? musicOnly : displayedTracks;
+    if (pool.length > 0) {
+      const idx = Math.floor(Math.random() * pool.length);
+      const first = pool[idx];
+      setTrack(first as any, displayedTracks as any[], displayedTracks.indexOf(first));
       setPlaying(true);
       const mood = WAVE_MOODS.find((m) => m.id === activeMood);
-      showToast(`🌊 Моя Волна запущена: ${mood?.label || 'Персональный поток'}`);
+      showToast(`🌊 Моя Волна: ${first.artist} — ${first.title}`);
     }
   };
 

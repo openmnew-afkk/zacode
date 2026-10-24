@@ -373,7 +373,7 @@ const GlobalMusicBar: React.FC = () => {
           </button>
         </div>
 
-        {/* Bottom actions: speed toggle & favorite */}
+        {/* Bottom actions: speed toggle & share */}
         <div className="gfull__bottom">
           <div className="gfull__speeds">
             {[0.8, 1.0, 1.25, 1.5].map((s) => (
@@ -388,15 +388,16 @@ const GlobalMusicBar: React.FC = () => {
           </div>
 
           <button
-            className={`gfull__action ${liked ? 'gfull__action--liked' : ''}`}
+            className="gfull__action"
             onClick={() => {
-              toggleLike(currentTrack);
-              showToastMsg(liked ? 'Удалено из медиатеки' : 'Сохранено в любимые треки');
+              showToastMsg('Поделиться треком…');
+              setShowMenu(true);
             }}
-            aria-label="Мне нравится"
+            aria-label="Поделиться треком"
+            title="Поделиться треком"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill={liked ? 'var(--accent, #fb7185)' : 'none'} stroke={liked ? 'var(--accent, #fb7185)' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
           </button>
         </div>
