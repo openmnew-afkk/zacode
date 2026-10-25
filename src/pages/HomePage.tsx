@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
-  discoverMovies, discoverSeries,
+  discoverMovies, discoverSeries, getKeywordCollection,
 } from '../api/catalog';
+import { getStoredSeason } from '../services/seasons';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
@@ -363,6 +364,8 @@ const HomePage: React.FC = () => {
   const [topMovies, setTopMovies] = useState<Movie[]>([]);
   const [topSeries, setTopSeries] = useState<Movie[]>([]);
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
+  const [seasonMovies, setSeasonMovies] = useState<Movie[]>([]);
+  const season = getStoredSeason().season;
   const [genreRows, setGenreRows] = useState<Record<number, Movie[]>>({});
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
 
@@ -495,18 +498,22 @@ const HomePage: React.FC = () => {
           getTopRated('movie'),
           getTopRated('series'),
           getNowPlaying(),
+          season.collectionQuery
+            ? getKeywordCollection(season.collectionQuery.value)
+            : Promise.resolve([] as Movie[]),
         ]);
         if (!alive) return;
 
         const get = (i: number) => results[i].status === 'fulfilled' ? (results[i] as any).value : [];
 
-        const tr = get(0), tm = get(1), ts = get(2), top_m = get(3), top_s = get(4), np = get(5);
+        const tr = get(0), tm = get(1), ts = get(2), top_m = get(3), top_s = get(4), np = get(5), seasonal = get(6);
         setTrending(tr);
         setTrendMovies(tm);
         setTrendSeries(ts);
         setTopMovies(top_m);
         setTopSeries(top_s);
         setNowPlaying(np);
+        setSeasonMovies(seasonal);
 
         // Если ВСЕ пустые — ошибка загрузки
         const total = tr.length + tm.length + ts.length + top_m.length + top_s.length + np.length;
@@ -733,6 +740,15 @@ const HomePage: React.FC = () => {
             </div>
           )}
 
+          {season.collectionQuery && seasonMovies.length > 0 && (
+            <Row
+              title={`${season.icon} ${season.collectionQuery!.label}`}
+              movies={seasonMovies}
+              onMovieClick={go}
+              onMovieLongPress={openPreview}
+              onTitleClick={() => openCategory('season', `${season.icon} ${season.collectionQuery!.label}`, seasonMovies, undefined, 'movie')}
+            />
+          )}
           <Row
             title="Тренды недели"
             movies={trending}

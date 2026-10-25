@@ -1,0 +1,27 @@
+/* ❄️ Сезонные эффекты */
+
+.season-fx-snow {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 80;
+}
+
+/* Лёгкий голубоватый «морозный» оттенок поверх контента зимой */
+.season-fx-frost {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 79;
+  background:
+    radial-gradient(ellipse 120% 50% at 50% -10%, rgba(191, 219, 254, 0.10) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(224, 242, 254, 0.05) 0%, transparent 18%);
+}
+
+[data-theme='light'] .season-fx-frost {
+  background:
+    radial-gradient(ellipse 120% 50% at 50% -10%, rgba(147, 197, 253, 0.16) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(224, 242, 254, 0.12) 0%, transparent 18%);
+}

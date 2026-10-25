@@ -239,10 +239,10 @@
 }
 
 /* Контент поверх декоративных слоёв.
-   ВАЖНО: bg/overlay/aurora исключены — у них position: absolute,
-   которое нельзя перебивать relative (иначе они встают в поток
-   и сдвигают весь интерфейс плеера вниз). */
-.gfull > *:not(.gfull__bg):not(.gfull__overlay):not(.gfull__aurora) {
+   ВАЖНО: bg/overlay/aurora/sheet/toast исключены — у них position: absolute/fixed,
+   которое нельзя перебивать relative (иначе шторка меню встаёт в поток
+   и ломает всю компоновку плеера). */
+.gfull > *:not(.gfull__bg):not(.gfull__overlay):not(.gfull__aurora):not(.gfull__sheet-backdrop):not(.gfull__toast) {
   position: relative;
   z-index: 2;
 }
@@ -338,8 +338,9 @@
 
 .gfull__art-wrap {
   position: relative;
-  width: min(290px, 78vw, 36dvh + 90px);
-  height: min(290px, 78vw, 36dvh + 90px);
+  /* ограничение по высоте экрана — чтобы на маленьких устройствах контролы не сжимались */
+  width: min(250px, 72vw, 30dvh + 70px);
+  height: min(250px, 72vw, 30dvh + 70px);
 }
 
 .gfull__art-aura {

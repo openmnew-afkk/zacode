@@ -99,6 +99,48 @@ button {
 ::-webkit-scrollbar { width: 0; height: 0; }
 ::selection { background: var(--accent-glow); color: #fff; }
 
+/* ═══════════════════════════════════════════════
+   🎄 СЕЗОННЫЕ ТЕМЫ (data-season на <html>)
+   Зимой — новогодняя снежная, весной — сакура,
+   летом — лазурь, осенью — янтарь. Меняю акценты.
+   ═══════════════════════════════════════════════ */
+
+:root[data-season='winter'] {
+  --accent: #93c5fd;
+  --accent-2: #60a5fa;
+  --accent-3: #bfdbfe;
+  --accent-glow: rgba(147, 197, 253, 0.32);
+}
+
+:root[data-season='spring'] {
+  --accent: #f9a8d4;
+  --accent-2: #f472b6;
+  --accent-3: #fbcfe8;
+  --accent-glow: rgba(249, 168, 212, 0.32);
+}
+
+:root[data-season='summer'] {
+  --accent: #fbbf24;
+  --accent-2: #f59e0b;
+  --accent-3: #fde68a;
+  --accent-glow: rgba(251, 191, 36, 0.3);
+}
+
+:root[data-season='autumn'] {
+  --accent: #fdba74;
+  --accent-2: #fb923c;
+  --accent-3: #fed7aa;
+  --accent-glow: rgba(253, 186, 116, 0.3);
+}
+
+/* Сезонное свечение фона страниц */
+html[data-season='winter'] .page,
+html[data-season='spring'] .page,
+html[data-season='summer'] .page,
+html[data-season='autumn'] .page {
+  background-image: var(--season-glow-bg, none) !important;
+}
+
 .skeleton-pulse {
   background: linear-gradient(105deg, var(--surface-2) 0%, var(--surface-3) 40%, var(--surface-4, rgba(255,255,255,0.13)) 50%, var(--surface-3) 60%, var(--surface-2) 100%);
   background-size: 300% 100%;

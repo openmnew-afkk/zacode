@@ -15,8 +15,10 @@ import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
 import MandatorySubModal from './components/MandatorySubModal';
+import SeasonSnow from './components/SeasonFx';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
+import { getStoredSeason, applySeason } from './services/seasons';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -24,6 +26,12 @@ function App() {
   const navigate = useNavigate();
   const { theme, setTelegramUsername, syncCloudState } = useStore();
   const { currentTrack } = useMusicStore();
+
+  /* ═══ Сезонная тема: новогодняя зимой, сакура весной и т.д. ═══ */
+  const season = getStoredSeason().season;
+  useEffect(() => {
+    applySeason(season);
+  }, [season.id]);
 
   /* ═══ Фоновая облачная синхронизация при запуске (0 мс задержки) ═══ */
   useEffect(() => {
@@ -57,6 +65,9 @@ function App() {
 
   return (
     <div className="app-root">
+      {/* Сезонные эффекты: снегопад зимой */}
+      {season.id === 'winter' && <SeasonSnow />}
+
       {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
       <MandatorySubModal />
 

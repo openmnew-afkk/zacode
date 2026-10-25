@@ -151,6 +151,42 @@ async function handleApi(req, res, reqUrl) {
     return json(res, 200, { ok: true, premium: false });
   }
 
+  /* ── Telegram Stars: инвойс «поддержать звёздами» (сумма 1 – ∞) ──
+   * Требуется BOT_TOKEN в env того же бота, что открывает Mini App.
+   * Валюта XTR — Telegram Stars, звёзды падают на баланс бота. */
+  if (route === '/api/stars/invoice' && req.method === 'POST') {
+    const body = await readBody(req);
+    const amount = Math.max(1, Math.floor(Number(body.amount) || 0));
+    const movieTitle = String(body.title || '').slice(0, 80);
+    const botToken = process.env.BOT_TOKEN || '';
+    if (!botToken) {
+      return json(res, 500, { ok: false, message: 'BOT_TOKEN не настроен на сервере' });
+    }
+    if (amount < 1) {
+      return json(res, 400, { ok: false, message: 'Минимальная сумма — 1 ⭐' });
+    }
+    try {
+      const r = await fetch(`https://api.telegram.org/bot${botToken}/createInvoiceLink`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Поддержка ZENOVA ⭐',
+          description: movieTitle
+            ? `Спасибо за «${movieTitle}»! Ваша поддержка помогает проекту развиваться`
+            : 'Спасибо! Ваша поддержка помогает проекту развиваться',
+          payload: `stars_tip_${Date.now()}`,
+          currency: 'XTR',
+          prices: [{ label: 'Поддержка проекта', amount }],
+        }),
+      });
+      const tg = await r.json();
+      if (tg && tg.ok && tg.result) return json(res, 200, { ok: true, url: tg.result });
+      return json(res, 500, { ok: false, message: (tg && tg.description) || 'Ошибка Telegram API' });
+    } catch (e) {
+      return json(res, 500, { ok: false, message: 'Ошибка соединения с Telegram' });
+    }
+  }
+
   /* ── Заявка на оплату → авто-выдача премиума ── */
   if (route === '/api/premium/claim' && req.method === 'POST') {
     const body = await readBody(req);

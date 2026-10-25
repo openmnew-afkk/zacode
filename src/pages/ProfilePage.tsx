@@ -5,6 +5,8 @@ import { useStore } from '../store';
 import VeloraEmblem from '../components/VeloraEmblem';
 import RulesModal from '../components/RulesModal';
 import { resolveUserAccess } from '../services/accessControl';
+import { SEASONS, getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../services/seasons';
+import type { SeasonId } from '../services/seasons';
 import './ProfilePage.css';
 
 interface MenuItem {
@@ -25,6 +27,19 @@ const ProfilePage: React.FC = () => {
   const { user, closeApp, haptic, tg } = useTelegram();
   const { favorites, watchHistory, clearHistory, isPremium, premiumExpiry, theme, setTheme, role, telegramUsername } = useStore();
   const [showRules, setShowRules] = useState(false);
+
+  /* Сезонное оформление */
+  const [seasonState, setSeasonState] = useState(() => getStoredSeason());
+  const seasonAuto = seasonState.auto;
+  const currentSeasonId = seasonState.season.id;
+
+  const switchSeason = (id: SeasonId) => {
+    haptic('light');
+    setStoredSeason(id);
+    const next = getStoredSeason();
+    applySeason(next.season);
+    setSeasonState(next);
+  };
 
   const daysLeft = premiumExpiry
     ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
@@ -254,6 +269,37 @@ const ProfilePage: React.FC = () => {
 
       {/* iOS Inset Grouped Sections */}
       <div className="pf__groups">
+
+        {/* ── Сезонное оформление ── */}
+        <div className="pf__group">
+          <div className="pf__group-title">СЕЗОННОЕ ОФОРМЛЕНИЕ</div>
+          <div className="pf__group-box pf__season-box">
+            <div className="pf__season-chips">
+              <button
+                className={`pf__season-chip ${seasonAuto ? 'active' : ''}`}
+                onClick={() => switchSeason('none')}
+              >
+                ✦ Авто
+              </button>
+              {Object.values(SEASONS).map((s) => (
+                <button
+                  key={s.id}
+                  className={`pf__season-chip ${!seasonAuto && currentSeasonId === s.id ? 'active' : ''}`}
+                  onClick={() => switchSeason(s.id)}
+                  title={s.description}
+                >
+                  {s.icon} {s.label}
+                </button>
+              ))}
+            </div>
+            <p className="pf__season-note">
+              {seasonAuto
+                ? `${detectSeason().icon} Сейчас по календарю: ${detectSeason().label}. Зимой — новогодняя со снегом 🎄`
+                : 'Тема применяется сразу и сохраняется на этом устройстве'}
+            </p>
+          </div>
+        </div>
+
         {groups.map((grp, gIdx) => (
           <div key={gIdx} className="pf__group">
             <div className="pf__group-title">{grp.title}</div>

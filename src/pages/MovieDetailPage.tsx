@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';
+import { createStarsInvoice } from '../api/backend';
 import type { MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -194,6 +195,45 @@ const MovieDetailPage: React.FC = () => {
   const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
   const [watchIdx, setWatchIdx] = useState(0);
 
+  /* Поддержка звёздами: быстрые суммы + своя (1 – ∞) */
+  const STARS_QUICK = [10, 25, 50, 100];
+  const [starsAmount, setStarsAmount] = useState(25);
+  const [starsCustom, setStarsCustom] = useState('');
+  const [starsSending, setStarsSending] = useState(false);
+
+  const showTipToast = (msg: string) => {
+    setFavToast(msg);
+    setFavToastVisible(true);
+    setTimeout(() => setFavToastVisible(false), 2200);
+  };
+
+  const sendStars = async () => {
+    haptic('medium');
+    const parsed = parseInt(starsCustom, 10);
+    const amount = starsCustom.trim() ? parsed : starsAmount;
+    if (!isFinite(amount) || amount < 1) {
+      showTipToast('Минимум 1 ⭐');
+      return;
+    }
+    setStarsSending(true);
+    try {
+      const res = await createStarsInvoice(amount, movie?.title);
+      if (res.ok && res.url) {
+        const wa = (window as any).Telegram?.WebApp;
+        if (wa?.openInvoice) {
+          wa.openInvoice(res.url);
+        } else {
+          openLink(res.url);
+        }
+        showTipToast(`Счёт на ${amount} ⭐ открыт — спасибо! 💖`);
+      } else {
+        showTipToast(res.message);
+      }
+    } finally {
+      setStarsSending(false);
+    }
+  };
+
   const compositeId = id || '';
   const tmdbId = compositeId.replace(/^(tv|movie)-/, '');
 
@@ -376,6 +416,7 @@ const MovieDetailPage: React.FC = () => {
       <div className="dp-bg">
         <img src={backdrop} alt="" className="dp-bg__img" />
         <div className="dp-bg__grad" />
+        <div className="dp-bg__glow" />
       </div>
 
       {/* ── Кнопка назад ── */}
@@ -467,7 +508,7 @@ const MovieDetailPage: React.FC = () => {
       </div>
 
       {movie.overview && (
-        <div className="dp-section">
+        <div className="dp-section dp-section--card">
           <p className="dp-desc">{movie.overview}</p>
         </div>
       )}
@@ -475,7 +516,7 @@ const MovieDetailPage: React.FC = () => {
 
 
       {/* ── Дневник: статусы ── */}
-      <div className="dp-section">
+      <div className="dp-section dp-section--card">
         <h3 className="dp-section__title">Мой дневник</h3>
         <div className="dp-statuses">
           {STATUSES.map((s) => (
@@ -511,10 +552,10 @@ const MovieDetailPage: React.FC = () => {
       </div>
 
       {/* ── Где посмотреть (легальные сервисы) ── */}
-      <div className="dp-section">
+      <div className="dp-section dp-section--card">
         <h3 className="dp-section__title">Где посмотреть</h3>
         <p className="dp-where__hint">
-          'Поиск по легальным сервисам'
+          Поиск по легальным сервисам
         </p>
         <div className="dp-where">
           {whereLinks.map((s) => (
@@ -527,6 +568,55 @@ const MovieDetailPage: React.FC = () => {
               <span className="dp-where__name">{s.name}</span>
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* ── Поддержать проект ── */}
+      <div className="dp-section dp-section--card">
+        <h3 className="dp-section__title">Понравился проект?</h3>
+        <div className="dp-stars">
+          <p className="dp-stars__hint">
+            ZENOVA живёт без рекламы — только на вашу поддержку. Подарите звёздочки проекту, и он станет ещё лучше 💖
+          </p>
+          <div className="dp-stars__chips">
+            {STARS_QUICK.map((v) => (
+              <button
+                key={v}
+                className={`dp-stars__chip ${starsAmount === v && !starsCustom.trim() ? 'active' : ''}`}
+                onClick={() => { haptic('light'); setStarsAmount(v); setStarsCustom(''); }}
+              >
+                {v} ⭐
+              </button>
+            ))}
+            <div className={`dp-stars__custom ${starsCustom.trim() ? 'active' : ''}`}>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                placeholder="∞"
+                value={starsCustom}
+                onChange={(e) => setStarsCustom(e.target.value)}
+                aria-label="Своя сумма звёзд"
+              />
+              <span>⭐</span>
+            </div>
+          </div>
+          <button
+            className="dp-stars__send"
+            disabled={starsSending}
+            onClick={sendStars}
+          >
+            {starsSending ? (
+              <>Открываем счёт…</>
+            ) : (
+              <>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.5l7.1-.6L12 2z" />
+                </svg>
+                Отправить {starsCustom.trim() && isFinite(parseInt(starsCustom, 10)) ? starsCustom : starsAmount} ⭐
+              </>
+            )}
+          </button>
         </div>
       </div>
 

@@ -449,3 +449,48 @@
   margin-top: 14px;
   font-weight: 600;
 }
+
+/* ═══════════════════════════════════════════════
+   🎄 Сезонное оформление — переключатель
+   ═══════════════════════════════════════════════ */
+
+.pf__season-box {
+  padding: 14px 14px 12px;
+}
+
+.pf__season-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.pf__season-chip {
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--surface, rgba(255,255,255,0.05));
+  border: 1.5px solid var(--border, rgba(255,255,255,0.08));
+  color: var(--text-2, rgba(255,255,255,0.74));
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s var(--ease-spring, ease);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pf__season-chip:active {
+  transform: scale(0.93);
+}
+
+.pf__season-chip.active {
+  background: var(--accent-glow, rgba(251,113,133,0.18));
+  border-color: var(--accent, #fb7185);
+  color: var(--accent, #fb7185);
+}
+
+.pf__season-note {
+  margin: 11px 2px 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-3, rgba(255,255,255,0.48));
+}

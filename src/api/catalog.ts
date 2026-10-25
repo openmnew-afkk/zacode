@@ -626,6 +626,24 @@ export async function discoverMovies(opts: {
   }
 }
 
+/* ════════════ Сезонные подборки (по ключевому слову TMDB: christmas и т.п.) ════════════ */
+
+export async function getKeywordCollection(keyword: string, page = 1): Promise<Movie[]> {
+  try {
+    const kw = await tmdb<any>('/search/keyword', { query: keyword });
+    const id = kw?.results?.[0]?.id;
+    if (!id) return [];
+    const data = await tmdb<any>('/discover/movie', {
+      with_keywords: id,
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 80,
+      include_adult: false,
+      page,
+    });
+    return (data.results || []).map((i: any) => toMovie(i, 'movie'));
+  } catch { return []; }
+}
+
 /* ════════════ КиноИИ: умный подбор ════════════ */
 
 export interface SmartDiscoverOpts {

@@ -216,6 +216,34 @@ export const modGrantPremium = (name: string, days: number, modName: string) =>
 export const modSaveConfig = (name: string, fields: Record<string, unknown>) =>
   adminPost(fields, { modUser: name });
 
+/* ════════════ Звёзды (Telegram Stars) ════════════ */
+
+/** Создать счёт Telegram Stars на поддержку проекта (сумма 1 – ∞).
+ *  Возвращает ссылку на инвойс — открывается через WebApp.openInvoice. */
+export async function createStarsInvoice(
+  amount: number,
+  movieTitle?: string
+): Promise<{ ok: boolean; url?: string; message: string }> {
+  const base = getApiBase();
+  const clean = Math.max(1, Math.floor(Number(amount) || 0));
+  if (!base) {
+    return { ok: false, message: '⭐ Платёж звёздами не настроен: укажите адрес API в админ-панели' };
+  }
+  try {
+    const res = await fetch(`${base}/api/stars/invoice`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ amount: clean, title: movieTitle }),
+      signal: AbortSignal.timeout(10000),
+    });
+    const data = await res.json();
+    if (data?.ok && data.url) return { ok: true, url: data.url, message: 'ok' };
+    return { ok: false, message: data?.message || '❌ Не удалось создать счёт' };
+  } catch {
+    return { ok: false, message: '❌ Сервер недоступен, попробуйте позже' };
+  }
+}
+
 /* ════════════ Локальный фолбэк (когда сервер недоступен) ════════════ *
  * Гранты сохраняются на устройстве и применяются при каждом запуске.
  * Чтобы премиум виделся на ВСЕХ устройствах — нужен доступный API-сервер. */
