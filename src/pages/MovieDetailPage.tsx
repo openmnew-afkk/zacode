@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getMovieDetail, getTrailer } from '../api/catalog';
+import { getMovieDetail, getTrailer, getRecommendations } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';
 import { createStarsInvoice } from '../api/backend';
-import type { MovieDetail, WatchStatus, WatchOption } from '../types';
+import type { Movie, MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import AgeGateModal, { isAgeVerified } from '../components/AgeGateModal';
@@ -194,6 +194,7 @@ const MovieDetailPage: React.FC = () => {
   const [showAgeGate, setShowAgeGate] = useState(false);
   const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
   const [watchIdx, setWatchIdx] = useState(0);
+  const [recs, setRecs] = useState<Movie[]>([]);
 
   /* Поддержка звёздами: быстрые суммы + своя (1 – ∞) */
   const STARS_QUICK = [10, 25, 50, 100];
@@ -265,6 +266,17 @@ const MovieDetailPage: React.FC = () => {
     getTrailer(tmdbId, isSerial).then((url) => setTrailerUrl(url));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movie, tmdbId]);
+
+  /* ── Похожие фильмы (рекомендации TMDB) ── */
+  useEffect(() => {
+    if (!movie) return;
+    setRecs([]);
+    const mediaType = compositeId.startsWith('tv-') || movie.is_serial ? 'tv' : 'movie';
+    getRecommendations(tmdbId, mediaType)
+      .then((list) => setRecs(list.filter((r) => r.poster_path).slice(0, 14)))
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [movie]);
 
   /* ── Кнопка назад Telegram ── */
   useEffect(() => {
@@ -426,81 +438,88 @@ const MovieDetailPage: React.FC = () => {
         </svg>
       </button>
 
-      {/* ── Hero ── */}
-      <div className="dp-hero">
-        <div className="dp-hero__poster-wrap">
-          <img className="dp-hero__poster" src={poster} alt={movie.title} />
-          {movie.vote_average > 0 && (
-            <div className="dp-hero__score">
-              <span>★</span> {movie.vote_average.toFixed(1)}
+      {/* ── Кинематографичный Hero ── */}
+      <section className="dp-hero2">
+        <div className="dp-hero2__backdrop" style={{ backgroundImage: `url(${backdrop})` }}>
+          <div className="dp-hero2__fade" />
+          <div className="dp-hero2__glow" />
+          <div className="dp-hero2__head">
+            <div className="dp-hero2__chips">
+              {isSerial && <span className="dp-hero2__chip dp-hero2__chip--serial">Сериал</span>}
+              {movie.release_date && <span className="dp-hero2__chip">{movie.release_date.slice(0, 4)}</span>}
+              {movie.runtime ? <span className="dp-hero2__chip">{movie.runtime} мин</span> : null}
+              {movie.vote_average > 0 && (
+                <span className="dp-hero2__chip dp-hero2__chip--rating">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.5l7.1-.6L12 2z"/></svg>
+                  {movie.vote_average.toFixed(1)}
+                </span>
+              )}
             </div>
-          )}
+            <h1 className="dp-hero2__title">{movie.title}</h1>
+            {movie.original_title && movie.original_title !== movie.title && (
+              <p className="dp-hero2__orig">{movie.original_title}</p>
+            )}
+          </div>
         </div>
 
-        <div className="dp-hero__info">
-          <h1 className="dp-hero__title">{movie.title}</h1>
-          {movie.original_title && movie.original_title !== movie.title && (
-            <p className="dp-hero__orig">{movie.original_title}</p>
-          )}
-
-          <div className="dp-meta">
-            {movie.release_date && <span>{movie.release_date.slice(0, 4)}</span>}
-            {movie.runtime ? <span>{movie.runtime} мин</span> : null}
-            {isSerial && <span className="dp-meta--serial">Сериал</span>}
+        <div className="dp-hero2__body">
+          <div className="dp-hero2__poster-wrap">
+            <img className="dp-hero2__poster" src={poster} alt={movie.title} />
           </div>
 
-          <div className="dp-genres">
-            {movie.genres?.slice(0, 3).map((g, i) => (
-              <span key={i} className="dp-genre">{g}</span>
-            ))}
-          </div>
-
-          <div className="dp-actions">
-            {canWatch ? (
-              <button
-                className="dp-watch"
-                onClick={handleWatchClick}
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
-                </svg>
-                Смотреть
-              </button>
-            ) : (
-              <button
-                className="dp-watch"
-                onClick={() => {
-                  if (!trailerUrl) return;
-                  haptic('medium');
-                  setShowTrailer(true);
-                }}
-                disabled={!trailerUrl}
-                style={!trailerUrl ? { opacity: 0.5 } : undefined}
-              >
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
-                </svg>
-                Трейлер
-              </button>
+          <div className="dp-hero2__side">
+            {movie.genres && movie.genres.length > 0 && (
+              <div className="dp-hero2__genres">
+                {movie.genres.slice(0, 4).map((g, i) => (
+                  <span key={i} className="dp-genre">{g}</span>
+                ))}
+              </div>
             )}
 
-            <button
-              className={`dp-fav ${inList ? 'dp-fav--on' : ''}`}
-              onClick={handleFav}
-              aria-label="Буду смотреть"
-            >
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M17.3 4.4a5 5 0 0 0-7.1 0L10 4.6l-.2-.2A5 5 0 0 0 2.7 11.5l.2.2L10 19l7.1-7.3.2-.2a5 5 0 0 0 0-7.1z"
-                  fill={inList ? '#e23d3d' : 'none'}
-                  stroke={inList ? 'none' : 'rgba(255,255,255,0.6)'}
-                  strokeWidth="1.7"
-                />
-              </svg>
-            </button>
+            <div className="dp-actions">
+              {canWatch ? (
+                <button className="dp-watch" onClick={handleWatchClick}>
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
+                  </svg>
+                  Смотреть
+                </button>
+              ) : (
+                <button
+                  className="dp-watch"
+                  onClick={() => {
+                    if (!trailerUrl) return;
+                    haptic('medium');
+                    setShowTrailer(true);
+                  }}
+                  disabled={!trailerUrl}
+                  style={!trailerUrl ? { opacity: 0.5 } : undefined}
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                    <path d="M4 2.5l12 6.5-12 6.5V2.5z" fill="currentColor"/>
+                  </svg>
+                  Трейлер
+                </button>
+              )}
+
+              <button
+                className={`dp-fav ${inList ? 'dp-fav--on' : ''}`}
+                onClick={handleFav}
+                aria-label="Буду смотреть"
+              >
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M17.3 4.4a5 5 0 0 0-7.1 0L10 4.6l-.2-.2A5 5 0 0 0 2.7 11.5l.2.2L10 19l7.1-7.3.2-.2a5 5 0 0 0 0-7.1z"
+                    fill={inList ? '#e23d3d' : 'none'}
+                    stroke={inList ? 'none' : 'rgba(255,255,255,0.6)'}
+                    strokeWidth="1.7"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* ── Тост ── */}
       <div className={`dp-fav-toast ${favToastVisible ? 'dp-fav-toast--show' : ''}`}>
@@ -619,6 +638,32 @@ const MovieDetailPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ── Похожие фильмы ── */}
+      {recs.length > 0 && (
+        <div className="dp-section dp-section--recs">
+          <h3 className="dp-section__title">С этим фильмом смотрят</h3>
+          <div className="dp-recs">
+            {recs.map((r) => (
+              <button
+                key={r.id}
+                className="dp-rec"
+                onClick={() => {
+                  haptic('light');
+                  navigate(`/movie/${r.id}`);
+                  window.scrollTo(0, 0);
+                }}
+              >
+                <img src={r.poster_path} alt={r.title} className="dp-rec__poster" loading="lazy" />
+                <span className="dp-rec__title">{r.title}</span>
+                {r.vote_average > 0 && (
+                  <span className="dp-rec__rating">★ {r.vote_average.toFixed(1)}</span>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Плеер трейлера ── */}
       {showTrailer && trailerUrl && (

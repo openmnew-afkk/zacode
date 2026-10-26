@@ -604,6 +604,8 @@ export async function discoverMovies(opts: {
   sort_by?: string;
   with_genres?: string;
   year?: string;
+  /** Только релизы не новее этой даты (YYYY-MM-DD) — для честных «новинок» */
+  releaseLte?: string;
 } = {}): Promise<CatalogResponse> {
   try {
     const data = await tmdb<any>('/discover/movie', {
@@ -611,6 +613,7 @@ export async function discoverMovies(opts: {
       sort_by: opts.sort_by || 'popularity.desc',
       with_genres: opts.with_genres || '',
       primary_release_year: opts.year || '',
+      'primary_release_date.lte': opts.releaseLte || '',
       'vote_count.gte': 50,
       include_adult: false,
     });

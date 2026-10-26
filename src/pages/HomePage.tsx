@@ -366,6 +366,53 @@ const HomePage: React.FC = () => {
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [seasonMovies, setSeasonMovies] = useState<Movie[]>([]);
   const season = getStoredSeason().season;
+
+  /* 🎲 КиноИИ рекомендует: случайный тайтл из топ-страниц 1–8 с красивой карточкой */
+  const [luckySpinning, setLuckySpinning] = useState(false);
+  const [luckyPick, setLuckyPick] = useState<Movie | null>(null);
+
+  const feelingLucky = async () => {
+    haptic('heavy');
+    if (luckySpinning) return;
+    setLuckySpinning(true);
+    setLuckyPick(null);
+    try {
+      const page = 1 + Math.floor(Math.random() * 8);
+      const [movies, series] = await Promise.all([
+        discoverMovies({ page }),
+        discoverSeries({ page }),
+      ]);
+      const pool = [...(movies.results || []), ...(series.results || [])].filter(m => m.poster_path && (m.vote_average || 0) >= 6);
+      if (pool.length > 0) {
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        // «Думает» нейросеть — 1.1 сек спиннера
+        setTimeout(() => {
+          setLuckyPick(pick);
+          setLuckySpinning(false);
+        }, 1100);
+      } else {
+        setLuckySpinning(false);
+      }
+    } catch {
+      setLuckySpinning(false);
+    }
+  };
+
+  /* 🎄 Отсчёт до Нового года (зимой) */
+  const [nyLeft, setNyLeft] = useState<{ d: number; h: number; m: number } | null>(() => {
+    if (season.id !== 'winter') return null;
+    const now = new Date();
+    const year = now.getMonth() === 11 ? now.getFullYear() : now.getFullYear() - 1;
+    // Ближайающий Новый год: 1 января следующего календарного года
+    const ny = new Date(now.getFullYear() + 1, 0, 1);
+    void year;
+    const diff = ny.getTime() - now.getTime();
+    return {
+      d: Math.floor(diff / 86400000),
+      h: Math.floor(diff / 3600000) % 24,
+      m: Math.floor(diff / 60000) % 60,
+    };
+  });
   const [genreRows, setGenreRows] = useState<Record<number, Movie[]>>({});
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
 
@@ -439,7 +486,13 @@ const HomePage: React.FC = () => {
       const isSeries = activeCategory.type === 'series' || catId.includes('series');
       const isTop = catId.includes('top');
 
-      if (activeCategory.genreId) {
+      if (catId === 'season') {
+        // Сезонная подборка: +20 продолжают ТУ ЖЕ тему (новый год → рождественское,
+        // весна → весеннее и т.д.), листая страницы подборки по ключевому слову
+        if (season.collectionQuery) {
+          newItems = await getKeywordCollection(season.collectionQuery.value, nextPage);
+        }
+      } else if (activeCategory.genreId) {
         const res = await getPopularByGenre(activeCategory.genreId, nextPage);
         newItems = res.results || [];
       } else if (isSeries) {
@@ -954,6 +1007,23 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             <div className="hp-header__actions">
+              {/* 🎲 Мне повезёт — случайный фильм */}
+              <button
+                className={`hp-header__btn hp-header__lucky-btn ${luckySpinning ? 'spinning' : ''}`}
+                onClick={feelingLucky}
+                aria-label="Мне повезёт"
+                title="Случайный фильм"
+                disabled={luckySpinning}
+              >
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+                  <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
+                  <circle cx="8.7" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
+                  <circle cx="15.3" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
+                  <circle cx="8.7" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
+                  <circle cx="15.3" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
+                  <circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none" />
+                </svg>
+              </button>
               {/* ✦ Журнал обновлений приложения */}
               <button
                 className="hp-header__feed-btn"
@@ -1004,6 +1074,18 @@ const HomePage: React.FC = () => {
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
+      {/* ── 🎄 Отсчёт до Нового года (только в новогодней теме) ── */}
+      {nyLeft && !showSearch && !activeCategory && tab === 'home' && (
+        <button className="hp-ny-count" onClick={() => { haptic('light'); navigate('/feed'); }}>
+          <span className="hp-ny-count__tree">🎄</span>
+          <span className="hp-ny-count__label">До Нового года</span>
+          <span className="hp-ny-count__time">
+            {nyLeft.d}<i>д</i> {String(nyLeft.h).padStart(2, '0')}<i>ч</i> {String(nyLeft.m).padStart(2, '0')}<i>мин</i>
+          </span>
+          <span className="hp-ny-count__spark">✨</span>
+        </button>
+      )}
+
       {/* ── Вкладки — теперь строго НИЖЕ плавающих фильмов и ближе к каталогу! ── */}
       {!showSearch && !activeCategory && (
         <div className="hp-tabs">
@@ -1019,6 +1101,59 @@ const HomePage: React.FC = () => {
       <div className="hp-content">
         {renderContent()}
       </div>
+
+      {/* ── 🎲 КиноИИ рекомендует — случайная рекомендация ── */}
+      {(luckySpinning || luckyPick) && createPortal(
+        <div className="aip-overlay" onClick={() => { setLuckyPick(null); setLuckySpinning(false); }}>
+          <div className="aip-lucky" onClick={(e) => e.stopPropagation()}>
+            <div className="aip-lucky__aura" />
+            <div className="aip-lucky__emblem">
+              <VeloraEmblem size="md" />
+            </div>
+
+            {luckySpinning || !luckyPick ? (
+              <>
+                <h3 className="aip-lucky__title">КиноИИ думает…</h3>
+                <div className="aip-lucky__dots"><i /><i /><i /></div>
+                <p className="aip-lucky__sub">Сканирую каталог и ваши вкусы</p>
+              </>
+            ) : (
+              <>
+                <span className="aip-lucky__badge">🤖 КиноИИ рекомендует</span>
+                <div className="aip-lucky__card" onClick={() => { setLuckyPick(null); navigate(`/movie/${luckyPick.id}`); }}>
+                  <img src={luckyPick.poster_path} alt="" className="aip-lucky__poster" />
+                  <div className="aip-lucky__info">
+                    <h3 className="aip-lucky__name">{luckyPick.title}</h3>
+                    <div className="aip-lucky__meta">
+                      {luckyPick.vote_average > 0 && (
+                        <span className="aip-lucky__rating">★ {luckyPick.vote_average.toFixed(1)}</span>
+                      )}
+                      {luckyPick.release_date && <span>{luckyPick.release_date.slice(0, 4)}</span>}
+                      <span>{luckyPick.is_serial ? 'Сериал' : 'Фильм'}</span>
+                    </div>
+                    {luckyPick.overview && (
+                      <p className="aip-lucky__desc">{luckyPick.overview.slice(0, 120)}{luckyPick.overview.length > 120 ? '…' : ''}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="aip-lucky__actions">
+                  <button
+                    className="aip-lucky__btn aip-lucky__btn--primary"
+                    onClick={() => { setLuckyPick(null); navigate(`/movie/${luckyPick.id}`); }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+                    Смотреть
+                  </button>
+                  <button className="aip-lucky__btn" onClick={feelingLucky}>
+                    Ещё вариант
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* ── Быстрое превью (длинное нажатие на карточку) — портал в body ── */}
       {preview && createPortal(

@@ -41,6 +41,25 @@ const ProfilePage: React.FC = () => {
     setSeasonState(next);
   };
 
+  /* Тумблер сезонных эффектов (снег/лепестки/листья) */
+  const [fxOff, setFxOff] = useState(() => {
+    try { return localStorage.getItem('zenova_fx_off') === '1'; } catch { return false; }
+  });
+
+  const toggleFx = () => {
+    haptic('medium');
+    const next = !fxOff;
+    setFxOff(next);
+    try { localStorage.setItem('zenova_fx_off', next ? '1' : '0'); } catch {}
+    // Мгновенно показать/скрыть эффекты без перезагрузки
+    window.dispatchEvent(new CustomEvent('zenova-fx-change'));
+    if (next) {
+      document.querySelector('.season-fx-canvas')?.remove();
+    } else {
+      window.location.reload();
+    }
+  };
+
   const daysLeft = premiumExpiry
     ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
     : null;
@@ -292,9 +311,20 @@ const ProfilePage: React.FC = () => {
                 </button>
               ))}
             </div>
+            <button
+              className={`pf__season-toggle ${fxOff ? '' : 'on'}`}
+              onClick={toggleFx}
+            >
+              <span className="pf__season-toggle__track">
+                <span className="pf__season-toggle__thumb" />
+              </span>
+              <span className="pf__season-toggle__label">
+                {fxOff ? '❄️ Эффекты выключены (снег, лепестки)' : '❄️ Сезонные эффекты включены — снег, лепестки, светлячки'}
+              </span>
+            </button>
             <p className="pf__season-note">
               {seasonAuto
-                ? `${detectSeason().icon} Сейчас по календарю: ${detectSeason().label}. Зимой — новогодняя со снегом 🎄`
+                ? `${detectSeason().icon} Сейчас по календарю: ${detectSeason().label}. Зимой — новогодняя со снегом и сугробами 🎄`
                 : 'Тема применяется сразу и сохраняется на этом устройстве'}
             </p>
           </div>

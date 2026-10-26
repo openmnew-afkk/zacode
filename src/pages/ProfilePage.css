@@ -494,3 +494,61 @@
   line-height: 1.5;
   color: var(--text-3, rgba(255,255,255,0.48));
 }
+
+/* Тумблер сезонных эффектов */
+.pf__season-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 9px 10px;
+  border-radius: 13px;
+  background: var(--surface, rgba(255,255,255,0.05));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.pf__season-toggle:active {
+  background: var(--surface-2, rgba(255,255,255,0.08));
+}
+
+.pf__season-toggle__track {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--surface-3, rgba(255,255,255,0.14));
+  flex-shrink: 0;
+  transition: background 0.22s ease;
+}
+
+.pf__season-toggle.on .pf__season-toggle__track {
+  background: linear-gradient(135deg, var(--accent-2, #f43f5e), var(--accent, #fb7185));
+  box-shadow: 0 2px 12px var(--accent-glow, rgba(251,113,133,0.35));
+}
+
+.pf__season-toggle__thumb {
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: transform 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.pf__season-toggle.on .pf__season-toggle__thumb {
+  transform: translateX(18px);
+}
+
+.pf__season-toggle__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-align: left;
+  line-height: 1.4;
+}

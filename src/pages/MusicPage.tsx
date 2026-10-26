@@ -266,10 +266,11 @@ const MusicPage: React.FC = () => {
     }
   };
 
-  /* Запуск Моей Волны по большой кнопке/сфере */
-  const handleStartWave = () => {
+  /* Запуск Моей Волны по большой кнопке/сфере.
+     surprise = «Удиви меня»: игнорируем настроение, играем случайный трек из всех плейлистов */
+  const handleStartWave = (surprise = false) => {
     haptic('heavy');
-    if (currentTrack) {
+    if (currentTrack && !surprise) {
       setPlaying(!isPlaying);
       showToast(isPlaying ? '⏸ Пауза' : '▶️ Возобновлено');
       return;
@@ -278,17 +279,43 @@ const MusicPage: React.FC = () => {
       showToast('🌊 Подбираем треки для Волны…');
       return;
     }
-    // Стартуем со случайного трека (не радио), чтобы каждое включение было новым
-    const musicOnly = displayedTracks.filter((t) => !t.isLiveRadio);
-    const pool = musicOnly.length > 0 ? musicOnly : displayedTracks;
+    // Пул: все загруженные плейлисты + текущий отображаемый (без радио)
+    const allPool = Object.values(playlists).flat().filter((t) => !t.isLiveRadio);
+    const localPool = displayedTracks.filter((t) => !t.isLiveRadio);
+    const combined = [...localPool, ...allPool];
+    const seen = new Set<string>();
+    const pool = combined.filter((t) => {
+      if (seen.has(t.id)) return false;
+      seen.add(t.id);
+      return true;
+    });
     if (pool.length > 0) {
       const idx = Math.floor(Math.random() * pool.length);
       const first = pool[idx];
-      setTrack(first as any, displayedTracks as any[], displayedTracks.indexOf(first));
+      const queue = surprise ? pool : displayedTracks;
+      setTrack(first as any, queue as any[], Math.max(0, queue.indexOf(first)));
       setPlaying(true);
-      const mood = WAVE_MOODS.find((m) => m.id === activeMood);
-      showToast(`🌊 Моя Волна: ${first.artist} — ${first.title}`);
+      showToast(
+        surprise
+          ? `🎲 Удиви меня: ${first.artist} — ${first.title}`
+          : `🌊 Моя Волна: ${first.artist} — ${first.title}`
+      );
     }
+  };
+
+  /* 🌅 Волна дня: настроение подбирается по времени суток */
+  const dayWave = useMemo(() => {
+    const h = new Date().getHours();
+    if (h >= 6 && h < 11) return { mood: 'energy', icon: '🌅', label: 'Утренний старт' };
+    if (h >= 11 && h < 17) return { mood: 'chart', icon: '☀️', label: 'Дневные хиты' };
+    if (h >= 17 && h < 22) return { mood: 'night', icon: '🌆', label: 'Вечерний город' };
+    return { mood: 'relax', icon: '🌙', label: 'Ночная тишина' };
+  }, []);
+
+  const activateDayWave = () => {
+    haptic('medium');
+    setActiveMood(dayWave.mood as any);
+    showToast(`${dayWave.icon} Волна дня: ${dayWave.label}`);
   };
 
   const currentMoodObj = WAVE_MOODS.find((m) => m.id === activeMood) || WAVE_MOODS[0];
@@ -338,12 +365,22 @@ const MusicPage: React.FC = () => {
             </h1>
           </div>
 
-          <div
-            className={`ym-header__equalizer ${isPlaying ? 'playing' : ''}`}
-            onClick={() => currentTrack && setExpanded(true)}
-            title={currentTrack ? 'Развернуть плеер' : undefined}
-          >
-            <span /><span /><span /><span />
+          <div className="ym-header__right">
+            <button
+              className="ym-header__surprise"
+              onClick={() => handleStartWave(true)}
+              title="Удиви меня"
+              aria-label="Удиви меня"
+            >
+              🎲
+            </button>
+            <div
+              className={`ym-header__equalizer ${isPlaying ? 'playing' : ''}`}
+              onClick={() => currentTrack && setExpanded(true)}
+              title={currentTrack ? 'Развернуть плеер' : undefined}
+            >
+              <span /><span /><span /><span />
+            </div>
           </div>
         </div>
 
@@ -408,6 +445,14 @@ const MusicPage: React.FC = () => {
         {/* ── Селектор настроений Моей Волны ── */}
         {tab === 'wave' && !searchMode && (
           <div className="ym-moods">
+            <button
+              className={`ym-mood-chip ym-mood-chip--daywave ${activeMood === dayWave.mood ? 'active' : ''}`}
+              onClick={activateDayWave}
+              title="Волна подбирается по времени суток"
+            >
+              <span className="ym-mood-chip__icon">{dayWave.icon}</span>
+              <span className="ym-mood-chip__label">Волна дня · {dayWave.label}</span>
+            </button>
             {WAVE_MOODS.map((m) => (
               <button
                 key={m.id}
@@ -428,7 +473,7 @@ const MusicPage: React.FC = () => {
 
       {/* ── Интерактивная живая сфера "Моя Волна" в стиле Яндекс Музыки ── */}
       {tab === 'wave' && !searchMode && (
-        <section className="ym-wave-card" onClick={handleStartWave}>
+        <section className="ym-wave-card" onClick={() => handleStartWave(false)}>
           <div className="ym-wave-sphere-wrap">
             <div
               className={`ym-wave-sphere ${isPlaying ? 'playing' : ''}`}
@@ -456,6 +501,14 @@ const MusicPage: React.FC = () => {
             <h2 className="ym-wave-card__title">
               {isPlaying ? 'Волна звучит сейчас' : 'Включить Мою Волну'}
             </h2>
+            {!isPlaying && (
+              <button
+                className="ym-wave-card__surprise"
+                onClick={(e) => { e.stopPropagation(); handleStartWave(true); }}
+              >
+                🎲 Удиви меня
+              </button>
+            )}
             <p className="ym-wave-card__desc">{currentMoodObj.description}</p>
           </div>
         </section>

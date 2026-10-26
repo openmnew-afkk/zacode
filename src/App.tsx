@@ -15,7 +15,7 @@ import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
 import MandatorySubModal from './components/MandatorySubModal';
-import SeasonSnow from './components/SeasonFx';
+import SeasonFx from './components/SeasonFx';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
 import { getStoredSeason, applySeason } from './services/seasons';
@@ -65,8 +65,8 @@ function App() {
 
   return (
     <div className="app-root">
-      {/* Сезонные эффекты: снегопад зимой */}
-      {season.id === 'winter' && <SeasonSnow />}
+      {/* Сезонные эффекты: снегопад с сугробом, лепестки сакуры, листья, светлячки */}
+      {season.id !== 'none' && <SeasonFx season={season.id} />}
 
       {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
       <MandatorySubModal />
