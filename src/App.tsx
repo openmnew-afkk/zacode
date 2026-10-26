@@ -16,9 +16,12 @@ import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
 import MandatorySubModal from './components/MandatorySubModal';
 import SeasonFx from './components/SeasonFx';
+import { RulesModal } from './components/RulesModal';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
 import { getStoredSeason, applySeason } from './services/seasons';
+
+const RULES_ACCEPTED_KEY = 'zenova_rules_accepted';
 
 function App() {
   const [showSplash, setShowSplash] = useState(true);
@@ -26,6 +29,15 @@ function App() {
   const navigate = useNavigate();
   const { theme, setTelegramUsername, syncCloudState } = useStore();
   const { currentTrack } = useMusicStore();
+
+  /* ═══ Пользовательское соглашение: обязательное при первом запуске ═══ */
+  const [rulesGate, setRulesGate] = useState(() => {
+    try { return localStorage.getItem(RULES_ACCEPTED_KEY) !== '1'; } catch { return true; }
+  });
+  const acceptRules = () => {
+    try { localStorage.setItem(RULES_ACCEPTED_KEY, '1'); } catch {}
+    setRulesGate(false);
+  };
 
   /* ═══ Сезонная тема: новогодняя зимой, сакура весной и т.д. ═══ */
   const season = getStoredSeason().season;
@@ -69,6 +81,8 @@ function App() {
       {season.id !== 'none' && <SeasonFx season={season.id} />}
 
       {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
+      {/* Соглашение при первом заходе: блокирует использование до принятия */}
+      <RulesModal isOpen={rulesGate} onClose={() => {}} mandatory onAccept={acceptRules} />
       <MandatorySubModal />
 
       <div className={`app-main ${currentTrack ? 'app-main--with-player' : ''}`}>
