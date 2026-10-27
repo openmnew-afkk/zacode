@@ -11,10 +11,11 @@ const SeasonalMask: React.FC<SeasonalMaskProps> = ({ season, className = '' }) =
   <span className={`seasonal-mask seasonal-mask--${season} ${className}`.trim()}>
     <img src="/zenova-mask.svg" alt="" />
     {season === 'winter' && (
-      <svg className="seasonal-mask__hat" viewBox="0 0 40 28" aria-hidden="true">
-        <path d="M8 19C13 8 21 5 31 5c-4 4-5 8-2 13l-21 5Z" fill="#c9233e" />
-        <path d="M7 20c7-3 15-4 24-2l3 5c-9-2-17-1-26 2Z" fill="#f3f5ff" />
-        <circle cx="31" cy="5" r="4" fill="#fff" />
+      <svg className="seasonal-mask__hat" viewBox="0 0 64 48" aria-hidden="true">
+        <path d="M8 34C17 16 31 7 50 6c-4 10-1 18 8 25L8 42Z" fill="#c9233e" />
+        <path d="M7 34c16-6 34-8 51-3l4 9c-19-4-37-2-54 4Z" fill="#f3f5ff" />
+        <path d="M13 34c12-4 25-6 38-5" fill="none" stroke="#fff" strokeOpacity=".78" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="50" cy="6" r="5" fill="#fff" />
       </svg>
     )}
     {season === 'spring' && <span className="seasonal-mask__petal" aria-hidden="true">✿</span>}

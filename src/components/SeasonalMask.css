@@ -14,16 +14,20 @@
   filter: drop-shadow(0 3px 8px rgba(194, 13, 43, 0.36));
 }
 
+.seasonal-mask--winter > img {
+  filter: drop-shadow(0 3px 9px rgba(100, 197, 255, 0.36));
+}
+
 .seasonal-mask__hat {
   position: absolute;
   z-index: 1;
-  top: -19%;
+  top: -34%;
   left: 50%;
-  width: 50%;
+  width: 72%;
   height: auto;
   overflow: visible;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
-  transform: translateX(-50%) rotate(-7deg);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
+  transform: translateX(-50%) rotate(-3deg);
 }
 
 .seasonal-mask__petal,

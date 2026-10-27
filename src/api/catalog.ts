@@ -542,7 +542,9 @@ export async function getMoviesByActor(personId: number): Promise<Movie[]> {
       (item.media_type === 'movie' || item.media_type === 'tv') && item.adult !== true
     )
     .map((item: any) => toMovie(item))
-    .sort((a: Movie, b: Movie) => b.popularity - a.popularity)
+    .sort((a: Movie, b: Movie) =>
+      b.release_date.localeCompare(a.release_date) || b.popularity - a.popularity
+    )
     .slice(0, 40);
 }
 
