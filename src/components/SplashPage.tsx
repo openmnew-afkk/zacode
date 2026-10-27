@@ -20,13 +20,25 @@ const SeasonArtwork: React.FC<{ season: SplashSeason }> = ({ season }) => {
   const artwork = {
     halloween: (
       <>
+        <path d="M58 167c50-13 100-7 144 1 61-12 115-10 180 2" fill="none" stroke="#f08a58" strokeOpacity=".22" strokeWidth="2" />
         <circle cx="220" cy="69" r="37" fill="currentColor" />
         <circle cx="237" cy="55" r="34" fill="#17101d" />
         <path d="M66 68c10-15 22-16 32-1 10-15 22-14 32 1-13-5-21-3-32 7-11-10-19-12-32-7Zm245-30c8-12 18-13 26-1 8-12 18-11 26 1-10-4-17-2-26 6-9-8-16-10-26-6Z" fill="currentColor" />
-        <path d="M106 154h47v-33l19 13v-25l22 17v-34l24 26v43h100v-34l20-21 20 21v34h16v12H106Z" fill="currentColor" opacity=".72" />
-        <path d="M178 154v-20h17v20m95 0v-21h17v21m-164-2 4-17 4 17m182 0 4-17 4 17" fill="none" stroke="#17101d" strokeWidth="4" />
+        <path d="M276 157V96l36-28 37 28v61h-73Z" fill="#1d1727" stroke="currentColor" strokeOpacity=".65" strokeWidth="2" />
+        <path d="m267 99 45-37 47 37h-14l-33-26-31 26h-14Z" fill="#282033" stroke="currentColor" strokeOpacity=".72" strokeWidth="2" />
+        <path d="M302 157v-25a10 10 0 0 1 20 0v25m-37-40h11v13h-11Zm39 0h11v13h-11Z" fill="#f3a45f" fillOpacity=".8" />
+        <path d="M108 157c0-23 13-38 30-38 18 0 29 15 29 38l-8 9h-42l-9-9Z" fill="#e9e2ef" fillOpacity=".9" />
+        <circle cx="129" cy="145" r="3" fill="#272033" />
+        <circle cx="143" cy="145" r="3" fill="#272033" />
+        <path d="M130 153q6 6 12 0" fill="none" stroke="#272033" strokeLinecap="round" strokeWidth="2" />
+        <path d="M202 158c0-12 9-21 20-21s20 9 20 21c0 3-1 6-2 8h-36c-1-2-2-5-2-8Z" fill="#e98145" />
+        <path d="M218 139c-2-5 1-9 5-12 5 5 6 9 3 13" fill="#83a86b" />
+        <path d="m213 153-3 5 7-1m9-4 3 5-7-1" fill="#261b27" />
+        <path d="M225 165v7m-13-7v7m21-5 6 4m-33-4-6 4" stroke="#e98145" strokeLinecap="round" strokeWidth="2" />
+        <path d="M95 175h237" stroke="#100d16" strokeLinecap="round" strokeWidth="5" opacity=".8" />
         <circle cx="113" cy="42" r="2" fill="#fff" />
         <circle cx="354" cy="92" r="2" fill="#fff" />
+        <circle cx="184" cy="109" r="1.5" fill="#fff" opacity=".75" />
       </>
     ),
     winter: (
