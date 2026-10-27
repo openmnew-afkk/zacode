@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { getStoredSeason } from '../services/seasons';
+import SeasonalMask from './SeasonalMask';
 import './SplashPage.css';
 
 interface SplashPageProps {
@@ -8,6 +10,10 @@ interface SplashPageProps {
 type SplashSeason = 'halloween' | 'winter' | 'spring' | 'summer' | 'autumn';
 
 const getSplashSeason = (): SplashSeason => {
+  const stored = getStoredSeason();
+  if (!stored.auto && stored.season.id !== 'none') {
+    return stored.season.id === 'autumn' ? 'halloween' : stored.season.id;
+  }
   const month = new Date().getMonth() + 1;
   if (month === 10) return 'halloween';
   if (month === 12 || month <= 2) return 'winter';
@@ -141,7 +147,10 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         <div className="sp__identity">
           <div className="sp__emblem-wrap">
             <div className="sp__projector-beam" aria-hidden="true" />
-            <img className="sp__emblem" src="/zenova-mask.svg" alt="" />
+            <SeasonalMask
+              season={season === 'halloween' ? 'autumn' : season}
+              className="sp__emblem"
+            />
             <span className="sp__orbit sp__orbit--one" />
             <span className="sp__orbit sp__orbit--two" />
           </div>
@@ -150,7 +159,11 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
             <div className="sp__title-wrap">
               <h1 className="sp__title">ZENOVA</h1>
               <svg className="sp__blood" viewBox="0 0 260 22" aria-hidden="true" focusable="false">
-                <path d="M5 2h28l-3 10c-.6 2-3.4 2-4 0L24 6h-8l-1 12c-.2 3-4.8 3-5 0L9 6H5V2Zm54 0h32l-2 7c-.6 2-3.4 2-4 0l-1-3H74l-1 12c-.2 3-4.8 3-5 0L67 6h-8V2Zm53 0h36l-2 12c-.4 3-4.6 3-5 0l-1-8h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-11l-1 8c-.4 3-4.6 3-5 0l-1-12Zm59 0h32l-2 8c-.6 2-3.4 2-4 0l-1-4h-9l-1 10c-.3 3-4.7 3-5 0l-1-10h-8l-1 12c-.2 3-4.8 3-5 0l-1-16Zm51 0h33l-2 11c-.4 3-4.6 3-5 0l-1-7h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-10V2Z" />
+                {season === 'winter' ? (
+                  <path d="M4 2h252v3h-18l-3 5-2-5h-20v9l-3 5-3-5V5h-25l-2 4-2-4h-18v11l-3 5-3-5V5h-22l-2 4-2-4h-18v8l-3 5-3-5V5h-24l-2 4-2-4H4z" />
+                ) : (
+                  <path d="M5 2h28l-3 10c-.6 2-3.4 2-4 0L24 6h-8l-1 12c-.2 3-4.8 3-5 0L9 6H5V2Zm54 0h32l-2 7c-.6 2-3.4 2-4 0l-1-3H74l-1 12c-.2 3-4.8 3-5 0L67 6h-8V2Zm53 0h36l-2 12c-.4 3-4.6 3-5 0l-1-8h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-11l-1 8c-.4 3-4.6 3-5 0l-1-12Zm59 0h32l-2 8c-.6 2-3.4 2-4 0l-1-4h-9l-1 10c-.3 3-4.7 3-5 0l-1-10h-8l-1 12c-.2 3-4.8 3-5 0l-1-16Zm51 0h33l-2 11c-.4 3-4.6 3-5 0l-1-7h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-10V2Z" />
+                )}
               </svg>
             </div>
             <p className="sp__subtitle">ТВОЙ МИР · ТВОИ ИСТОРИИ</p>

@@ -525,30 +525,47 @@ const MovieDetailPage: React.FC = () => {
                 </svg>
               </button>
             </div>
-            {movie.overview && (
-              <div className="dp-hero2__story">
-                <h2 className="dp-overview__title">Сюжет</h2>
-                <p className="dp-desc">{movie.overview}</p>
-              </div>
-            )}
-            {movie.actors?.length > 0 && (
-              <div className="dp-hero2__cast">
-                <h2 className="dp-overview__title">В ролях</h2>
-                <div className="dp-hero2__cast-list">
-                  {movie.actors.slice(0, 6).map((actor, index) => {
-                    const name = formatActorName(actor).trim();
-                    const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] ?? '').join('');
-                    return (
-                      <div className="dp-hero2__cast-person" key={`${actor}-${index}`}>
-                        <span className="dp-hero2__cast-initials" aria-hidden="true">{initials}</span>
-                        <span className="dp-hero2__cast-name">{name}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
           </div>
+          {movie.overview && (
+            <div className="dp-hero2__story">
+              <h2 className="dp-overview__title">Сюжет</h2>
+              <p className="dp-desc">{movie.overview}</p>
+            </div>
+          )}
+          {movie.actors?.length > 0 && (
+            <div className="dp-hero2__cast">
+              <h2 className="dp-overview__title">В ролях</h2>
+              <div className="dp-hero2__cast-list">
+                {(movie.cast?.length ? movie.cast : movie.actors.map((name, index) => ({
+                  id: -1,
+                  name,
+                  character: '',
+                  profile_path: null,
+                }))).slice(0, 10).map((actor, index) => {
+                  const name = formatActorName(actor.name).trim();
+                  const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] ?? '').join('');
+                  return (
+                    <button
+                      className="dp-hero2__cast-person"
+                      key={`${actor.id}-${index}`}
+                      type="button"
+                      onClick={() => actor.id > 0 && navigate(`/search?person=${actor.id}&name=${encodeURIComponent(name)}`)}
+                      aria-label={`Найти фильмы с актёром ${name}`}
+                      disabled={actor.id <= 0}
+                    >
+                      {actor.profile_path ? (
+                        <img className="dp-hero2__cast-photo" src={actor.profile_path} alt="" loading="lazy" />
+                      ) : (
+                        <span className="dp-hero2__cast-initials" aria-hidden="true">{initials}</span>
+                      )}
+                      <span className="dp-hero2__cast-name">{name}</span>
+                      {actor.character && <span className="dp-hero2__cast-character">{actor.character}</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

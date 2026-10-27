@@ -27,8 +27,23 @@ export interface Movie {
 
 export interface MovieDetail extends Movie {
   plot: string;
+  cast?: CastMember[];
   seasons?: Season[];
   episodes?: number;
+}
+
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+export interface Actor {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for: string[];
 }
 
 export interface Season {

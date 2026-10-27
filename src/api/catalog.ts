@@ -1,6 +1,6 @@
 /* ===== КиноЗал — TMDB API ===== */
 
-import type { Movie, MovieDetail, CatalogResponse, Season, Genre } from '../types';
+import type { Actor, Movie, MovieDetail, CatalogResponse, Season, Genre } from '../types';
 
 /* ════════════ TMDB Config ════════════ */
 const TMDB_KEY = 'dc003aabe0e60ef32360bfdf70deac32';
@@ -189,6 +189,12 @@ function toMovieDetail(item: any, isSerial: boolean): MovieDetail {
     genre_ids: (item.genres || []).map((g: any) => g.id),
     directors: (credits.crew || []).filter((c: any) => c.job === 'Director').map((c: any) => c.name),
     actors: (credits.cast || []).slice(0, 10).map((c: any) => c.name),
+    cast: (credits.cast || []).slice(0, 10).map((person: any) => ({
+      id: person.id,
+      name: person.name,
+      character: person.character || '',
+      profile_path: person.profile_path ? `${IMG_BASE}/w185${person.profile_path}` : null,
+    })),
     countries: item.production_countries?.map((c: any) => c.name) || [],
     seasons: isSerial ? seasons : undefined,
     episodes: isSerial ? seasons.reduce((acc, s) => acc + s.episodes_count, 0) : undefined,
@@ -506,6 +512,38 @@ export async function searchMovies(query: string, page = 1, type?: 'movie' | 'se
     console.error('Search error:', error);
     return { ok: false, page, results: [], total_pages: 0, total_results: 0 };
   }
+}
+
+export async function searchActors(query: string): Promise<Actor[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const data = await tmdb<any>('/search/person', {
+    query: trimmed,
+    page: 1,
+    include_adult: false,
+  });
+
+  return (data.results || []).slice(0, 12).map((person: any) => ({
+    id: person.id,
+    name: person.name || 'Без имени',
+    profile_path: person.profile_path ? `${IMG_BASE}/w185${person.profile_path}` : null,
+    known_for: (person.known_for || [])
+      .map((item: any) => item.title || item.name)
+      .filter(Boolean)
+      .slice(0, 3),
+  }));
+}
+
+export async function getMoviesByActor(personId: number): Promise<Movie[]> {
+  const data = await tmdb<any>(`/person/${personId}/combined_credits`);
+  return (data.cast || [])
+    .filter((item: any) =>
+      (item.media_type === 'movie' || item.media_type === 'tv') && item.adult !== true
+    )
+    .map((item: any) => toMovie(item))
+    .sort((a: Movie, b: Movie) => b.popularity - a.popularity)
+    .slice(0, 40);
 }
 
 export async function getMovieDetail(compositeId: string): Promise<MovieDetail | null> {

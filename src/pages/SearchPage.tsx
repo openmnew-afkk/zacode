@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { searchMovies } from '../api/catalog';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { getMoviesByActor, searchActors, searchMovies } from '../api/catalog';
 import { useStore } from '../store';
-import type { Movie } from '../types';
+import type { Actor, Movie } from '../types';
 import './SearchPage.css';
 
 const QUICK_SEARCHES = [
@@ -28,34 +28,100 @@ const HASHTAG_CHIPS = [
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { isMovieBlocked } = useStore();
 
-  const [query, setQuery] = useState('');
+  const initialPersonId = Number(searchParams.get('person'));
+  const [query, setQuery] = useState(searchParams.get('name') || '');
   const [movies, setMovies] = useState<Movie[]>([]);
+  const [actors, setActors] = useState<Actor[]>([]);
+  const [selectedActor, setSelectedActor] = useState<Actor | null>(() =>
+    Number.isSafeInteger(initialPersonId) && initialPersonId > 0
+      ? { id: initialPersonId, name: searchParams.get('name') || '', profile_path: null, known_for: [] }
+      : null
+  );
   const [loading, setLoading] = useState(false);
-  const [searchType, setSearchType] = useState<'movie' | 'series'>('movie');
+  const [searchType, setSearchType] = useState<'movie' | 'series' | 'actors'>(initialPersonId ? 'actors' : 'movie');
+  const [searchError, setSearchError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
-    if (!query.trim()) { setMovies([]); return; }
+    let active = true;
+    if (!query.trim()) {
+      setMovies([]);
+      setActors([]);
+      setSearchError('');
+      setLoading(false);
+      return () => { active = false; };
+    }
+    if (searchType === 'actors' && selectedActor) return () => { active = false; };
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
+      setSearchError('');
       try {
-        const res = await searchMovies(query.trim(), 1, searchType);
-        const filtered = (res.results || []).filter(
-          m => !isMovieBlocked(m.id) && !(m.kinopoisk_id && isMovieBlocked(m.kinopoisk_id))
-        );
-        setMovies(filtered);
-      } catch { setMovies([]); }
-      setLoading(false);
+        if (searchType === 'actors') {
+          const results = await searchActors(query.trim());
+          if (active) {
+            setActors(results);
+            setMovies([]);
+          }
+        } else {
+          const res = await searchMovies(query.trim(), 1, searchType);
+          if (!res.ok) throw new Error('Film search failed');
+          const filtered = (res.results || []).filter(
+            m => !isMovieBlocked(m.id) && !(m.kinopoisk_id && isMovieBlocked(m.kinopoisk_id))
+          );
+          if (active) {
+            setMovies(filtered);
+            setActors([]);
+          }
+        }
+      } catch {
+        if (active) {
+          setMovies([]);
+          setActors([]);
+          setSearchError('Не удалось выполнить поиск. Проверьте соединение и попробуйте ещё раз.');
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
     }, 380);
-    return () => clearTimeout(debounceRef.current);
-  }, [query, searchType, isMovieBlocked]);
+    return () => {
+      active = false;
+      clearTimeout(debounceRef.current);
+    };
+  }, [query, searchType, selectedActor, isMovieBlocked]);
 
-  const isEmpty = !loading && movies.length === 0 && query.trim().length > 0;
+  useEffect(() => {
+    if (!selectedActor) return;
+    let active = true;
+    setLoading(true);
+    setSearchError('');
+    getMoviesByActor(selectedActor.id)
+      .then((results) => {
+        if (active) {
+          setMovies(results.filter(
+            m => !isMovieBlocked(m.id) && !(m.kinopoisk_id && isMovieBlocked(m.kinopoisk_id))
+          ));
+        }
+      })
+      .catch(() => {
+        if (active) setSearchError('Не удалось загрузить фильмы этого актёра. Попробуйте ещё раз.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [selectedActor, isMovieBlocked]);
+
+  const isEmpty = !loading && !searchError && (searchType === 'actors' && !selectedActor ? actors.length === 0 : movies.length === 0) && query.trim().length > 0;
   const isInitial = !loading && query.trim().length === 0;
+  const chooseActor = (actor: Actor) => {
+    setSelectedActor(actor);
+    setQuery(actor.name);
+  };
 
   return (
     <div className="search-page page">
@@ -74,9 +140,12 @@ const SearchPage: React.FC = () => {
           ref={inputRef}
           className="search-input"
           type="text"
-          placeholder="Фильм, сериал, или хештег #боевик #2026…"
+          placeholder={searchType === 'actors' ? 'Имя актёра или актрисы…' : 'Фильм, сериал или хештег #боевик…'}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => {
+            setSelectedActor(null);
+            setQuery(e.target.value);
+          }}
           autoComplete="off"
           spellCheck={false}
         />
@@ -94,20 +163,33 @@ const SearchPage: React.FC = () => {
       <div className="search-types">
         <button
           className={`search-type ${searchType === 'movie' ? 'active' : ''}`}
-          onClick={() => setSearchType('movie')}
+          onClick={() => { setSelectedActor(null); setSearchType('movie'); }}
+          aria-pressed={searchType === 'movie'}
         >
           Фильмы
         </button>
         <button
           className={`search-type ${searchType === 'series' ? 'active' : ''}`}
-          onClick={() => setSearchType('series')}
+          onClick={() => { setSelectedActor(null); setSearchType('series'); }}
+          aria-pressed={searchType === 'series'}
         >
           Сериалы
+        </button>
+        <button
+          className={`search-type ${searchType === 'actors' ? 'active' : ''}`}
+          onClick={() => {
+            setSelectedActor(null);
+            setSearchType('actors');
+            setQuery('');
+          }}
+          aria-pressed={searchType === 'actors'}
+        >
+          Актёры
         </button>
       </div>
 
       {/* ── Горизонтальная лента хештегов для мгновенного подбора ── */}
-      <div className="search-tags-scroll">
+      {searchType !== 'actors' && <div className="search-tags-scroll">
         {HASHTAG_CHIPS.map((item) => {
           const isActive = query.trim().toLowerCase() === item.tag.toLowerCase();
           return (
@@ -127,9 +209,9 @@ const SearchPage: React.FC = () => {
             </button>
           );
         })}
-      </div>
+      </div>}
 
-      {query.includes('#') && !loading && movies.length > 0 && (
+      {searchType !== 'actors' && query.includes('#') && !loading && movies.length > 0 && (
         <div className="search-active-tag">
           <span className="search-active-tag__badge">🏷️ Хештег:</span>
           <span className="search-active-tag__text">{query}</span>
@@ -137,7 +219,7 @@ const SearchPage: React.FC = () => {
         </div>
       )}
 
-      {isInitial && (
+      {isInitial && searchType !== 'actors' && (
         <div className="search-quick">
           <div className="search-quick__title">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#f43f5e', marginRight: 6 }}>
@@ -169,6 +251,42 @@ const SearchPage: React.FC = () => {
               <div className="search-skeleton__poster skeleton-pulse" />
               <div className="search-skeleton__text skeleton-pulse" />
             </div>
+          ))}
+        </div>
+      )}
+
+      {searchError && (
+        <div className="search-empty" role="status">
+          <p className="search-empty__title">Поиск временно недоступен</p>
+          <p className="search-empty__sub">{searchError}</p>
+        </div>
+      )}
+
+      {searchType === 'actors' && selectedActor && (
+        <div className="search-actor-selected">
+          <span>Фильмы и сериалы с актёром</span>
+          <strong>{selectedActor.name}</strong>
+          <button type="button" onClick={() => { setSelectedActor(null); setQuery(''); }}>
+            Другой актёр
+          </button>
+        </div>
+      )}
+
+      {searchType === 'actors' && !selectedActor && !loading && actors.length > 0 && (
+        <div className="search-actors" aria-label="Результаты поиска актёров">
+          {actors.map((actor) => (
+            <button key={actor.id} className="search-actor" type="button" onClick={() => chooseActor(actor)}>
+              {actor.profile_path ? (
+                <img src={actor.profile_path} alt="" loading="lazy" />
+              ) : (
+                <span className="search-actor__placeholder" aria-hidden="true">{actor.name.slice(0, 1)}</span>
+              )}
+              <span className="search-actor__copy">
+                <strong>{actor.name}</strong>
+                {actor.known_for.length > 0 && <small>{actor.known_for.join(' · ')}</small>}
+              </span>
+              <span className="search-actor__arrow" aria-hidden="true">→</span>
+            </button>
           ))}
         </div>
       )}

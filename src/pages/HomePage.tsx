@@ -7,6 +7,7 @@ import {
   discoverMovies, discoverSeries, getKeywordCollection,
 } from '../api/catalog';
 import { getStoredSeason } from '../services/seasons';
+import SeasonalMask from '../components/SeasonalMask';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
@@ -1012,7 +1013,17 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <img className="hp-header__emblem" src="/zenova-mask.svg" alt="ZENOVA" />
+              <SeasonalMask season={season.id} className="hp-header__emblem" />
+              <span className={`hp-header__wordmark hp-header__wordmark--${season.id}`}>
+                <span>ZENOVA</span>
+                <svg viewBox="0 0 260 22" aria-hidden="true">
+                  {season.id === 'winter' ? (
+                    <path d="M4 2h252v3h-18l-3 5-2-5h-20v9l-3 5-3-5V5h-25l-2 4-2-4h-18v11l-3 5-3-5V5h-22l-2 4-2-4h-18v8l-3 5-3-5V5h-24l-2 4-2-4H4z" />
+                  ) : (
+                    <path d="M5 2h28l-3 10c-.6 2-3.4 2-4 0L24 6h-8l-1 12c-.2 3-4.8 3-5 0L9 6H5V2Zm54 0h32l-2 7c-.6 2-3.4 2-4 0l-1-3H74l-1 12c-.2 3-4.8 3-5 0L67 6h-8V2Zm53 0h36l-2 12c-.4 3-4.6 3-5 0l-1-8h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-11l-1 8c-.4 3-4.6 3-5 0l-1-12Zm59 0h32l-2 8c-.6 2-3.4 2-4 0l-1-4h-9l-1 10c-.3 3-4.7 3-5 0l-1-10h-8l-1 12c-.2 3-4.8 3-5 0l-1-16Zm51 0h33l-2 11c-.4 3-4.6 3-5 0l-1-7h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-10V2Z" />
+                  )}
+                </svg>
+              </span>
             </div>
             <div className="hp-header__actions">
               {/* 🎲 Мне повезёт — случайный фильм */}
