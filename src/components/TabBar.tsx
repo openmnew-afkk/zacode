@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../store';
+import { getStoredSeason } from '../services/seasons';
 import './TabBar.css';
 
 interface TabDef {
@@ -75,14 +76,32 @@ const TabBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { favorites } = useStore();
+  const season = getStoredSeason().season.id;
 
   const isActive = (path: string) => {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
 
+  const seasonalPage = season === 'winter'
+    ? { path: '/new-year', icon: '🎄', label: 'Открыть зимнюю сказку' }
+    : season === 'autumn'
+      ? { path: '/halloween', icon: '🎃', label: 'Открыть хэллоуинскую историю' }
+      : null;
+
   return (
     <nav className="tab-bar" aria-label="Основная навигация">
+      {seasonalPage && (
+        <button
+          className={`tab-bar__season tab-bar__season--${season}`}
+          type="button"
+          onClick={() => navigate(seasonalPage.path)}
+          aria-label={seasonalPage.label}
+          title={seasonalPage.label}
+        >
+          <span aria-hidden="true">{seasonalPage.icon}</span>
+        </button>
+      )}
       <div className="tab-bar__inner">
         {tabs.map((tab) => {
           const active = isActive(tab.path);

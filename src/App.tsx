@@ -12,6 +12,7 @@ import AiPickPage from './pages/AiPickPage';
 import RulesPage from './pages/RulesPage';
 import FeedPage from './pages/FeedPage';
 import NewYearPage from './pages/NewYearPage';
+import HalloweenPage from './pages/HalloweenPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
@@ -98,6 +99,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/feed" element={<FeedPage />} />
           <Route path="/new-year" element={<NewYearPage />} />
+          <Route path="/halloween" element={<HalloweenPage />} />
           <Route path="/movie/:id" element={<MovieDetailPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/favorites" element={<FavoritesPage />} />

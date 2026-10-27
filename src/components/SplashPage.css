@@ -143,15 +143,24 @@
   width: min(100%, 520px);
   flex-direction: column;
   align-items: center;
-  gap: clamp(24px, 5vh, 38px);
+  gap: clamp(32px, 7vh, 56px);
   padding: 32px;
+}
+
+.sp__identity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(4px, 2vw, 18px);
+  width: 100%;
 }
 
 .sp__emblem-wrap {
   position: relative;
   display: grid;
-  width: 216px;
-  height: 216px;
+  width: clamp(126px, 36vw, 184px);
+  height: clamp(126px, 36vw, 184px);
+  flex: 0 0 auto;
   place-items: center;
   background: radial-gradient(ellipse, rgba(192, 24, 55, 0.09), transparent 66%);
   animation: spEmblemEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both, spEmblemHover 5s ease-in-out 0.8s infinite;
@@ -160,8 +169,8 @@
 .sp__emblem {
   position: relative;
   z-index: 1;
-  width: 176px;
-  height: 176px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 20px rgba(188, 31, 59, 0.34));
   animation: spMaskGlow 3.8s ease-in-out infinite alternate;
@@ -195,27 +204,45 @@
 
 .sp__brand {
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 10px;
   animation: spTextEnter 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
+}
+
+.sp__title-wrap {
+  position: relative;
+  padding-bottom: 12px;
 }
 
 .sp__title {
   margin: 0;
-  padding-left: 0.2em;
-  background: linear-gradient(110deg, #fff 5%, var(--sp-accent) 28%, #e8c8ff 48%, #fff 62%, #ffc2ce 82%, #fff 96%);
+  color: #fff;
+  background: linear-gradient(110deg, #fff 14%, #e4e0e5 34%, #fff 48%, #f6e8eb 62%, #fff 76%);
   background-size: 220% 100%;
   background-clip: text;
   -webkit-background-clip: text;
-  color: transparent;
-  font-size: clamp(36px, 10vw, 48px);
+  -webkit-text-fill-color: transparent;
+  font-size: clamp(31px, 8.2vw, 43px);
   font-weight: 780;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.14em;
   line-height: 1;
-  text-shadow: 0 0 40px rgba(228, 213, 255, 0.26), 0 8px 36px rgba(255, 255, 255, 0.14);
-  filter: drop-shadow(0 0 15px var(--sp-accent-soft));
+  text-shadow: 0 0 28px rgba(255, 255, 255, 0.2), 0 5px 24px rgba(255, 255, 255, 0.1);
+  filter: drop-shadow(0 0 12px rgba(220, 35, 58, 0.32));
   animation: spBrandShimmer 5s ease-in-out infinite;
+}
+
+.sp__blood {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 19px;
+  overflow: visible;
+  fill: #a90f26;
+  filter: drop-shadow(0 2px 6px rgba(202, 19, 42, 0.48));
 }
 
 .sp__subtitle {
@@ -223,7 +250,8 @@
   color: rgba(235, 226, 245, 0.58);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.14em;
+  line-height: 1.5;
 }
 
 .sp__loading {
@@ -322,8 +350,11 @@
 }
 
 @media (max-width: 380px) {
-  .sp__emblem-wrap { width: 184px; height: 184px; }
-  .sp__emblem { width: 156px; height: 156px; }
+  .sp__container { padding: 20px; }
+  .sp__identity { gap: 1px; }
+  .sp__emblem-wrap { width: 126px; height: 126px; }
+  .sp__title { font-size: clamp(27px, 8vw, 31px); letter-spacing: 0.11em; }
+  .sp__subtitle { font-size: 7px; letter-spacing: 0.1em; }
   .sp__projector-beam { width: 220px; height: 220px; }
   .sp__season-artwork { top: max(12px, calc(50% - 240px)); }
 }
