@@ -246,7 +246,7 @@ const MusicPage: React.FC = () => {
       return playlists['chart'] || [];
     }
 
-    // Вкладка 'wave' (Моя Волна): плейлист настроения + подходящие радиостанции
+    // Поток ZENOVA Пульс: плейлист настроения и подходящие радиостанции.
     const moodTracks = playlists[`wave:${activeMood}`] || [];
     const radioMatches =
       activeMood === 'all'
@@ -266,11 +266,11 @@ const MusicPage: React.FC = () => {
     }
   };
 
-  /* Запуск Моей Волны по большой кнопке/сфере.
-     surprise = «Удиви меня»: игнорируем настроение, играем случайный трек из всех плейлистов */
+  /* Запуск ZENOVA Пульс; surprise игнорирует настроение и выбирает трек случайно. */
   const handleStartWave = (surprise = false) => {
     haptic('heavy');
-    if (currentTrack && !surprise) {
+    const localPool = displayedTracks.filter((t) => !t.isLiveRadio);
+    if (currentTrack && !surprise && localPool.some((track) => track.id === currentTrack.id)) {
       setPlaying(!isPlaying);
       showToast(isPlaying ? '⏸ Пауза' : '▶️ Возобновлено');
       return;
@@ -280,7 +280,6 @@ const MusicPage: React.FC = () => {
       return;
     }
     // У обычного запуска очередь соответствует выбранному экрану; «Удиви меня» — всему кэшу.
-    const localPool = displayedTracks.filter((t) => !t.isLiveRadio);
     const combined = surprise
       ? [...localPool, ...Object.values(playlists).flat().filter((t) => !t.isLiveRadio)]
       : localPool;
@@ -298,7 +297,7 @@ const MusicPage: React.FC = () => {
       showToast(
         surprise
           ? `🎲 Удиви меня: ${first.artist} — ${first.title}`
-          : `🌊 Моя Волна: ${first.artist} — ${first.title}`
+          : `✦ ZENOVA Пульс: ${first.artist} — ${first.title}`
       );
     } else {
       showToast('В этом списке пока нет доступных треков');
@@ -321,6 +320,9 @@ const MusicPage: React.FC = () => {
   };
 
   const currentMoodObj = WAVE_MOODS.find((m) => m.id === activeMood) || WAVE_MOODS[0];
+  const currentTrackIsInWave = Boolean(
+    currentTrack && displayedTracks.some((track) => !track.isLiveRadio && track.id === currentTrack.id)
+  );
 
   /* Скелетоны при первой загрузке плейлиста */
   const showSkeletons =
@@ -356,11 +358,10 @@ const MusicPage: React.FC = () => {
         <div className="ym-header__top">
           <div className="ym-brand">
             <div className="ym-brand__badge-row">
-              <span className="ym-brand__badge">✦ МОЯ ВОЛНА · МИЛЛИОНЫ ТРЕКОВ</span>
-              <span className="ym-source-tag">ZENOVA SOUND</span>
+              <span className="ym-brand__badge">✦ ZENOVA SOUND</span>
             </div>
             <h1 className="ym-brand__title">
-              {tab === 'wave' && 'Моя Волна'}
+              {tab === 'wave' && 'ZENOVA Пульс'}
               {tab === 'chart' && 'Топ Чарты'}
               {tab === 'radio' && 'Прямой Эфир'}
               {tab === 'library' && 'Коллекция'}
@@ -420,8 +421,8 @@ const MusicPage: React.FC = () => {
             className={`ym-tab ${tab === 'wave' ? 'active' : ''}`}
             onClick={() => { haptic('light'); setTab('wave'); }}
           >
-            <span className="ym-tab__icon">🌊</span>
-            <span>Моя Волна</span>
+            <span className="ym-tab__icon">✦</span>
+            <span>Пульс</span>
           </button>
           <button
             className={`ym-tab ${tab === 'chart' ? 'active' : ''}`}
@@ -446,7 +447,7 @@ const MusicPage: React.FC = () => {
           </button>
         </div>
 
-        {/* ── Селектор настроений Моей Волны ── */}
+        {/* ── Селектор музыкальных настроений ── */}
         {tab === 'wave' && !searchMode && (
           <div className="ym-moods">
             <button
@@ -475,45 +476,58 @@ const MusicPage: React.FC = () => {
         )}
       </header>
 
-      {/* ── Интерактивная живая сфера "Моя Волна" в стиле Яндекс Музыки ── */}
+      {/* ── Фирменный музыкальный визуализатор ZENOVA SOUND ── */}
       {tab === 'wave' && !searchMode && (
-        <section className="ym-wave-card" onClick={() => handleStartWave(false)}>
-          <div className="ym-wave-sphere-wrap">
-            <div
-              className={`ym-wave-sphere ${isPlaying ? 'playing' : ''}`}
-              style={{ background: currentMoodObj.gradient }}
-            >
-              <div className="ym-wave-glow" />
-              <div className="ym-wave-pulse" />
-              <div className="ym-wave-center-icon">
-                {isPlaying ? (
-                  <div className="ym-wave-equalizer">
-                    <span /><span /><span /><span />
-                  </div>
-                ) : (
-                  <svg width="34" height="34" viewBox="0 0 24 24" fill="#ffffff">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
+        <section className={`ym-wave-card ${isPlaying ? 'is-playing' : ''}`}>
+          <div className="ym-wave-card__visual" aria-hidden="true">
+            <div className="ym-wave-card__orbit ym-wave-card__orbit--outer" />
+            <div className="ym-wave-card__orbit ym-wave-card__orbit--inner" />
+            <div className="ym-wave-sphere" style={{ background: currentMoodObj.gradient }}>
+              <div className="ym-wave-sphere__shine" />
+              <div className="ym-wave-sphere__bars">
+                {Array.from({ length: 25 }, (_, index) => <i key={index} />)}
               </div>
             </div>
           </div>
           <div className="ym-wave-card__info">
             <span className="ym-wave-card__badge">
-              {currentMoodObj.icon} {currentMoodObj.label}
+              <span className="ym-wave-card__live-dot" />
+              {currentMoodObj.label}
             </span>
-            <h2 className="ym-wave-card__title">
-              {isPlaying ? 'Волна звучит сейчас' : 'Включить Мою Волну'}
-            </h2>
-            {!isPlaying && (
+            <p className="ym-wave-card__kicker">
+              {isPlaying ? 'СЕЙЧАС В ЭФИРЕ' : currentTrack ? 'ПОСЛЕДНИЙ ТРЕК' : 'ВАШ МУЗЫКАЛЬНЫЙ ПОТОК'}
+            </p>
+            <h2 className="ym-wave-card__title">{currentTrack?.title || 'Музыка под ваше настроение'}</h2>
+            <p className="ym-wave-card__desc">
+              {currentTrack?.artist || currentMoodObj.description}
+            </p>
+            <div className="ym-wave-card__controls">
+              <button
+                className="ym-wave-card__play"
+                type="button"
+                onClick={() => handleStartWave(false)}
+                aria-label={currentTrackIsInWave ? (isPlaying ? 'Пауза' : 'Продолжить') : 'Запустить ZENOVA Пульс'}
+              >
+                {currentTrackIsInWave && isPlaying ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M7 5h4v14H7zM15 5h4v14h-4z" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                )}
+              </button>
               <button
                 className="ym-wave-card__surprise"
-                onClick={(e) => { e.stopPropagation(); handleStartWave(true); }}
+                type="button"
+                onClick={() => handleStartWave(true)}
+                aria-label="Включить случайный трек"
               >
-                🎲 Удиви меня
+                <span aria-hidden="true">⤨</span>
+                Случайный микс
               </button>
-            )}
-            <p className="ym-wave-card__desc">{currentMoodObj.description}</p>
+            </div>
           </div>
         </section>
       )}

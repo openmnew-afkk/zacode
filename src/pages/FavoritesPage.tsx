@@ -18,15 +18,15 @@ const FavoritesPage: React.FC = () => {
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
   const allTracked = Object.values(tracked);
-  const wantMovies = new Map<string, Movie>();
+  const wantMovies = new Map<string, Movie>(
+    allTracked
+      .filter((item) => item.status === 'want')
+      .sort((a, b) => b.addedAt - a.addedAt)
+      .map((item) => [item.movie.id, item.movie])
+  );
   favorites.forEach((movie) => {
-    const item = tracked[movie.id];
-    if (!item || item.status === 'want') wantMovies.set(movie.id, movie);
+    if (!tracked[movie.id]) wantMovies.set(movie.id, movie);
   });
-  allTracked
-    .filter((item) => item.status === 'want')
-    .sort((a, b) => b.addedAt - a.addedAt)
-    .forEach((item) => wantMovies.set(item.movie.id, item.movie));
 
   const items: Movie[] =
     tab === 'want'

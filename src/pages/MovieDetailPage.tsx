@@ -176,7 +176,7 @@ const MovieDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { showBackButton, haptic, openLink, user: tgUser } = useTelegram();
   const {
-    addFavorite, removeFavorite, addToHistory,
+    addFavorite, removeFavorite, isFavorite, addToHistory,
     setTrackedStatus, setPersonalRating, getStatus, getRating,
     isMovieBlocked,
   } = useStore();
@@ -311,8 +311,9 @@ const MovieDetailPage: React.FC = () => {
   const handleFav = () => {
     haptic('light');
     if (movie) {
-      if (status) {
+      if (status || isFavorite(movie.id)) {
         setTrackedStatus(movie, null);
+        removeFavorite(movie.id);
         setFavToast('Убрано из списков');
         haptic('medium');
       } else {
@@ -362,7 +363,7 @@ const MovieDetailPage: React.FC = () => {
   const isSerial = movie.is_serial || (movie.seasons?.length ?? 0) > 0;
   const poster = movie.poster_path;
   const backdrop = movie.backdrop_path || poster;
-  const inList = status !== null;
+  const inList = status !== null || Boolean(movie && isFavorite(movie.id));
   const whereLinks = whereToWatch(movie.title);
 
   const canWatch = true;
@@ -443,6 +444,7 @@ const MovieDetailPage: React.FC = () => {
         <div className="dp-hero2__backdrop" style={{ backgroundImage: `url(${backdrop})` }}>
           <div className="dp-hero2__fade" />
           <div className="dp-hero2__glow" />
+          <div className="dp-hero2__light-sweep" aria-hidden="true" />
           <div className="dp-hero2__head">
             <p className="dp-hero2__eyebrow">
               <span aria-hidden="true" />
@@ -550,6 +552,7 @@ const MovieDetailPage: React.FC = () => {
               key={s.id}
               className={`dp-status ${status === s.id ? 'active' : ''}`}
               onClick={() => handleStatus(s.id)}
+              aria-pressed={status === s.id}
             >
               <span className="dp-status__icon">{s.icon}</span>
               <span className="dp-status__label">{s.label}</span>

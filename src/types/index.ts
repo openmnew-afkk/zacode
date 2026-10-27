@@ -77,6 +77,7 @@ export interface TrackedItem {
   status: WatchStatus;
   rating: number | null; // личная оценка 1-10
   addedAt: number;
+  updatedAt?: number;
   progress?: number; // 0..1 — доля просмотра (для «Продолжить просмотр»)
 }
 

@@ -1253,21 +1253,21 @@
   gap: 5px;
 }
 
-/* Лёгкий снег на верхнем крае постера, без тяжёлых отдельных «шапок». */
+/* Тонкий слой инея по краям постера вместо снежной шапки. */
 [data-season='winter'] .dp-hero2__poster-wrap::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 19px;
+  z-index: 2;
+  inset: 0;
+  border: 1px solid rgba(220, 247, 255, 0.3);
+  border-radius: inherit;
   background:
-    radial-gradient(18px 9px at 10% 7px, #fff 96%, transparent),
-    radial-gradient(22px 10px at 34% 5px, #f8fbff 96%, transparent),
-    radial-gradient(20px 9px at 62% 7px, #fff 96%, transparent),
-    radial-gradient(17px 9px at 90% 6px, #f8fbff 96%, transparent),
-    linear-gradient(180deg, rgba(255,255,255,0.95) 0 4px, rgba(224,242,254,0.55) 8px, transparent 100%);
-  filter: drop-shadow(0 2px 3px rgba(186, 230, 253, 0.32));
+    radial-gradient(ellipse 38% 22% at 0% 0%, rgba(234, 250, 255, 0.55), transparent 82%),
+    radial-gradient(ellipse 34% 20% at 100% 0%, rgba(223, 246, 255, 0.48), transparent 84%),
+    linear-gradient(180deg, rgba(210, 242, 255, 0.2), transparent 13%),
+    linear-gradient(90deg, rgba(219, 244, 255, 0.13), transparent 9% 91%, rgba(219, 244, 255, 0.11));
+  box-shadow: inset 0 0 18px rgba(198, 238, 255, 0.18);
+  backdrop-filter: blur(1.2px);
   pointer-events: none;
 }
 
@@ -1360,21 +1360,23 @@
   font-variant-numeric: tabular-nums;
 }
 
-[data-season='winter'] .dp-rec__poster-wrap,
 [data-season='winter'] .dp-rec { position: relative; }
 
 [data-season='winter'] .dp-rec::before {
   content: '';
   position: absolute;
   z-index: 2;
-  inset: 1px auto auto 0;
+  inset: 0 auto auto 0;
   width: 92px;
-  height: 13px;
+  height: 138px;
+  border: 1px solid rgba(220, 247, 255, 0.27);
+  border-radius: 13px;
   background:
-    radial-gradient(14px 7px at 10% 5px, #fff 96%, transparent),
-    radial-gradient(18px 8px at 38% 4px, #f8fbff 96%, transparent),
-    radial-gradient(15px 7px at 69% 5px, #fff 96%, transparent),
-    linear-gradient(180deg, rgba(255,255,255,0.88) 0 3px, transparent 100%);
+    radial-gradient(ellipse 42% 23% at 0% 0%, rgba(234, 250, 255, 0.52), transparent 82%),
+    radial-gradient(ellipse 38% 20% at 100% 0%, rgba(223, 246, 255, 0.42), transparent 84%),
+    linear-gradient(180deg, rgba(210, 242, 255, 0.2), transparent 15%),
+    linear-gradient(90deg, rgba(219, 244, 255, 0.12), transparent 10% 90%, rgba(219, 244, 255, 0.1));
+  box-shadow: inset 0 0 14px rgba(198, 238, 255, 0.18);
   pointer-events: none;
 }
 
@@ -1417,27 +1419,67 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background:
-    linear-gradient(90deg, rgba(6, 5, 10, 0.48), transparent 78%),
-    radial-gradient(ellipse 52% 40% at 82% 35%, rgba(147, 91, 231, 0.2), transparent 80%);
+  background-image: inherit;
+  background-position: inherit;
+  background-size: cover;
+  filter: saturate(1.18) contrast(1.04);
+  transform: scale(1.035);
+  animation: dp-backdrop-drift 26s ease-in-out infinite alternate;
   content: '';
   pointer-events: none;
 }
 
+@keyframes dp-backdrop-drift {
+  from { transform: scale(1.035) translate3d(-0.3%, 0, 0); }
+  to { transform: scale(1.09) translate3d(0.3%, -0.5%, 0); }
+}
+
+.dp-hero2__backdrop::after {
+  position: absolute;
+  z-index: 2;
+  inset: 20px 20px 8%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  content: '';
+  mask-image: linear-gradient(#000 10%, transparent 92%);
+  pointer-events: none;
+}
+
 .dp-hero2__fade {
-  z-index: 1;
+  z-index: 2;
   background:
     linear-gradient(180deg, rgba(7, 6, 12, 0.36) 0%, rgba(7, 6, 12, 0.02) 28%, rgba(7, 6, 12, 0.12) 48%, rgba(7, 6, 12, 0.68) 72%, var(--bg, #09080b) 100%);
 }
 
 .dp-hero2__glow {
-  z-index: 1;
+  z-index: 2;
   background:
-    radial-gradient(ellipse 50% 35% at 18% 100%, var(--accent-glow, rgba(251, 113, 133, 0.24)), transparent 75%),
+    radial-gradient(ellipse 48% 38% at 18% 100%, var(--accent-glow, rgba(251, 113, 133, 0.27)), transparent 75%),
+    radial-gradient(ellipse 35% 48% at 95% 48%, rgba(129, 140, 248, 0.14), transparent 78%),
     linear-gradient(0deg, rgba(6, 5, 10, 0.2), transparent 38%);
 }
 
+.dp-hero2__light-sweep {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  background: linear-gradient(112deg, transparent 34%, rgba(255, 255, 255, 0.11) 47%, rgba(255, 220, 236, 0.045) 50%, transparent 62%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transform: translateX(-44%);
+  animation: dp-light-sweep 13s ease-in-out 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes dp-light-sweep {
+  0%, 74%, 100% { opacity: 0; transform: translateX(-44%); }
+  79% { opacity: 0.75; }
+  88% { opacity: 0.35; transform: translateX(44%); }
+}
+
 .dp-hero2__head {
+  z-index: 3;
   padding: 0 clamp(20px, 5vw, 56px) 164px;
 }
 
@@ -1510,6 +1552,22 @@
   background: #17131d;
   box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 0 1px rgba(255, 255, 255, 0.17);
   isolation: isolate;
+  transform: perspective(1000px) rotateY(-2deg) rotateX(1deg);
+  transition: transform 0.35s cubic-bezier(0.2, 0.75, 0.25, 1), box-shadow 0.35s ease;
+  filter: drop-shadow(0 0 24px rgba(168, 85, 247, 0.13));
+  animation: dp-poster-float 7s ease-in-out infinite;
+}
+
+@keyframes dp-poster-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -4px; }
+}
+
+@media (hover: hover) {
+  .dp-hero2__poster-wrap:hover {
+    transform: perspective(1000px) rotateY(0) rotateX(0) translateY(-4px);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.62), 0 0 42px rgba(192, 132, 252, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
 }
 
 .dp-hero2__poster {
@@ -1699,7 +1757,12 @@
 
 @media (prefers-reduced-motion: reduce) {
   .dp-watch,
-  .dp-fav {
+  .dp-fav,
+  .dp-hero2__backdrop::before,
+  .dp-hero2__light-sweep,
+  .dp-hero2__poster-wrap {
     transition: none;
+    animation: none;
+    transform: none;
   }
 }

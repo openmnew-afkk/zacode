@@ -5,6 +5,7 @@ import type { Movie, WatchHistoryItem, AppTheme, WatchStatus, TrackedItem } from
 import type { BackendConfig, Requisites, Prices } from '../api/backend';
 import { findLocalGrant } from '../api/backend';
 import { resolveUserAccess, MASTER_ADMINS } from '../services/accessControl';
+import { readTrackedCloud, writeTrackedCloud, type TrackedCloudRecord } from '../services/trackedCloud';
 import {
   getLocalMandatorySub,
   saveLocalMandatorySub,
@@ -86,12 +87,14 @@ interface AppState {
 
   /* ═══ Дневник киномана: статусы и личные оценки ═══ */
   tracked: Record<string, TrackedItem>;
+  trackedDeletions: Record<string, number>;
   /** Установить статус (повторный тап по тому же — снять) */
   setTrackedStatus: (movie: Movie, status: WatchStatus | null) => void;
   /** Личная оценка 1-10 */
   setPersonalRating: (id: string, rating: number) => void;
   getStatus: (id: string) => WatchStatus | null;
   getRating: (id: string) => number | null;
+  syncTrackedCloud: () => Promise<void>;
 
   /* Тема */
   theme: AppTheme;
@@ -158,6 +161,33 @@ interface AppState {
 
 const DEFAULT_REQUISITES: Requisites = { card: '', sbp: '', crypto: '', note: '' };
 const DEFAULT_PRICES: Prices = { month: 199, monthFirst: 99, year: 2400, yearFirst: 1600 };
+let trackedCloudWriteQueue = Promise.resolve();
+
+function trackedRecordTimestamp(record: TrackedCloudRecord): number {
+  return record.kind === 'item'
+    ? record.item.updatedAt ?? record.item.addedAt
+    : record.deletedAt;
+}
+
+function sameTrackedRecord(left: TrackedCloudRecord | undefined, right: TrackedCloudRecord): boolean {
+  if (!left || left.kind !== right.kind) return false;
+  if (left.kind === 'deleted' && right.kind === 'deleted') return left.deletedAt === right.deletedAt;
+  if (left.kind === 'item' && right.kind === 'item') {
+    return left.item.updatedAt === right.item.updatedAt
+      && left.item.addedAt === right.item.addedAt
+      && left.item.status === right.item.status
+      && left.item.rating === right.item.rating;
+  }
+  return false;
+}
+
+function queueTrackedCloudWrite(id: string, record: TrackedCloudRecord): void {
+  trackedCloudWriteQueue = trackedCloudWriteQueue
+    .then(() => writeTrackedCloud(id, record))
+    .catch((error: unknown) => {
+      console.warn('Could not sync watch status to Telegram CloudStorage:', error);
+    });
+}
 
 export const useStore = create<AppState>((set, get) => ({
   /* ═══ Избранное ═══ */
@@ -187,30 +217,73 @@ export const useStore = create<AppState>((set, get) => ({
 
   /* ═══ Дневник киномана ═══ */
   tracked: load<Record<string, TrackedItem>>('tc_tracked', {}),
+  trackedDeletions: load<Record<string, number>>('tc_tracked_deleted', {}),
   setTrackedStatus: (movie, status) => {
     const t = { ...get().tracked };
+    const deletions = { ...get().trackedDeletions };
     if (!status || t[movie.id]?.status === status) {
       delete t[movie.id];
+      deletions[movie.id] = Date.now();
     } else {
       t[movie.id] = {
         movie,
         status,
         rating: t[movie.id]?.rating ?? null,
         addedAt: t[movie.id]?.addedAt ?? Date.now(),
+        updatedAt: Date.now(),
       };
+      delete deletions[movie.id];
     }
     save('tc_tracked', t);
-    set({ tracked: t });
+    save('tc_tracked_deleted', deletions);
+    set({ tracked: t, trackedDeletions: deletions });
+    const record = t[movie.id]
+      ? { kind: 'item' as const, item: t[movie.id] }
+      : { kind: 'deleted' as const, deletedAt: deletions[movie.id] };
+    queueTrackedCloudWrite(movie.id, record);
   },
   setPersonalRating: (id, rating) => {
     const t = { ...get().tracked };
     if (!t[id]) return;
-    t[id] = { ...t[id], rating };
+    t[id] = { ...t[id], rating, updatedAt: Date.now() };
     save('tc_tracked', t);
     set({ tracked: t });
+    queueTrackedCloudWrite(id, { kind: 'item', item: t[id] });
   },
   getStatus: (id) => get().tracked[id]?.status ?? null,
   getRating: (id) => get().tracked[id]?.rating ?? null,
+  syncTrackedCloud: async () => {
+    const remote = await readTrackedCloud();
+    if (!remote) return;
+
+    const local = get().tracked;
+    const localDeletions = get().trackedDeletions;
+    const merged: Record<string, TrackedItem> = {};
+    const mergedDeletions: Record<string, number> = {};
+    const ids = new Set([...Object.keys(remote), ...Object.keys(local), ...Object.keys(localDeletions)]);
+
+    for (const id of ids) {
+      const localRecord: TrackedCloudRecord | undefined = local[id]
+        ? { kind: 'item', item: local[id] }
+        : localDeletions[id] !== undefined
+          ? { kind: 'deleted', deletedAt: localDeletions[id] }
+          : undefined;
+      const cloudRecord = remote[id];
+      const winner = !cloudRecord || (localRecord && trackedRecordTimestamp(localRecord) >= trackedRecordTimestamp(cloudRecord))
+        ? localRecord
+        : cloudRecord;
+      if (!winner) continue;
+
+      if (winner.kind === 'item') merged[id] = winner.item;
+      else mergedDeletions[id] = winner.deletedAt;
+
+      if (!sameTrackedRecord(cloudRecord, winner)) queueTrackedCloudWrite(id, winner);
+    }
+
+    save('tc_tracked', merged);
+    save('tc_tracked_deleted', mergedDeletions);
+    set({ tracked: merged, trackedDeletions: mergedDeletions });
+  },
 
   /* ═══ Тема ═══ */
   theme: (() => {

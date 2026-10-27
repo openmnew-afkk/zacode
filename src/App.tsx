@@ -27,7 +27,7 @@ function App() {
   const [showSplash, setShowSplash] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, setTelegramUsername, syncCloudState } = useStore();
+  const { theme, setTelegramUsername, syncCloudState, syncTrackedCloud } = useStore();
   const { currentTrack } = useMusicStore();
 
   /* ═══ Пользовательское соглашение: обязательное при первом запуске ═══ */
@@ -49,6 +49,12 @@ function App() {
   useEffect(() => {
     syncCloudState?.().catch(() => {});
   }, [syncCloudState]);
+
+  useEffect(() => {
+    syncTrackedCloud().catch((error: unknown) => {
+      console.warn('Could not restore watch statuses from Telegram CloudStorage:', error);
+    });
+  }, [syncTrackedCloud]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

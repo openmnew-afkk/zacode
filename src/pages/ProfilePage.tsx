@@ -114,7 +114,7 @@ const ProfilePage: React.FC = () => {
             </div>
           ),
           label: 'Музыка ZENOVA',
-          sub: 'Русские и мировые хиты · Моя волна',
+          sub: 'Русские и мировые хиты · ZENOVA Пульс',
           action: () => navigate('/music'),
         },
         {
