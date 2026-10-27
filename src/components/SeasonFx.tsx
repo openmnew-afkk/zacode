@@ -12,7 +12,7 @@
  *  «снег/эффекты выключены» (localStorage zenova_fx_off).
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './SeasonFx.css';
 
 type FxSeason = 'winter' | 'spring' | 'summer' | 'autumn' | 'none';
@@ -36,12 +36,28 @@ interface Particle {
 
 const SeasonFx: React.FC<Props> = ({ season }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [enabled, setEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_fx_off') !== '1';
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
-    if (season === 'none') return;
-    try {
-      if (localStorage.getItem('zenova_fx_off') === '1') return;
-    } catch {}
+    const updateEnabled = () => {
+      try {
+        setEnabled(localStorage.getItem('zenova_fx_off') !== '1');
+      } catch {
+        setEnabled(true);
+      }
+    };
+    window.addEventListener('zenova-fx-change', updateEnabled);
+    return () => window.removeEventListener('zenova-fx-change', updateEnabled);
+  }, []);
+
+  useEffect(() => {
+    if (season === 'none' || !enabled) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -83,12 +99,36 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
     let t = 0;
 
     const drawWinter = (f: Particle) => {
+      const length = f.r * 1.65;
+      ctx.save();
+      ctx.translate(f.x, f.y);
+      ctx.rotate(f.rot);
+      ctx.globalAlpha = f.opacity;
+      ctx.strokeStyle = '#e8f4ff';
+      ctx.lineWidth = Math.max(0.7, f.r * 0.35);
+      ctx.lineCap = 'round';
+      ctx.shadowColor = 'rgba(186, 220, 255, 0.55)';
+      ctx.shadowBlur = f.r * 1.2;
       ctx.beginPath();
-      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(226, 240, 253, ${f.opacity})`;
-      ctx.shadowColor = 'rgba(186, 230, 253, 0.8)';
-      ctx.shadowBlur = f.r * 2.2;
-      ctx.fill();
+      for (let arm = 0; arm < 6; arm += 1) {
+        const angle = (arm * Math.PI) / 3;
+        const x = Math.cos(angle) * length;
+        const y = Math.sin(angle) * length;
+        const branchX = x * 0.65;
+        const branchY = y * 0.65;
+        ctx.moveTo(0, 0);
+        ctx.lineTo(x, y);
+        for (const direction of [-1, 1]) {
+          const branchAngle = angle + direction * 0.8;
+          ctx.moveTo(branchX, branchY);
+          ctx.lineTo(
+            branchX - Math.cos(branchAngle) * length * 0.38,
+            branchY - Math.sin(branchAngle) * length * 0.38
+          );
+        }
+      }
+      ctx.stroke();
+      ctx.restore();
     };
 
     const drawPetal = (f: Particle) => {
@@ -178,9 +218,9 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
       window.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [season]);
+  }, [season, enabled]);
 
-  if (season === 'none') return null;
+  if (season === 'none' || !enabled) return null;
 
   return (
     <>

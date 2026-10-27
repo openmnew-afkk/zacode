@@ -279,27 +279,29 @@ const MusicPage: React.FC = () => {
       showToast('🌊 Подбираем треки для Волны…');
       return;
     }
-    // Пул: все загруженные плейлисты + текущий отображаемый (без радио)
-    const allPool = Object.values(playlists).flat().filter((t) => !t.isLiveRadio);
+    // У обычного запуска очередь соответствует выбранному экрану; «Удиви меня» — всему кэшу.
     const localPool = displayedTracks.filter((t) => !t.isLiveRadio);
-    const combined = [...localPool, ...allPool];
+    const combined = surprise
+      ? [...localPool, ...Object.values(playlists).flat().filter((t) => !t.isLiveRadio)]
+      : localPool;
     const seen = new Set<string>();
-    const pool = combined.filter((t) => {
-      if (seen.has(t.id)) return false;
-      seen.add(t.id);
+    const pool = combined.filter((track) => {
+      if (seen.has(track.id)) return false;
+      seen.add(track.id);
       return true;
     });
     if (pool.length > 0) {
       const idx = Math.floor(Math.random() * pool.length);
       const first = pool[idx];
-      const queue = surprise ? pool : displayedTracks;
-      setTrack(first as any, queue as any[], Math.max(0, queue.indexOf(first)));
+      setTrack(first as any, pool as any[], idx);
       setPlaying(true);
       showToast(
         surprise
           ? `🎲 Удиви меня: ${first.artist} — ${first.title}`
           : `🌊 Моя Волна: ${first.artist} — ${first.title}`
       );
+    } else {
+      showToast('В этом списке пока нет доступных треков');
     }
   };
 
@@ -374,13 +376,15 @@ const MusicPage: React.FC = () => {
             >
               🎲
             </button>
-            <div
+            <button
+              type="button"
               className={`ym-header__equalizer ${isPlaying ? 'playing' : ''}`}
               onClick={() => currentTrack && setExpanded(true)}
-              title={currentTrack ? 'Развернуть плеер' : undefined}
+              aria-label={currentTrack ? 'Открыть плеер' : 'Плеер не запущен'}
+              disabled={!currentTrack}
             >
               <span /><span /><span /><span />
-            </div>
+            </button>
           </div>
         </div>
 

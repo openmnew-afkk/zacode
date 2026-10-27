@@ -38,6 +38,11 @@
   flex: 1;
   text-align: center;
   cursor: pointer;
+  border: 0;
+  padding: 2px 4px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
   -webkit-tap-highlight-color: transparent;
 }
 .fav-stat:active {
@@ -92,10 +97,10 @@
   white-space: nowrap;
 }
 .fav-tab.active {
-  background: #ffffff;
-  color: #06050a;
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 5px 16px var(--accent-glow);
 }
 .fav-tab__count {
   font-size: 10px;
@@ -106,7 +111,7 @@
   color: inherit;
 }
 .fav-tab.active .fav-tab__count {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Grid */
@@ -427,4 +432,28 @@
   margin: 0;
   max-width: 260px;
   line-height: 1.45;
+}
+
+@media (min-width: 600px) {
+  .fav-page {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+
+  .fav-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px 16px;
+  }
+}
+
+@media (max-width: 360px) {
+  .fav-tabs-wrap {
+    padding-inline: 10px;
+  }
+
+  .fav-tab {
+    gap: 3px;
+    padding-inline: 2px;
+    font-size: 10.5px;
+  }
 }

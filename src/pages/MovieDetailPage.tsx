@@ -505,7 +505,8 @@ const MovieDetailPage: React.FC = () => {
               <button
                 className={`dp-fav ${inList ? 'dp-fav--on' : ''}`}
                 onClick={handleFav}
-                aria-label="Буду смотреть"
+                aria-label={inList ? 'Убрать из списка' : 'Добавить в планы'}
+                aria-pressed={inList}
               >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path

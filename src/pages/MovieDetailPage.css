@@ -1117,9 +1117,9 @@
 
 .dp-hero2__backdrop {
   position: relative;
-  height: clamp(320px, 46vh, 400px);
+  height: clamp(340px, 52svh, 520px);
   background-size: cover;
-  background-position: center 20%;
+  background-position: center 24%;
   display: flex;
   align-items: flex-end;
   overflow: hidden;
@@ -1147,8 +1147,10 @@
 .dp-hero2__head {
   position: relative;
   z-index: 2;
-  padding: 0 18px 96px;   /* запас под постер, который наезжает снизу */
+  padding: 0 18px 120px;
   width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
   box-sizing: border-box;
 }
 
@@ -1186,13 +1188,15 @@
 
 .dp-hero2__title {
   font-family: var(--font-display);
-  font-size: clamp(24px, 6.4vw, 32px);
+  max-width: 760px;
+  font-size: clamp(25px, 6.4vw, 44px);
   font-weight: 900;
-  letter-spacing: -0.5px;
-  line-height: 1.12;
+  letter-spacing: -0.04em;
+  line-height: 1.04;
   color: #ffffff;
   text-shadow: 0 3px 24px rgba(0, 0, 0, 0.65);
   margin: 0 0 4px;
+  overflow-wrap: anywhere;
 }
 
 .dp-hero2__orig {
@@ -1208,17 +1212,19 @@
 /* Тело: постер наложен на бэкдроп + справа жанры и кнопки */
 .dp-hero2__body {
   display: flex;
-  gap: 16px;
+  gap: clamp(14px, 3vw, 28px);
   align-items: flex-start;
-  padding: 0 16px;
-  margin-top: -92px;
+  width: 100%;
+  max-width: 1080px;
+  padding: 0 clamp(16px, 4vw, 36px);
+  margin: -108px auto 0;
   position: relative;
   z-index: 3;
 }
 
 .dp-hero2__poster-wrap {
   flex-shrink: 0;
-  width: 118px;
+  width: clamp(112px, 30vw, 172px);
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border-light, rgba(255,255,255,0.12));
@@ -1235,10 +1241,10 @@
 .dp-hero2__side {
   flex: 1;
   min-width: 0;
-  padding-top: 96px;
+  padding-top: clamp(72px, 18vw, 96px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .dp-hero2__genres {
@@ -1247,24 +1253,21 @@
   gap: 5px;
 }
 
-[data-theme='light'] .dp-hero2__side {
-  padding-top: 80px;
-}
-
-/* Сезонная снежная шапка на постере (зима) */
+/* Лёгкий снег на верхнем крае постера, без тяжёлых отдельных «шапок». */
 [data-season='winter'] .dp-hero2__poster-wrap::after {
   content: '';
   position: absolute;
-  top: -2px;
-  left: -8px;
-  right: -8px;
-  height: 16px;
-  border-radius: 0 0 999px 999px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 19px;
   background:
-    radial-gradient(14px 10px at 24% 9px, #fff 98%, transparent),
-    radial-gradient(18px 13px at 55% 6px, #f8fafc 98%, transparent),
-    radial-gradient(13px 9px at 84% 10px, #fff 98%, transparent);
-  box-shadow: 0 2px 8px rgba(186, 230, 253, 0.6);
+    radial-gradient(18px 9px at 10% 7px, #fff 96%, transparent),
+    radial-gradient(22px 10px at 34% 5px, #f8fbff 96%, transparent),
+    radial-gradient(20px 9px at 62% 7px, #fff 96%, transparent),
+    radial-gradient(17px 9px at 90% 6px, #f8fbff 96%, transparent),
+    linear-gradient(180deg, rgba(255,255,255,0.95) 0 4px, rgba(224,242,254,0.55) 8px, transparent 100%);
+  filter: drop-shadow(0 2px 3px rgba(186, 230, 253, 0.32));
   pointer-events: none;
 }
 
@@ -1359,3 +1362,41 @@
 
 [data-season='winter'] .dp-rec__poster-wrap,
 [data-season='winter'] .dp-rec { position: relative; }
+
+[data-season='winter'] .dp-rec::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 1px auto auto 0;
+  width: 92px;
+  height: 13px;
+  background:
+    radial-gradient(14px 7px at 10% 5px, #fff 96%, transparent),
+    radial-gradient(18px 8px at 38% 4px, #f8fbff 96%, transparent),
+    radial-gradient(15px 7px at 69% 5px, #fff 96%, transparent),
+    linear-gradient(180deg, rgba(255,255,255,0.88) 0 3px, transparent 100%);
+  pointer-events: none;
+}
+
+@media (min-width: 760px) {
+  .dp-hero2__body {
+    margin-top: -124px;
+  }
+
+  .dp-hero2__poster-wrap {
+    width: 172px;
+    border-radius: 22px;
+  }
+
+  .dp-hero2__side {
+    padding-top: 100px;
+  }
+
+  .dp-section--card,
+  .dp-section--recs,
+  .dp-details {
+    width: min(calc(100% - 72px), 1008px);
+    margin-right: auto;
+    margin-left: auto;
+  }
+}

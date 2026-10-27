@@ -17,15 +17,25 @@ const FavoritesPage: React.FC = () => {
   const [tab, setTab] = useState<WatchStatus | 'want'>('want');
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
+  const allTracked = Object.values(tracked);
+  const wantMovies = new Map<string, Movie>();
+  favorites.forEach((movie) => {
+    const item = tracked[movie.id];
+    if (!item || item.status === 'want') wantMovies.set(movie.id, movie);
+  });
+  allTracked
+    .filter((item) => item.status === 'want')
+    .sort((a, b) => b.addedAt - a.addedAt)
+    .forEach((item) => wantMovies.set(item.movie.id, item.movie));
+
   const items: Movie[] =
     tab === 'want'
-      ? favorites
-      : Object.values(tracked)
-          .filter((t) => t.status === tab)
+      ? Array.from(wantMovies.values())
+      : allTracked
+          .filter((item) => item.status === tab)
           .sort((a, b) => b.addedAt - a.addedAt)
-          .map((t) => t.movie);
+          .map((item) => item.movie);
 
-  const allTracked = Object.values(tracked);
   const watchedCount = allTracked.filter((t) => t.status === 'watched').length;
   const watchingCount = allTracked.filter((t) => t.status === 'watching').length;
 
@@ -39,7 +49,7 @@ const FavoritesPage: React.FC = () => {
 
   const handleSetStatus = (e: React.MouseEvent, movie: Movie, status: WatchStatus) => {
     e.stopPropagation();
-    setTrackedStatus(movie, status);
+    if (tracked[movie.id]?.status !== status) setTrackedStatus(movie, status);
     if (tab === 'want') {
       removeFavorite(movie.id);
     }
@@ -50,6 +60,8 @@ const FavoritesPage: React.FC = () => {
     e.stopPropagation();
     if (tab === 'want') {
       removeFavorite(movieId);
+      const item = tracked[movieId];
+      if (item?.status === 'want') setTrackedStatus(item.movie, null);
     } else {
       const item = tracked[movieId];
       if (item) setTrackedStatus(item.movie, null);
@@ -67,20 +79,20 @@ const FavoritesPage: React.FC = () => {
 
       {/* Summary stats */}
       <div className="fav-stats">
-        <div className="fav-stat" onClick={() => setTab('watched')}>
+        <button className="fav-stat" type="button" onClick={() => setTab('watched')}>
           <span className="fav-stat__val">{watchedCount}</span>
           <span className="fav-stat__label">Просмотрено</span>
-        </div>
+        </button>
         <div className="fav-stat-div" />
-        <div className="fav-stat" onClick={() => setTab('watching')}>
+        <button className="fav-stat" type="button" onClick={() => setTab('watching')}>
           <span className="fav-stat__val">{watchingCount}</span>
           <span className="fav-stat__label">Смотрю сейчас</span>
-        </div>
+        </button>
         <div className="fav-stat-div" />
-        <div className="fav-stat" onClick={() => setTab('want')}>
-          <span className="fav-stat__val">{favorites.length}</span>
+        <button className="fav-stat" type="button" onClick={() => setTab('want')}>
+          <span className="fav-stat__val">{wantMovies.size}</span>
           <span className="fav-stat__label">В планах</span>
-        </div>
+        </button>
       </div>
 
       {/* Apple style Segmented Tabs */}
@@ -89,8 +101,8 @@ const FavoritesPage: React.FC = () => {
           {TABS.map((t) => {
             const count =
               t.id === 'want'
-                ? favorites.length
-                : Object.values(tracked).filter((x) => x.status === t.id).length;
+                ? wantMovies.size
+                : allTracked.filter((item) => item.status === t.id).length;
             const active = tab === t.id;
             return (
               <button
@@ -100,6 +112,7 @@ const FavoritesPage: React.FC = () => {
                   setTab(t.id);
                   setSelectedMovie(null);
                 }}
+                aria-pressed={active}
               >
                 <span>{t.label}</span>
                 {count > 0 && <span className="fav-tab__count">{count}</span>}

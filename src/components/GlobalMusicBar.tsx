@@ -215,6 +215,7 @@ const GlobalMusicBar: React.FC = () => {
 
   const posFromEvent = (e: React.PointerEvent<HTMLDivElement>): number => {
     const rect = e.currentTarget.getBoundingClientRect();
+    if (!rect.width) return 0;
     const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
     return ratio * duration;
   };
@@ -242,6 +243,31 @@ const GlobalMusicBar: React.FC = () => {
     const pos = posFromEvent(e);
     setProgress(pos);
     audioEngine.seek(pos);
+  };
+
+  const handleSeekKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isLive || !duration || !isFinite(duration)) return;
+    let next = progress;
+    switch (e.key) {
+      case 'ArrowRight':
+        next += e.shiftKey ? 15 : 5;
+        break;
+      case 'ArrowLeft':
+        next -= e.shiftKey ? 15 : 5;
+        break;
+      case 'Home':
+        next = 0;
+        break;
+      case 'End':
+        next = duration;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    next = Math.max(0, Math.min(duration, next));
+    setProgress(next);
+    audioEngine.seek(next);
   };
 
   const art = currentTrack.artwork && !imgError ? currentTrack.artwork : '';
@@ -323,11 +349,15 @@ const GlobalMusicBar: React.FC = () => {
             onPointerMove={handleSeekPointerMove}
             onPointerUp={handleSeekPointerUp}
             onPointerCancel={handleSeekPointerUp}
+            onKeyDown={handleSeekKeyDown}
             role="slider"
             aria-label="Перемотка трека"
+            aria-disabled={isLive || !duration}
             aria-valuemin={0}
             aria-valuemax={Math.round(duration) || 0}
             aria-valuenow={Math.round(progress)}
+            aria-valuetext={`${fmt(progress)} из ${fmt(duration)}`}
+            tabIndex={!isLive && duration > 0 && isFinite(duration) ? 0 : -1}
           >
             <div className="gfull__seek-track">
               <div className="gfull__seek-fill" style={{ width: `${pct}%` }}>
@@ -358,7 +388,7 @@ const GlobalMusicBar: React.FC = () => {
           <button className="gfull__ctrl" onClick={prevTrack} aria-label="Предыдущий">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
           </button>
-          <button className="gfull__play" onClick={() => setPlaying(!isPlaying)} aria-label="Play/Pause">
+          <button className="gfull__play" onClick={() => setPlaying(!isPlaying)} aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}>
             {isPlaying ? (
               <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             ) : (
@@ -504,7 +534,7 @@ const GlobalMusicBar: React.FC = () => {
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
             </svg>
           </button>
-          <button className="gbar__btn gbar__btn--play" onClick={() => setPlaying(!isPlaying)} aria-label="Play/Pause">
+          <button className="gbar__btn gbar__btn--play" onClick={() => setPlaying(!isPlaying)} aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}>
             {isPlaying ? (
               <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             ) : (

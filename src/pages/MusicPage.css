@@ -98,6 +98,11 @@
   transform: scale(0.92);
 }
 
+.ym-header__equalizer:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
 .ym-header__equalizer span {
   width: 3px;
   border-radius: 2px;

@@ -1,116 +1,137 @@
-/* ═══════════════════════════════════════════════════════════════
-   VELORA SPLASH SCREEN — MINIMALIST LUXURY (Apple / Netflix Style)
-   ═══════════════════════════════════════════════════════════════ */
-
 .sp {
   position: fixed;
   inset: 0;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
   z-index: 99999;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #07060b;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  color: #fff;
+  background:
+    radial-gradient(ellipse 75% 48% at 50% 42%, rgba(87, 42, 133, 0.22), transparent 72%),
+    radial-gradient(ellipse 95% 70% at 50% 100%, rgba(244, 63, 94, 0.08), transparent 60%),
+    #08070d;
   transition: opacity 0.35s ease, transform 0.35s ease;
   user-select: none;
-  overflow: hidden;
+}
+
+.sp::before,
+.sp::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+
+.sp::before {
+  inset: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.045);
+  border-radius: 32px;
+}
+
+.sp::after {
+  width: min(94vw, 560px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(255, 255, 255, 0.035);
+  border-radius: 50%;
 }
 
 .sp--fade {
   opacity: 0;
-  transform: scale(1.04);
+  transform: scale(1.025);
   pointer-events: none;
 }
 
-/* Мягкий рассеянный свет за эмблемой */
 .sp__ambient {
   position: absolute;
-  width: 380px;
-  height: 380px;
+  width: min(85vw, 440px);
+  aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(168, 85, 247, 0.28) 0%,
-    rgba(244, 63, 94, 0.12) 40%,
-    transparent 70%
-  );
-  filter: blur(60px);
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25), rgba(244, 63, 94, 0.08) 42%, transparent 72%);
+  filter: blur(28px);
   pointer-events: none;
-  animation: spGlow 3s ease-in-out infinite alternate;
 }
 
-@keyframes spGlow {
-  0% { transform: scale(0.9); opacity: 0.6; }
-  100% { transform: scale(1.15); opacity: 0.95; }
-}
-
-/* Центральный блок */
 .sp__container {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
+  padding: 32px;
 }
 
 .sp__emblem-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: spEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes spEnter {
-  from { opacity: 0; transform: scale(0.85); }
-  to { opacity: 1; transform: scale(1); }
+  display: grid;
+  width: 132px;
+  height: 132px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 38px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.015));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: spEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .sp__brand {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  animation: spEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+  gap: 9px;
+  animation: spEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
 }
 
 .sp__title {
   margin: 0;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: 12px;
-  padding-left: 12px;
-  color: #ffffff;
+  padding-left: 0.22em;
+  color: #fff;
+  font-size: clamp(30px, 8vw, 38px);
+  font-weight: 760;
+  letter-spacing: 0.22em;
   line-height: 1;
-  text-shadow: 0 0 24px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 8px 34px rgba(255, 255, 255, 0.16);
 }
 
 .sp__subtitle {
   margin: 0;
+  color: rgba(235, 226, 245, 0.62);
   font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 4px;
-  color: rgba(255, 255, 255, 0.4);
-  text-transform: uppercase;
+  font-weight: 650;
+  letter-spacing: 0.2em;
 }
 
-/* Ультра-тонкий аккуратный прогресс-бар */
 .sp__track {
-  width: 140px;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  width: 164px;
+  height: 3px;
+  margin-top: 8px;
   overflow: hidden;
-  margin-top: 6px;
-  animation: spEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.1);
+  animation: spEnter 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
 }
 
 .sp__bar {
   height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #a855f7, #fb7185, #ffffff);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.8);
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a78bfa, #fb7185, #fff);
+  box-shadow: 0 0 14px rgba(251, 113, 133, 0.55);
   transition: width 0.12s linear;
+}
+
+@keyframes spEnter {
+  from { opacity: 0; transform: translateY(10px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp,
+  .sp__emblem-wrap,
+  .sp__brand,
+  .sp__track {
+    animation: none;
+    transition-duration: 0.01ms;
+  }
 }

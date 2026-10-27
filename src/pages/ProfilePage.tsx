@@ -51,13 +51,7 @@ const ProfilePage: React.FC = () => {
     const next = !fxOff;
     setFxOff(next);
     try { localStorage.setItem('zenova_fx_off', next ? '1' : '0'); } catch {}
-    // Мгновенно показать/скрыть эффекты без перезагрузки
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
-    if (next) {
-      document.querySelector('.season-fx-canvas')?.remove();
-    } else {
-      window.location.reload();
-    }
   };
 
   const daysLeft = premiumExpiry

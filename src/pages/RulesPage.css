@@ -1,8 +1,9 @@
 .rules {
-  min-height: 100vh;
-  padding: 0 0 100px;
+  min-height: 100svh;
+  padding: 0 0 calc(var(--tabbar-h) + 24px);
   background: #090810;
   color: #fff;
+  overflow-wrap: anywhere;
 }
 
 .rules-header {
@@ -43,6 +44,7 @@
 
 .rules-header__text {
   flex: 1;
+  min-width: 0;
 }
 
 .rules-title {
@@ -61,6 +63,7 @@
 .rules-content {
   padding: 16px;
   max-width: 720px;
+  min-width: 0;
   margin: 0 auto;
 }
 

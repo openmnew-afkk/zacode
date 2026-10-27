@@ -101,14 +101,20 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, mandato
 
   return (
     <div className="rules-modal-overlay" onClick={mandatory ? undefined : onClose}>
-      <div className="rules-modal-sheet" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="rules-modal-sheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="rules-modal-title"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="rules-modal-handle-bar">
           <div className="rules-modal-handle" />
         </div>
 
         <header className="rules-modal-header">
           <div className="rules-modal-header__text">
-            <h2 className="rules-modal-title">Пользовательское соглашение</h2>
+            <h2 id="rules-modal-title" className="rules-modal-title">Пользовательское соглашение</h2>
             <p className="rules-modal-subtitle">Правовой статус ZENOVA · ст. 1253.1 ГК РФ</p>
           </div>
           {!mandatory && (
@@ -142,7 +148,10 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, mandato
               Для вопросов правообладателей и Notice & Takedown: бот поддержки в Telegram или e-mail: legal@zenova-media.app. Запросы обрабатываются в течение 24 часов.
             </p>
           </div>
+        </div>
 
+        <footer className="rules-modal-footer">
+          <p>© {new Date().getFullYear()} ZENOVA Media Client. Все права защищены.</p>
           {mandatory && (
             <button
               className="rules-modal-accept"
@@ -154,11 +163,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, mandato
               Принимаю условия соглашения
             </button>
           )}
-
-          <div className="rules-modal-footer">
-            <p>© {new Date().getFullYear()} ZENOVA Media Client. Все права защищены.</p>
-          </div>
-        </div>
+        </footer>
       </div>
     </div>
   );
