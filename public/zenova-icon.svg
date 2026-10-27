@@ -1,52 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="glass" x1="45" y1="28" x2="470" y2="482" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#29233a"/>
-      <stop offset=".5" stop-color="#13111d"/>
-      <stop offset="1" stop-color="#08090e"/>
+    <linearGradient id="icon-bg" x1="52" y1="40" x2="462" y2="478" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#211d30"/>
+      <stop offset=".52" stop-color="#100f19"/>
+      <stop offset="1" stop-color="#07080d"/>
     </linearGradient>
-    <linearGradient id="rim" x1="88" y1="90" x2="423" y2="420" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#9be9ff"/>
-      <stop offset=".45" stop-color="#d5a5ff"/>
-      <stop offset=".76" stop-color="#ff93b9"/>
-      <stop offset="1" stop-color="#ffe2a8"/>
+    <linearGradient id="icon-rim" x1="92" y1="72" x2="427" y2="428" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8eeaff"/>
+      <stop offset=".48" stop-color="#c5a5ff"/>
+      <stop offset=".78" stop-color="#ff91b6"/>
+      <stop offset="1" stop-color="#ffe4a8"/>
     </linearGradient>
-    <linearGradient id="porcelain" x1="158" y1="173" x2="352" y2="348" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#fffaf4"/>
-      <stop offset=".58" stop-color="#e1dbe9"/>
-      <stop offset="1" stop-color="#a8a2bb"/>
+    <linearGradient id="icon-mask" x1="152" y1="90" x2="365" y2="415" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fffdf8"/>
+      <stop offset=".58" stop-color="#e6e1ed"/>
+      <stop offset="1" stop-color="#b9b2c7"/>
     </linearGradient>
-    <linearGradient id="edge" x1="178" y1="198" x2="340" y2="316" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#f8c7d7"/>
-      <stop offset=".5" stop-color="#d4b8ff"/>
-      <stop offset="1" stop-color="#8feaff"/>
-    </linearGradient>
-    <radialGradient id="aura" cx="0" cy="0" r="1" gradientTransform="matrix(0 205 -205 0 256 255)" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#b66cff" stop-opacity=".25"/>
-      <stop offset="1" stop-color="#b66cff" stop-opacity="0"/>
+    <radialGradient id="icon-aura" cx="0" cy="0" r="1" gradientTransform="matrix(0 203 -203 0 256 248)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a86cff" stop-opacity=".29"/>
+      <stop offset="1" stop-color="#a86cff" stop-opacity="0"/>
     </radialGradient>
-    <filter id="glow" x="48" y="46" width="416" height="420" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-      <feGaussianBlur stdDeviation="15"/>
+    <filter id="icon-glow" x="48" y="46" width="416" height="420" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="13"/>
     </filter>
   </defs>
-  <rect x="18" y="18" width="476" height="476" rx="142" fill="url(#glass)"/>
-  <rect x="19.5" y="19.5" width="473" height="473" rx="140.5" stroke="#fff" stroke-opacity=".14" stroke-width="3"/>
-  <circle cx="256" cy="252" r="185" fill="url(#aura)"/>
-  <circle cx="256" cy="256" r="151" stroke="url(#rim)" stroke-opacity=".72" stroke-width="13" filter="url(#glow)"/>
-  <circle cx="256" cy="256" r="151" stroke="url(#rim)" stroke-opacity=".8" stroke-width="3"/>
-  <circle cx="256" cy="256" r="132" stroke="#fff" stroke-opacity=".1" stroke-width="2"/>
+  <rect x="18" y="18" width="476" height="476" rx="142" fill="url(#icon-bg)"/>
+  <rect x="19.5" y="19.5" width="473" height="473" rx="140.5" stroke="#fff" stroke-opacity=".15" stroke-width="3"/>
+  <circle cx="256" cy="248" r="190" fill="url(#icon-aura)"/>
+  <circle cx="256" cy="244" r="169" stroke="url(#icon-rim)" stroke-opacity=".74" stroke-width="12" filter="url(#icon-glow)"/>
+  <circle cx="256" cy="244" r="169" stroke="url(#icon-rim)" stroke-opacity=".8" stroke-width="3"/>
+  <circle cx="256" cy="244" r="151" stroke="#fff" stroke-opacity=".11" stroke-width="2"/>
 
-  <path d="M132 235c21-43 59-67 103-67h42c44 0 82 24 103 67-22 8-42 23-59 44-19-13-40-19-65-19s-46 6-65 19c-17-21-37-36-59-44Z" fill="url(#porcelain)"/>
-  <path d="M133 235c21-43 59-67 103-67h21v94c-25 0-46 6-66 19-16-21-36-36-58-44Z" fill="#fff" fill-opacity=".27"/>
-  <path d="m171 224 66-17-22 31-32 8-12-22Zm170 0-66-17 22 31 32 8 12-22Z" fill="#171724"/>
-  <path d="m250 218 6 36 6-36" fill="none" stroke="#806c91" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M185 225c19-14 43-21 71-21s52 7 71 21" fill="none" stroke="#fff" stroke-opacity=".72" stroke-width="4" stroke-linecap="round"/>
-  <path d="M175 279c20 13 44 20 81 20s61-7 81-20" fill="none" stroke="url(#edge)" stroke-width="5" stroke-linecap="round"/>
-  <path d="M211 291c13 9 28 13 45 13s32-4 45-13" fill="none" stroke="#766a87" stroke-opacity=".68" stroke-width="3" stroke-linecap="round"/>
-  <path d="m204 233 19 11m85-11-19 11" stroke="#fff" stroke-opacity=".42" stroke-width="2" stroke-linecap="round"/>
-  <path d="M255 316h2" stroke="#ffe0a2" stroke-width="3" stroke-linecap="round"/>
-  <text x="256" y="382" fill="#F4ECFF" fill-opacity=".92" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="7" text-anchor="middle">ZENOVA</text>
-  <circle cx="375" cy="148" r="7" fill="#fff4dd"/>
-  <circle cx="375" cy="148" r="17" stroke="#a9eaff" stroke-opacity=".55" stroke-width="2"/>
-  <path d="M94 118c43-45 103-71 170-77" stroke="#fff" stroke-opacity=".16" stroke-linecap="round" stroke-width="3"/>
+  <path d="M256 72c-83 0-139 57-139 143v37c0 77 48 137 139 185 91-48 139-108 139-185v-37c0-86-56-143-139-143Z" fill="url(#icon-mask)"/>
+  <path d="M256 72c-83 0-139 57-139 143v37c0 77 48 137 139 185V72Z" fill="#fff" fill-opacity=".2"/>
+  <path d="m153 207 89-27-32 48-43 16-14-37Zm206 0-89-27 32 48 43 16 14-37Z" fill="#171521"/>
+  <path d="M190 211c20-17 42-25 66-25s46 8 66 25" fill="none" stroke="#fff" stroke-opacity=".76" stroke-width="5" stroke-linecap="round"/>
+  <path d="m237 256 19-16 19 16-19 20-19-20Z" fill="#83728e"/>
+  <path d="M215 302c13-14 26-20 41-20s28 6 41 20c-11 24-24 36-41 36s-30-12-41-36Z" fill="#211b2a"/>
+  <path d="M226 304c9-7 19-10 30-10s21 3 30 10" fill="none" stroke="#ff9fc4" stroke-opacity=".82" stroke-width="3" stroke-linecap="round"/>
+  <path d="M178 243c23 13 48 20 78 20s55-7 78-20" fill="none" stroke="url(#icon-rim)" stroke-opacity=".65" stroke-width="2"/>
+
+  <circle cx="384" cy="116" r="7" fill="#fff4dd"/>
+  <circle cx="384" cy="116" r="17" stroke="#a9eaff" stroke-opacity=".58" stroke-width="2"/>
+  <path d="M94 118c43-45 103-71 170-77" stroke="#fff" stroke-opacity=".17" stroke-linecap="round" stroke-width="3"/>
+  <text x="256" y="456" fill="#F4ECFF" fill-opacity=".92" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="7" text-anchor="middle">ZENOVA</text>
 </svg>
