@@ -480,12 +480,14 @@ const MusicPage: React.FC = () => {
       {tab === 'wave' && !searchMode && (
         <section className={`ym-wave-card ${isPlaying ? 'is-playing' : ''}`}>
           <div className="ym-wave-card__visual" aria-hidden="true">
-            <div className="ym-wave-card__orbit ym-wave-card__orbit--outer" />
-            <div className="ym-wave-card__orbit ym-wave-card__orbit--inner" />
-            <div className="ym-wave-sphere" style={{ background: currentMoodObj.gradient }}>
-              <div className="ym-wave-sphere__shine" />
-              <div className="ym-wave-sphere__bars">
-                {Array.from({ length: 25 }, (_, index) => <i key={index} />)}
+            <div className="ym-wave-card__art" style={{ background: currentMoodObj.gradient }}>
+              {currentTrack?.artwork ? (
+                <img src={currentTrack.artwork} alt="" />
+              ) : (
+                <span className="ym-wave-card__art-mark">✦</span>
+              )}
+              <div className="ym-wave-card__spectrum">
+                {Array.from({ length: 17 }, (_, index) => <i key={index} />)}
               </div>
             </div>
           </div>
@@ -495,9 +497,9 @@ const MusicPage: React.FC = () => {
               {currentMoodObj.label}
             </span>
             <p className="ym-wave-card__kicker">
-              {isPlaying ? 'СЕЙЧАС В ЭФИРЕ' : currentTrack ? 'ПОСЛЕДНИЙ ТРЕК' : 'ВАШ МУЗЫКАЛЬНЫЙ ПОТОК'}
+              {isPlaying ? 'СЕЙЧАС В ЭФИРЕ' : currentTrack ? 'ПОСЛЕДНИЙ ТРЕК' : 'МУЗЫКА ПОД НАСТРОЕНИЕ'}
             </p>
-            <h2 className="ym-wave-card__title">{currentTrack?.title || 'Музыка под ваше настроение'}</h2>
+            <h2 className="ym-wave-card__title">{currentTrack?.title || 'ZENOVA Пульс'}</h2>
             <p className="ym-wave-card__desc">
               {currentTrack?.artist || currentMoodObj.description}
             </p>

@@ -1432,3 +1432,150 @@
     animation: none;
   }
 }
+
+.ym-wave-card {
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: clamp(14px, 3vw, 22px);
+  min-height: 154px;
+  padding: clamp(15px, 3vw, 22px);
+  border-radius: 23px;
+}
+
+.ym-wave-card__visual {
+  width: 82px;
+  aspect-ratio: 1;
+}
+
+.ym-wave-card__art {
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: 21px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  isolation: isolate;
+}
+
+.ym-wave-card__art::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(7, 6, 12, 0.05) 22%, rgba(7, 6, 12, 0.58));
+  content: '';
+}
+
+.ym-wave-card__art img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ym-wave-card__art-mark {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 34px;
+  filter: drop-shadow(0 3px 16px rgba(255, 255, 255, 0.55));
+}
+
+.ym-wave-card__spectrum {
+  position: absolute;
+  z-index: 2;
+  right: 12px;
+  bottom: 13px;
+  left: 12px;
+  display: flex;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.ym-wave-card__spectrum i {
+  width: 2px;
+  height: var(--bar-height, 35%);
+  border-radius: 5px;
+  background: linear-gradient(180deg, #ffe2cc, #fb7185 60%, #c084fc);
+  box-shadow: 0 0 8px rgba(251, 113, 133, 0.5);
+  transform: scaleY(0.52);
+  transform-origin: center;
+}
+
+.ym-wave-card__spectrum i:nth-child(4n + 1) { --bar-height: 42%; }
+.ym-wave-card__spectrum i:nth-child(4n + 2) { --bar-height: 76%; }
+.ym-wave-card__spectrum i:nth-child(4n + 3) { --bar-height: 54%; }
+.ym-wave-card__spectrum i:nth-child(4n) { --bar-height: 96%; }
+
+.ym-wave-card.is-playing .ym-wave-card__spectrum i {
+  animation: ym-spectrum 0.78s ease-in-out infinite alternate;
+  animation-delay: calc(var(--bar-index, 0) * -42ms);
+}
+
+.ym-wave-card__spectrum i:nth-child(5n + 1) { --bar-index: 1; }
+.ym-wave-card__spectrum i:nth-child(5n + 2) { --bar-index: 2; }
+.ym-wave-card__spectrum i:nth-child(5n + 3) { --bar-index: 3; }
+.ym-wave-card__spectrum i:nth-child(5n + 4) { --bar-index: 4; }
+.ym-wave-card__spectrum i:nth-child(5n) { --bar-index: 5; }
+
+.ym-wave-card__info {
+  min-width: 0;
+}
+
+.ym-wave-card__badge {
+  margin-bottom: 8px;
+}
+
+.ym-wave-card__kicker {
+  margin-bottom: 5px;
+  font-size: 8px;
+  letter-spacing: 0.16em;
+}
+
+.ym-wave-card__title {
+  font-size: clamp(16px, 4vw, 22px);
+  line-height: 1.15;
+  -webkit-line-clamp: 1;
+}
+
+.ym-wave-card__desc {
+  margin-top: 4px;
+  font-size: 11px;
+  -webkit-line-clamp: 1;
+}
+
+.ym-wave-card__controls {
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.ym-wave-card__play {
+  width: 38px;
+  height: 38px;
+}
+
+.ym-wave-card__surprise {
+  min-height: 36px;
+  padding-inline: 11px;
+}
+
+@media (max-width: 380px) {
+  .ym-wave-card {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 12px;
+    min-height: 140px;
+    padding: 14px;
+  }
+
+  .ym-wave-card__visual { width: 68px; }
+  .ym-wave-card__art { border-radius: 18px; }
+  .ym-wave-card__badge { margin-bottom: 6px; }
+  .ym-wave-card__title { font-size: 16px; }
+  .ym-wave-card__surprise { min-height: 34px; padding-inline: 9px; font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ym-wave-card.is-playing .ym-wave-card__spectrum i { animation: none; }
+}

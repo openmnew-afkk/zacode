@@ -118,9 +118,6 @@ const TabBar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
-  // Скрываем TabBar на странице фильма
-  if (location.pathname.startsWith('/movie/')) return null;
-
   return (
     <nav className="tab-bar">
       <div className="tab-bar__inner">
@@ -129,9 +126,11 @@ const TabBar: React.FC = () => {
           return (
             <button
               key={tab.path}
+              type="button"
               className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}`}
               onClick={() => navigate(tab.path)}
               aria-label={tab.label}
+              aria-current={active ? 'page' : undefined}
             >
               <span className="tab-bar__icon">{tab.icon(active)}</span>
               <span className="tab-bar__label">{tab.label}</span>

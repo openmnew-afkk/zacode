@@ -552,3 +552,126 @@
   text-align: left;
   line-height: 1.4;
 }
+
+/* Cinematic glass language shared with the movie-detail sheet. */
+.pf__bg {
+  background:
+    radial-gradient(ellipse 75% 34% at 50% 0%, rgba(168, 85, 247, 0.18), transparent 78%),
+    radial-gradient(ellipse 44% 34% at 0% 12%, rgba(251, 113, 133, 0.1), transparent 78%),
+    var(--bg);
+}
+
+.pf > .pf__bg { position: fixed; }
+
+.pf__card {
+  margin: 18px 14px 16px;
+  padding: 21px 18px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 27px;
+  background:
+    radial-gradient(ellipse 85% 70% at 100% 0%, rgba(168, 85, 247, 0.14), transparent 76%),
+    linear-gradient(145deg, rgba(33, 29, 42, 0.96), rgba(15, 14, 21, 0.97) 74%);
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.pf__card-shine {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 221, 202, 0.58), rgba(192, 132, 252, 0.38), transparent);
+}
+
+.pf__avatar-ring {
+  background: conic-gradient(from 220deg, #ffd8b4, #fb7185, #c084fc, #818cf8, #ffd8b4);
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.24);
+}
+
+.pf__vip-status-bar {
+  border-color: rgba(192, 132, 252, 0.2);
+  background: linear-gradient(100deg, rgba(251, 113, 133, 0.1), rgba(168, 85, 247, 0.09));
+}
+
+.pf__stats {
+  margin-inline: 14px;
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(29, 26, 37, 0.92), rgba(16, 15, 22, 0.94));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.pf__groups {
+  gap: 18px;
+  margin-inline: 14px;
+}
+
+.pf__group-title {
+  margin-left: 10px;
+  letter-spacing: 0.13em;
+}
+
+.pf__group-box {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 21px;
+  background: linear-gradient(145deg, rgba(27, 25, 34, 0.92), rgba(15, 14, 20, 0.94));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.pf__row {
+  min-height: 62px;
+  padding-inline: 14px;
+}
+
+.pf__icon-box {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.035));
+}
+
+.pf__row-content {
+  min-height: 44px;
+}
+
+.pf__history-scroll {
+  padding-top: 6px;
+}
+
+.pf__hist-poster {
+  border-radius: 14px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+}
+
+.pf__close-btn {
+  border-radius: 17px;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(168, 85, 247, 0.1));
+}
+
+.pf__row:focus-visible,
+.pf__stat:focus-visible,
+.pf__season-chip:focus-visible,
+.pf__season-toggle:focus-visible,
+.pf__vip-status-bar:focus-visible,
+.pf__hist-card:focus-visible {
+  outline: 2px solid rgba(255, 221, 202, 0.76);
+  outline-offset: -2px;
+}
+
+@media (min-width: 760px) {
+  .pf__card,
+  .pf__stats,
+  .pf__groups {
+    width: min(calc(100% - 48px), 780px);
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf__row,
+  .pf__icon-box,
+  .pf__season-chip,
+  .pf__season-toggle,
+  .pf__season-toggle__thumb {
+    transition: none;
+  }
+}

@@ -98,19 +98,13 @@
 .sp__emblem-wrap {
   position: relative;
   display: grid;
-  width: 184px;
-  height: 184px;
+  width: 196px;
+  height: 196px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.105);
-  border-radius: 52px;
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.018) 48%, rgba(168, 85, 247, 0.07)),
-    rgba(17, 13, 27, 0.76);
-  box-shadow:
-    0 32px 100px rgba(0, 0, 0, 0.55),
-    0 0 75px rgba(168, 85, 247, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.14), transparent 68%);
+  box-shadow: 0 0 80px rgba(168, 85, 247, 0.12);
   animation: spEmblemEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both, spEmblemHover 5s ease-in-out 0.8s infinite;
 }
 
@@ -124,20 +118,36 @@
 }
 
 .sp__emblem-wrap::before {
-  inset: -18px;
+  inset: 14px -20px;
   transform: rotateX(68deg) rotate(-24deg);
 }
 
 .sp__emblem-wrap::after {
-  inset: -28px;
+  inset: 2px 6px;
   border-color: rgba(251, 113, 133, 0.15);
   transform: rotateX(67deg) rotate(38deg);
 }
 
 .sp__emblem {
-  width: 112px;
-  height: 112px;
-  filter: drop-shadow(0 12px 30px rgba(168, 85, 247, 0.36));
+  position: relative;
+  z-index: 1;
+  width: 148px;
+  height: 148px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 42px;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 38px rgba(168, 85, 247, 0.28);
+}
+
+.sp__projector-beam {
+  position: absolute;
+  z-index: 0;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: conic-gradient(from 220deg, transparent 0 39%, rgba(168, 85, 247, 0.12) 48%, rgba(255, 219, 171, 0.09) 53%, transparent 62%);
+  filter: blur(12px);
+  animation: spBeam 9s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
 .sp__orbit {
@@ -227,6 +237,11 @@
   letter-spacing: 0.24em;
 }
 
+@keyframes spBeam {
+  from { transform: rotate(-12deg) scale(0.9); opacity: 0.55; }
+  to { transform: rotate(12deg) scale(1.08); opacity: 1; }
+}
+
 @keyframes spEmblemEnter {
   from { opacity: 0; transform: translateY(16px) scale(0.84) rotate(-5deg); }
   to { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
@@ -257,8 +272,9 @@
 }
 
 @media (max-width: 380px) {
-  .sp__emblem-wrap { width: 158px; height: 158px; border-radius: 46px; }
-  .sp__emblem { width: 100px; height: 100px; }
+  .sp__emblem-wrap { width: 164px; height: 164px; }
+  .sp__emblem { width: 124px; height: 124px; border-radius: 36px; }
+  .sp__projector-beam { width: 220px; height: 220px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -269,10 +285,7 @@
   .sp__emblem-wrap,
   .sp__brand,
   .sp__loading,
-  .velora-emblem--hero .velora-emblem__frame,
-  .velora-emblem--hero .velora-emblem__orbit,
-  .velora-emblem--hero .velora-emblem__halo {
+  .sp__projector-beam {
     animation: none;
-    transition-duration: 0.01ms;
   }
 }

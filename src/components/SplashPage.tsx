@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import VeloraEmblem from './VeloraEmblem';
 import './SplashPage.css';
 
 interface SplashPageProps {
@@ -51,7 +50,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
 
       <div className="sp__container">
         <div className="sp__emblem-wrap">
-          <VeloraEmblem size="hero" className="sp__emblem" />
+          <div className="sp__projector-beam" aria-hidden="true" />
+          <img className="sp__emblem" src="/zenova-icon.svg" alt="" />
           <span className="sp__orbit sp__orbit--one" />
           <span className="sp__orbit sp__orbit--two" />
         </div>
@@ -65,7 +65,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           <div className="sp__track" role="progressbar" aria-label="Загрузка" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
             <div className="sp__bar" style={{ width: `${progress}%` }} />
           </div>
-          <span className="sp__loading-label">НАСТРАИВАЕМ ПРОЕКТОР</span>
+          <span className="sp__loading-label">СЛЕДУЮЩАЯ СЦЕНА УЖЕ БЛИЗКО</span>
         </div>
       </div>
     </div>

@@ -49,6 +49,9 @@ const STATUSES: Array<{ id: WatchStatus; label: string; icon: React.ReactNode }>
   },
 ];
 
+const formatActorName = (name: string) =>
+  name.replace(/^[A-ZА-ЯЁ]{2}(?=[A-ZА-ЯЁ][a-zа-яё])/, '');
+
 /* Легальные сервисы для поиска, где посмотреть — с брендовыми иконками */
 const whereToWatch = (title: string) => [
   { name: 'JustWatch', brand: 'justwatch', url: `https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(title)}` },
@@ -450,31 +453,28 @@ const MovieDetailPage: React.FC = () => {
               <span aria-hidden="true" />
               {isSerial ? 'Сериал' : 'Полнометражный фильм'}
             </p>
-            <div className="dp-hero2__chips">
-              {movie.release_date && <span className="dp-hero2__chip">{movie.release_date.slice(0, 4)}</span>}
-              {movie.runtime ? <span className="dp-hero2__chip">{movie.runtime} мин</span> : null}
-            </div>
-            <h1 className="dp-hero2__title">{movie.title}</h1>
-            {movie.original_title && movie.original_title !== movie.title && (
-              <p className="dp-hero2__orig">{movie.original_title}</p>
-            )}
           </div>
         </div>
 
         <div className="dp-hero2__body">
           <div className="dp-hero2__poster-wrap">
             <img className="dp-hero2__poster" src={poster} alt={movie.title} />
-            {movie.vote_average > 0 && (
-              <span className="dp-hero2__score">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.5l7.1-.6L12 2z" />
-                </svg>
-                {movie.vote_average.toFixed(1)}
-              </span>
-            )}
           </div>
 
           <div className="dp-hero2__side">
+            <div className="dp-hero2__heading">
+              <h1 className="dp-hero2__title">{movie.title}</h1>
+              {movie.original_title && movie.original_title !== movie.title && (
+                <p className="dp-hero2__orig">{movie.original_title}</p>
+              )}
+            </div>
+            <div className="dp-hero2__chips">
+              {movie.release_date && <span className="dp-hero2__chip">{movie.release_date.slice(0, 4)}</span>}
+              {movie.runtime ? <span className="dp-hero2__chip">{movie.runtime} мин</span> : null}
+              {movie.vote_average > 0 && (
+                <span className="dp-hero2__chip dp-hero2__chip--rating">★ {movie.vote_average.toFixed(1)}</span>
+              )}
+            </div>
             {movie.genres && movie.genres.length > 0 && (
               <div className="dp-hero2__genres">
                 {movie.genres.slice(0, 4).map((g, i) => (
@@ -525,6 +525,29 @@ const MovieDetailPage: React.FC = () => {
                 </svg>
               </button>
             </div>
+            {movie.overview && (
+              <div className="dp-hero2__story">
+                <h2 className="dp-overview__title">Сюжет</h2>
+                <p className="dp-desc">{movie.overview}</p>
+              </div>
+            )}
+            {movie.actors?.length > 0 && (
+              <div className="dp-hero2__cast">
+                <h2 className="dp-overview__title">В ролях</h2>
+                <div className="dp-hero2__cast-list">
+                  {movie.actors.slice(0, 6).map((actor, index) => {
+                    const name = formatActorName(actor).trim();
+                    const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0] ?? '').join('');
+                    return (
+                      <div className="dp-hero2__cast-person" key={`${actor}-${index}`}>
+                        <span className="dp-hero2__cast-initials" aria-hidden="true">{initials}</span>
+                        <span className="dp-hero2__cast-name">{name}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -533,15 +556,6 @@ const MovieDetailPage: React.FC = () => {
       <div className={`dp-fav-toast ${favToastVisible ? 'dp-fav-toast--show' : ''}`}>
         {favToast}
       </div>
-
-      {movie.overview && (
-        <div className="dp-section dp-section--card">
-          <h2 className="dp-overview__title">О фильме</h2>
-          <p className="dp-desc">{movie.overview}</p>
-        </div>
-      )}
-
-
 
       {/* ── Дневник: статусы ── */}
       <div className="dp-section dp-section--card">
@@ -826,12 +840,6 @@ const MovieDetailPage: React.FC = () => {
           <div className="dp-row">
             <span className="dp-row__label">Режиссёр</span>
             <span className="dp-row__val">{movie.directors.join(', ')}</span>
-          </div>
-        )}
-        {movie.actors?.length > 0 && (
-          <div className="dp-row">
-            <span className="dp-row__label">В ролях</span>
-            <span className="dp-row__val">{movie.actors.slice(0, 5).join(', ')}</span>
           </div>
         )}
       </div>
