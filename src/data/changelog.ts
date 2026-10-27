@@ -26,6 +26,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    id: 'v3-2-1',
+    version: 'v3.2.1',
+    date: '28 октября 2026',
+    title: 'Переходы между страницами стали ровнее',
+    icon: '⬆️',
+    tags: ['Удобство', 'Исправления'],
+    changes: [
+      { kind: 'fixed', text: 'Теперь каждая страница открывается с самого верха — даже если предыдущую вы прокрутили вниз' },
+    ],
+  },
+  {
     id: 'v3-2',
     version: 'v3.2',
     date: '28 октября 2026',
