@@ -58,7 +58,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
 
         <div className="sp__brand">
           <h1 className="sp__title">ZENOVA</h1>
-          <p className="sp__subtitle">ТВОЯ ВСЕЛЕННАЯ КИНО И МУЗЫКИ</p>
+          <p className="sp__subtitle">ТВОЙ МИР · ТВОИ ИСТОРИИ</p>
         </div>
 
         <div className="sp__loading">

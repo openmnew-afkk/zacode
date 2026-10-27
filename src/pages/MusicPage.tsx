@@ -57,6 +57,11 @@ const MusicPage: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [searchExhausted, setSearchExhausted] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [waveArtworkError, setWaveArtworkError] = useState(false);
+
+  useEffect(() => {
+    setWaveArtworkError(false);
+  }, [currentTrack?.id]);
 
   /* Плейлисты полных треков (кэш по ключу «wave:настроение» / «chart»,
      догружаются страницами при прокрутке) */
@@ -479,21 +484,22 @@ const MusicPage: React.FC = () => {
       {/* ── Фирменный музыкальный визуализатор ZENOVA SOUND ── */}
       {tab === 'wave' && !searchMode && (
         <section className={`ym-wave-card ${isPlaying ? 'is-playing' : ''}`}>
-          <div className="ym-wave-card__visual" aria-hidden="true">
-            <div className="ym-wave-card__art" style={{ background: currentMoodObj.gradient }}>
-              {currentTrack?.artwork ? (
-                <img src={currentTrack.artwork} alt="" />
-              ) : (
-                <svg className="ym-wave-card__art-mark" viewBox="0 0 64 64" fill="none">
-                  <circle cx="32" cy="32" r="24" stroke="rgba(255,255,255,.55)" strokeWidth="1.2" />
-                  <circle cx="32" cy="32" r="17" stroke="rgba(255,255,255,.22)" strokeWidth="1" />
-                  <path d="M12 34h7l4-12 8 24 6-17 4 9h11" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="32" cy="32" r="2.5" fill="#ffe2cc" />
+          <div className="ym-wave-card__cover" aria-hidden="true">
+            {currentTrack?.artwork && !waveArtworkError ? (
+              <img src={currentTrack.artwork} alt="" onError={() => setWaveArtworkError(true)} />
+            ) : (
+              <div className="ym-wave-card__cover-art" style={{ background: currentMoodObj.gradient }}>
+                <svg className="ym-wave-card__art-mark" viewBox="0 0 100 100" fill="none">
+                  <circle cx="50" cy="50" r="36" stroke="rgba(255,255,255,.24)" />
+                  <circle cx="50" cy="50" r="28" stroke="rgba(255,255,255,.42)" />
+                  <path d="M20 53h13l7-21 13 39 9-27 6 14h12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="50" cy="50" r="3" fill="#ffe2cc" />
                 </svg>
-              )}
-              <div className="ym-wave-card__spectrum">
-                {Array.from({ length: 17 }, (_, index) => <i key={index} />)}
               </div>
+            )}
+            <div className="ym-wave-card__cover-shade" />
+            <div className="ym-wave-card__spectrum">
+              {Array.from({ length: 17 }, (_, index) => <i key={index} />)}
             </div>
           </div>
           <div className="ym-wave-card__info">

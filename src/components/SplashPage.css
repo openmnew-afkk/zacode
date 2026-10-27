@@ -98,13 +98,15 @@
 .sp__emblem-wrap {
   position: relative;
   display: grid;
-  width: 196px;
-  height: 196px;
+  width: 216px;
+  height: 216px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(190, 173, 255, 0.16);
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(244, 63, 94, 0.14), transparent 68%);
-  box-shadow: 0 0 80px rgba(168, 85, 247, 0.12);
+  background:
+    radial-gradient(circle, rgba(168, 85, 247, 0.17), transparent 62%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 62%);
+  box-shadow: 0 0 90px rgba(168, 85, 247, 0.17), inset 0 0 38px rgba(168, 85, 247, 0.04);
   animation: spEmblemEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both, spEmblemHover 5s ease-in-out 0.8s infinite;
 }
 
@@ -131,11 +133,12 @@
 .sp__emblem {
   position: relative;
   z-index: 1;
-  width: 148px;
-  height: 148px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 42px;
-  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 38px rgba(168, 85, 247, 0.28);
+  width: 166px;
+  height: 166px;
+  border: 1px solid rgba(255, 255, 255, 0.29);
+  border-radius: 47px;
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 42px rgba(168, 85, 247, 0.33);
+  animation: spMaskGlow 3.8s ease-in-out infinite alternate;
 }
 
 .sp__projector-beam {
@@ -188,7 +191,7 @@
   color: rgba(235, 226, 245, 0.58);
   font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.28em;
 }
 
 .sp__loading {
@@ -252,6 +255,11 @@
   50% { translate: 0 -7px; }
 }
 
+@keyframes spMaskGlow {
+  from { box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 34px rgba(168, 85, 247, 0.24); }
+  to { box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 48px rgba(251, 113, 133, 0.34); }
+}
+
 @keyframes spTextEnter {
   from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
@@ -272,8 +280,8 @@
 }
 
 @media (max-width: 380px) {
-  .sp__emblem-wrap { width: 164px; height: 164px; }
-  .sp__emblem { width: 124px; height: 124px; border-radius: 36px; }
+  .sp__emblem-wrap { width: 184px; height: 184px; }
+  .sp__emblem { width: 142px; height: 142px; border-radius: 40px; }
   .sp__projector-beam { width: 220px; height: 220px; }
 }
 
@@ -283,6 +291,7 @@
   .sp__ambient,
   .sp__starfield i,
   .sp__emblem-wrap,
+  .sp__emblem,
   .sp__brand,
   .sp__loading,
   .sp__projector-beam {

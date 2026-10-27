@@ -69,6 +69,8 @@ const NewYearPage: React.FC = () => {
 
         <div className="ny-tree-scene" aria-hidden="true">
           <div className="ny-tree-scene__halo" />
+          <div className="ny-tree-scene__globe"><span /></div>
+          <div className="ny-tree-scene__globe-base" />
           <div className="ny-tree-scene__stars">✦　·　✧　　·　✦</div>
           <svg className="ny-tree" viewBox="0 0 280 340" fill="none">
             <defs>
