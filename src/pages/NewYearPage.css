@@ -146,103 +146,36 @@
 
 .ny-tree-scene__halo {
   position: absolute;
-  width: min(68vw, 270px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(33, 155, 128, 0.3), rgba(38, 111, 121, 0.08) 49%, transparent 72%);
-  filter: blur(7px);
-}
-
-.ny-tree-scene__globe {
-  position: absolute;
-  z-index: 1;
-  top: 50%;
-  left: 50%;
-  width: min(76vw, 276px);
-  aspect-ratio: 1;
-  overflow: hidden;
-  border: 1px solid rgba(211, 241, 255, 0.43);
+  width: min(92vw, 450px);
+  aspect-ratio: 1.18;
   border-radius: 50%;
   background:
-    radial-gradient(ellipse at 34% 20%, rgba(223, 248, 255, 0.14), transparent 35%),
-    radial-gradient(ellipse at 53% 78%, rgba(61, 190, 163, 0.1), transparent 58%),
-    linear-gradient(145deg, rgba(210, 241, 255, 0.08), rgba(54, 105, 121, 0.04) 48%, rgba(214, 231, 255, 0.08));
-  box-shadow:
-    inset 10px 12px 28px rgba(235, 248, 255, 0.1),
-    inset -12px -18px 34px rgba(88, 154, 180, 0.11),
-    0 0 44px rgba(99, 216, 203, 0.11);
-  transform: translate(-50%, -50%);
+    radial-gradient(ellipse at 50% 70%, rgba(50, 224, 172, 0.25), transparent 48%),
+    radial-gradient(ellipse at 55% 40%, rgba(101, 193, 214, 0.16), transparent 64%);
+  filter: blur(20px);
 }
 
-.ny-tree-scene__globe::before {
-  position: absolute;
-  top: 7%;
-  left: 12%;
-  width: 18%;
-  height: 45%;
-  border-radius: 50%;
-  background: linear-gradient(180deg, rgba(235, 249, 255, 0.25), rgba(235, 249, 255, 0));
-  content: '';
-  filter: blur(5px);
-  transform: rotate(25deg);
-}
-
-.ny-tree-scene__globe::after {
-  position: absolute;
-  right: 3%;
-  bottom: 8%;
-  left: 3%;
-  height: 20%;
-  border-radius: 50% 50% 45% 45%;
-  background:
-    radial-gradient(ellipse at 46% 0%, rgba(248, 255, 255, 0.8), rgba(229, 244, 246, 0.18) 68%, transparent 72%);
-  content: '';
-  opacity: 0.42;
-}
-
-.ny-tree-scene__globe > span {
+.ny-tree-scene__aurora {
   position: absolute;
   top: 12%;
-  right: 12%;
-  width: 6px;
-  height: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.74);
-  border-radius: 50%;
-  background: #dff9ff;
-  box-shadow: 0 0 13px 3px rgba(211, 245, 255, 0.5);
-}
-
-.ny-tree-scene__globe-base {
-  position: absolute;
-  z-index: 3;
-  bottom: 3%;
   left: 50%;
-  width: min(56vw, 190px);
-  height: 17px;
-  border: 1px solid rgba(228, 213, 178, 0.38);
-  border-radius: 7px 7px 14px 14px;
-  background: linear-gradient(180deg, rgba(230, 206, 156, 0.72), rgba(84, 61, 55, 0.88));
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.45);
-  transform: translateX(-50%);
-}
-
-.ny-tree-scene__globe-base::before {
-  position: absolute;
-  top: -4px;
-  right: -5px;
-  left: -5px;
-  height: 5px;
-  border: 1px solid rgba(248, 228, 187, 0.55);
-  border-radius: 999px;
-  background: linear-gradient(90deg, #7a5a55, #efd9a9, #836257);
-  content: '';
+  width: 115%;
+  height: 58%;
+  border-radius: 50%;
+  background:
+    linear-gradient(110deg, transparent 20%, rgba(60, 218, 172, 0.14) 42%, rgba(109, 205, 218, 0.12) 54%, transparent 77%);
+  filter: blur(18px);
+  opacity: 0.9;
+  transform: translateX(-50%) rotate(-12deg);
+  animation: ny-aurora-drift 9s ease-in-out infinite alternate;
+  pointer-events: none;
 }
 
 .ny-tree {
   position: relative;
   z-index: 2;
   display: block;
-  width: min(100%, 280px);
+  width: min(100%, 320px);
   overflow: visible;
   filter: drop-shadow(0 20px 28px rgba(0, 0, 0, 0.32));
   animation: ny-tree-arrive 0.9s cubic-bezier(0.18, 0.8, 0.24, 1) both;
@@ -250,8 +183,8 @@
 
 .ny-tree-scene__stars {
   position: absolute;
-  top: 16%;
-  right: 3%;
+  top: 7%;
+  right: 6%;
   color: rgba(242, 222, 178, 0.72);
   font-size: 12px;
   letter-spacing: 0.6em;
@@ -269,78 +202,18 @@
 }
 
 .ny-tree-scene__snow--one {
-  top: 30%;
-  left: 13%;
+  top: 35%;
+  left: 8%;
   animation: ny-snow-float 4s ease-in-out infinite;
 }
 
 .ny-tree-scene__snow--two {
-  top: 54%;
-  right: 11%;
+  top: 61%;
+  right: 8%;
   width: 3px;
   height: 3px;
   animation: ny-snow-float 5s ease-in-out -1.6s infinite;
 }
-
-.ny-tree-scene__gift {
-  position: absolute;
-  z-index: 4;
-  bottom: 8%;
-  width: 30px;
-  height: 24px;
-  border: 1px solid rgba(255, 241, 206, 0.55);
-  border-radius: 3px;
-  background: linear-gradient(135deg, #b85e69, #71394c);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24);
-}
-
-.ny-tree-scene__gift::before,
-.ny-tree-scene__gift::after,
-.ny-tree-scene__gift i {
-  position: absolute;
-  content: '';
-}
-
-.ny-tree-scene__gift::before {
-  top: 0;
-  bottom: 0;
-  left: 12px;
-  width: 5px;
-  background: #eac57c;
-}
-
-.ny-tree-scene__gift::after {
-  top: -6px;
-  left: 8px;
-  width: 12px;
-  height: 7px;
-  border: 2px solid #eac57c;
-  border-radius: 50% 50% 0 50%;
-  transform: rotate(20deg);
-}
-
-.ny-tree-scene__gift i {
-  top: -6px;
-  left: 15px;
-  width: 12px;
-  height: 7px;
-  border: 2px solid #eac57c;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-20deg);
-}
-
-.ny-tree-scene__gift--one { left: 7%; transform: rotate(-8deg); }
-.ny-tree-scene__gift--two {
-  right: 5%;
-  bottom: 9%;
-  width: 23px;
-  height: 19px;
-  background: linear-gradient(135deg, #527e75, #28524f);
-  transform: rotate(8deg);
-}
-.ny-tree-scene__gift--two::before { left: 9px; width: 4px; }
-.ny-tree-scene__gift--two::after { left: 5px; }
-.ny-tree-scene__gift--two i { left: 11px; }
 
 .ny-countdown {
   width: min(100%, 480px);
@@ -469,6 +342,11 @@
   50% { opacity: 1; }
 }
 
+@keyframes ny-aurora-drift {
+  from { opacity: 0.48; transform: translateX(-54%) rotate(-15deg) scale(0.94); }
+  to { opacity: 0.92; transform: translateX(-46%) rotate(-7deg) scale(1.05); }
+}
+
 @keyframes ny-snow-float {
   0%, 100% { opacity: 0.45; transform: translateY(-4px); }
   50% { opacity: 1; transform: translateY(6px); }
@@ -490,7 +368,7 @@
   .ny-hero h1 { font-size: clamp(34px, 9.5vw, 42px); }
   .ny-hero__copy > p { font-size: 11px; }
   .ny-tree-scene { min-height: 272px; }
-  .ny-tree { width: 115%; max-width: 265px; }
+  .ny-tree { width: 118%; max-width: 290px; }
 }
 
 @media (max-width: 430px) {
@@ -503,15 +381,14 @@
 
   .ny-hero__copy { padding-top: 24px; }
   .ny-tree-scene { min-height: 286px; margin-top: -6px; }
-  .ny-tree { width: min(78vw, 280px); }
-  .ny-tree-scene__globe { width: min(76vw, 276px); }
+  .ny-tree { width: min(84vw, 320px); }
 }
 
 @media (max-width: 340px) {
   .ny-hero { grid-template-columns: 1fr; min-height: 0; }
   .ny-hero__copy { padding-top: 28px; }
   .ny-tree-scene { min-height: 240px; margin-top: -6px; }
-  .ny-tree { width: min(78vw, 250px); }
+  .ny-tree { width: min(88vw, 285px); }
   .ny-countdown { margin-top: 3px; padding-inline: 12px; }
 }
 
@@ -519,6 +396,7 @@
   .ny-page::after,
   .ny-tree,
   .ny-tree-scene__stars,
+  .ny-tree-scene__aurora,
   .ny-tree-scene__snow,
   .ny-back,
   .ny-action {

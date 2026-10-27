@@ -69,56 +69,49 @@ const NewYearPage: React.FC = () => {
 
         <div className="ny-tree-scene" aria-hidden="true">
           <div className="ny-tree-scene__halo" />
-          <div className="ny-tree-scene__globe"><span /></div>
-          <div className="ny-tree-scene__globe-base" />
-          <div className="ny-tree-scene__stars">✦　·　✧　　·　✦</div>
-          <svg className="ny-tree" viewBox="0 0 280 340" fill="none">
+          <div className="ny-tree-scene__aurora" />
+          <div className="ny-tree-scene__stars" aria-hidden="true">✦　·　✧　·　✦</div>
+          <svg className="ny-tree" viewBox="0 0 320 380" fill="none">
             <defs>
-              <linearGradient id="ny-tree-top" x1="140" y1="35" x2="140" y2="135" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#66E3B2" />
-                <stop offset="1" stopColor="#117B68" />
+              <linearGradient id="ny-tree-top" x1="160" y1="35" x2="160" y2="345" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#5CF1C4" />
+                <stop offset=".48" stopColor="#147E69" />
+                <stop offset="1" stopColor="#073E43" />
               </linearGradient>
-              <linearGradient id="ny-tree-mid" x1="140" y1="92" x2="140" y2="228" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#40C89A" />
-                <stop offset="1" stopColor="#075B53" />
+              <linearGradient id="ny-tree-shadow" x1="95" y1="100" x2="236" y2="293" gradientUnits="userSpaceOnUse">
+                <stop stopColor="#0A564E" />
+                <stop offset="1" stopColor="#062D35" />
               </linearGradient>
-              <linearGradient id="ny-tree-base" x1="140" y1="163" x2="140" y2="292" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#2DB88A" />
-                <stop offset="1" stopColor="#06443F" />
-              </linearGradient>
-              <linearGradient id="ny-star" x1="140" y1="13" x2="140" y2="58" gradientUnits="userSpaceOnUse">
+              <linearGradient id="ny-star" x1="160" y1="7" x2="160" y2="52" gradientUnits="userSpaceOnUse">
                 <stop stopColor="#FFF7D6" />
-                <stop offset="1" stopColor="#F4B95F" />
+                <stop offset="1" stopColor="#F7C35D" />
               </linearGradient>
-              <filter id="ny-star-glow" x="106" y="0" width="68" height="70" filterUnits="userSpaceOnUse">
+              <filter id="ny-star-glow" x="126" y="-8" width="68" height="70" filterUnits="userSpaceOnUse">
                 <feGaussianBlur stdDeviation="7" result="blur" />
                 <feComposite in="SourceGraphic" in2="blur" operator="over" />
               </filter>
             </defs>
-            <ellipse cx="140" cy="311" rx="91" ry="13" fill="#A9E9E0" fillOpacity=".15" />
-            <path d="m140 38-42 71h23l-43 68h34l-51 78h158l-51-78h34l-43-68h23l-42-71Z" fill="url(#ny-tree-base)" />
-            <path d="m140 38-42 71h23l-43 68h34l-51 78h79V38Z" fill="url(#ny-tree-top)" fillOpacity=".45" />
-            <path d="m119 274 5 38h32l5-38" fill="#9A5E45" />
-            <path d="M110 105c16 10 38 10 57 0M92 176c31 14 67 14 97 0M78 253c40 17 85 17 124 0" stroke="#D7FFF0" strokeOpacity=".3" strokeWidth="2" strokeLinecap="round" />
-            <path d="M140 14 147 31l18 1-14 11 5 17-16-10-16 10 5-17-14-11 18-1 7-17Z" fill="url(#ny-star)" filter="url(#ny-star-glow)" />
-            <path d="M140 14 147 31l18 1-14 11 5 17-16-10-16 10 5-17-14-11 18-1 7-17Z" fill="url(#ny-star)" />
-            <path d="M106 119c23 13 48 13 69 0M93 191c31 17 63 17 94 0M80 267c38 17 82 17 120 0" stroke="#F9DDA8" strokeOpacity=".8" strokeWidth="2.5" strokeLinecap="round" />
-            <circle cx="117" cy="91" r="5" fill="#F5C774" />
-            <circle cx="158" cy="112" r="4" fill="#F4A8B5" />
-            <circle cx="97" cy="163" r="5" fill="#B5C9FF" />
-            <circle cx="176" cy="167" r="5" fill="#F5C774" />
-            <circle cx="132" cy="147" r="4" fill="#F4A8B5" />
-            <circle cx="113" cy="225" r="5" fill="#F4A8B5" />
-            <circle cx="164" cy="231" r="5" fill="#B5C9FF" />
-            <circle cx="144" cy="205" r="4" fill="#F5C774" />
-            <circle cx="95" cy="245" r="3" fill="#F5C774" />
-            <circle cx="188" cy="245" r="3" fill="#F4A8B5" />
-            <path d="M45 95h8m-4-4v8m170 19h8m-4-4v8M57 213h7m-3.5-3.5v7" stroke="#D8EDFF" strokeOpacity=".7" strokeWidth="1.5" strokeLinecap="round" />
+            <ellipse cx="160" cy="348" rx="112" ry="12" fill="#A9E9E0" fillOpacity=".13" />
+            <path d="M160 35 126 88h18l-44 53h24l-53 61h35l-66 78h240l-66-78h35l-53-61h24l-44-53h18L160 35Z" fill="url(#ny-tree-top)" />
+            <path d="m160 35-34 53h18l-44 53h24l-53 61h35l-66 78h120V35Z" fill="url(#ny-tree-shadow)" fillOpacity=".58" />
+            <path d="m143 303 4 43h26l4-43" fill="#785342" />
+            <path d="M126 88c21 10 44 10 68 0M100 141c36 13 83 13 120 0M71 202c54 17 123 17 178 0M40 280c69 20 171 20 240 0" stroke="#D9FFF5" strokeOpacity=".55" strokeWidth="4" strokeLinecap="round" />
+            <path d="M160 11 167 28l18 1-14 11 5 17-16-10-16 10 5-17-14-11 18-1 7-17Z" fill="url(#ny-star)" filter="url(#ny-star-glow)" />
+            <path d="M160 11 167 28l18 1-14 11 5 17-16-10-16 10 5-17-14-11 18-1 7-17Z" fill="url(#ny-star)" />
+            <path d="M113 131c22 8 39 7 55-2 17 9 35 10 54 2M77 193c29 12 56 10 83-2 28 12 56 14 83 2M48 269c36 11 74 9 112-4 38 13 76 15 112 4" stroke="#F6D991" strokeOpacity=".86" strokeWidth="2.5" strokeLinecap="round" />
+            <circle cx="137" cy="102" r="3.5" fill="#FFE7A3" />
+            <circle cx="178" cy="117" r="3" fill="#B9F7E7" />
+            <circle cx="113" cy="164" r="3.5" fill="#FFE7A3" />
+            <circle cx="205" cy="174" r="3.5" fill="#FFE7A3" />
+            <circle cx="154" cy="151" r="3" fill="#B9F7E7" />
+            <circle cx="94" cy="229" r="3.5" fill="#FFE7A3" />
+            <circle cx="222" cy="238" r="3.5" fill="#FFE7A3" />
+            <circle cx="161" cy="219" r="3" fill="#B9F7E7" />
+            <circle cx="62" cy="292" r="3" fill="#FFE7A3" />
+            <circle cx="258" cy="292" r="3" fill="#FFE7A3" />
           </svg>
           <div className="ny-tree-scene__snow ny-tree-scene__snow--one" />
           <div className="ny-tree-scene__snow ny-tree-scene__snow--two" />
-          <div className="ny-tree-scene__gift ny-tree-scene__gift--one"><i /></div>
-          <div className="ny-tree-scene__gift ny-tree-scene__gift--two"><i /></div>
         </div>
       </section>
 

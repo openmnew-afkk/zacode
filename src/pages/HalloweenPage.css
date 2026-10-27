@@ -4,7 +4,7 @@
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  overflow: hidden;
+  overflow: clip;
   isolation: isolate;
   padding: calc(var(--header-safe-top, 0px) + 10px) 22px 112px;
   background:
@@ -128,7 +128,7 @@
 .hw-hero {
   display: flex;
   width: min(100%, 520px);
-  flex: 1;
+  min-height: min(690px, calc(100svh - 115px));
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -249,6 +249,175 @@
   letter-spacing: 0.19em;
 }
 
+.hw-stories {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  padding: 22px 0 34px;
+  border-top: 1px solid rgba(255, 195, 164, 0.13);
+  scroll-margin-top: 24px;
+}
+
+.hw-stories__heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hw-stories__eyebrow {
+  margin: 0 0 7px;
+  color: rgba(255, 139, 103, 0.76);
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.2em;
+}
+
+.hw-stories__heading h2 {
+  margin: 0;
+  color: #fff3ef;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(24px, 6vw, 34px);
+  letter-spacing: -0.045em;
+  line-height: 1.05;
+}
+
+.hw-stories__heading > span {
+  padding-bottom: 4px;
+  color: rgba(241, 197, 181, 0.44);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+
+.hw-stories__intro {
+  margin: 8px 0 15px;
+  color: rgba(237, 222, 220, 0.58);
+  font-size: 12px;
+}
+
+.hw-stories__rail {
+  display: flex;
+  gap: 13px;
+  overflow-x: auto;
+  margin: 0 -22px;
+  padding: 2px 22px 12px;
+  scrollbar-width: none;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.hw-stories__rail::-webkit-scrollbar { display: none; }
+
+.hw-story {
+  display: flex;
+  width: clamp(132px, 39vw, 172px);
+  flex: 0 0 clamp(132px, 39vw, 172px);
+  flex-direction: column;
+  gap: 7px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-snap-align: start;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hw-story__poster {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 2 / 3;
+  border: 1px solid rgba(255, 225, 214, 0.12);
+  border-radius: 17px;
+  background: linear-gradient(145deg, #36242c, #111017);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+  isolation: isolate;
+}
+
+.hw-story__poster::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(7, 5, 9, 0.08), transparent 40%, rgba(7, 5, 9, 0.65));
+  content: '';
+  pointer-events: none;
+}
+
+.hw-story__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.2, 0.75, 0.25, 1), filter 0.5s ease;
+}
+
+.hw-story__number,
+.hw-story__rating {
+  position: absolute;
+  z-index: 1;
+  bottom: 9px;
+  color: #fff6f1;
+  font-size: 10px;
+  font-weight: 800;
+  text-shadow: 0 2px 9px #08060a;
+}
+
+.hw-story__number { left: 10px; opacity: 0.82; }
+
+.hw-story__rating {
+  right: 9px;
+  color: #ffd18b;
+}
+
+.hw-story__title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(255, 246, 243, 0.92);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.hw-story__year {
+  color: rgba(237, 222, 220, 0.45);
+  font-size: 10px;
+}
+
+.hw-story:active .hw-story__poster img {
+  filter: saturate(0.8) brightness(0.8);
+  transform: scale(1.04);
+}
+
+.hw-stories__loading,
+.hw-stories__error {
+  padding: 18px;
+  border: 1px solid rgba(255, 225, 214, 0.1);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(237, 222, 220, 0.65);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.hw-stories__error p { margin: 0 0 10px; }
+
+.hw-stories__error button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #ff9a79;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.hw-cta {
+  scroll-behavior: smooth;
+}
+
 .hw-bottom {
   display: flex;
   width: min(100%, 440px);
@@ -289,7 +458,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hw-bat,
-  .hw-seal {
+  .hw-seal,
+  .hw-story__poster img {
     animation: none;
+    transition: none;
+  }
+
+  .hw-stories {
+    scroll-behavior: auto;
   }
 }

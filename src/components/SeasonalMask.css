@@ -17,13 +17,13 @@
 .seasonal-mask__hat {
   position: absolute;
   z-index: 1;
-  top: -12%;
-  right: -8%;
-  width: 75%;
+  top: -19%;
+  left: 50%;
+  width: 50%;
   height: auto;
   overflow: visible;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
-  transform: rotate(12deg);
+  transform: translateX(-50%) rotate(-7deg);
 }
 
 .seasonal-mask__petal,
