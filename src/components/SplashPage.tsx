@@ -11,6 +11,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [fading, setFading] = useState(false);
   const [progress, setProgress] = useState(0);
   const onDoneRef = useRef(onDone);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   useEffect(() => {
     onDoneRef.current = onDone;
@@ -19,22 +20,25 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   useEffect(() => {
     let current = 0;
     const interval = setInterval(() => {
-      current += Math.random() * 18 + 12;
+      current += Math.random() * 2.4 + 1.6;
       if (current >= 100) {
         current = 100;
         clearInterval(interval);
-        setTimeout(() => {
+        timersRef.current.push(setTimeout(() => {
           setFading(true);
-          setTimeout(() => {
+          timersRef.current.push(setTimeout(() => {
             setVisible(false);
             onDoneRef.current?.();
-          }, 350);
-        }, 180);
+          }, 460));
+        }, 220));
       }
       setProgress(Math.min(100, Math.round(current)));
-    }, 45);
+    }, 30);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      timersRef.current.forEach(clearTimeout);
+    };
   }, []);
 
   if (!visible) return null;
@@ -43,19 +47,25 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     <div className={`sp ${fading ? 'sp--fade' : ''}`} role="status" aria-label="Загрузка ZENOVA">
       {/* Мягкое глубинное свечение */}
       <div className="sp__ambient" />
+      <div className="sp__starfield" aria-hidden="true"><i /><i /><i /><i /><i /></div>
 
       <div className="sp__container">
         <div className="sp__emblem-wrap">
           <VeloraEmblem size="hero" className="sp__emblem" />
+          <span className="sp__orbit sp__orbit--one" />
+          <span className="sp__orbit sp__orbit--two" />
         </div>
 
         <div className="sp__brand">
           <h1 className="sp__title">ZENOVA</h1>
-          <p className="sp__subtitle">КИНО · СЕРИАЛЫ · МУЗЫКА</p>
+          <p className="sp__subtitle">ТВОЯ ВСЕЛЕННАЯ КИНО И МУЗЫКИ</p>
         </div>
 
-        <div className="sp__track" role="progressbar" aria-label="Загрузка" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
-          <div className="sp__bar" style={{ width: `${progress}%` }} />
+        <div className="sp__loading">
+          <div className="sp__track" role="progressbar" aria-label="Загрузка" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
+            <div className="sp__bar" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="sp__loading-label">НАСТРАИВАЕМ ПРОЕКТОР</span>
         </div>
       </div>
     </div>

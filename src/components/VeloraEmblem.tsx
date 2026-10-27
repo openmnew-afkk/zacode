@@ -9,15 +9,17 @@ interface VeloraEmblemProps {
 export const VeloraEmblem: React.FC<VeloraEmblemProps> = ({ size = 'md', className = '' }) => {
   return (
     <div className={`velora-emblem velora-emblem--${size} ${className}`} role="img" aria-label="ZENOVA">
-      <svg viewBox="0 0 100 100" aria-hidden="true">
-        <rect x="3" y="3" width="94" height="94" rx="28" fill="#100d18" />
-        <rect x="4" y="4" width="92" height="92" rx="27" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
-        <circle cx="50" cy="50" r="32" fill="rgba(168,85,247,0.08)" />
-        <circle cx="50" cy="50" r="28" fill="none" stroke="#fb7185" strokeWidth="3.5" />
-        <circle cx="50" cy="50" r="21" fill="none" stroke="#a78bfa" strokeOpacity="0.76" strokeWidth="1.5" />
-        <path d="M45 38.5a2 2 0 0 1 3-1.7l19 11a2.5 2.5 0 0 1 0 4.4l-19 11a2 2 0 0 1-3-1.7z" fill="#fff" />
-        <circle cx="73" cy="27" r="2.5" fill="#fda4af" />
-      </svg>
+      <span className="velora-emblem__frame">
+        <span className="velora-emblem__halo" />
+        <span className="velora-emblem__orbit velora-emblem__orbit--outer"><i /></span>
+        <span className="velora-emblem__orbit velora-emblem__orbit--inner" />
+        <span className="velora-emblem__core">
+          <svg viewBox="0 0 48 48" aria-hidden="true">
+            <path d="M19 13.8a2.4 2.4 0 0 1 3.6-2.08l17.2 9.94a2.7 2.7 0 0 1 0 4.68L22.6 36.28A2.4 2.4 0 0 1 19 34.2z" fill="currentColor" />
+          </svg>
+        </span>
+        <span className="velora-emblem__glint" />
+      </span>
     </div>
   );
 };

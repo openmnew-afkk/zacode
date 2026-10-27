@@ -444,16 +444,13 @@ const MovieDetailPage: React.FC = () => {
           <div className="dp-hero2__fade" />
           <div className="dp-hero2__glow" />
           <div className="dp-hero2__head">
+            <p className="dp-hero2__eyebrow">
+              <span aria-hidden="true" />
+              {isSerial ? 'Сериал' : 'Полнометражный фильм'}
+            </p>
             <div className="dp-hero2__chips">
-              {isSerial && <span className="dp-hero2__chip dp-hero2__chip--serial">Сериал</span>}
               {movie.release_date && <span className="dp-hero2__chip">{movie.release_date.slice(0, 4)}</span>}
               {movie.runtime ? <span className="dp-hero2__chip">{movie.runtime} мин</span> : null}
-              {movie.vote_average > 0 && (
-                <span className="dp-hero2__chip dp-hero2__chip--rating">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.5l7.1-.6L12 2z"/></svg>
-                  {movie.vote_average.toFixed(1)}
-                </span>
-              )}
             </div>
             <h1 className="dp-hero2__title">{movie.title}</h1>
             {movie.original_title && movie.original_title !== movie.title && (
@@ -465,6 +462,14 @@ const MovieDetailPage: React.FC = () => {
         <div className="dp-hero2__body">
           <div className="dp-hero2__poster-wrap">
             <img className="dp-hero2__poster" src={poster} alt={movie.title} />
+            {movie.vote_average > 0 && (
+              <span className="dp-hero2__score">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2l2.9 6.9 7.1.6-5.4 4.7 1.6 7-6.2-3.7-6.2 3.7 1.6-7L2 9.5l7.1-.6L12 2z" />
+                </svg>
+                {movie.vote_average.toFixed(1)}
+              </span>
+            )}
           </div>
 
           <div className="dp-hero2__side">
@@ -529,6 +534,7 @@ const MovieDetailPage: React.FC = () => {
 
       {movie.overview && (
         <div className="dp-section dp-section--card">
+          <h2 className="dp-overview__title">О фильме</h2>
           <p className="dp-desc">{movie.overview}</p>
         </div>
       )}
