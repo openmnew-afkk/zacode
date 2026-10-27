@@ -13,6 +13,17 @@ import type { Movie, TrackedItem } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
 import './HomePage.css';
 
+const getNewYearTimeLeft = () => {
+  const now = new Date();
+  const newYear = new Date(now.getFullYear() + 1, 0, 1);
+  const diff = newYear.getTime() - now.getTime();
+  return {
+    d: Math.floor(diff / 86400000),
+    h: Math.floor(diff / 3600000) % 24,
+    m: Math.floor(diff / 60000) % 60,
+  };
+};
+
 /* ──────────────────────────────────────────────────────── */
 /*  Мини-карточка фильма (с длинным нажатием → превью)     */
 /* ──────────────────────────────────────────────────────── */
@@ -401,18 +412,21 @@ const HomePage: React.FC = () => {
   /* 🎄 Отсчёт до Нового года (зимой) */
   const [nyLeft, setNyLeft] = useState<{ d: number; h: number; m: number } | null>(() => {
     if (season.id !== 'winter') return null;
-    const now = new Date();
-    const year = now.getMonth() === 11 ? now.getFullYear() : now.getFullYear() - 1;
-    // Ближайающий Новый год: 1 января следующего календарного года
-    const ny = new Date(now.getFullYear() + 1, 0, 1);
-    void year;
-    const diff = ny.getTime() - now.getTime();
-    return {
-      d: Math.floor(diff / 86400000),
-      h: Math.floor(diff / 3600000) % 24,
-      m: Math.floor(diff / 60000) % 60,
-    };
+    return getNewYearTimeLeft();
   });
+
+  useEffect(() => {
+    if (season.id !== 'winter') {
+      setNyLeft(null);
+      return;
+    }
+
+    const updateCountdown = () => setNyLeft(getNewYearTimeLeft());
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 60_000);
+    return () => window.clearInterval(timer);
+  }, [season.id]);
+
   const [genreRows, setGenreRows] = useState<Record<number, Movie[]>>({});
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
 
@@ -1078,7 +1092,7 @@ const HomePage: React.FC = () => {
 
       {/* ── 🎄 Отсчёт до Нового года (только в новогодней теме) ── */}
       {nyLeft && !showSearch && !activeCategory && tab === 'home' && (
-        <button className="hp-ny-count" onClick={() => { haptic('light'); navigate('/feed'); }}>
+        <button className="hp-ny-count" onClick={() => { haptic('light'); navigate('/new-year'); }}>
           <span className="hp-ny-count__tree">🎄</span>
           <span className="hp-ny-count__label">До Нового года</span>
           <span className="hp-ny-count__time">

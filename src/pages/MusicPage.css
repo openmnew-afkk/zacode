@@ -1034,8 +1034,8 @@
 }
 
 .ym-header__surprise {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent-2, #f43f5e), var(--accent, #fb7185));
   border: none;
@@ -1417,12 +1417,12 @@
 
 @media (max-width: 350px) {
   .ym-wave-card {
-    grid-template-columns: 1fr;
-    text-align: center;
+    grid-template-columns: 46px minmax(0, 1fr);
+    text-align: left;
   }
 
-  .ym-wave-card__visual { width: min(46vw, 168px); }
-  .ym-wave-card__controls { justify-content: center; }
+  .ym-wave-card__visual { width: 42px; }
+  .ym-wave-card__controls { justify-content: flex-start; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1434,7 +1434,7 @@
 }
 
 .ym-wave-card {
-  grid-template-columns: 88px minmax(0, 1fr);
+  grid-template-columns: 54px minmax(0, 1fr);
   gap: clamp(14px, 3vw, 22px);
   min-height: 154px;
   padding: clamp(15px, 3vw, 22px);
@@ -1442,7 +1442,7 @@
 }
 
 .ym-wave-card__visual {
-  width: 82px;
+  width: 50px;
   aspect-ratio: 1;
 }
 
@@ -1454,8 +1454,8 @@
   place-items: center;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.26);
-  border-radius: 21px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  border-radius: 18px;
+  box-shadow: 0 9px 24px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.24);
   isolation: isolate;
 }
 
@@ -1476,26 +1476,29 @@
 }
 
 .ym-wave-card__art-mark {
+  position: relative;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 34px;
-  filter: drop-shadow(0 3px 16px rgba(255, 255, 255, 0.55));
+  filter: drop-shadow(0 2px 9px rgba(255, 255, 255, 0.34));
 }
 
 .ym-wave-card__spectrum {
   position: absolute;
   z-index: 2;
-  right: 12px;
-  bottom: 13px;
-  left: 12px;
+  right: 8px;
+  bottom: 8px;
+  left: 8px;
   display: flex;
-  height: 28px;
+  height: 14px;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 1.5px;
 }
 
 .ym-wave-card__spectrum i {
-  width: 2px;
+  width: 1.5px;
   height: var(--bar-height, 35%);
   border-radius: 5px;
   background: linear-gradient(180deg, #ffe2cc, #fb7185 60%, #c084fc);
@@ -1563,14 +1566,14 @@
 
 @media (max-width: 380px) {
   .ym-wave-card {
-    grid-template-columns: 70px minmax(0, 1fr);
+    grid-template-columns: 50px minmax(0, 1fr);
     gap: 12px;
     min-height: 140px;
     padding: 14px;
   }
 
-  .ym-wave-card__visual { width: 68px; }
-  .ym-wave-card__art { border-radius: 18px; }
+  .ym-wave-card__visual { width: 46px; }
+  .ym-wave-card__art { border-radius: 14px; }
   .ym-wave-card__badge { margin-bottom: 6px; }
   .ym-wave-card__title { font-size: 16px; }
   .ym-wave-card__surprise { min-height: 34px; padding-inline: 9px; font-size: 10px; }
@@ -1578,4 +1581,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ym-wave-card.is-playing .ym-wave-card__spectrum i { animation: none; }
+}
+
+@media (max-width: 350px) {
+  .ym-wave-card { grid-template-columns: 44px minmax(0, 1fr); }
+  .ym-wave-card__visual { width: 42px; }
 }

@@ -484,7 +484,12 @@ const MusicPage: React.FC = () => {
               {currentTrack?.artwork ? (
                 <img src={currentTrack.artwork} alt="" />
               ) : (
-                <span className="ym-wave-card__art-mark">✦</span>
+                <svg className="ym-wave-card__art-mark" viewBox="0 0 64 64" fill="none">
+                  <circle cx="32" cy="32" r="24" stroke="rgba(255,255,255,.55)" strokeWidth="1.2" />
+                  <circle cx="32" cy="32" r="17" stroke="rgba(255,255,255,.22)" strokeWidth="1" />
+                  <path d="M12 34h7l4-12 8 24 6-17 4 9h11" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <circle cx="32" cy="32" r="2.5" fill="#ffe2cc" />
+                </svg>
               )}
               <div className="ym-wave-card__spectrum">
                 {Array.from({ length: 17 }, (_, index) => <i key={index} />)}

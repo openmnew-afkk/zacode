@@ -119,7 +119,7 @@ const TabBar: React.FC = () => {
   };
 
   return (
-    <nav className="tab-bar">
+    <nav className="tab-bar" aria-label="Основная навигация">
       <div className="tab-bar__inner">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
