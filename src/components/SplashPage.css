@@ -230,12 +230,18 @@
 .sp__title {
   margin: 0;
   padding-left: 0.2em;
-  color: #fff;
+  background: linear-gradient(110deg, #fff 5%, var(--sp-accent) 28%, #e8c8ff 48%, #fff 62%, #ffc2ce 82%, #fff 96%);
+  background-size: 220% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
   font-size: clamp(36px, 10vw, 48px);
   font-weight: 780;
   letter-spacing: 0.2em;
   line-height: 1;
   text-shadow: 0 0 40px rgba(228, 213, 255, 0.26), 0 8px 36px rgba(255, 255, 255, 0.14);
+  filter: drop-shadow(0 0 15px var(--sp-accent-soft));
+  animation: spBrandShimmer 5s ease-in-out infinite;
 }
 
 .sp__subtitle {
@@ -336,6 +342,11 @@
   to { translate: 0 7px; }
 }
 
+@keyframes spBrandShimmer {
+  0%, 100% { background-position: 100% 50%; }
+  50% { background-position: 0 50%; }
+}
+
 @media (max-width: 380px) {
   .sp__emblem-wrap { width: 184px; height: 184px; }
   .sp__emblem { width: 142px; height: 142px; border-radius: 40px; }
@@ -353,7 +364,8 @@
   .sp__season-artwork,
   .sp__brand,
   .sp__loading,
-  .sp__projector-beam {
+  .sp__projector-beam,
+  .sp__title {
     animation: none;
   }
 

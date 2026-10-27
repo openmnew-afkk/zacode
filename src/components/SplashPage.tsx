@@ -128,7 +128,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       <div className="sp__container">
         <div className="sp__emblem-wrap">
           <div className="sp__projector-beam" aria-hidden="true" />
-          <img className="sp__emblem" src="/zenova-icon.svg" alt="" />
+          <img className="sp__emblem" src="/zenova-mask.svg" alt="" />
           <span className="sp__orbit sp__orbit--one" />
           <span className="sp__orbit sp__orbit--two" />
         </div>

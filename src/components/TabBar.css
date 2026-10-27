@@ -16,6 +16,25 @@
   transform: translateX(-50%);
 }
 
+.tab-bar::after {
+  position: absolute;
+  top: -9px;
+  right: -5px;
+  z-index: 1;
+  font-size: 17px;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.35));
+}
+
+:root[data-season='autumn'] .tab-bar::after {
+  content: '🎃';
+}
+
+:root[data-season='winter'] .tab-bar::after {
+  content: '🎄';
+}
+
 .tab-bar__inner {
   display: flex;
   min-height: 58px;

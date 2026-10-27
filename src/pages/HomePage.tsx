@@ -1012,13 +1012,7 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <div className="hp-header__emblem">
-                <VeloraEmblem size="sm" />
-              </div>
-              <div>
-                <h1 className="hp-header__title">ZENOVA</h1>
-                <span className="hp-header__sub">Cinema & Sound</span>
-              </div>
+              <img className="hp-header__emblem" src="/zenova-mask.svg" alt="ZENOVA" />
             </div>
             <div className="hp-header__actions">
               {/* 🎲 Мне повезёт — случайный фильм */}
