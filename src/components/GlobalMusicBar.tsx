@@ -284,9 +284,14 @@ const GlobalMusicBar: React.FC = () => {
         <div className="gfull__aurora" />
 
         {/* Swipe handle */}
-        <div className="gfull__handle" onClick={() => setExpanded(false)}>
-          <div className="gfull__handle-bar" />
-        </div>
+        <button
+          type="button"
+          className="gfull__handle"
+          onClick={() => setExpanded(false)}
+          aria-label="Свернуть плеер"
+        >
+          <span className="gfull__handle-bar" />
+        </button>
 
         {/* Header */}
         <div className="gfull__header">
@@ -322,6 +327,10 @@ const GlobalMusicBar: React.FC = () => {
         {/* Track info with prominent inline like button */}
         <div className="gfull__info">
           <div className="gfull__info-text">
+            <div className={`gfull__track-status ${isPlaying ? 'playing' : ''}`}>
+              <span className="gfull__track-status-bars" aria-hidden="true"><i /><i /><i /><i /></span>
+              {isLive ? 'ПРЯМОЙ ЭФИР' : isPlaying ? 'СЕЙЧАС ИГРАЕТ' : 'НА ПАУЗЕ'}
+            </div>
             <div className="gfull__title">{currentTrack.title}</div>
             <div className="gfull__artist">{currentTrack.artist}</div>
           </div>
@@ -503,24 +512,31 @@ const GlobalMusicBar: React.FC = () => {
 
   /* ══ Мини-капсула (над нижним меню TabBar) ══ */
   return (
-    <div className="gbar" onClick={() => setExpanded(true)}>
+    <div className="gbar" role="group" aria-label="Музыкальный плеер">
       <div className="gbar__progress" style={{ width: `${pct}%` }} />
       <div className="gbar__inner">
-        <div className="gbar__art">
-          {art ? (
-            <img src={art} alt="" onError={() => setImgError(true)} />
-          ) : (
-            <div className="gbar__art-ph">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 17.5V6.3L20 4v11.2"/><circle cx="6.5" cy="17.5" r="2.6"/><circle cx="17.5" cy="15.2" r="2.6"/></svg>
-            </div>
-          )}
-          {isPlaying && <div className="gbar__art-pulse" />}
-        </div>
-        <div className="gbar__info">
-          <div className="gbar__title">{currentTrack.title}</div>
-          <div className="gbar__artist">{currentTrack.artist}</div>
-        </div>
-        <div className="gbar__btns" onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          className="gbar__track"
+          onClick={() => setExpanded(true)}
+          aria-label={`Открыть плеер: ${currentTrack.title} — ${currentTrack.artist}`}
+        >
+          <span className="gbar__art">
+            {art ? (
+              <img src={art} alt="" onError={() => setImgError(true)} />
+            ) : (
+              <span className="gbar__art-ph">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 17.5V6.3L20 4v11.2"/><circle cx="6.5" cy="17.5" r="2.6"/><circle cx="17.5" cy="15.2" r="2.6"/></svg>
+              </span>
+            )}
+            {isPlaying && <span className="gbar__art-pulse" />}
+          </span>
+          <span className="gbar__info">
+            <span className="gbar__title">{currentTrack.title}</span>
+            <span className="gbar__artist">{currentTrack.artist}</span>
+          </span>
+        </button>
+        <div className="gbar__btns">
           <button
             className={`gbar__btn gbar__btn--like ${liked ? 'liked' : ''}`}
             onClick={() => {

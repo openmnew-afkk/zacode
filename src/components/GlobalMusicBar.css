@@ -43,17 +43,31 @@
 .gbar__inner {
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+}
+
+.gbar__track {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
   gap: 10px;
-  padding: 8px 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
 }
 
 .gbar__art {
-  width: 42px;
-  height: 42px;
-  border-radius: 11px;
+  position: relative;
+  display: block;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
   overflow: hidden;
   flex-shrink: 0;
-  position: relative;
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
@@ -89,11 +103,13 @@
 }
 
 .gbar__info {
+  display: block;
   flex: 1;
   min-width: 0;
 }
 
 .gbar__title {
+  display: block;
   font-size: 13px;
   font-weight: 700;
   color: var(--text);
@@ -104,6 +120,7 @@
 }
 
 .gbar__artist {
+  display: block;
   font-size: 11px;
   color: var(--text-3);
   white-space: nowrap;
@@ -249,7 +266,11 @@
 
 /* ── Ручка сворачивания ── */
 .gfull__handle {
+  width: 100%;
   padding: 4px 0 6px;
+  border: 0;
+  background: transparent;
+  color: inherit;
   text-align: center;
   cursor: pointer;
   flex-shrink: 0;
@@ -338,9 +359,8 @@
 
 .gfull__art-wrap {
   position: relative;
-  /* ограничение по высоте экрана — чтобы на маленьких устройствах контролы не сжимались */
-  width: min(250px, 72vw, 30dvh + 70px);
-  height: min(250px, 72vw, 30dvh + 70px);
+  width: min(280px, 72vw, calc(34dvh + 36px));
+  aspect-ratio: 1;
 }
 
 .gfull__art-aura {
@@ -409,14 +429,56 @@
   min-width: 0;
 }
 
+.gfull__track-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.gfull__track-status-bars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 12px;
+}
+
+.gfull__track-status-bars i {
+  width: 2px;
+  height: 4px;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.gfull__track-status.playing .gfull__track-status-bars i {
+  animation: track-status-wave 0.8s ease-in-out infinite alternate;
+}
+
+.gfull__track-status.playing .gfull__track-status-bars i:nth-child(2) { animation-delay: 0.16s; }
+.gfull__track-status.playing .gfull__track-status-bars i:nth-child(3) { animation-delay: 0.32s; }
+.gfull__track-status.playing .gfull__track-status-bars i:nth-child(4) { animation-delay: 0.08s; }
+
+@keyframes track-status-wave {
+  from { height: 3px; }
+  to { height: 11px; }
+}
+
 .gfull__title {
-  font-size: 19px;
+  display: -webkit-box;
+  font-size: clamp(18px, 4.8vw, 23px);
   font-weight: 800;
   color: var(--text);
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   letter-spacing: -0.3px;
-  white-space: nowrap;
+  line-height: 1.16;
+  white-space: normal;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   text-overflow: ellipsis;
 }
 
@@ -585,8 +647,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  margin-top: 14px;
+  gap: clamp(10px, 3.8vw, 20px);
+  width: min(100%, 390px);
+  margin: 14px auto 0;
   flex-shrink: 0;
 }
 
@@ -634,8 +697,8 @@
 }
 
 .gfull__play {
-  width: 64px;
-  height: 64px;
+  width: clamp(58px, 16vw, 68px);
+  height: clamp(58px, 16vw, 68px);
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent-2), var(--accent));
   border: none;
@@ -933,4 +996,42 @@
 
 [data-theme='light'] .gfull__sheet-backdrop {
   background: rgba(255, 245, 247, 0.6);
+}
+
+@media (max-height: 700px) {
+  .gfull {
+    padding-top: calc(var(--header-safe-top) + 2px);
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .gfull__art-container {
+    min-height: 112px;
+    margin: 4px 0 10px;
+  }
+
+  .gfull__art-wrap {
+    width: min(220px, 64vw, calc(30dvh + 36px));
+  }
+
+  .gfull__seek-wrap,
+  .gfull__controls {
+    margin-top: 10px;
+  }
+
+  .gfull__bottom {
+    margin-top: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gbar,
+  .gbar__art-pulse,
+  .gfull__aurora,
+  .gfull__art-aura,
+  .gfull__seek-fill,
+  .gfull__track-status-bars i,
+  .gfull__live-badge::before {
+    animation: none;
+    transition-duration: 0.01ms;
+  }
 }
