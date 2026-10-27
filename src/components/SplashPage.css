@@ -153,43 +153,17 @@
   width: 216px;
   height: 216px;
   place-items: center;
-  border: 1px solid rgba(190, 173, 255, 0.16);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(168, 85, 247, 0.17), transparent 62%),
-    linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 62%);
-  box-shadow: 0 0 90px rgba(168, 85, 247, 0.17), inset 0 0 38px rgba(168, 85, 247, 0.04);
+  background: radial-gradient(ellipse, rgba(192, 24, 55, 0.09), transparent 66%);
   animation: spEmblemEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both, spEmblemHover 5s ease-in-out 0.8s infinite;
-}
-
-.sp__emblem-wrap::before,
-.sp__emblem-wrap::after {
-  position: absolute;
-  content: '';
-  border: 1px solid rgba(223, 204, 255, 0.2);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.sp__emblem-wrap::before {
-  inset: 14px -20px;
-  transform: rotateX(68deg) rotate(-24deg);
-}
-
-.sp__emblem-wrap::after {
-  inset: 2px 6px;
-  border-color: rgba(251, 113, 133, 0.15);
-  transform: rotateX(67deg) rotate(38deg);
 }
 
 .sp__emblem {
   position: relative;
   z-index: 1;
-  width: 166px;
-  height: 166px;
-  border: 1px solid rgba(255, 255, 255, 0.29);
-  border-radius: 47px;
-  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 42px rgba(168, 85, 247, 0.33);
+  width: 176px;
+  height: 176px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 20px rgba(188, 31, 59, 0.34));
   animation: spMaskGlow 3.8s ease-in-out infinite alternate;
 }
 
@@ -314,8 +288,8 @@
 }
 
 @keyframes spMaskGlow {
-  from { box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 34px rgba(168, 85, 247, 0.24); }
-  to { box-shadow: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 48px rgba(251, 113, 133, 0.34); }
+  from { filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 14px rgba(188, 31, 59, 0.24)); }
+  to { filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 28px rgba(231, 53, 78, 0.42)); }
 }
 
 @keyframes spTextEnter {
@@ -349,7 +323,7 @@
 
 @media (max-width: 380px) {
   .sp__emblem-wrap { width: 184px; height: 184px; }
-  .sp__emblem { width: 142px; height: 142px; border-radius: 40px; }
+  .sp__emblem { width: 156px; height: 156px; }
   .sp__projector-beam { width: 220px; height: 220px; }
   .sp__season-artwork { top: max(12px, calc(50% - 240px)); }
 }

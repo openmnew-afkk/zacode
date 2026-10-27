@@ -1,25 +1,26 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
-    <linearGradient id="frame" x1="20" y1="8" x2="109" y2="119" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#8eeaff"/>
-      <stop offset=".5" stop-color="#c5a5ff"/>
-      <stop offset="1" stop-color="#ff91b6"/>
+    <linearGradient id="porcelain" x1="42" y1="13" x2="80" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset=".52" stop-color="#f2edf0"/>
+      <stop offset="1" stop-color="#c9c1c6"/>
     </linearGradient>
-    <linearGradient id="face" x1="38" y1="17" x2="86" y2="112" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#fffdf8"/>
-      <stop offset=".62" stop-color="#e6e1ed"/>
-      <stop offset="1" stop-color="#b9b2c7"/>
+    <linearGradient id="paint" x1="33" y1="35" x2="94" y2="100" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff5264"/>
+      <stop offset=".5" stop-color="#c20d2b"/>
+      <stop offset="1" stop-color="#650819"/>
     </linearGradient>
-    <filter id="glow" x="3" y="1" width="122" height="126" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+    <filter id="mask-glow" x="4" y="1" width="120" height="126" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
       <feGaussianBlur stdDeviation="4"/>
     </filter>
   </defs>
-  <rect x="4" y="4" width="120" height="120" rx="36" fill="#100f19"/>
-  <rect x="5" y="5" width="118" height="118" rx="35" stroke="url(#frame)" stroke-opacity=".48" stroke-width="2"/>
-  <path d="M64 17c-22 0-37 16-37 40v10c0 21 13 37 37 50 24-13 37-29 37-50V57c0-24-15-40-37-40Z" fill="url(#frame)" opacity=".32" filter="url(#glow)"/>
-  <path d="M64 17c-22 0-37 16-37 40v10c0 21 13 37 37 50 24-13 37-29 37-50V57c0-24-15-40-37-40Z" fill="url(#face)"/>
-  <path d="m36 55 25-8-10 14-13 5-2-11Zm56 0-25-8 10 14 13 5 2-11Z" fill="#171521"/>
-  <path d="m58 74 6-5 6 5-6 7-6-7Z" fill="#83728e"/>
-  <path d="M51 88c4-5 8-7 13-7s9 2 13 7c-4 9-8 13-13 13s-9-4-13-13Z" fill="#211b2a"/>
-  <path d="M58 90c2-2 4-3 6-3s4 1 6 3" fill="none" stroke="#ff9fc4" stroke-linecap="round" stroke-width="1.5"/>
+  <path d="M64 13C43 13 29 27 27 49c-2 23 5 44 20 60 7 6 13 9 17 9s10-3 17-9c15-16 22-37 20-60-2-22-16-36-37-36Z" fill="#fff" opacity=".24" filter="url(#mask-glow)"/>
+  <path d="M64 13C43 13 29 27 27 49c-2 23 5 44 20 60 7 6 13 9 17 9s10-3 17-9c15-16 22-37 20-60-2-22-16-36-37-36Z" fill="url(#porcelain)"/>
+  <path d="M39 54c4-8 12-12 20-9 4 2 5 6 3 10-3 7-10 14-18 15-6 0-9-7-5-16Zm50 0c-4-8-12-12-20-9-4 2-5 6-3 10 3 7 10 14 18 15 6 0 9-7 5-16Z" fill="#17141a"/>
+  <path d="m60 78 4-5 4 5-4 5-4-5Z" fill="#4a4148"/>
+  <path d="m64 18 7 15-4 9 9 9-5 8 11 8-5 6 8 5-4 7 9 5-6 6 1 11-7-6-2-11-8-4 3-8-8-7 5-7-9-8 4-7-7-8 2-8-8-10Z" fill="url(#paint)"/>
+  <path d="m42 37 8 3-3 5-9-2 4-6Zm40 48 7 2-2 5-8-2 3-5Z" fill="#ad1029" opacity=".86"/>
+  <path d="M34 79c6 4 11 6 16 6m34-43c5-1 9-3 13-7" fill="none" stroke="#fff" stroke-opacity=".58" stroke-linecap="round" stroke-width="2"/>
+  <path d="M52 96c4-4 8-6 12-6s8 2 12 6c-4 4-8 6-12 6s-8-2-12-6Z" fill="#211b20"/>
+  <path d="M61 91v10m6-10v10" stroke="#e8dfe3" stroke-opacity=".8" stroke-width="1.5"/>
 </svg>

@@ -1,47 +1,34 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="icon-bg" x1="52" y1="40" x2="462" y2="478" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#211d30"/>
-      <stop offset=".52" stop-color="#100f19"/>
-      <stop offset="1" stop-color="#07080d"/>
+    <linearGradient id="porcelain" x1="178" y1="66" x2="355" y2="445" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff"/>
+      <stop offset=".52" stop-color="#f2edf0"/>
+      <stop offset="1" stop-color="#bdb4bb"/>
     </linearGradient>
-    <linearGradient id="icon-rim" x1="92" y1="72" x2="427" y2="428" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#8eeaff"/>
-      <stop offset=".48" stop-color="#c5a5ff"/>
-      <stop offset=".78" stop-color="#ff91b6"/>
-      <stop offset="1" stop-color="#ffe4a8"/>
+    <linearGradient id="paint" x1="119" y1="113" x2="396" y2="421" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff5264"/>
+      <stop offset=".5" stop-color="#c20d2b"/>
+      <stop offset="1" stop-color="#650819"/>
     </linearGradient>
-    <linearGradient id="icon-mask" x1="152" y1="90" x2="365" y2="415" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#fffdf8"/>
-      <stop offset=".58" stop-color="#e6e1ed"/>
-      <stop offset="1" stop-color="#b9b2c7"/>
-    </linearGradient>
-    <radialGradient id="icon-aura" cx="0" cy="0" r="1" gradientTransform="matrix(0 203 -203 0 256 248)" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#a86cff" stop-opacity=".29"/>
-      <stop offset="1" stop-color="#a86cff" stop-opacity="0"/>
+    <radialGradient id="aura" cx="0" cy="0" r="1" gradientTransform="matrix(0 242 -242 0 256 255)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9d1838" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#9d1838" stop-opacity="0"/>
     </radialGradient>
-    <filter id="icon-glow" x="48" y="46" width="416" height="420" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-      <feGaussianBlur stdDeviation="13"/>
+    <filter id="glow" x="55" y="45" width="402" height="434" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="18"/>
     </filter>
   </defs>
-  <rect x="18" y="18" width="476" height="476" rx="142" fill="url(#icon-bg)"/>
-  <rect x="19.5" y="19.5" width="473" height="473" rx="140.5" stroke="#fff" stroke-opacity=".15" stroke-width="3"/>
-  <circle cx="256" cy="248" r="190" fill="url(#icon-aura)"/>
-  <circle cx="256" cy="244" r="169" stroke="url(#icon-rim)" stroke-opacity=".74" stroke-width="12" filter="url(#icon-glow)"/>
-  <circle cx="256" cy="244" r="169" stroke="url(#icon-rim)" stroke-opacity=".8" stroke-width="3"/>
-  <circle cx="256" cy="244" r="151" stroke="#fff" stroke-opacity=".11" stroke-width="2"/>
-
-  <path d="M256 72c-83 0-139 57-139 143v37c0 77 48 137 139 185 91-48 139-108 139-185v-37c0-86-56-143-139-143Z" fill="url(#icon-mask)"/>
-  <path d="M256 72c-83 0-139 57-139 143v37c0 77 48 137 139 185V72Z" fill="#fff" fill-opacity=".2"/>
-  <path d="m153 207 89-27-32 48-43 16-14-37Zm206 0-89-27 32 48 43 16 14-37Z" fill="#171521"/>
-  <path d="M190 211c20-17 42-25 66-25s46 8 66 25" fill="none" stroke="#fff" stroke-opacity=".76" stroke-width="5" stroke-linecap="round"/>
-  <path d="m237 256 19-16 19 16-19 20-19-20Z" fill="#83728e"/>
-  <path d="M215 302c13-14 26-20 41-20s28 6 41 20c-11 24-24 36-41 36s-30-12-41-36Z" fill="#211b2a"/>
-  <path d="M226 304c9-7 19-10 30-10s21 3 30 10" fill="none" stroke="#ff9fc4" stroke-opacity=".82" stroke-width="3" stroke-linecap="round"/>
-  <path d="M178 243c23 13 48 20 78 20s55-7 78-20" fill="none" stroke="url(#icon-rim)" stroke-opacity=".65" stroke-width="2"/>
-
-  <circle cx="384" cy="116" r="7" fill="#fff4dd"/>
-  <circle cx="384" cy="116" r="17" stroke="#a9eaff" stroke-opacity=".58" stroke-width="2"/>
-  <path d="M94 118c43-45 103-71 170-77" stroke="#fff" stroke-opacity=".17" stroke-linecap="round" stroke-width="3"/>
-  <text x="256" y="456" fill="#F4ECFF" fill-opacity=".92" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" letter-spacing="7" text-anchor="middle">ZENOVA</text>
+  <path fill="#08070b" d="M0 0h512v512H0z"/>
+  <circle cx="256" cy="256" r="244" fill="url(#aura)"/>
+  <path d="M256 64c-88 0-149 56-158 151-9 91 18 179 82 245 28 28 54 42 76 42s48-14 76-42c64-66 91-154 82-245-9-95-70-151-158-151Z" fill="#fff" opacity=".23" filter="url(#glow)"/>
+  <path d="M256 64c-88 0-149 56-158 151-9 91 18 179 82 245 28 28 54 42 76 42s48-14 76-42c64-66 91-154 82-245-9-95-70-151-158-151Z" fill="url(#porcelain)"/>
+  <path d="M145 236c15-30 47-49 76-38 16 6 21 21 13 39-12 25-38 47-68 48-23 0-35-23-21-49Zm222 0c-15-30-47-49-76-38-16 6-21 21-13 39 12 25 38 47 68 48 23 0 35-23 21-49Z" fill="#17141a"/>
+  <path d="m239 330 17-22 17 22-17 20-17-20Z" fill="#4a4148"/>
+  <path d="M256 72 287 133l-17 34 39 36-22 32 48 32-21 27 37 25-17 31 39 20-27 28 4 41-30-24-9-42-34-18 12-33-36-30 22-31-40-34 18-31-31-33 10-34-36-41Z" fill="url(#paint)"/>
+  <path d="m136 176 34 12-12 23-38-9 16-26Zm224 196 31 10-10 23-36-9 15-24Z" fill="#b30d29" opacity=".88"/>
+  <path d="M117 319c23 13 43 18 64 18m150-182c20-5 38-15 54-31" fill="none" stroke="#fff" stroke-opacity=".56" stroke-linecap="round" stroke-width="8"/>
+  <path d="M208 398c17-17 33-25 48-25s31 8 48 25c-16 17-32 25-48 25s-32-8-48-25Z" fill="#211b20"/>
+  <path d="M246 378v41m20-41v41" stroke="#e8dfe3" stroke-opacity=".8" stroke-width="6"/>
+  <circle cx="100" cy="124" r="3" fill="#d8344b" opacity=".7"/>
+  <circle cx="405" cy="280" r="2.5" fill="#e84b5f" opacity=".65"/>
 </svg>
