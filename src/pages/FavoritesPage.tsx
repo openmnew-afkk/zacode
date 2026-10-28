@@ -4,7 +4,8 @@ import { useStore } from '../store';
 import type { Movie, WatchStatus } from '../types';
 import './FavoritesPage.css';
 
-const TABS: Array<{ id: WatchStatus | 'want'; label: string }> = [
+const TABS: Array<{ id: WatchStatus | 'want' | 'liked'; label: string }> = [
+  { id: 'liked', label: 'Понравилось' },
   { id: 'want', label: 'В планах' },
   { id: 'watching', label: 'Смотрю' },
   { id: 'watched', label: 'Просмотрено' },
@@ -13,24 +14,18 @@ const TABS: Array<{ id: WatchStatus | 'want'; label: string }> = [
 
 const FavoritesPage: React.FC = () => {
   const navigate = useNavigate();
-  const { favorites, tracked, setTrackedStatus, removeFavorite } = useStore();
-  const [tab, setTab] = useState<WatchStatus | 'want'>('want');
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const { favorites, tracked, setTrackedStatus, addFavorite, removeFavorite } = useStore();
+  const [tab, setTab] = useState<WatchStatus | 'want' | 'liked'>('liked');
 
   const allTracked = Object.values(tracked);
-  const wantMovies = new Map<string, Movie>(
-    allTracked
-      .filter((item) => item.status === 'want')
-      .sort((a, b) => b.addedAt - a.addedAt)
-      .map((item) => [item.movie.id, item.movie])
-  );
-  favorites.forEach((movie) => {
-    if (!tracked[movie.id]) wantMovies.set(movie.id, movie);
-  });
+  const wantMovies = allTracked
+    .filter((item) => item.status === 'want')
+    .sort((a, b) => b.addedAt - a.addedAt);
 
-  const items: Movie[] =
-    tab === 'want'
-      ? Array.from(wantMovies.values())
+  const items: Movie[] = tab === 'liked'
+    ? [...favorites].reverse()
+    : tab === 'want'
+      ? wantMovies.map((item) => item.movie)
       : allTracked
           .filter((item) => item.status === tab)
           .sort((a, b) => b.addedAt - a.addedAt)
@@ -39,34 +34,26 @@ const FavoritesPage: React.FC = () => {
   const watchedCount = allTracked.filter((t) => t.status === 'watched').length;
   const watchingCount = allTracked.filter((t) => t.status === 'watching').length;
 
-  const handleMarkWatched = (e: React.MouseEvent, movie: Movie) => {
-    e.stopPropagation();
-    setTrackedStatus(movie, 'watched');
-    if (tab === 'want') {
-      removeFavorite(movie.id);
+  const handleStatusChange = (movie: Movie, value: string) => {
+    if (value === 'remove') {
+      if (tab === 'liked') {
+        removeFavorite(movie.id);
+      } else if (tracked[movie.id]) {
+        setTrackedStatus(movie, null);
+      }
+      return;
     }
-  };
-
-  const handleSetStatus = (e: React.MouseEvent, movie: Movie, status: WatchStatus) => {
-    e.stopPropagation();
-    if (tracked[movie.id]?.status !== status) setTrackedStatus(movie, status);
-    if (tab === 'want') {
-      removeFavorite(movie.id);
+    if (value === 'liked') {
+      if (tab === 'liked') {
+        if (tracked[movie.id]) setTrackedStatus(movie, null);
+      } else if (!favorites.some((item) => item.id === movie.id)) {
+        addFavorite(movie);
+      }
+      return;
     }
-    setSelectedMovie(null);
-  };
-
-  const handleRemove = (e: React.MouseEvent, movieId: string) => {
-    e.stopPropagation();
-    if (tab === 'want') {
-      removeFavorite(movieId);
-      const item = tracked[movieId];
-      if (item?.status === 'want') setTrackedStatus(item.movie, null);
-    } else {
-      const item = tracked[movieId];
-      if (item) setTrackedStatus(item.movie, null);
+    if (value === 'want' || value === 'watching' || value === 'watched' || value === 'dropped') {
+      setTrackedStatus(movie, value);
     }
-    setSelectedMovie(null);
   };
 
   return (
@@ -90,7 +77,7 @@ const FavoritesPage: React.FC = () => {
         </button>
         <div className="fav-stat-div" />
         <button className="fav-stat" type="button" onClick={() => setTab('want')}>
-          <span className="fav-stat__val">{wantMovies.size}</span>
+          <span className="fav-stat__val">{wantMovies.length}</span>
           <span className="fav-stat__label">В планах</span>
         </button>
       </div>
@@ -99,23 +86,21 @@ const FavoritesPage: React.FC = () => {
       <div className="fav-tabs-wrap">
         <div className="fav-tabs">
           {TABS.map((t) => {
-            const count =
-              t.id === 'want'
-                ? wantMovies.size
+            const count = t.id === 'liked'
+              ? favorites.length
+              : t.id === 'want'
+                ? wantMovies.length
                 : allTracked.filter((item) => item.status === t.id).length;
             const active = tab === t.id;
             return (
               <button
                 key={t.id}
                 className={`fav-tab ${active ? 'active' : ''}`}
-                onClick={() => {
-                  setTab(t.id);
-                  setSelectedMovie(null);
-                }}
+                onClick={() => setTab(t.id)}
                 aria-pressed={active}
               >
                 <span>{t.label}</span>
-                {count > 0 && <span className="fav-tab__count">{count}</span>}
+                <span className="fav-tab__count">{count}</span>
               </button>
             );
           })}
@@ -131,7 +116,11 @@ const FavoritesPage: React.FC = () => {
             </svg>
           </div>
           <p className="fav-empty__title">Список пуст</p>
-          <p className="fav-empty__sub">Добавляйте фильмы в закладки или отмечайте просмотренное</p>
+          <p className="fav-empty__sub">
+            {tab === 'liked'
+              ? 'Отмечайте сердцем фильмы и сериалы, которые вам нравятся'
+              : 'Добавляйте фильмы в закладки или отмечайте просмотренное'}
+          </p>
         </div>
       ) : (
         <div className="fav-grid">
@@ -156,35 +145,6 @@ const FavoritesPage: React.FC = () => {
                     <span className="fav-card__rating">★ {movie.vote_average.toFixed(1)}</span>
                   )}
 
-                  {/* Fast action overlay button */}
-                  <div className="fav-card__quick-bar">
-                    {tab !== 'watched' && (
-                      <button
-                        className="fav-card__check-btn"
-                        onClick={(e) => handleMarkWatched(e, movie)}
-                        title="Отметить просмотренным"
-                      >
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                          <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                        <span>Просмотрено</span>
-                      </button>
-                    )}
-                    <button
-                      className="fav-card__more-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedMovie(movie);
-                      }}
-                      aria-label="Опции"
-                    >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <circle cx="12" cy="5" r="2" />
-                        <circle cx="12" cy="12" r="2" />
-                        <circle cx="12" cy="19" r="2" />
-                      </svg>
-                    </button>
-                  </div>
                 </div>
 
                 <div className="fav-card__info">
@@ -193,6 +153,26 @@ const FavoritesPage: React.FC = () => {
                     {movie.release_date?.slice(0, 4)}
                     {movie.is_serial ? ' · сериал' : ''}
                   </p>
+                  <label className="fav-card__status">
+                    <span aria-hidden="true">✦</span>
+                    <select
+                      value={tracked[movie.id]?.status ?? 'liked'}
+                      aria-label={`Статус для «${movie.title}»`}
+                      onClick={(event) => event.stopPropagation()}
+                      onChange={(event) => {
+                        event.stopPropagation();
+                        handleStatusChange(movie, event.target.value);
+                      }}
+                    >
+                      <option value="liked">{tab === 'liked' ? 'Понравилось' : 'В понравившееся'}</option>
+                      <option value="want">В планах</option>
+                      <option value="watching">Смотрю</option>
+                      <option value="watched">Просмотрено</option>
+                      <option value="dropped">Брошено</option>
+                      <option value="remove">{tab === 'liked' ? 'Убрать из понравившегося' : 'Убрать из этого списка'}</option>
+                    </select>
+                    <span className="fav-card__status-chevron" aria-hidden="true">⌄</span>
+                  </label>
                 </div>
               </div>
             );
@@ -200,80 +180,6 @@ const FavoritesPage: React.FC = () => {
         </div>
       )}
 
-      {/* iOS Action Sheet for 3-dots menu */}
-      {selectedMovie && (
-        <div className="fav-sheet-backdrop" onClick={() => setSelectedMovie(null)}>
-          <div className="fav-sheet" onClick={(e) => e.stopPropagation()}>
-            <div className="fav-sheet__header">
-              <div className="fav-sheet__poster">
-                <img
-                  src={selectedMovie.poster_path}
-                  alt={selectedMovie.title}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?';
-                  }}
-                />
-              </div>
-              <div className="fav-sheet__meta">
-                <span className="fav-sheet__title">{selectedMovie.title}</span>
-                <span className="fav-sheet__sub">
-                  {selectedMovie.release_date?.slice(0, 4)}
-                  {selectedMovie.vote_average > 0 ? ` · ★ ${selectedMovie.vote_average.toFixed(1)}` : ''}
-                  {selectedMovie.is_serial ? ' · Сериал' : ' · Фильм'}
-                </span>
-              </div>
-            </div>
-
-            <div className="fav-sheet__group">
-              <button
-                className="fav-sheet__btn"
-                onClick={(e) => handleSetStatus(e, selectedMovie, 'watched')}
-              >
-                <span className="fav-sheet__icon icon--green">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17L4 12"/></svg>
-                </span>
-                <span className="fav-sheet__btn-text">Отметить «Просмотрено»</span>
-              </button>
-
-              <button
-                className="fav-sheet__btn"
-                onClick={(e) => handleSetStatus(e, selectedMovie, 'watching')}
-              >
-                <span className="fav-sheet__icon icon--blue">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                </span>
-                <span className="fav-sheet__btn-text">Переместить в «Смотрю сейчас»</span>
-              </button>
-
-              <button
-                className="fav-sheet__btn"
-                onClick={(e) => handleSetStatus(e, selectedMovie, 'want')}
-              >
-                <span className="fav-sheet__icon icon--purple">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-                </span>
-                <span className="fav-sheet__btn-text">Переместить в «В планах»</span>
-              </button>
-
-              <button
-                className="fav-sheet__btn fav-sheet__btn--danger"
-                onClick={(e) => handleRemove(e, selectedMovie.id)}
-              >
-                <span className="fav-sheet__icon icon--red">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-                </span>
-                <span className="fav-sheet__btn-text">Удалить из списка</span>
-              </button>
-            </div>
-
-            <div className="fav-sheet__cancel">
-              <button className="fav-sheet__cancel-btn" onClick={() => setSelectedMovie(null)}>
-                Отмена
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

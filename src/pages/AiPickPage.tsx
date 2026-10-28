@@ -4,7 +4,8 @@ import { smartDiscover, getRecommendations } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
-import VeloraAiEmblem from '../components/VeloraAiEmblem';
+import SeasonalMask from '../components/SeasonalMask';
+import { getStoredSeason } from '../services/seasons';
 import './AiPickPage.css';
 
 /* ══════════════════════════════════════════════════════ */
@@ -90,6 +91,8 @@ const AiPickPage: React.FC = () => {
   const navigate = useNavigate();
   const { haptic } = useTelegram();
   const { favorites, watchHistory, isFavorite, addFavorite, removeFavorite } = useStore();
+  const [season] = useState(() => getStoredSeason().season.id);
+  const maskSeason = season === 'none' ? 'autumn' : season;
 
   const [mood, setMood] = useState<MoodDef | null>(null);
   const [time, setTime] = useState<TimeDef | null>(null);
@@ -182,7 +185,7 @@ const AiPickPage: React.FC = () => {
     return (
       <div className="aip page">
         <header className="aip-header">
-          <VeloraAiEmblem size="md" />
+          <SeasonalMask season={maskSeason} className="aip-header__avatar" />
           <div className="aip-header__info">
             <h1 className="aip-header__title">ZENOVA AI</h1>
             <p className="aip-header__sub">{mood?.label} · {time?.label} · {era?.label}</p>
@@ -302,7 +305,7 @@ const AiPickPage: React.FC = () => {
   return (
     <div className="aip page">
       <header className="aip-header">
-        <VeloraAiEmblem size="md" />
+        <SeasonalMask season={maskSeason} className="aip-header__avatar" />
         <div className="aip-header__info">
           <h1 className="aip-header__title">ZENOVA AI</h1>
           <p className="aip-header__sub">Нейросетевой куратор кино</p>

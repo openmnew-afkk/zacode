@@ -537,14 +537,30 @@ export async function searchActors(query: string): Promise<Actor[]> {
 
 export async function getMoviesByActor(personId: number): Promise<Movie[]> {
   const data = await tmdb<any>(`/person/${personId}/combined_credits`);
+  const currentYear = new Date().getFullYear();
   return (data.cast || [])
-    .filter((item: any) =>
-      (item.media_type === 'movie' || item.media_type === 'tv') && item.adult !== true
+    .filter((item: any) => {
+      const year = Number.parseInt((item.release_date || item.first_air_date || '').slice(0, 4), 10);
+      return (item.media_type === 'movie' || item.media_type === 'tv')
+        && item.adult !== true
+        && item.vote_average >= 5.8
+        && item.vote_count >= 35
+        && !item.genre_ids?.includes(99)
+        && year > 0
+        && year <= currentYear;
+    })
+    .map((item: any) => {
+      const movie = toMovie(item);
+      const voteCount = Math.log10((item.vote_count || 0) + 1);
+      const popularity = Math.log10((item.popularity || 0) + 1);
+      const year = Number.parseInt(movie.release_date.slice(0, 4), 10);
+      const qualityScore = movie.vote_average * 10 + voteCount * 5 + popularity * 3 + year * 0.08;
+      return { movie, qualityScore };
+    })
+    .sort((a: { movie: Movie; qualityScore: number }, b: { movie: Movie; qualityScore: number }) =>
+      b.qualityScore - a.qualityScore
     )
-    .map((item: any) => toMovie(item))
-    .sort((a: Movie, b: Movie) =>
-      b.release_date.localeCompare(a.release_date) || b.popularity - a.popularity
-    )
+    .map((item: { movie: Movie }) => item.movie)
     .slice(0, 40);
 }
 

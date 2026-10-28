@@ -103,6 +103,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [fading, setFading] = useState(false);
   const [progress, setProgress] = useState(0);
   const season = getSplashSeason();
+  const today = new Date();
+  const isBirthday = today.getMonth() === 9 && today.getDate() === 28;
   const onDoneRef = useRef(onDone);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -123,7 +125,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
             setVisible(false);
             onDoneRef.current?.();
           }, 460));
-        }, 220));
+        }, isBirthday ? 2600 : 220));
       }
       setProgress(Math.min(100, Math.round(current)));
     }, 30);
@@ -137,7 +139,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   if (!visible) return null;
 
   return (
-    <div className={`sp sp--${season} ${fading ? 'sp--fade' : ''}`} role="status" aria-label="Загрузка ZENOVA">
+    <div className={`sp sp--${season} ${isBirthday ? 'sp--birthday' : ''} ${fading ? 'sp--fade' : ''}`} role="status" aria-label={isBirthday ? 'Поздравление с днём рождения' : 'Загрузка ZENOVA'}>
       {/* Мягкое глубинное свечение */}
       <SeasonArtwork season={season} />
       <div className="sp__ambient" />
@@ -155,26 +157,33 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
             <span className="sp__orbit sp__orbit--two" />
           </div>
 
-          <div className="sp__brand">
-            <div className="sp__title-wrap">
-              <h1 className="sp__title">ZENOVA</h1>
-              <svg className="sp__blood" viewBox="0 0 260 22" aria-hidden="true" focusable="false">
-                {season === 'winter' ? (
-                  <path d="M4 2h252v3h-18l-3 5-2-5h-20v9l-3 5-3-5V5h-25l-2 4-2-4h-18v11l-3 5-3-5V5h-22l-2 4-2-4h-18v8l-3 5-3-5V5h-24l-2 4-2-4H4z" />
-                ) : (
-                  <path d="M5 2h28l-3 10c-.6 2-3.4 2-4 0L24 6h-8l-1 12c-.2 3-4.8 3-5 0L9 6H5V2Zm54 0h32l-2 7c-.6 2-3.4 2-4 0l-1-3H74l-1 12c-.2 3-4.8 3-5 0L67 6h-8V2Zm53 0h36l-2 12c-.4 3-4.6 3-5 0l-1-8h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-11l-1 8c-.4 3-4.6 3-5 0l-1-12Zm59 0h32l-2 8c-.6 2-3.4 2-4 0l-1-4h-9l-1 10c-.3 3-4.7 3-5 0l-1-10h-8l-1 12c-.2 3-4.8 3-5 0l-1-16Zm51 0h33l-2 11c-.4 3-4.6 3-5 0l-1-7h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-10V2Z" />
-                )}
-              </svg>
+          {isBirthday ? (
+            <div className="sp__birthday-message">
+              <h1>Миша, с днём рождения!</h1>
+              <p>Пусть впереди будет больше ярких историй, смелых мечтаний и счастливых моментов. Пусть каждый новый день радует, как любимый фильм!</p>
             </div>
-            <p className="sp__subtitle">ТВОЙ МИР · ТВОИ ИСТОРИИ</p>
-          </div>
+          ) : (
+            <div className="sp__brand">
+              <div className="sp__title-wrap">
+                <h1 className="sp__title">ZENOVA</h1>
+                <svg className="sp__blood" viewBox="0 0 260 22" aria-hidden="true" focusable="false">
+                  {season === 'winter' ? (
+                    <path d="M4 2h252v3h-18l-3 5-2-5h-20v9l-3 5-3-5V5h-25l-2 4-2-4h-18v11l-3 5-3-5V5h-22l-2 4-2-4h-18v8l-3 5-3-5V5h-24l-2 4-2-4H4z" />
+                  ) : (
+                    <path d="M5 2h28l-3 10c-.6 2-3.4 2-4 0L24 6h-8l-1 12c-.2 3-4.8 3-5 0L9 6H5V2Zm54 0h32l-2 7c-.6 2-3.4 2-4 0l-1-3H74l-1 12c-.2 3-4.8 3-5 0L67 6h-8V2Zm53 0h36l-2 12c-.4 3-4.6 3-5 0l-1-8h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-11l-1 8c-.4 3-4.6 3-5 0l-1-12Zm59 0h32l-2 8c-.6 2-3.4 2-4 0l-1-4h-9l-1 10c-.3 3-4.7 3-5 0l-1-10h-8l-1 12c-.2 3-4.8 3-5 0l-1-16Zm51 0h33l-2 11c-.4 3-4.6 3-5 0l-1-7h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-10V2Z" />
+                  )}
+                </svg>
+              </div>
+              <p className="sp__subtitle">ТВОЙ МИР · ТВОИ ИСТОРИИ</p>
+            </div>
+          )}
         </div>
 
         <div className="sp__loading">
           <div className="sp__track" role="progressbar" aria-label="Загрузка" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
             <div className="sp__bar" style={{ width: `${progress}%` }} />
           </div>
-          <span className="sp__loading-label">СЛЕДУЮЩАЯ СЦЕНА УЖЕ БЛИЗКО</span>
+          <span className="sp__loading-label">{isBirthday ? 'СЕГОДНЯ ТВОЙ ОСОБЕННЫЙ ДЕНЬ' : 'СЛЕДУЮЩАЯ СЦЕНА УЖЕ БЛИЗКО'}</span>
         </div>
       </div>
     </div>

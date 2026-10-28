@@ -245,7 +245,7 @@ const SearchPage: React.FC = () => {
       )}
 
       {loading && (
-        <div className="search-grid">
+        <div className="search-grid" aria-label="Загрузка фильмов">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="search-skeleton">
               <div className="search-skeleton__poster skeleton-pulse" />
@@ -294,7 +294,13 @@ const SearchPage: React.FC = () => {
       {!loading && movies.length > 0 && (
         <div className="search-grid">
           {movies.map((movie) => (
-            <div key={movie.id} className="search-card" onClick={() => navigate(`/movie/${movie.id}`)}>
+            <button
+              key={movie.id}
+              type="button"
+              className="search-card"
+              onClick={() => navigate(`/movie/${movie.id}`)}
+              aria-label={`Открыть ${movie.title}${movie.release_date ? `, ${movie.release_date.slice(0, 4)}` : ''}`}
+            >
               <div className="search-card__poster">
                 <img
                   src={movie.poster_path}
@@ -307,9 +313,9 @@ const SearchPage: React.FC = () => {
                   <span className="search-card__rating">★ {movie.vote_average.toFixed(1)}</span>
                 )}
               </div>
-              <p className="search-card__title">{movie.title}</p>
-              {movie.release_date && <p className="search-card__year">{movie.release_date.slice(0, 4)}</p>}
-            </div>
+              <span className="search-card__title">{movie.title}</span>
+              {movie.release_date && <span className="search-card__year">{movie.release_date.slice(0, 4)}</span>}
+            </button>
           ))}
         </div>
       )}

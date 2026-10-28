@@ -429,3 +429,56 @@
     transition: none;
   }
 }
+
+.sp--birthday .sp__identity {
+  flex-direction: column;
+  gap: 12px;
+  text-align: center;
+}
+
+.sp--birthday .sp__emblem-wrap {
+  animation: spBirthdayTransform 1.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.sp__birthday-message {
+  max-width: 390px;
+  animation: spBirthdayReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both;
+}
+
+.sp__birthday-message h1 {
+  margin: 0;
+  color: #fff2c8;
+  font-size: clamp(26px, 7vw, 36px);
+  font-weight: 850;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  text-shadow: 0 0 26px rgba(255, 207, 120, 0.55);
+}
+
+.sp__birthday-message p {
+  margin: 11px 0 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.sp--birthday .sp__loading {
+  margin-top: 0;
+}
+
+@keyframes spBirthdayTransform {
+  0%, 35% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
+  100% { opacity: 0.08; transform: translateY(50px) scale(0.34) rotate(12deg); }
+}
+
+@keyframes spBirthdayReveal {
+  from { opacity: 0; transform: translateY(14px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp--birthday .sp__emblem-wrap,
+  .sp__birthday-message {
+    animation: none;
+  }
+}

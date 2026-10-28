@@ -383,3 +383,102 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.55);
 }
+
+.aip-header__avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  overflow: visible;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.06);
+  animation: aip-glow 3s ease-in-out infinite alternate;
+}
+
+.aip-header__avatar > img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+}
+
+.aip-header__avatar.seasonal-mask--winter::after,
+.aip-header__avatar.seasonal-mask--autumn::after,
+.aip-header__avatar.seasonal-mask--summer::after,
+.aip-header__avatar.seasonal-mask--spring::after {
+  position: absolute;
+  z-index: 2;
+  top: -6px;
+  right: -5px;
+  font-size: 13px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.aip-header__avatar.seasonal-mask--winter::after {
+  color: #e7f8ff;
+  content: '❄';
+  text-shadow: 0 0 8px #7dd3fc;
+  animation: aip-snow-shake 2.8s ease-in-out infinite;
+}
+
+.aip-header__avatar.seasonal-mask--autumn::after {
+  top: auto;
+  right: 7px;
+  bottom: 1px;
+  width: 4px;
+  height: 7px;
+  border-radius: 50% 50% 55% 55%;
+  background: #d82945;
+  box-shadow: 0 1px 5px rgba(248, 47, 70, 0.8);
+  content: '';
+  animation: aip-blood-drip 2.2s ease-in-out infinite;
+}
+
+.aip-header__avatar.seasonal-mask--spring::after {
+  color: #ffb6d2;
+  content: '✿';
+  text-shadow: 0 0 8px rgba(255, 182, 210, 0.9);
+  transform-origin: center bottom;
+  animation: aip-flower-grow 2.6s ease-in-out infinite;
+}
+
+.aip-header__avatar.seasonal-mask--summer::after {
+  color: #ffd18a;
+  content: '✦';
+  text-shadow: 0 0 8px rgba(255, 209, 138, 0.9);
+  animation: aip-summer-spark 2s ease-in-out infinite;
+}
+
+.aip-header__avatar.seasonal-mask--winter .seasonal-mask__hat {
+  transform-origin: 50% 80%;
+  animation: aip-snow-shake 2.8s ease-in-out infinite;
+}
+
+@keyframes aip-snow-shake {
+  0%, 74%, 100% { transform: translateX(-50%) rotate(-3deg) translateY(0); }
+  82% { transform: translateX(-50%) rotate(2deg) translateY(1px); }
+  90% { transform: translateX(-50%) rotate(-5deg) translateY(-1px); }
+}
+
+@keyframes aip-blood-drip {
+  0%, 52%, 100% { transform: scaleY(0.55); transform-origin: top; opacity: 0.65; }
+  74% { transform: scaleY(1.35); transform-origin: top; opacity: 1; }
+}
+
+@keyframes aip-flower-grow {
+  0%, 100% { transform: rotate(-12deg) scale(0.85); }
+  50% { transform: rotate(12deg) scale(1.1); }
+}
+
+@keyframes aip-summer-spark {
+  0%, 100% { transform: scale(0.78) rotate(0); opacity: 0.72; }
+  50% { transform: scale(1.2) rotate(36deg); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aip-header__avatar,
+  .aip-header__avatar::after,
+  .aip-header__avatar .seasonal-mask__hat {
+    animation: none;
+  }
+}
