@@ -102,6 +102,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [birthdayReveal, setBirthdayReveal] = useState(false);
   const season = getSplashSeason();
   const today = new Date();
   const isBirthday = today.getMonth() === 9 && today.getDate() === 28;
@@ -119,13 +120,14 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       if (current >= 100) {
         current = 100;
         clearInterval(interval);
+        if (isBirthday) setBirthdayReveal(true);
         timersRef.current.push(setTimeout(() => {
           setFading(true);
           timersRef.current.push(setTimeout(() => {
             setVisible(false);
             onDoneRef.current?.();
           }, 460));
-        }, isBirthday ? 2600 : 220));
+        }, isBirthday ? 3400 : 220));
       }
       setProgress(Math.min(100, Math.round(current)));
     }, 30);
@@ -139,7 +141,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   if (!visible) return null;
 
   return (
-    <div className={`sp sp--${season} ${isBirthday ? 'sp--birthday' : ''} ${fading ? 'sp--fade' : ''}`} role="status" aria-label={isBirthday ? 'Поздравление с днём рождения' : 'Загрузка ZENOVA'}>
+    <div className={`sp sp--${season} ${birthdayReveal ? 'sp--birthday' : ''} ${fading ? 'sp--fade' : ''}`} role="status" aria-label={birthdayReveal ? 'Поздравление с днём рождения' : 'Загрузка ZENOVA'}>
       {/* Мягкое глубинное свечение */}
       <SeasonArtwork season={season} />
       <div className="sp__ambient" />
@@ -157,7 +159,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
             <span className="sp__orbit sp__orbit--two" />
           </div>
 
-          {isBirthday ? (
+          {birthdayReveal ? (
             <div className="sp__birthday-message">
               <h1>Миша, с днём рождения!</h1>
               <p>Пусть впереди будет больше ярких историй, смелых мечтаний и счастливых моментов. Пусть каждый новый день радует, как любимый фильм!</p>
@@ -183,7 +185,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           <div className="sp__track" role="progressbar" aria-label="Загрузка" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}>
             <div className="sp__bar" style={{ width: `${progress}%` }} />
           </div>
-          <span className="sp__loading-label">{isBirthday ? 'СЕГОДНЯ ТВОЙ ОСОБЕННЫЙ ДЕНЬ' : 'СЛЕДУЮЩАЯ СЦЕНА УЖЕ БЛИЗКО'}</span>
+          <span className="sp__loading-label">{birthdayReveal ? 'СЕГОДНЯ ТВОЙ ОСОБЕННЫЙ ДЕНЬ' : 'СЛЕДУЮЩАЯ СЦЕНА УЖЕ БЛИЗКО'}</span>
         </div>
       </div>
     </div>

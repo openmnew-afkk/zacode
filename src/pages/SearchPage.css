@@ -333,14 +333,18 @@
   gap: 12px;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 10px 18px 22px;
-  scroll-padding-inline: 18px;
+  padding: 18px max(18px, calc((100% - clamp(146px, 42vw, 190px)) / 2)) 30px;
+  scroll-padding-inline: max(18px, calc((100% - clamp(146px, 42vw, 190px)) / 2));
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
   animation: search-fade 0.3s ease both;
 }
 .search-grid::-webkit-scrollbar { display: none; }
+
+.search-grid--centered {
+  perspective: 900px;
+}
 
 /* Card */
 .search-card {
@@ -353,13 +357,25 @@
   color: inherit;
   font: inherit;
   text-align: left;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0.72;
+  transform: scale(0.88);
+  transition:
+    opacity 240ms ease,
+    transform 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 240ms ease;
+  filter: saturate(0.78);
   -webkit-tap-highlight-color: transparent;
 }
+.search-card.is-centered {
+  z-index: 1;
+  opacity: 1;
+  transform: scale(1.06);
+  filter: saturate(1);
+}
 .search-card:active {
-  transform: scale(0.98);
+  transform: scale(1.02);
 }
 .search-card:focus-visible {
   border-radius: 14px;
@@ -386,6 +402,49 @@
 .search-card:hover .search-card__poster img,
 .search-card:focus-visible .search-card__poster img {
   transform: scale(1.055);
+}
+
+.search-actor-shelf {
+  margin-top: 6px;
+}
+
+.search-actor-shelf + .search-actor-shelf {
+  margin-top: 12px;
+}
+
+.search-actor-shelf__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 18px;
+}
+
+.search-actor-shelf__heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.search-actor-shelf__heading p {
+  margin: 3px 0 0;
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.search-actor-shelf__heading > span {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text-2);
+  font-size: 11px;
+  font-weight: 750;
 }
 .search-card__fade {
   position: absolute;
@@ -431,7 +490,7 @@
   flex: 0 0 clamp(146px, 42vw, 190px);
   border-radius: 14px;
   overflow: hidden;
-  scroll-snap-align: start;
+  scroll-snap-align: center;
 }
 .search-skeleton__poster {
   aspect-ratio: 2/3;
@@ -451,6 +510,12 @@
 @keyframes sk-pulse {
   0%, 100% { opacity: 0.45; }
   50%      { opacity: 0.15; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .search-card {
+    transition: none;
+  }
 }
 
 /* Empty */

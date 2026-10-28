@@ -16,6 +16,7 @@ const FavoritesPage: React.FC = () => {
   const navigate = useNavigate();
   const { favorites, tracked, setTrackedStatus, addFavorite, removeFavorite } = useStore();
   const [tab, setTab] = useState<WatchStatus | 'want' | 'liked'>('liked');
+  const [centeredCard, setCenteredCard] = useState(0);
 
   const allTracked = Object.values(tracked);
   const wantMovies = allTracked
@@ -45,7 +46,7 @@ const FavoritesPage: React.FC = () => {
     }
     if (value === 'liked') {
       if (tab === 'liked') {
-        if (tracked[movie.id]) setTrackedStatus(movie, null);
+        return;
       } else if (!favorites.some((item) => item.id === movie.id)) {
         addFavorite(movie);
       }
@@ -54,6 +55,21 @@ const FavoritesPage: React.FC = () => {
     if (value === 'want' || value === 'watching' || value === 'watched' || value === 'dropped') {
       setTrackedStatus(movie, value);
     }
+  };
+
+  const updateCenteredCard = (rail: HTMLDivElement) => {
+    const center = rail.getBoundingClientRect().left + rail.clientWidth / 2;
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    Array.from(rail.children).forEach((child, index) => {
+      const rect = child.getBoundingClientRect();
+      const distance = Math.abs(rect.left + rect.width / 2 - center);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+    setCenteredCard(nearestIndex);
   };
 
   return (
@@ -96,7 +112,10 @@ const FavoritesPage: React.FC = () => {
               <button
                 key={t.id}
                 className={`fav-tab ${active ? 'active' : ''}`}
-                onClick={() => setTab(t.id)}
+                onClick={() => {
+                  setTab(t.id);
+                  setCenteredCard(0);
+                }}
                 aria-pressed={active}
               >
                 <span>{t.label}</span>
@@ -123,12 +142,12 @@ const FavoritesPage: React.FC = () => {
           </p>
         </div>
       ) : (
-        <div className="fav-grid">
-          {items.map((movie) => {
+        <div className="fav-grid" onScroll={(event) => updateCenteredCard(event.currentTarget)}>
+          {items.map((movie, index) => {
             return (
               <div
                 key={movie.id}
-                className="fav-card"
+                className={`fav-card ${centeredCard === index ? 'is-centered' : ''}`}
                 onClick={() => navigate(`/movie/${movie.id}`)}
               >
                 <div className="fav-card__poster">

@@ -43,6 +43,7 @@ const SearchPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState<'movie' | 'series' | 'actors'>(initialPersonId ? 'actors' : 'movie');
   const [searchError, setSearchError] = useState('');
+  const [centeredCards, setCenteredCards] = useState<Record<string, number>>({});
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -119,9 +120,75 @@ const SearchPage: React.FC = () => {
   const isEmpty = !loading && !searchError && (searchType === 'actors' && !selectedActor ? actors.length === 0 : movies.length === 0) && query.trim().length > 0;
   const isInitial = !loading && query.trim().length === 0;
   const chooseActor = (actor: Actor) => {
+    setCenteredCards({});
     setSelectedActor(actor);
     setQuery(actor.name);
   };
+
+  const updateCenteredCard = (key: string, rail: HTMLDivElement) => {
+    const center = rail.getBoundingClientRect().left + rail.clientWidth / 2;
+    let nearestIndex = 0;
+    let nearestDistance = Number.POSITIVE_INFINITY;
+    Array.from(rail.children).forEach((child, index) => {
+      const rect = child.getBoundingClientRect();
+      const distance = Math.abs(rect.left + rect.width / 2 - center);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+    });
+    setCenteredCards((current) => current[key] === nearestIndex
+      ? current
+      : { ...current, [key]: nearestIndex });
+  };
+
+  const actorShelves = selectedActor ? [
+    {
+      id: 'rating',
+      title: 'Лучшие по рейтингу',
+      subtitle: 'Высокие оценки зрителей',
+      movies: [...movies].sort((a, b) => b.vote_average - a.vote_average || b.popularity - a.popularity),
+    },
+    {
+      id: 'year',
+      title: 'Сначала новинки',
+      subtitle: 'Фильмография от новых к ранним',
+      movies: [...movies].sort((a, b) =>
+        b.release_date.localeCompare(a.release_date) || b.vote_average - a.vote_average
+      ),
+    },
+    {
+      id: 'popular',
+      title: 'Самые популярные',
+      subtitle: 'То, что чаще выбирают зрители',
+      movies: [...movies].sort((a, b) => b.popularity - a.popularity || b.vote_average - a.vote_average),
+    },
+  ] : [];
+
+  const renderMovieCards = (list: Movie[], carouselId: string) => list.map((movie, index) => (
+    <button
+      key={`${carouselId}-${movie.id}`}
+      type="button"
+      className={`search-card ${(centeredCards[carouselId] ?? 0) === index ? 'is-centered' : ''}`}
+      onClick={() => navigate(`/movie/${movie.id}`)}
+      aria-label={`Открыть ${movie.title}${movie.release_date ? `, ${movie.release_date.slice(0, 4)}` : ''}`}
+    >
+      <div className="search-card__poster">
+        <img
+          src={movie.poster_path}
+          alt={movie.title}
+          loading="lazy"
+          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?'; }}
+        />
+        <div className="search-card__fade" />
+        {movie.vote_average > 0 && (
+          <span className="search-card__rating">★ {movie.vote_average.toFixed(1)}</span>
+        )}
+      </div>
+      <span className="search-card__title">{movie.title}</span>
+      {movie.release_date && <span className="search-card__year">{movie.release_date.slice(0, 4)}</span>}
+    </button>
+  ));
 
   return (
     <div className="search-page page">
@@ -291,32 +358,34 @@ const SearchPage: React.FC = () => {
         </div>
       )}
 
-      {!loading && movies.length > 0 && (
-        <div className="search-grid">
-          {movies.map((movie) => (
-            <button
-              key={movie.id}
-              type="button"
-              className="search-card"
-              onClick={() => navigate(`/movie/${movie.id}`)}
-              aria-label={`Открыть ${movie.title}${movie.release_date ? `, ${movie.release_date.slice(0, 4)}` : ''}`}
-            >
-              <div className="search-card__poster">
-                <img
-                  src={movie.poster_path}
-                  alt={movie.title}
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/200x300?text=?'; }}
-                />
-                <div className="search-card__fade" />
-                {movie.vote_average > 0 && (
-                  <span className="search-card__rating">★ {movie.vote_average.toFixed(1)}</span>
-                )}
+      {!loading && movies.length > 0 && selectedActor && (
+        <div className="search-actor-shelves">
+          {actorShelves.map((shelf) => (
+            <section className="search-actor-shelf" key={shelf.id} aria-label={shelf.title}>
+              <div className="search-actor-shelf__heading">
+                <div>
+                  <h2>{shelf.title}</h2>
+                  <p>{shelf.subtitle}</p>
+                </div>
+                <span>{shelf.movies.length}</span>
               </div>
-              <span className="search-card__title">{movie.title}</span>
-              {movie.release_date && <span className="search-card__year">{movie.release_date.slice(0, 4)}</span>}
-            </button>
+              <div
+                className="search-grid search-grid--centered"
+                onScroll={(event) => updateCenteredCard(shelf.id, event.currentTarget)}
+              >
+                {renderMovieCards(shelf.movies, shelf.id)}
+              </div>
+            </section>
           ))}
+        </div>
+      )}
+
+      {!loading && movies.length > 0 && !selectedActor && (
+        <div
+          className="search-grid search-grid--centered"
+          onScroll={(event) => updateCenteredCard('general', event.currentTarget)}
+        >
+          {renderMovieCards(movies, 'general')}
         </div>
       )}
 
