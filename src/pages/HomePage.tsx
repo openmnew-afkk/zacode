@@ -1,13 +1,12 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { createPortal } from 'react-dom';
+import { useState, useEffect, useCallback, useRef, useMemo, createPortal } from 'react';
+import { getStoredSeason } from '../services/seasons';
 import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
   discoverMovies, discoverSeries, getKeywordCollection,
 } from '../api/catalog';
-import { getStoredSeason } from '../services/seasons';
-import SeasonalMask from '../components/SeasonalMask';
+
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
@@ -410,23 +409,7 @@ const HomePage: React.FC = () => {
     }
   };
 
-  /* 🎄 Отсчёт до Нового года (зимой) */
-  const [nyLeft, setNyLeft] = useState<{ d: number; h: number; m: number } | null>(() => {
-    if (season.id !== 'winter') return null;
-    return getNewYearTimeLeft();
-  });
 
-  useEffect(() => {
-    if (season.id !== 'winter') {
-      setNyLeft(null);
-      return;
-    }
-
-    const updateCountdown = () => setNyLeft(getNewYearTimeLeft());
-    updateCountdown();
-    const timer = window.setInterval(updateCountdown, 60_000);
-    return () => window.clearInterval(timer);
-  }, [season.id]);
 
   const [genreRows, setGenreRows] = useState<Record<number, Movie[]>>({});
   const [searchResults, setSearchResults] = useState<Movie[]>([]);
@@ -1013,8 +996,8 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <SeasonalMask season={season.id} className="hp-header__emblem" />
-              <span className={`hp-header__wordmark hp-header__wordmark--${season.id}`}>
+              <VeloraEmblem />
+              <span className="hp-header__wordmark">
                 <span>ZENOVA</span>
                 <svg viewBox="0 0 260 22" aria-hidden="true">
                   {season.id === 'winter' ? (
@@ -1096,12 +1079,12 @@ const HomePage: React.FC = () => {
       )}
 
       {/* ── 🎄 Отсчёт до Нового года (только в новогодней теме) ── */}
-      {nyLeft && !showSearch && !activeCategory && tab === 'home' && (
+      {false && (
         <button className="hp-ny-count" onClick={() => { haptic('light'); navigate('/new-year'); }}>
           <span className="hp-ny-count__tree">🎄</span>
           <span className="hp-ny-count__label">До Нового года</span>
           <span className="hp-ny-count__time">
-            {nyLeft.d}<i>д</i> {String(nyLeft.h).padStart(2, '0')}<i>ч</i> {String(nyLeft.m).padStart(2, '0')}<i>мин</i>
+            <i>д</i> <i>ч</i> <i>мин</i>
           </span>
           <span className="hp-ny-count__spark">✨</span>
         </button>
