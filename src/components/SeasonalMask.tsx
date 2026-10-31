@@ -9,17 +9,27 @@ interface SeasonalMaskProps {
 
 const SeasonalMask: React.FC<SeasonalMaskProps> = ({ season, className = '' }) => (
   <span className={`seasonal-mask seasonal-mask--${season} ${className}`.trim()}>
-    <img src="/zenova-mask.svg" alt="" />
+    <img src="/zenova-mask.svg" alt="" aria-hidden="true" className="seasonal-mask__base"/>
     {season === 'winter' && (
-      <svg className="seasonal-mask__hat" viewBox="0 0 64 48" aria-hidden="true">
-        <path d="M8 34C17 16 31 7 50 6c-4 10-1 18 8 25L8 42Z" fill="#c9233e" />
-        <path d="M7 34c16-6 34-8 51-3l4 9c-19-4-37-2-54 4Z" fill="#f3f5ff" />
-        <path d="M13 34c12-4 25-6 38-5" fill="none" stroke="#fff" strokeOpacity=".78" strokeWidth="2" strokeLinecap="round" />
-        <circle cx="50" cy="6" r="5" fill="#fff" />
-      </svg>
+      <span className="seasonal-mask__winter" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" aria-hidden="true">
+          <path className="tab-bar__season-tree" d="m32 14-13 17h7L14 44h12L10 56h44L38 44h12L38 31h7L32 14Z"/>
+          <path className="tab-bar__season-snow" d="M22 31h20M16 44h32M14 55h36"/>
+          <circle className="tab-bar__season-light" cx="32" cy="27" r="2"/>
+          <circle className="tab-bar__season-light" cx="25" cy="39" r="1.7"/>
+          <circle className="tab-bar__season-light" cx="39" cy="39" r="1.7"/>
+        </svg>
+      </span>
     )}
-    {season === 'spring' && <span className="seasonal-mask__petal" aria-hidden="true">✿</span>}
-    {season === 'summer' && <span className="seasonal-mask__spark" aria-hidden="true">✦</span>}
+    {season === 'autumn' && (
+      <span className="seasonal-mask__autumn" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="100%" height="100%" aria-hidden="true">
+          <path className="tab-bar__season-pumpkin" d="M31 22c-3-4-10-2-12 3-8-3-13 4-13 13 0 10 5 17 14 17 4 0 7-2 10-4 3 2 6 4 10 4 9 0 14-7 14-17 0-9-5-16-13-13-2-5-9-7-13-3h3Z"/>
+          <path className="tab-bar__season-leaf" d="M47 13c-7 0-12 4-14 11 7 0 12-4 14-11Z"/>
+          <path className="tab-bar__season-stem" d="M33 25c4-5 8-8 13-11"/>
+        </svg>
+      </span>
+    )}
   </span>
 );
 

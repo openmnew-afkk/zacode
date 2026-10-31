@@ -11,37 +11,78 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: drop-shadow(0 3px 8px rgba(194, 13, 43, 0.36));
 }
 
-.seasonal-mask--winter > img {
-  filter: drop-shadow(0 3px 9px rgba(100, 197, 255, 0.36));
+.seasonal-mask__base {
+  position: relative;
+  z-index: 0;
 }
 
-.seasonal-mask__hat {
-  position: absolute;
-  z-index: 1;
-  top: -34%;
-  left: 50%;
-  width: 72%;
-  height: auto;
+/* Зима — обычная ёлочка */
+.seasonal-mask--winter {
   overflow: visible;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.38));
-  transform: translateX(-50%) rotate(-3deg);
 }
 
-.seasonal-mask__petal,
-.seasonal-mask__spark {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  color: #ffb6d2;
-  font-size: 13px;
-  line-height: 1;
-  text-shadow: 0 0 8px rgba(255, 182, 210, 0.8);
+.seasonal-mask__winter {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.seasonal-mask__spark {
-  color: #ffd18a;
-  text-shadow: 0 0 8px rgba(255, 209, 138, 0.8);
+.seasonal-mask--winter .tab-bar__season-tree {
+  fill: #1d7665;
+  stroke: #83d8c0;
+  stroke-linejoin: round;
+  stroke-width: 1.2;
+}
+
+.seasonal-mask--winter .tab-bar__season-snow {
+  stroke: #e7fbff;
+  stroke-linecap: round;
+  stroke-width: 1.4;
+}
+
+.seasonal-mask--winter .tab-bar__season-star,
+.seasonal-mask--winter .tab-bar__season-light {
+  fill: #ffe4a0;
+}
+
+/* Осень — обычная тыква */
+.seasonal-mask--autumn {
+  overflow: visible;
+}
+
+.seasonal-mask__autumn {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.seasonal-mask--autumn .tab-bar__season-pumpkin {
+  fill: #e87932;
+  stroke: #f9ad55;
+  stroke-width: 1.2;
+}
+
+.seasonal-mask--autumn .tab-bar__season-leaf {
+  fill: #86a96a;
+}
+
+.seasonal-mask--autumn .tab-bar__season-stem {
+  stroke: #536f3d;
+}
+
+.seasonal-mask--autumn .tab-bar__season-trunk {
+  fill: #916448;
+}
+
+@media (max-width: 360px) {
+  .seasonal-mask__winter,
+  .seasonal-mask__autumn {
+    transform: scale(0.9);
+  }
 }

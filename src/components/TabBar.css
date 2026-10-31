@@ -4,7 +4,7 @@
   bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   width: min(440px, calc(100% - 24px));
-  padding: 5px;
+  padding: 8px;
   isolation: isolate;
   transform: translateX(-50%);
 }
@@ -13,26 +13,26 @@
   position: absolute;
   z-index: 1;
   inset: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 22px;
-  background: rgba(15, 15, 22, 0.64);
-  box-shadow:
-    0 8px 26px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  -webkit-backdrop-filter: blur(24px) saturate(135%);
-  backdrop-filter: blur(24px) saturate(135%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  background: rgba(15, 15, 22, 0.55);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
   content: '';
   pointer-events: none;
 }
 
+/* ════════ Сезонная вкладка навигации ════════ */
+
 .tab-bar__season {
   position: absolute;
-  top: -43px;
-  right: -3px;
+  top: -40px;
+  right: -4px;
   z-index: 0;
   display: grid;
-  width: 58px;
-  height: 66px;
+  width: 54px;
+  height: 62px;
   place-items: center;
   padding: 0;
   border: 0;
@@ -47,156 +47,169 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.46));
+  filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.42));
 }
 
-.tab-bar__season-pumpkin {
-  fill: #e87932;
-  stroke: #f9ad55;
-  stroke-width: 1.2;
-}
+/* ── зима ── */
 
-.tab-bar__season-rib {
-  fill: none;
-  stroke: #a64b27;
-  stroke-linecap: round;
-  stroke-width: 1.5;
-}
-
-.tab-bar__season-face {
-  fill: none;
-  stroke: #54272c;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.7;
-}
-
-.tab-bar__season-leaf {
-  fill: #86a96a;
-  stroke: #c1d69b;
-  stroke-width: 0.8;
-}
-
-.tab-bar__season-stem {
-  fill: none;
-  stroke: #536f3d;
-  stroke-linecap: round;
-  stroke-width: 2.3;
-}
-
-.tab-bar__season-tree {
+.tab-bar__season--winter .tab-bar__season-tree {
   fill: #1d7665;
   stroke: #83d8c0;
   stroke-linejoin: round;
-  stroke-width: 1.1;
+  stroke-width: 1.2;
 }
 
-.tab-bar__season-snow {
-  fill: none;
+.tab-bar__season--winter .tab-bar__season-snow {
   stroke: #e7fbff;
   stroke-linecap: round;
   stroke-width: 1.5;
 }
 
-.tab-bar__season-star,
-.tab-bar__season-light {
+.tab-bar__season--winter .tab-bar__season-star,
+.tab-bar__season--winter .tab-bar__season-light {
   fill: #ffe4a0;
-  filter: drop-shadow(0 0 4px rgba(255, 225, 148, 0.82));
 }
 
-.tab-bar__season-trunk {
+/* ── хэллоуин ── */
+
+.tab-bar__season--autumn .tab-bar__season-pumpkin {
+  fill: #e87932;
+  stroke: #f9ad55;
+  stroke-width: 1.2;
+}
+
+.tab-bar__season--autumn .tab-bar__season-stem {
+  stroke: #536f3d;
+}
+
+.tab-bar__season--autumn .tab-bar__season-leaf {
+  fill: #86a96a;
+  stroke: #c1d69b;
+}
+
+.tab-bar__season--autumn .tab-bar__season-trunk {
   fill: #916448;
 }
 
-.tab-bar__season:active {
-  filter: brightness(1.15);
-  transform: translateY(3px) scale(0.96);
+.tab-bar__season--autumn .tab-bar__season-tree {
+  fill: #1d7665;
+  stroke: #83d8c0;
 }
 
-.tab-bar__season:focus-visible {
-  outline: 2px solid rgba(225, 203, 255, 0.9);
-  outline-offset: 3px;
+.tab-bar__season--autumn .tab-bar__season-snow {
+  stroke: #e7fbff;
 }
+
+.tab-bar__season--autumn .tab-bar__season-star,
+.tab-bar__season--autumn .tab-bar__season-light {
+  fill: #ffe4a0;
+}
+
+/* ════════ Элементы вкладки ════════ */
 
 .tab-bar__inner {
   position: relative;
   z-index: 2;
   display: flex;
-  min-height: 58px;
-  align-items: stretch;
+  min-height: 60px;
+  align-items: center;
+  padding: 0 2px;
 }
 
 .tab-bar__item {
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 52px;
+  min-height: 56px;
   flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  padding: 4px 2px 6px;
+  padding: 5px 2px 7px;
   border: 0;
-  border-radius: 16px;
+  border-radius: 18px;
   background: transparent;
-  color: rgba(239, 235, 246, 0.56);
+  color: rgba(239, 235, 246, 0.52);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: color 0.18s ease, background-color 0.18s ease, transform 0.18s ease;
+  transition: color 0.18s ease, background-color 0.2s ease, transform 0.18s ease;
 }
+
+.tab-bar__item svg {
+  display: block;
+}
+
+/* светлая тема */
+[data-theme='light'] .tab-bar__item {
+  color: rgba(58, 48, 62, 0.52);
+}
+
+[data-theme='light'] .tab-bar__item--active {
+  background: rgba(168, 128, 220, 0.10);
+  color: #6b4a8a;
+}
+
+[data-theme='light'] .tab-bar__item--active::after {
+  background: #8d6ab7;
+}
+
+/* ════════ Активный пункт ════════ */
 
 .tab-bar__item--active {
-  background: rgba(196, 165, 255, 0.08);
-  color: #e8d9ff;
+  background: rgba(210, 180, 255, 0.08);
+  color: #e9dcf6;
 }
 
-.tab-bar__item:active {
-  transform: scale(0.96);
+.tab-bar__item--active::after {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #d7bcff;
+  content: '';
+  transform: translateX(-50%) scale(1.2);
+  box-shadow: 0 0 10px rgba(215, 188, 255, 0.7);
 }
+
+/* ════════ Иконки ════════ */
 
 .tab-bar__icon {
   display: flex;
-  width: 21px;
-  height: 21px;
-  flex: 0 0 21px;
+  width: 23px;
+  height: 23px;
+  flex: 0 0 23px;
   align-items: center;
   justify-content: center;
 }
 
 .tab-bar__icon svg {
-  width: 19px;
-  height: 19px;
+  width: 21px;
+  height: 21px;
   overflow: visible;
   stroke: currentColor;
-  stroke-width: 1.65;
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+
+/* ════════ Метки ════════ */
 
 .tab-bar__label {
   max-width: 100%;
   overflow: hidden;
   color: inherit;
-  font-size: 9px;
-  font-weight: 550;
-  letter-spacing: 0;
-  line-height: 1.1;
+  font-size: 9.5px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tab-bar__item--active::after {
-  position: absolute;
-  bottom: 1px;
-  left: 50%;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #d7bcff;
-  content: '';
-  transform: translateX(-50%);
-}
+/* ════════ Бэдж ════════ */
 
 .tab-bar__badge {
   position: absolute;
@@ -214,50 +227,54 @@
   background: #ed647d;
   color: #fff;
   font-size: 8px;
-  font-weight: 750;
+  font-weight: 800;
+  box-shadow: 0 0 12px rgba(237, 100, 125, 0.35);
 }
 
-.tab-bar__item:focus-visible {
-  outline: 2px solid rgba(225, 203, 255, 0.9);
-  outline-offset: -3px;
+/* ════════ Фокусы ════════ */
+
+.tab-bar__item:focus-visible,
+.tab-bar__season:focus-visible {
+  outline: 2px solid rgba(225, 203, 255, 0.92);
+  outline-offset: 3px;
 }
 
-[data-theme='light'] .tab-bar::before {
-  border-color: rgba(255, 255, 255, 0.56);
-  background: rgba(255, 250, 255, 0.72);
-  box-shadow:
-    0 8px 26px rgba(54, 35, 75, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+/* ════════ Анимации ════════ */
+
+.tab-bar__season:active {
+  transform: translateY(4px) scale(0.95);
+  transition-duration: 0.08s;
 }
 
-[data-theme='light'] .tab-bar__item {
-  color: rgba(49, 42, 59, 0.56);
+.tab-bar__item:active {
+  transform: scale(0.95);
+  transition-duration: 0.08s;
 }
 
-[data-theme='light'] .tab-bar__item--active {
-  background: rgba(156, 118, 204, 0.09);
-  color: #624b80;
-}
-
-[data-theme='light'] .tab-bar__item--active::after {
-  background: #8d6ab7;
-}
-
-[data-theme='light'] .tab-bar__badge {
-  border-color: #faf6fc;
-}
+/* ════════ Адаптив ════════ */
 
 @media (max-width: 360px) {
   .tab-bar__label {
-    font-size: 8px;
+    font-size: 8.5px;
+  }
+
+  .tab-bar__item {
+    min-height: 52px;
+  }
+
+  .tab-bar__icon {
+    width: 21px;
+    height: 21px;
+  }
+
+  .tab-bar__icon svg {
+    width: 19px;
+    height: 19px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tab-bar__item {
-    transition: none;
-  }
-
+  .tab-bar__item,
   .tab-bar__season {
     transition: none;
   }
