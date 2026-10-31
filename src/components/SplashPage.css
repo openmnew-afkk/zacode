@@ -1,25 +1,25 @@
+/* ═══════════════════════════════════════════════════════════════════════════════════════
+   SplashPage — красивая сезонная загрузка ZENOVA с маской и стеклом
+   ═══════════════════════════════════════════════════════════════════════════════════════ */
+
 .sp {
-  --sp-accent: #c084fc;
-  --sp-accent-soft: rgba(192, 132, 252, 0.22);
-  --sp-accent-warm: rgba(251, 113, 133, 0.14);
   position: fixed;
   inset: 0;
   z-index: 99999;
   display: grid;
-  width: 100%;
-  height: 100vh;
-  height: 100dvh;
   place-items: center;
   overflow: hidden;
   isolation: isolate;
   color: #fff;
-  background:
-    radial-gradient(ellipse 52% 38% at 50% 43%, var(--sp-accent-soft), transparent 75%),
-    radial-gradient(ellipse 72% 54% at 50% 112%, var(--sp-accent-warm), transparent 68%),
-    radial-gradient(ellipse 68% 60% at 0% 50%, rgba(33, 79, 148, 0.1), transparent 75%),
-    #08070d;
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
   transition: opacity 0.46s ease, transform 0.46s cubic-bezier(0.2, 0.75, 0.25, 1);
   user-select: none;
+  --sp-accent: #f9a8d4;
+  --sp-accent-soft: rgba(249, 168, 212, 0.22);
+  --sp-accent-warm: rgba(251, 113, 133, 0.14);
+  --sp-bg: #0b0910;
 }
 
 .sp::before,
@@ -50,72 +50,7 @@
   opacity: 0;
   transform: scale(1.045);
   pointer-events: none;
-}
-
-.sp__ambient {
-  position: absolute;
-  z-index: -1;
-  width: min(92vw, 520px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: conic-gradient(from 110deg, transparent 0 15%, var(--sp-accent-soft) 32%, var(--sp-accent-warm) 48%, transparent 68%);
-  filter: blur(48px);
-  opacity: 0.55;
-  animation: spAmbient 9s ease-in-out infinite alternate;
-}
-
-.sp__starfield {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.sp__starfield i {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 9px 2px rgba(220, 190, 255, 0.55);
-  animation: spStar 3.2s ease-in-out infinite alternate;
-}
-
-.sp__starfield i:nth-child(1) { top: 22%; left: 17%; }
-.sp__starfield i:nth-child(2) { top: 34%; right: 19%; animation-delay: -1.2s; }
-.sp__starfield i:nth-child(3) { top: 69%; left: 23%; animation-delay: -2.1s; }
-.sp__starfield i:nth-child(4) { top: 74%; right: 22%; animation-delay: -0.8s; }
-.sp__starfield i:nth-child(5) { top: 17%; right: 35%; width: 2px; height: 2px; animation-delay: -1.6s; }
-
-.sp__season-artwork {
-  position: absolute;
-  z-index: 0;
-  top: max(12px, calc(50% - 270px));
-  left: 50%;
-  width: min(94vw, 440px);
-  overflow: visible;
-  color: var(--sp-accent);
-  filter: drop-shadow(0 0 20px var(--sp-accent-soft));
-  opacity: 0.8;
-  pointer-events: none;
-  transform: translateX(-50%);
-  animation: spArtworkDrift 12s ease-in-out infinite alternate;
-}
-
-.sp--halloween {
-  --sp-accent: #ffc27b;
-  --sp-accent-soft: rgba(255, 133, 68, 0.22);
-  --sp-accent-warm: rgba(204, 68, 74, 0.16);
-  background:
-    radial-gradient(ellipse 58% 40% at 50% 39%, rgba(98, 42, 105, 0.3), transparent 76%),
-    radial-gradient(ellipse 75% 55% at 50% 112%, rgba(189, 71, 48, 0.14), transparent 68%),
-    #0c0811;
-}
-
-.sp--winter {
-  --sp-accent: #b7eaff;
-  --sp-accent-soft: rgba(125, 211, 252, 0.25);
-  --sp-accent-warm: rgba(129, 140, 248, 0.16);
+}, 140, 248, 0.16);
   background:
     radial-gradient(ellipse 58% 42% at 50% 42%, rgba(125, 211, 252, 0.12), transparent 76%),
     radial-gradient(ellipse 75% 55% at 50% 112%, rgba(129, 140, 248, 0.12), transparent 68%),
@@ -427,58 +362,5 @@
   .sp,
   .sp__bar {
     transition: none;
-  }
-}
-
-.sp--birthday .sp__identity {
-  flex-direction: column;
-  gap: 12px;
-  text-align: center;
-}
-
-.sp--birthday .sp__emblem-wrap {
-  animation: spBirthdayTransform 1.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.sp__birthday-message {
-  max-width: 390px;
-  animation: spBirthdayReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.55s both;
-}
-
-.sp__birthday-message h1 {
-  margin: 0;
-  color: #fff2c8;
-  font-size: clamp(26px, 7vw, 36px);
-  font-weight: 850;
-  line-height: 1.12;
-  letter-spacing: -0.035em;
-  text-shadow: 0 0 26px rgba(255, 207, 120, 0.55);
-}
-
-.sp__birthday-message p {
-  margin: 11px 0 0;
-  color: rgba(255, 255, 255, 0.76);
-  font-size: 13px;
-  line-height: 1.55;
-}
-
-.sp--birthday .sp__loading {
-  margin-top: 0;
-}
-
-@keyframes spBirthdayTransform {
-  0%, 35% { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-  100% { opacity: 0.08; transform: translateY(50px) scale(0.34) rotate(12deg); }
-}
-
-@keyframes spBirthdayReveal {
-  from { opacity: 0; transform: translateY(14px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sp--birthday .sp__emblem-wrap,
-  .sp__birthday-message {
-    animation: none;
   }
 }

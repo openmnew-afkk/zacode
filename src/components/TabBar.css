@@ -275,7 +275,11 @@
 
 @media (prefers-reduced-motion: reduce) {
   .tab-bar__item,
-  .tab-bar__season {
-    transition: none;
+  .tab-bar__icon,
+  .tab-bar__item--active,
+  .tab-bar__season-glow,
+  .tab-bar__ripple {
+    transition: none !important;
+    animation: none !important;
   }
 }

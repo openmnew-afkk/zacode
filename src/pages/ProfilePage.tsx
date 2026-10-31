@@ -290,6 +290,7 @@ const ProfilePage: React.FC = () => {
                 {fxOff ? '❄️ Эффекты выключены (снег, лепестки)' : '❄️ Сезонные эффекты включены — снег, лепестки, светлячки'}
               </span>
             </button>
+            <div className="pf__season-chip">{seasonState.season.icon} {seasonState.season.label}</div>
             <p className="pf__season-note">
               {seasonAuto
                 ? `${detectSeason().icon} Сейчас по календарю: ${detectSeason().label}. Зимой — новогодняя со снегом и сугробами 🎄`
