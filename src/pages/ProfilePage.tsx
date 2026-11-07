@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
-import VeloraEmblem from '../components/VeloraEmblem';
 import RulesModal from '../components/RulesModal';
+import { openSideMenu } from '../components/SideMenu';
 import { resolveUserAccess } from '../services/accessControl';
 import { getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../services/seasons';
 import type { SeasonId } from '../services/seasons';
@@ -25,58 +25,58 @@ interface MenuGroup {
 const VISUAL_SEASONS: Array<{
   id: SeasonId | 'auto';
   name: string;
+  shortName: string;
   sub: string;
   emoji: string;
-  bg: string;
-  border: string;
+  accent: string;
 }> = [
   {
     id: 'winter',
     name: 'Супер Новогодняя',
+    shortName: 'Зима',
     sub: 'Морозный кристалл, Санта и гирлянда',
     emoji: '🎄',
-    bg: 'linear-gradient(135deg, rgba(14, 165, 233, 0.36) 0%, rgba(244, 63, 94, 0.28) 55%, rgba(250, 204, 21, 0.24) 100%)',
-    border: 'rgba(125, 211, 252, 0.6)',
+    accent: 'linear-gradient(180deg, #7dd3fc 0%, #c084fc 50%, #f43f5e 100%)',
   },
   {
     id: 'spring',
     name: 'Неоновая Сакура',
+    shortName: 'Сакура',
     sub: 'Цветущий Токио и лепестки сакуры',
     emoji: '🌸',
-    bg: 'linear-gradient(135deg, rgba(244, 114, 182, 0.34) 0%, rgba(168, 85, 247, 0.26) 100%)',
-    border: 'rgba(244, 114, 182, 0.58)',
+    accent: 'linear-gradient(180deg, #f9a8d4 0%, #ec4899 55%, #a855f7 100%)',
   },
   {
     id: 'summer',
     name: 'Солнечная Лазурь',
+    shortName: 'Лазурь',
     sub: 'Бирюзовый океан и золотые блики',
     emoji: '🌞',
-    bg: 'linear-gradient(135deg, rgba(251, 191, 36, 0.34) 0%, rgba(6, 182, 212, 0.3) 100%)',
-    border: 'rgba(251, 191, 36, 0.58)',
+    accent: 'linear-gradient(180deg, #fde047 0%, #38bdf8 55%, #0284c7 100%)',
   },
   {
     id: 'autumn',
     name: 'Тёплый Янтарь',
+    shortName: 'Янтарь',
     sub: 'Бархатный листопад и уютный свет',
     emoji: '🍁',
-    bg: 'linear-gradient(135deg, rgba(249, 115, 22, 0.36) 0%, rgba(180, 83, 9, 0.28) 100%)',
-    border: 'rgba(251, 146, 60, 0.58)',
+    accent: 'linear-gradient(180deg, #fdba74 0%, #f97316 55%, #b45309 100%)',
   },
   {
     id: 'none',
     name: 'Обсидиан PRO',
+    shortName: 'PRO',
     sub: 'Эталонный тёмный кинозал',
     emoji: '✦',
-    bg: 'linear-gradient(135deg, rgba(244, 63, 94, 0.28) 0%, rgba(24, 22, 36, 0.8) 100%)',
-    border: 'rgba(251, 113, 133, 0.52)',
+    accent: 'linear-gradient(180deg, #d8b4fe 0%, #a855f7 55%, #6366f1 100%)',
   },
   {
     id: 'auto',
     name: 'Авто-сезон',
+    shortName: 'Авто',
     sub: `По календарю (${detectSeason().label})`,
     emoji: '⚡',
-    bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(56, 189, 248, 0.26) 100%)',
-    border: 'rgba(52, 211, 153, 0.55)',
+    accent: 'linear-gradient(180deg, #6ee7b7 0%, #10b981 55%, #0ea5e9 100%)',
   },
 ];
 
@@ -94,6 +94,7 @@ const ProfilePage: React.FC = () => {
     telegramUsername,
   } = useStore();
   const [showRules, setShowRules] = useState(false);
+  const [sectionFilter, setSectionFilter] = useState<'all' | 'diary' | 'seasons' | 'services'>('all');
   const [diaryTab, setDiaryTab] = useState<'favorites' | 'watching' | 'want' | 'watched'>('favorites');
 
   /* Сезонное оформление */
@@ -141,13 +142,13 @@ const ProfilePage: React.FC = () => {
     : null;
 
   const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Киноман ZENOVA';
-  const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '');
+  const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '@zenova_member');
   const effectiveUser = user?.username || telegramUsername || '';
   const userAccess = resolveUserAccess(effectiveUser);
   const isAdminUser = userAccess.isAdmin || userAccess.isModerator || role === 'admin' || role === 'moderator' || user?.username === 'ZenovaAdmin';
   const effectivePremium = isPremium || userAccess.isVip;
 
-  /* Кино-ранг и XP прогресс для PRO-профиля */
+  /* Кино-ранг и XP прогресс */
   const trackedList = Object.values(tracked || {});
   const trackedCount = trackedList.length;
   const totalXp = watchHistory.length * 45 + favorites.length * 30 + trackedCount * 25 + (effectivePremium ? 250 : 60);
@@ -162,39 +163,11 @@ const ProfilePage: React.FC = () => {
       ? 'Киноэстет PRO'
       : 'Первооткрыватель';
 
-  /* Достижения пользователя */
-  const achievements = [
-    {
-      id: 'cinephile',
-      icon: '🎬',
-      title: 'Киноэстет',
-      desc: 'Первые фильмы',
-      unlocked: watchHistory.length >= 1 || favorites.length >= 1,
-    },
-    {
-      id: 'collector',
-      icon: '💎',
-      title: 'Коллекционер',
-      desc: '3+ в избранном',
-      unlocked: favorites.length >= 3,
-    },
-    {
-      id: 'explorer',
-      icon: '🌐',
-      title: 'Покоритель Миров',
-      desc: '7 кино-студий',
-      unlocked: true,
-    },
-    {
-      id: 'vip',
-      icon: '👑',
-      title: 'VIP Клуб',
-      desc: 'PRO привилегии',
-      unlocked: effectivePremium || isAdminUser,
-    },
-  ];
+  const heroMaskSrc = seasonState.season.id === 'winter'
+    ? '/zenova-mask-winter.png'
+    : '/zenova-mask-default.png';
 
-  /* Элементы интерактивного дневника в профиле */
+  /* Элементы интерактивного дневника */
   const diaryMovies = (() => {
     if (diaryTab === 'favorites') return favorites;
     return trackedList
@@ -204,7 +177,7 @@ const ProfilePage: React.FC = () => {
 
   const groups: MenuGroup[] = [
     {
-      title: 'ПОДПИСКА И ЭКОСИСТЕМА ZENOVA',
+      title: 'ЭКОСИСТЕМА И СЕРВИСЫ ZENOVA',
       items: [
         {
           icon: (
@@ -220,16 +193,14 @@ const ProfilePage: React.FC = () => {
         },
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7.5" height="7.5" rx="2" />
-              <rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
-              <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" />
-              <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="3.5" />
             </svg>
           ),
-          label: 'Кино-Миры и Студии',
+          label: 'Карусель Кино-Вселенных',
           sub: 'Netflix · Disney+ · HBO Max · Apple TV+ · Marvel · A24',
-          action: () => navigate('/studios'),
+          action: () => openSideMenu(),
         },
         {
           icon: (
@@ -253,11 +224,6 @@ const ProfilePage: React.FC = () => {
           sub: 'Персональный подбор фильма под настроение',
           action: () => navigate('/ai'),
         },
-      ],
-    },
-    {
-      title: 'ПРАВОВАЯ ИНФОРМАЦИЯ',
-      items: [
         {
           icon: (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -297,312 +263,457 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="pf page">
-      <div className="pf__bg" />
+      {/* Cyber Blueprint Grid Background */}
+      <div className="pf__bg" aria-hidden="true" />
 
-      {/* ═════ 3D HOLOGRAPHIC TITANIUM VIP MEMBER CARD ═════ */}
-      <div className="pf__card pf__card--pro">
-        <div className="pf__card-aurora" aria-hidden="true" />
-        <div className="pf__card-shine" />
-        <div className="pf__card-mesh" aria-hidden="true" />
+      {/* ═════ 1. TALL ROUNDED PASTEL-LILAC 3D SHOWCASE STAGE (Pinterest 888405463989126482) ═════ */}
+      <section className="pf-showcase">
+        <div className="pf-stage">
+          {/* Top-left cutout notch with circular back button */}
+          <div className="pf-stage__notch pf-stage__notch--tl">
+            <button
+              type="button"
+              className="pf-stage__corner-btn"
+              onClick={() => {
+                haptic('light');
+                navigate('/');
+              }}
+              aria-label="На главную"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </div>
 
-        {/* Верхняя плашка клубной карты */}
-        <div className="pf__pass-top">
-          <span className="pf__pass-kicker">✦ ZENOVA CINEMA CLUB • PASS</span>
-          <span className="pf__pass-serial">
-            ID #{String(user?.id || 2027).slice(-4).padStart(4, '0')} • 4K HDR
-          </span>
-        </div>
+          {/* Top-right cutout notch with circular VIP/bookmark button */}
+          <div className="pf-stage__notch pf-stage__notch--tr">
+            <button
+              type="button"
+              className="pf-stage__corner-btn"
+              onClick={() => {
+                haptic('medium');
+                navigate('/premium');
+              }}
+              aria-label="PRO Привилегии"
+            >
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+          </div>
 
-        <div className="pf__card-top">
-          <div className="pf__avatar-wrap">
-            <div className="pf__avatar-ring" />
-            <div className="pf__avatar">
+          {/* Ambient glow rings inside lilac stage */}
+          <div className="pf-stage__halo" aria-hidden="true" />
+
+          {/* Top floating serial badge */}
+          <div className="pf-stage__serial">
+            <span>ZENOVA EDITION</span>
+            <b>#{String(user?.id || 2027).slice(-4).padStart(4, '0')}</b>
+          </div>
+
+          {/* 3D Character Mascot Showcase */}
+          <div className="pf-stage__figure-wrap">
+            <img
+              src={heroMaskSrc}
+              alt="ZENOVA 3D Character"
+              className="pf-stage__figure"
+              draggable={false}
+            />
+            <div className="pf-stage__pedestal-shadow" aria-hidden="true" />
+          </div>
+
+          {/* Bottom-left frosted user pill (exact match to Pinterest reference) */}
+          <div className="pf-stage__user-pill">
+            <div className="pf-stage__user-avatar">
               {user?.photo_url ? (
-                <img src={user.photo_url} alt="" />
+                <img src={user.photo_url} alt={displayName} />
               ) : (
                 <span>{displayName[0]?.toUpperCase() || 'Z'}</span>
               )}
             </div>
-            <div className="pf__level-pill">LVL {cineLevel}</div>
-          </div>
-
-          <div className="pf__user-meta">
-            <div className="pf__user-title-row">
-              <h1 className="pf__name">{displayName}</h1>
+            <div className="pf-stage__user-copy">
+              <span className="pf-stage__user-handle">{username}</span>
               {(isAdminUser || effectivePremium) && (
-                <span className="pf__verified" title="Верифицирован">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                </span>
+                <span className="pf-stage__user-verified">✓ PRO</span>
               )}
-            </div>
-            {username && <p className="pf__username">{username}</p>}
-            <div className="pf__badges">
-              {effectivePremium ? (
-                <span className="pf__badge pf__badge--premium">👑 ZENOVA VIP PRO</span>
-              ) : (
-                <span className="pf__badge pf__badge--rank">✦ {rankTitle}</span>
-              )}
-              {isAdminUser && <span className="pf__badge pf__badge--admin">FOUNDER</span>}
             </div>
           </div>
 
-          <div className="pf__emblem-pod">
-            <VeloraEmblem size="md" className="pf__card-emblem" />
+          {/* Bottom-right level tag */}
+          <div className="pf-stage__lvl-pill">
+            LVL {cineLevel}
           </div>
         </div>
 
-        {/* Прогресс кино-ранга (PRO XP Bar) */}
-        <div className="pf__xp-box">
-          <div className="pf__xp-head">
-            <span className="pf__xp-rank">🏆 Ранг: {rankTitle}</span>
-            <span className="pf__xp-val">{totalXp} XP · {levelProgress}% до ур. {cineLevel + 1}</span>
+        {/* ═════ 2. DARK SLATE RANK BAR (Current Bid / Rank row from reference) ═════ */}
+        <div className="pf-rank-bar">
+          <div className="pf-rank-bar__left">
+            <span className="pf-rank-bar__diamond" aria-hidden="true">◆</span>
+            <span>Current Rank</span>
           </div>
-          <div className="pf__xp-bar">
-            <div className="pf__xp-fill" style={{ width: `${levelProgress}%` }} />
+          <div className="pf-rank-bar__right">
+            <strong>{rankTitle}</strong>
+            <span>{totalXp} XP</span>
           </div>
         </div>
 
-        <div className="pf__vip-status-bar" onClick={() => navigate('/premium')}>
-          <div className="pf__vip-status-left">
-            <span className={`pf__vip-dot ${effectivePremium ? 'active' : ''}`} />
-            <span className="pf__vip-status-text">
+        {/* ═════ 3. 2-COLUMN INFO & DIGITAL TIMER CARD (Name | Ending In + Description) ═════ */}
+        <div className="pf-meta-card">
+          <div className="pf-meta-card__top">
+            <div className="pf-meta-card__col">
+              <span className="pf-meta-card__label">Киноман</span>
+              <strong className="pf-meta-card__value">{displayName}</strong>
+            </div>
+            <div className="pf-meta-card__divider" />
+            <div className="pf-meta-card__col pf-meta-card__col--right">
+              <span className="pf-meta-card__label">
+                {effectivePremium ? 'PRO Активен' : 'Статус доступа'}
+              </span>
+              <strong className="pf-meta-card__clock">
+                {effectivePremium
+                  ? (daysLeft ? `${String(daysLeft).padStart(2, '0')}d : 24h : 00m` : 'UNLIMITED • 4K')
+                  : `0${cineLevel}L : ${String(levelProgress).padStart(2, '0')}% : XP`}
+              </strong>
+            </div>
+          </div>
+
+          <div className="pf-meta-card__desc">
+            <div className="pf-meta-card__desc-head">
+              <span>Description</span>
+              <b>{levelProgress}% до LVL {cineLevel + 1}</b>
+            </div>
+            <p>
               {effectivePremium
-                ? (isAdminUser ? 'Бессрочный PRO VIP доступ активен' : `PRO активен · ${daysLeft ? `осталось ${daysLeft} дн.` : 'Безлимит'}`)
-                : 'Откройте 4K потоки, премиум-серверы и режим без рекламы'}
-            </span>
-          </div>
-          <span className="pf__vip-action-btn">
-            {effectivePremium ? 'Привилегии' : 'PRO Доступ'} →
-          </span>
-        </div>
-      </div>
-
-      {/* ═════ 4-Плиточный PRO Bento Дашборд ═════ */}
-      <div className="pf__bento-stats">
-        <button type="button" className="pf__bento-tile" onClick={() => navigate('/favorites')}>
-          <span className="pf__bento-icon">🎬</span>
-          <span className="pf__bento-val">{watchHistory.length}</span>
-          <span className="pf__bento-lbl">Просмотрено</span>
-        </button>
-        <button type="button" className="pf__bento-tile" onClick={() => navigate('/favorites')}>
-          <span className="pf__bento-icon">❤️</span>
-          <span className="pf__bento-val">{favorites.length}</span>
-          <span className="pf__bento-lbl">Избранное</span>
-        </button>
-        <button type="button" className="pf__bento-tile" onClick={() => navigate('/studios')}>
-          <span className="pf__bento-icon">🌐</span>
-          <span className="pf__bento-val">7</span>
-          <span className="pf__bento-lbl">Кино-Миров</span>
-        </button>
-        <button type="button" className="pf__bento-tile pf__bento-tile--pro" onClick={() => navigate('/premium')}>
-          <span className="pf__bento-icon">👑</span>
-          <span className="pf__bento-val">{effectivePremium ? 'VIP' : 'PRO'}</span>
-          <span className="pf__bento-lbl">Статус</span>
-        </button>
-      </div>
-
-      {/* ═════ Медали и Достижения Киномана ═════ */}
-      <div className="pf__section-wrap">
-        <div className="pf__group-title">🏅 ДОСТИЖЕНИЯ КИНОМАНА</div>
-        <div className="pf__achievements-grid">
-          {achievements.map((ach) => (
-            <div
-              key={ach.id}
-              className={`pf__ach-card ${ach.unlocked ? 'unlocked' : 'locked'}`}
-            >
-              <span className="pf__ach-icon">{ach.icon}</span>
-              <div className="pf__ach-copy">
-                <span className="pf__ach-title">{ach.title}</span>
-                <span className="pf__ach-desc">{ach.desc}</span>
-              </div>
-              <span className="pf__ach-state">{ach.unlocked ? '✓' : '🔒'}</span>
+                ? 'Полный доступ к 4K HDR потокам, всем 7 Кино-Вселенным и приоритетному серверу без рекламы.'
+                : 'Смотрите фильмы, сохраняйте избранное и повышайте ранг в клубе ZENOVA.'}
+            </p>
+            <div className="pf-meta-card__xp-track">
+              <div className="pf-meta-card__xp-fill" style={{ width: `${levelProgress}%` }} />
             </div>
-          ))}
+          </div>
         </div>
-      </div>
 
-      {/* ═════ Интерактивный Кино-Дневник прямо в профиле ═════ */}
-      <div className="pf__section-wrap">
-        <div className="pf__diary-head">
-          <span className="pf__group-title" style={{ margin: 0 }}>📚 МОЯ КОЛЛЕКЦИЯ И ДНЕВНИК</span>
+        {/* ═════ 4. PILL SLIDER CTA BAR ("Place a bid >>>" style from reference) ═════ */}
+        <button
+          type="button"
+          className="pf-slider-cta"
+          onClick={() => {
+            haptic('medium');
+            navigate('/premium');
+          }}
+        >
+          <span className="pf-slider-cta__pill">
+            {effectivePremium ? '👑 VIP Привилегии' : '👑 PRO Доступ'}
+          </span>
+          <span className="pf-slider-cta__chevrons" aria-hidden="true">
+            <i>›</i><i>›</i><i>›</i><i>›</i>
+          </span>
+        </button>
+      </section>
+
+      {/* ═════ 5. DISCOVER HEADER & PILL TABS (Left screen of reference) ═════ */}
+      <section className="pf-discover">
+        <div className="pf-discover__head">
+          <h2 className="pf-discover__title">Коллекция и Студия</h2>
           <button
             type="button"
-            className="pf__diary-all-btn"
-            onClick={() => navigate('/favorites')}
+            className="pf-discover__icon-btn"
+            onClick={() => {
+              haptic('light');
+              navigate('/favorites');
+            }}
+            aria-label="Открыть избранное"
           >
-            Все списки →
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 17L17 7M17 7H8M17 7V16" />
+            </svg>
           </button>
         </div>
 
-        <div className="pf__diary-box">
-          <div className="pf__diary-tabs">
-            {([
-              { id: 'favorites', label: 'Избранное', count: favorites.length },
-              { id: 'watching', label: 'Смотрю', count: trackedList.filter((t) => t.status === 'watching').length },
-              { id: 'want', label: 'В планах', count: trackedList.filter((t) => t.status === 'want').length },
-              { id: 'watched', label: 'Просмотрено', count: trackedList.filter((t) => t.status === 'watched').length },
-            ] as const).map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                className={`pf__diary-tab ${diaryTab === t.id ? 'active' : ''}`}
-                onClick={() => {
-                  haptic('light');
-                  setDiaryTab(t.id);
-                }}
-              >
-                <span>{t.label}</span>
-                <b>{t.count}</b>
-              </button>
-            ))}
-          </div>
-
-          {diaryMovies.length === 0 ? (
-            <div className="pf__diary-empty">
-              <span>В этом списке пока пусто — добавляйте фильмы и сериалы со страницы любого тайтла</span>
-            </div>
-          ) : (
-            <div className="pf__diary-scroll">
-              {diaryMovies.slice(0, 12).map((m) => (
-                <div
-                  key={m.id}
-                  className="pf__diary-card"
-                  onClick={() => {
-                    haptic('light');
-                    navigate(`/movie/${m.id}`);
-                  }}
-                >
-                  <div className="pf__diary-poster">
-                    <img src={m.poster_path || ''} alt={m.title} loading="lazy" />
-                    {m.vote_average > 0 && (
-                      <span className="pf__diary-rate">★ {m.vote_average.toFixed(1)}</span>
-                    )}
-                  </div>
-                  <span className="pf__diary-name">{m.title}</span>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="pf-pill-tabs">
+          {([
+            { id: 'all', label: 'Все' },
+            { id: 'diary', label: 'Дневник' },
+            { id: 'seasons', label: 'Сезоны' },
+            { id: 'services', label: 'Сервисы' },
+          ] as const).map((tabItem) => (
+            <button
+              key={tabItem.id}
+              type="button"
+              className={`pf-pill-tab ${sectionFilter === tabItem.id ? 'active' : ''}`}
+              onClick={() => {
+                haptic('light');
+                setSectionFilter(tabItem.id);
+              }}
+            >
+              {tabItem.label}
+            </button>
+          ))}
         </div>
-      </div>
 
-      {/* ═════ Секции настроек и сервисов ═════ */}
-      <div className="pf__groups">
-        {/* ── СЕЗОННАЯ СТУДИЯ ОФОРМЛЕНИЯ (ВИЗУАЛЬНЫЕ КАРТОЧКИ С ГРАДИЕНТАМИ) ── */}
-        <div className="pf__group">
-          <div className="pf__group-title">🎨 СЕЗОННАЯ СТУДИЯ И АТМОСФЕРА</div>
-          <div className="pf__group-box pf__season-box">
-            <div className="pf__season-grid">
-              {VISUAL_SEASONS.map((s) => {
-                const isSelected = activeChoice === s.id;
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    className={`pf__season-card ${isSelected ? 'active' : ''}`}
-                    style={
-                      {
-                        '--sc-bg': s.bg,
-                        '--sc-border': s.border,
-                      } as React.CSSProperties
-                    }
-                    onClick={() => switchSeason(s.id)}
-                  >
-                    <div className="pf__season-card__top">
-                      <span className="pf__season-card__emoji">{s.emoji}</span>
-                      {isSelected && <span className="pf__season-card__active-pill">✓ Активна</span>}
-                    </div>
-                    <span className="pf__season-card__name">{s.name}</span>
-                    <span className="pf__season-card__sub">{s.sub}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="pf__season-switches">
-              <button
-                type="button"
-                className={`pf__season-toggle ${fxOff ? '' : 'on'}`}
-                onClick={toggleFx}
-              >
-                <span className="pf__season-toggle__track">
-                  <span className="pf__season-toggle__thumb" />
-                </span>
-                <span className="pf__season-toggle__label">
-                  {fxOff ? '❄️ 3D-снегопад и частицы выключены' : '❄️ 3D-снегопад, кристаллы и лепестки включены'}
-                </span>
-              </button>
-
-              {seasonState.season.id === 'winter' && (
-                <button
-                  type="button"
-                  className={`pf__season-toggle ${garlandOff ? '' : 'on'}`}
-                  onClick={toggleGarland}
-                >
-                  <span className="pf__season-toggle__track">
-                    <span className="pf__season-toggle__thumb" />
-                  </span>
-                  <span className="pf__season-toggle__label">
-                    {garlandOff ? '💡 Новогодняя гирлянда скрыта' : '💡 Светящаяся новогодняя гирлянда включена'}
-                  </span>
-                </button>
-              )}
-            </div>
-
+        {/* ═════ 6. 2×2 VIBRANT PASTEL-NEON BENTO GRID (Exact match to left screen of reference) ═════ */}
+        {sectionFilter === 'all' && (
+          <div className="pf-neon-grid">
+            {/* Card 1: Pastel Lime-Yellow */}
             <button
               type="button"
-              className="pf__ny-special-btn"
+              className="pf-neon-card pf-neon-card--lime"
+              onClick={() => {
+                haptic('light');
+                navigate('/favorites');
+              }}
+            >
+              <div className="pf-neon-card__top">
+                <span className="pf-neon-card__stat">
+                  <i>🎬</i> {watchHistory.length}
+                </span>
+                <span className="pf-neon-card__arrow">↗</span>
+              </div>
+              <div className="pf-neon-card__art">🎞️</div>
+              <div className="pf-neon-card__bottom">
+                <strong>Просмотрено</strong>
+                <span>История кинозала</span>
+              </div>
+            </button>
+
+            {/* Card 2: Pastel Pink-Rose */}
+            <button
+              type="button"
+              className="pf-neon-card pf-neon-card--pink"
+              onClick={() => {
+                haptic('light');
+                navigate('/favorites');
+              }}
+            >
+              <div className="pf-neon-card__top">
+                <span className="pf-neon-card__stat">
+                  <i>❤️</i> {favorites.length}
+                </span>
+                <span className="pf-neon-card__arrow">↗</span>
+              </div>
+              <div className="pf-neon-card__art">💎</div>
+              <div className="pf-neon-card__bottom">
+                <strong>Избранное</strong>
+                <span>Золотая коллекция</span>
+              </div>
+            </button>
+
+            {/* Card 3: Pastel Cyan-Mint */}
+            <button
+              type="button"
+              className="pf-neon-card pf-neon-card--mint"
+              onClick={() => {
+                haptic('medium');
+                openSideMenu();
+              }}
+            >
+              <div className="pf-neon-card__top">
+                <span className="pf-neon-card__stat">
+                  <i>🌐</i> 7 миров
+                </span>
+                <span className="pf-neon-card__arrow">↗</span>
+              </div>
+              <div className="pf-neon-card__art">🪐</div>
+              <div className="pf-neon-card__bottom">
+                <strong>Вселенные</strong>
+                <span>Netflix · Disney+ · HBO</span>
+              </div>
+            </button>
+
+            {/* Card 4: Pastel Violet-Sky */}
+            <button
+              type="button"
+              className="pf-neon-card pf-neon-card--violet"
               onClick={() => {
                 haptic('medium');
                 navigate('/new-year');
               }}
             >
-              <div className="pf__ny-special-btn__left">
-                <img src="/zenova-mask-winter.png" alt="" className="pf__ny-special-btn__img" />
-                <div>
-                  <span className="pf__ny-special-btn__title">🎄 Новогодний марафон 2027</span>
-                  <span className="pf__ny-special-btn__sub">Праздничная рулетка фильмов и таймер</span>
-                </div>
+              <div className="pf-neon-card__top">
+                <span className="pf-neon-card__stat">
+                  <i>🎄</i> 2027
+                </span>
+                <span className="pf-neon-card__arrow">↗</span>
               </div>
-              <span className="pf__ny-special-btn__arrow">Открыть →</span>
+              <div className="pf-neon-card__art">✨</div>
+              <div className="pf-neon-card__bottom">
+                <strong>Марафон</strong>
+                <span>Новогодняя рулетка</span>
+              </div>
             </button>
           </div>
-        </div>
+        )}
+      </section>
 
-        {groups.map((grp, gIdx) => (
-          <div key={gIdx} className="pf__group">
-            <div className="pf__group-title">{grp.title}</div>
-            <div className="pf__group-box">
-              {grp.items.map((item, iIdx) => (
+      {/* ═════ 7. VERTICAL OVAL CAPSULES — SEASONAL STUDIO (Right screen of reference) ═════ */}
+      {(sectionFilter === 'all' || sectionFilter === 'seasons') && (
+        <section className="pf-section">
+          <div className="pf-section__head">
+            <h3 className="pf-section__title">Сезонная Атмосфера</h3>
+            <span className="pf-section__sub">{seasonState.season.label}</span>
+          </div>
+
+          <div className="pf-capsules-rail">
+            {VISUAL_SEASONS.map((s) => {
+              const isSelected = activeChoice === s.id;
+              return (
                 <button
-                  key={iIdx}
-                  className={`pf__row ${item.highlight ? 'pf__row--highlight' : ''}`}
-                  onClick={item.action}
+                  key={s.id}
+                  type="button"
+                  className={`pf-capsule ${isSelected ? 'active' : ''}`}
+                  style={{ '--cap-accent': s.accent } as React.CSSProperties}
+                  onClick={() => switchSeason(s.id)}
                 >
-                  <div className="pf__icon-box">
-                    {item.icon}
-                  </div>
-                  <div className="pf__row-content">
-                    <div className="pf__row-text">
-                      <span className="pf__row-label">{item.label}</span>
-                      <span className="pf__row-sub">{item.sub}</span>
-                    </div>
-                    <span className="pf__arrow">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-                    </span>
-                  </div>
+                  <span className="pf-capsule__orb">{s.emoji}</span>
+                  <span className="pf-capsule__chevrons" aria-hidden="true">
+                    <i>⌃</i>
+                    <i>⌃</i>
+                    <i>⌃</i>
+                  </span>
+                  <span className="pf-capsule__name">{s.shortName}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="pf-season-controls">
+            <button
+              type="button"
+              className={`pf__season-toggle ${fxOff ? '' : 'on'}`}
+              onClick={toggleFx}
+            >
+              <span className="pf__season-toggle__track">
+                <span className="pf__season-toggle__thumb" />
+              </span>
+              <span className="pf__season-toggle__label">
+                {fxOff ? '❄️ 3D-снегопад и частицы выключены' : '❄️ 3D-снегопад, кристаллы и лепестки включены'}
+              </span>
+            </button>
+
+            {seasonState.season.id === 'winter' && (
+              <button
+                type="button"
+                className={`pf__season-toggle ${garlandOff ? '' : 'on'}`}
+                onClick={toggleGarland}
+              >
+                <span className="pf__season-toggle__track">
+                  <span className="pf__season-toggle__thumb" />
+                </span>
+                <span className="pf__season-toggle__label">
+                  {garlandOff ? '💡 Новогодняя гирлянда скрыта' : '💡 Светящаяся новогодняя гирлянда включена'}
+                </span>
+              </button>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ═════ 8. INTERACTIVE DIARY & WATCHLIST ═════ */}
+      {(sectionFilter === 'all' || sectionFilter === 'diary') && (
+        <section className="pf-section">
+          <div className="pf-section__head">
+            <h3 className="pf-section__title">Кино-Дневник</h3>
+            <button
+              type="button"
+              className="pf-section__link"
+              onClick={() => navigate('/favorites')}
+            >
+              Все списки →
+            </button>
+          </div>
+
+          <div className="pf__diary-box">
+            <div className="pf__diary-tabs">
+              {([
+                { id: 'favorites', label: 'Избранное', count: favorites.length },
+                { id: 'watching', label: 'Смотрю', count: trackedList.filter((t) => t.status === 'watching').length },
+                { id: 'want', label: 'В планах', count: trackedList.filter((t) => t.status === 'want').length },
+                { id: 'watched', label: 'Просмотрено', count: trackedList.filter((t) => t.status === 'watched').length },
+              ] as const).map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`pf__diary-tab ${diaryTab === t.id ? 'active' : ''}`}
+                  onClick={() => {
+                    haptic('light');
+                    setDiaryTab(t.id);
+                  }}
+                >
+                  <span>{t.label}</span>
+                  <b>{t.count}</b>
                 </button>
               ))}
             </div>
+
+            {diaryMovies.length === 0 ? (
+              <div className="pf__diary-empty">
+                <span>В этом списке пока пусто — добавляйте фильмы и сериалы со страницы любого тайтла</span>
+              </div>
+            ) : (
+              <div className="pf__diary-scroll">
+                {diaryMovies.slice(0, 12).map((m) => (
+                  <div
+                    key={m.id}
+                    className="pf__diary-card"
+                    onClick={() => {
+                      haptic('light');
+                      navigate(`/movie/${m.id}`);
+                    }}
+                  >
+                    <div className="pf__diary-poster">
+                      <img src={m.poster_path || ''} alt={m.title} loading="lazy" />
+                      {m.vote_average > 0 && (
+                        <span className="pf__diary-rate">★ {m.vote_average.toFixed(1)}</span>
+                      )}
+                    </div>
+                    <span className="pf__diary-name">{m.title}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        ))}
-      </div>
+        </section>
+      )}
+
+      {/* ═════ 9. SERVICES & ADMIN MENU ═════ */}
+      {(sectionFilter === 'all' || sectionFilter === 'services') && (
+        <div className="pf__groups">
+          {groups.map((grp, gIdx) => (
+            <div key={gIdx} className="pf__group">
+              <div className="pf__group-title">{grp.title}</div>
+              <div className="pf__group-box">
+                {grp.items.map((item, iIdx) => (
+                  <button
+                    key={iIdx}
+                    className={`pf__row ${item.highlight ? 'pf__row--highlight' : ''}`}
+                    onClick={item.action}
+                  >
+                    <div className="pf__icon-box">
+                      {item.icon}
+                    </div>
+                    <div className="pf__row-content">
+                      <div className="pf__row-text">
+                        <span className="pf__row-label">{item.label}</span>
+                        <span className="pf__row-sub">{item.sub}</span>
+                      </div>
+                      <span className="pf__arrow">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Недавно смотрели */}
-      {watchHistory.length > 0 && (
-        <div className="pf__group" style={{ marginInline: 14 }}>
-          <div className="pf__history-header">
-            <span className="pf__group-title">НЕДАВНО СМОТРЕЛИ</span>
+      {watchHistory.length > 0 && sectionFilter === 'all' && (
+        <div className="pf-section">
+          <div className="pf-section__head">
+            <h3 className="pf-section__title">Недавно смотрели</h3>
             <button className="pf__clear-btn" onClick={clearHistory}>
               Очистить
             </button>
@@ -634,7 +745,7 @@ const ProfilePage: React.FC = () => {
 
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
 
-      <div className="pf__footer">ZENOVA PRO · Все права защищены</div>
+      <div className="pf__footer">ZENOVA PRO · DIGITAL CINEMA CLUB</div>
     </div>
   );
 };

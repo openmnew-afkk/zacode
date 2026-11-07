@@ -94,51 +94,89 @@ const TabBar: React.FC = () => {
       style={{ '--active-idx': activeIndex } as React.CSSProperties}
       aria-label="Основная навигация"
     >
-      {/* Эффект заморозки и ледяного блика по контуру док-панели */}
-      <span className="tab-bar__frost-rim" aria-hidden="true" />
-      <span className="tab-bar__ice-drops" aria-hidden="true">
-        <i /><i /><i /><i />
-      </span>
+      <div className="tab-bar__capsule">
+        {/* Плавная неоновая волна-арка в стиле референса Pinterest (огибает активную вкладку сверху и идёт по низу) */}
+        <div className="tab-bar__arch-viewport" aria-hidden="true">
+          <svg
+            className="tab-bar__arch-svg"
+            viewBox="0 0 1500 68"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <linearGradient id="zenovaArchStroke" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(229, 9, 20, 0.15)" />
+                <stop offset="30%" stopColor="#ff1f3d" />
+                <stop offset="36.6%" stopColor="#ff2a4b" />
+                <stop offset="44%" stopColor="#e50914" />
+                <stop offset="85%" stopColor="rgba(229, 9, 20, 0.25)" />
+              </linearGradient>
+              <linearGradient id="zenovaArchFill" x1="550" y1="6" x2="550" y2="66" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="rgba(229, 9, 20, 0.24)" />
+                <stop offset="100%" stopColor="rgba(229, 9, 20, 0.0)" />
+              </linearGradient>
+            </defs>
 
-      <div className="tab-bar__inner">
-        {/* Плавающая жидкая ледяная капля-линза в стиле iOS 26 Liquid Glass */}
-        <div className="tab-bar__liquid-slider" aria-hidden="true">
-          <div className="tab-bar__liquid-blob" />
+            {/* Мягкое свечение внутри купола активной вкладки */}
+            <path
+              d="M 492 64 C 512 64, 514 7, 550 7 C 586 7, 588 64, 608 64 Z"
+              fill="url(#zenovaArchFill)"
+            />
+
+            {/* Непрерывная неоновая линия с куполом-аркой над активной иконкой */}
+            <path
+              className="tab-bar__arch-glow"
+              d="M 0 63 L 490 63 C 512 63, 514 7, 550 7 C 586 7, 588 63, 610 63 L 1500 63"
+              fill="none"
+              stroke="url(#zenovaArchStroke)"
+              strokeWidth="4.5"
+              strokeLinecap="round"
+            />
+            <path
+              className="tab-bar__arch-line"
+              d="M 0 63 L 490 63 C 512 63, 514 7, 550 7 C 586 7, 588 63, 610 63 L 1500 63"
+              fill="none"
+              stroke="url(#zenovaArchStroke)"
+              strokeWidth="2.3"
+              strokeLinecap="round"
+            />
+          </svg>
         </div>
 
-        {tabs.map((tab) => {
-          const active = isActive(tab.path);
-          return (
-            <button
-              key={tab.path}
-              type="button"
-              className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}${
-                tab.accent ? ' tab-bar__item--accent' : ''
-              }`}
-              onClick={() => {
-                haptic('light');
-                navigate(tab.path);
-              }}
-              aria-label={tab.label}
-              aria-current={active ? 'page' : undefined}
-            >
-              {/* Индивидуальная стеклянная капля вокруг иконки */}
-              <span className="tab-bar__droplet" aria-hidden="true">
-                <span className="tab-bar__droplet-glint" />
-              </span>
-
-              <span className="tab-bar__icon" aria-hidden="true">
-                {tab.icon}
-              </span>
-              <span className="tab-bar__label">{tab.label}</span>
-              {tab.path === '/profile' && favorites.length > 0 && (
-                <span className="tab-bar__badge">
-                  {favorites.length > 99 ? '99+' : favorites.length}
+        <div className="tab-bar__inner">
+          {tabs.map((tab) => {
+            const active = isActive(tab.path);
+            return (
+              <button
+                key={tab.path}
+                type="button"
+                className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}${
+                  tab.accent ? ' tab-bar__item--accent' : ''
+                }`}
+                onClick={() => {
+                  haptic('light');
+                  navigate(tab.path);
+                }}
+                aria-label={tab.label}
+                aria-current={active ? 'page' : undefined}
+              >
+                <span className="tab-bar__icon" aria-hidden="true">
+                  {tab.icon}
                 </span>
-              )}
-            </button>
-          );
-        })}
+
+                {/* Светящаяся красная точка под активной иконкой как на референсе */}
+                <span className="tab-bar__dot" aria-hidden="true" />
+
+                <span className="tab-bar__label">{tab.label}</span>
+
+                {tab.path === '/profile' && favorites.length > 0 && (
+                  <span className="tab-bar__badge">
+                    {favorites.length > 99 ? '99+' : favorites.length}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

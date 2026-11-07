@@ -776,7 +776,7 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Плеер ZENOVA CINEMA SHEET (Выезжает снизу + растягивается вверх + полный экран для ТГ Вэб) ── */}
+      {/* ── Плеер ZENOVA CINEMA SHEET (Красиво выезжает СВЕРХУ ВНИЗ + растягивается вниз + полный экран) ── */}
       {showWatch && watchOptions.length > 0 && (
         <div
           className={`dp-sheet-backdrop dp-sheet-backdrop--${sheetMode}`}
@@ -798,40 +798,6 @@ const MovieDetailPage: React.FC = () => {
               />
             )}
 
-            {/* Ручка растягивания снизу вверх (поддерживает свайп вверх/вниз и клик) */}
-            {!isPlayerFullscreen && (
-              <div
-                className="dp-sheet-pull-area"
-                onClick={toggleSheetTall}
-                onTouchStart={(e) => {
-                  dragStartY.current = e.touches[0]?.clientY ?? null;
-                }}
-                onTouchEnd={(e) => {
-                  if (dragStartY.current === null) return;
-                  const endY = e.changedTouches[0]?.clientY ?? dragStartY.current;
-                  const deltaY = endY - dragStartY.current;
-                  dragStartY.current = null;
-                  if (deltaY < -35) {
-                    haptic('light');
-                    setSheetMode('tall');
-                  } else if (deltaY > 45) {
-                    haptic('light');
-                    if (sheetMode === 'tall') {
-                      setSheetMode('normal');
-                    } else {
-                      setShowWatch(false);
-                    }
-                  }
-                }}
-                title="Потяните вверх или нажмите, чтобы растянуть плеер"
-              >
-                <div className="dp-sheet-pull-bar" />
-                <span className="dp-sheet-pull-hint">
-                  {isSheetTall ? '⬇ Нажмите или потяните вниз — обычный размер' : '⬆ Потяните вверх или нажмите — растянуть плеер'}
-                </span>
-              </div>
-            )}
-
             {/* Компактная верхняя панель управления */}
             <div className="dp-watch-bar">
               <div className="dp-watch-bar__info">
@@ -848,22 +814,22 @@ const MovieDetailPage: React.FC = () => {
               </div>
 
               <div className="dp-watch-bar__actions">
-                {/* Кнопка растягивания шторки снизу вверх */}
+                {/* Кнопка растягивания шторки сверху вниз */}
                 {!isPlayerFullscreen && (
                   <button
                     type="button"
                     className={`dp-watch-bar__stretch-btn ${isSheetTall ? 'active' : ''}`}
                     onClick={toggleSheetTall}
-                    title={isSheetTall ? 'Вернуть стандартную высоту шторки' : 'Растянуть плеер снизу вверх'}
+                    title={isSheetTall ? 'Вернуть стандартную высоту шторки' : 'Растянуть плеер сверху вниз'}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                       {isSheetTall ? (
-                        <path d="M7 10l5 5 5-5" />
-                      ) : (
                         <path d="M17 14l-5-5-5 5" />
+                      ) : (
+                        <path d="M7 10l5 5 5-5" />
                       )}
                     </svg>
-                    <span>{isSheetTall ? 'Ниже' : 'Выше'}</span>
+                    <span>{isSheetTall ? 'Свернуть' : 'Растянуть'}</span>
                   </button>
                 )}
 
@@ -879,7 +845,7 @@ const MovieDetailPage: React.FC = () => {
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
                       </svg>
-                      <span>Свернуть</span>
+                      <span>Обычный</span>
                     </>
                   ) : (
                     <>
@@ -957,7 +923,7 @@ const MovieDetailPage: React.FC = () => {
               )}
             </div>
 
-            {/* ── Компактная нижняя панель переключения серверов (в 1 ряд, ничего не загромождает) ── */}
+            {/* ── Компактная нижняя панель переключения серверов + нижний язычок растягивания вниз ── */}
             {!isPlayerFullscreen && (
               <div className="dp-sheet-footer">
                 <div className="dp-watch-sources">
@@ -977,6 +943,38 @@ const MovieDetailPage: React.FC = () => {
                 </div>
                 <div className="dp-sheet-voice-hint">
                   🎙️ Озвучка, качество 4K/1080p{isSerial ? ' и выбор серий' : ''} доступны прямо внутри верхнего меню плеера
+                </div>
+
+                {/* Нижняя ручка растягивания шторки сверху вниз (поддерживает свайп вниз/вверх и клик) */}
+                <div
+                  className="dp-sheet-pull-area"
+                  onClick={toggleSheetTall}
+                  onTouchStart={(e) => {
+                    dragStartY.current = e.touches[0]?.clientY ?? null;
+                  }}
+                  onTouchEnd={(e) => {
+                    if (dragStartY.current === null) return;
+                    const endY = e.changedTouches[0]?.clientY ?? dragStartY.current;
+                    const deltaY = endY - dragStartY.current;
+                    dragStartY.current = null;
+                    if (deltaY > 35) {
+                      haptic('light');
+                      setSheetMode('tall');
+                    } else if (deltaY < -45) {
+                      haptic('light');
+                      if (sheetMode === 'tall') {
+                        setSheetMode('normal');
+                      } else {
+                        setShowWatch(false);
+                      }
+                    }
+                  }}
+                  title="Потяните вниз или нажмите, чтобы растянуть плеер"
+                >
+                  <span className="dp-sheet-pull-hint">
+                    {isSheetTall ? '⬆ Нажмите или потяните вверх — обычный размер' : '⬇ Потяните вниз или нажмите — растянуть плеер'}
+                  </span>
+                  <div className="dp-sheet-pull-bar" />
                 </div>
               </div>
             )}

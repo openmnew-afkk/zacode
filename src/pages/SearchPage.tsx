@@ -197,34 +197,42 @@ const SearchPage: React.FC = () => {
         <span className="search-header__sub">Тысячи фильмов и сериалов в одном месте</span>
       </div>
 
-      <div className="search-input-wrap">
-        <span className="search-input-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <circle cx="11" cy="11" r="7" /><line x1="16.5" y1="16.5" x2="21" y2="21" />
-          </svg>
-        </span>
-        <input
-          ref={inputRef}
-          className="search-input"
-          type="text"
-          placeholder={searchType === 'actors' ? 'Имя актёра или актрисы…' : 'Фильм, сериал или хештег #боевик…'}
-          value={query}
-          onChange={(e) => {
-            setSelectedActor(null);
-            setQuery(e.target.value);
-          }}
-          autoComplete="off"
-          spellCheck={false}
-        />
-        {query && (
+      <div className="search-input-shell">
+        <div className="search-input-wrap">
+          <input
+            ref={inputRef}
+            className="search-input"
+            type="text"
+            placeholder={searchType === 'actors' ? 'Имя актёра или актрисы…' : 'Поиск фильма, сериала или #хештега…'}
+            value={query}
+            onChange={(e) => {
+              setSelectedActor(null);
+              setQuery(e.target.value);
+            }}
+            autoComplete="off"
+            spellCheck={false}
+          />
+          {query && (
+            <button
+              className="search-clear"
+              onClick={() => { setQuery(''); inputRef.current?.focus(); }}
+              aria-label="Очистить"
+            >
+              ✕
+            </button>
+          )}
           <button
-            className="search-clear"
-            onClick={() => { setQuery(''); inputRef.current?.focus(); }}
-            aria-label="Очистить"
+            type="button"
+            className="search-submit-btn"
+            onClick={() => inputRef.current?.focus()}
+            aria-label="Искать"
           >
-            ✕
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
           </button>
-        )}
+        </div>
       </div>
 
       <div className="search-types">

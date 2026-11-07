@@ -6,14 +6,12 @@ import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
   discoverMovies, discoverSeries, getKeywordCollection,
-  STUDIO_WORLDS,
 } from '../api/catalog';
 
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
-import StudioWordmark from '../components/StudioWordmark';
 import { openSideMenu } from '../components/SideMenu';
 import './HomePage.css';
 
@@ -383,7 +381,6 @@ const HomePage: React.FC = () => {
   const [seasonMovies, setSeasonMovies] = useState<Movie[]>([]);
   const [season, setSeason] = useState(() => getStoredSeason().season);
   const [nyTime, setNyTime] = useState(() => getNewYearTimeLeft());
-  const [showWorldsModal, setShowWorldsModal] = useState(false);
 
   useEffect(() => {
     const sync = () => setSeason(getStoredSeason().season);
@@ -1033,20 +1030,34 @@ const HomePage: React.FC = () => {
       {/* ── Шапка ── */}
       <div className="hp-header">
         {showSearch ? (
-          <div className="hp-searchbar">
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-              <circle cx="7.5" cy="7.5" r="5.5" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5"/>
-              <path d="M12 12l3.5 3.5" stroke="rgba(255,255,255,0.4)" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            <input
-              ref={searchRef}
-              className="hp-searchbar__input"
-              placeholder="Фильм, сериал, актёр…"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoFocus
-            />
-            <button className="hp-searchbar__close" onClick={() => { setShowSearch(false); setQuery(''); setSearchResults([]); }}>✕</button>
+          <div className="hp-searchbar-shell">
+            <div className="hp-searchbar">
+              <input
+                ref={searchRef}
+                className="hp-searchbar__input"
+                placeholder="Поиск фильма, сериала, актёра…"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                autoFocus
+              />
+              {query && (
+                <button className="hp-searchbar__clear" onClick={() => { setQuery(''); setSearchResults([]); searchRef.current?.focus(); }} aria-label="Очистить">
+                  ✕
+                </button>
+              )}
+              <button
+                type="button"
+                className="hp-searchbar__submit"
+                onClick={() => { setShowSearch(false); setQuery(''); setSearchResults([]); }}
+                aria-label="Закрыть поиск"
+                title="Закрыть поиск"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                </svg>
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -1058,8 +1069,8 @@ const HomePage: React.FC = () => {
                   haptic('light');
                   openSideMenu();
                 }}
-                aria-label="Открыть меню"
-                title="Боковое меню разделов и студий"
+                aria-label="Открыть меню вселенных"
+                title="Боковое меню Кино-Вселенных"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M4 7h16M4 12h11M4 17h16" />
@@ -1071,25 +1082,6 @@ const HomePage: React.FC = () => {
               </span>
             </div>
             <div className="hp-header__actions">
-              {/* 🎬 КИНО-МИРЫ (компактная PRO-кнопка без надписи в шапке — открывает верхний выпадающий список) */}
-              <button
-                type="button"
-                className={`hp-header__worlds-btn ${showWorldsModal ? 'active' : ''}`}
-                onClick={() => {
-                  haptic('medium');
-                  setShowWorldsModal((v) => !v);
-                }}
-                aria-label="Кино-Миры и Студии"
-                title="Кино-Миры: Netflix, Disney+, HBO Max, Apple TV+, Marvel, A24, Anime"
-              >
-                <span className="hp-header__worlds-ring" aria-hidden="true" />
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7.2" height="7.2" rx="2.2" />
-                  <rect x="13.8" y="3" width="7.2" height="7.2" rx="2.2" />
-                  <rect x="3" y="13.8" width="7.2" height="7.2" rx="2.2" />
-                  <path d="M17.4 13.5l1.1 2.7 2.8 1.1-2.8 1.1-1.1 2.8-1.1-2.8-2.8-1.1 2.8-1.1 1.1-2.7z" fill="currentColor" stroke="none" />
-                </svg>
-              </button>
               {/* 🎲 Мне повезёт — случайный фильм */}
               <button
                 className={`hp-header__btn hp-header__lucky-btn ${luckySpinning ? 'spinning' : ''}`}
@@ -1107,10 +1099,14 @@ const HomePage: React.FC = () => {
                   <circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none" />
                 </svg>
               </button>
-              <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }} aria-label="Поиск">
-                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                  <circle cx="8.5" cy="8.5" r="6" stroke="currentColor" strokeWidth="1.8"/>
-                  <path d="M13.5 13.5l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <button
+                className="hp-header__btn hp-header__search-btn"
+                onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}
+                aria-label="Поиск"
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <line x1="16.5" y1="16.5" x2="21" y2="21" />
                 </svg>
               </button>
               <button className="hp-header__btn hp-header__btn--avatar" onClick={() => navigate('/profile')} aria-label="Профиль">
@@ -1326,63 +1322,6 @@ const HomePage: React.FC = () => {
         </div>,
         document.body
       )}
-
-
-      {/* ── Верхняя выезжающая шторка Кино-Миров из шапки (СПИСКОМ сверху вниз с фирменными надписями) ── */}
-      {showWorldsModal && createPortal(
-        <div className="hp-worlds-modal-overlay" onClick={() => setShowWorldsModal(false)}>
-          <div className="hp-worlds-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="hp-worlds-modal__head">
-              <div>
-                <span className="hp-worlds-modal__kicker">ZENOVA • STREAMING WORLDS</span>
-                <h3 className="hp-worlds-modal__title">Кино-Миры и Студии</h3>
-                <p className="hp-worlds-modal__sub">Выберите вселенную — внутри откроется каталог плитками</p>
-              </div>
-              <button className="hp-worlds-modal__close" onClick={() => setShowWorldsModal(false)} aria-label="Закрыть">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="hp-worlds-modal__list">
-              {STUDIO_WORLDS.map((st, idx) => (
-                <button
-                  key={st.id}
-                  type="button"
-                  className={`hp-world-row hp-world-row--${st.id}`}
-                  style={
-                    {
-                      '--w-accent': st.accentColor,
-                      '--w-glow': st.glowColor,
-                      '--row-idx': idx,
-                    } as React.CSSProperties
-                  }
-                  onClick={() => {
-                    haptic('medium');
-                    setShowWorldsModal(false);
-                    navigate(`/studios/${st.id}`);
-                  }}
-                >
-                  <div className="hp-world-row__logo">
-                    <StudioWordmark id={st.id} size="md" />
-                  </div>
-                  <div className="hp-world-row__info">
-                    <span className="hp-world-row__badge">{st.badgeText}</span>
-                    <span className="hp-world-row__tagline">{st.tagline}</span>
-                  </div>
-                  <span className="hp-world-row__arrow" aria-hidden="true">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M9 18l6-6-6-6" />
-                    </svg>
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>,
-        document.body
-      )}
-
     </div>
   );
 };
