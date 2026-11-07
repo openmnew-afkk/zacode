@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   ✨ Сезонные эффекты
+   ✨ Сезонные эффекты + Новогодняя Гирлянда PRO
    ═══════════════════════════════════════════════ */
 
 .season-fx-canvas {
@@ -11,15 +11,107 @@
   z-index: 80;
 }
 
-/* Морозный оттенок сверху (зима) */
+/* ── Новогодняя гирлянда сверху экрана ── */
+.season-fx-garland {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  z-index: 82;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.season-fx-garland__wire {
+  position: absolute;
+  top: -6px;
+  left: -2%;
+  right: -2%;
+  height: 12px;
+  border-bottom: 1.5px solid rgba(186, 230, 253, 0.22);
+  border-radius: 50%;
+}
+
+.season-fx-garland__bulbs {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2px 8px 0;
+}
+
+.season-fx-bulb {
+  position: relative;
+  width: 7px;
+  height: 10px;
+  border-radius: 50% 50% 55% 55%;
+  transform-origin: top center;
+  animation: bulbTwinkle 2.8s ease-in-out infinite alternate;
+}
+
+.season-fx-bulb::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 1px;
+  background: rgba(203, 213, 225, 0.55);
+}
+
+.season-fx-bulb--gold {
+  background: #fde68a;
+  box-shadow: 0 0 10px 2px rgba(251, 191, 36, 0.8), 0 0 22px 5px rgba(251, 191, 36, 0.35);
+}
+
+.season-fx-bulb--ruby {
+  background: #fda4af;
+  box-shadow: 0 0 10px 2px rgba(244, 63, 94, 0.85), 0 0 22px 5px rgba(244, 63, 94, 0.38);
+}
+
+.season-fx-bulb--ice {
+  background: #e0f2fe;
+  box-shadow: 0 0 10px 2px rgba(56, 189, 248, 0.85), 0 0 22px 5px rgba(56, 189, 248, 0.38);
+}
+
+.season-fx-bulb--emerald {
+  background: #a7f3d0;
+  box-shadow: 0 0 10px 2px rgba(16, 185, 129, 0.82), 0 0 22px 5px rgba(16, 185, 129, 0.34);
+}
+
+.season-fx-bulb--amber {
+  background: #fed7aa;
+  box-shadow: 0 0 10px 2px rgba(249, 115, 22, 0.82), 0 0 22px 5px rgba(249, 115, 22, 0.34);
+}
+
+@keyframes bulbTwinkle {
+  0% {
+    opacity: 0.48;
+    transform: scale(0.88) rotate(-3deg);
+  }
+  50% {
+    opacity: 0.92;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1.08) rotate(3deg);
+  }
+}
+
+/* Морозный оттенок сверху и по углам (зима) */
 .season-fx-frost {
   position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 79;
   background:
-    radial-gradient(ellipse 120% 50% at 50% -10%, rgba(191, 219, 254, 0.10) 0%, transparent 55%),
-    linear-gradient(180deg, rgba(224, 242, 254, 0.05) 0%, transparent 18%);
+    radial-gradient(ellipse 120% 45% at 50% -10%, rgba(125, 211, 252, 0.12) 0%, transparent 56%),
+    radial-gradient(ellipse 60% 25% at 15% 0%, rgba(251, 191, 36, 0.07) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(224, 242, 254, 0.05) 0%, transparent 16%);
 }
 
 .season-fx-frost::before,
@@ -31,43 +123,17 @@
 
 .season-fx-frost::before {
   background:
-    radial-gradient(ellipse 110px 90px at 0 0, rgba(210, 241, 255, 0.1), transparent 80%),
-    radial-gradient(ellipse 110px 90px at 100% 0, rgba(210, 241, 255, 0.1), transparent 80%),
-    radial-gradient(ellipse 110px 90px at 0 100%, rgba(210, 241, 255, 0.07), transparent 80%),
-    radial-gradient(ellipse 110px 90px at 100% 100%, rgba(210, 241, 255, 0.07), transparent 80%),
-    linear-gradient(45deg, transparent 48%, rgba(210, 241, 255, 0.24) 49.5%, transparent 51%) top left / 40px 40px no-repeat,
-    linear-gradient(90deg, transparent 48%, rgba(210, 241, 255, 0.18) 49.5%, transparent 51%) top left / 24px 48px no-repeat,
-    linear-gradient(0deg, transparent 48%, rgba(210, 241, 255, 0.18) 49.5%, transparent 51%) top left / 48px 24px no-repeat,
-    linear-gradient(135deg, transparent 48%, rgba(210, 241, 255, 0.22) 49.5%, transparent 51%) top right / 40px 40px no-repeat,
-    linear-gradient(90deg, transparent 48%, rgba(210, 241, 255, 0.16) 49.5%, transparent 51%) top right / 24px 48px no-repeat,
-    linear-gradient(0deg, transparent 48%, rgba(210, 241, 255, 0.16) 49.5%, transparent 51%) top right / 48px 24px no-repeat,
-    linear-gradient(135deg, transparent 48%, rgba(210, 241, 255, 0.18) 49.5%, transparent 51%) bottom left / 40px 40px no-repeat,
-    linear-gradient(90deg, transparent 48%, rgba(210, 241, 255, 0.14) 49.5%, transparent 51%) bottom left / 24px 48px no-repeat,
-    linear-gradient(0deg, transparent 48%, rgba(210, 241, 255, 0.14) 49.5%, transparent 51%) bottom left / 48px 24px no-repeat,
-    linear-gradient(45deg, transparent 48%, rgba(210, 241, 255, 0.18) 49.5%, transparent 51%) bottom right / 40px 40px no-repeat,
-    linear-gradient(90deg, transparent 48%, rgba(210, 241, 255, 0.14) 49.5%, transparent 51%) bottom right / 24px 48px no-repeat,
-    linear-gradient(0deg, transparent 48%, rgba(210, 241, 255, 0.14) 49.5%, transparent 51%) bottom right / 48px 24px no-repeat;
-  opacity: 0.58;
+    radial-gradient(ellipse 130px 100px at 0 0, rgba(186, 230, 253, 0.12), transparent 80%),
+    radial-gradient(ellipse 130px 100px at 100% 0, rgba(186, 230, 253, 0.12), transparent 80%),
+    radial-gradient(ellipse 120px 90px at 0 100%, rgba(186, 230, 253, 0.08), transparent 80%),
+    radial-gradient(ellipse 120px 90px at 100% 100%, rgba(186, 230, 253, 0.08), transparent 80%);
+  opacity: 0.72;
 }
 
 .season-fx-frost::after {
   background:
-    radial-gradient(ellipse 80% 16% at 50% 0%, rgba(216, 242, 255, 0.14), transparent 76%),
-    linear-gradient(90deg, transparent, rgba(210, 241, 255, 0.12) 50%, transparent);
-  height: 22px;
-  opacity: 0.6;
-}
-
-[data-theme='light'] .season-fx-frost {
-  background:
-    radial-gradient(ellipse 120% 50% at 50% -10%, rgba(147, 197, 253, 0.16) 0%, transparent 55%),
-    linear-gradient(180deg, rgba(224, 242, 254, 0.12) 0%, transparent 18%);
-}
-
-[data-theme='light'] .season-fx-frost::before {
-  opacity: 0.44;
-}
-
-[data-theme='light'] .season-fx-frost::after {
-  opacity: 0.42;
+    radial-gradient(ellipse 80% 16% at 50% 0%, rgba(216, 242, 255, 0.15), transparent 76%),
+    linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.12) 30%, rgba(125, 211, 252, 0.16) 50%, rgba(244, 63, 94, 0.12) 70%, transparent);
+  height: 20px;
+  opacity: 0.75;
 }

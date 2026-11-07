@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback, useRef, useMemo, createPortal } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { getStoredSeason } from '../services/seasons';
 import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
   discoverMovies, discoverSeries, getKeywordCollection,
+  STUDIO_WORLDS,
 } from '../api/catalog';
 
 import { useStore } from '../store';
@@ -16,11 +18,12 @@ import './HomePage.css';
 const getNewYearTimeLeft = () => {
   const now = new Date();
   const newYear = new Date(now.getFullYear() + 1, 0, 1);
-  const diff = newYear.getTime() - now.getTime();
+  const diff = Math.max(0, newYear.getTime() - now.getTime());
   return {
     d: Math.floor(diff / 86400000),
     h: Math.floor(diff / 3600000) % 24,
     m: Math.floor(diff / 60000) % 60,
+    s: Math.floor(diff / 1000) % 60,
   };
 };
 
@@ -376,7 +379,31 @@ const HomePage: React.FC = () => {
   const [topSeries, setTopSeries] = useState<Movie[]>([]);
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [seasonMovies, setSeasonMovies] = useState<Movie[]>([]);
-  const season = getStoredSeason().season;
+  const [season, setSeason] = useState(() => getStoredSeason().season);
+  const [nyTime, setNyTime] = useState(() => getNewYearTimeLeft());
+  const [showWorldsModal, setShowWorldsModal] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setSeason(getStoredSeason().season);
+    window.addEventListener('zenova-season-change', sync);
+    return () => window.removeEventListener('zenova-season-change', sync);
+  }, []);
+
+  useEffect(() => {
+    if (season.id !== 'winter') return;
+    const t = setInterval(() => setNyTime(getNewYearTimeLeft()), 1000);
+    return () => clearInterval(t);
+  }, [season.id]);
+
+  useEffect(() => {
+    if (!season.collectionQuery) {
+      setSeasonMovies([]);
+      return;
+    }
+    getKeywordCollection(season.collectionQuery.value)
+      .then((list) => setSeasonMovies(list))
+      .catch(() => {});
+  }, [season.id]);
 
   /* 🎲 КиноИИ рекомендует: случайный тайтл из топ-страниц 1–8 с красивой карточкой */
   const [luckySpinning, setLuckySpinning] = useState(false);
@@ -791,6 +818,61 @@ const HomePage: React.FC = () => {
             </div>
           )}
 
+          {/* ── Витрина Кино-Миров и Студий (Netflix, Disney+, HBO, Apple TV+, Marvel, A24, Аниме) ── */}
+          <section className="hp-worlds-strip">
+            <div className="hp-row__header hp-row__header--clickable" onClick={() => { haptic('light'); navigate('/studios'); }}>
+              <h3 className="hp-row__title">🎬 Кино-Миры и Студии</h3>
+              <span className="hp-row__more">
+                <span className="hp-row__more-text">Все миры</span>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18l6-6-6-6"/>
+                </svg>
+              </span>
+            </div>
+            <div className="hp-worlds-scroll">
+              {STUDIO_WORLDS.map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  className={`hp-world-card hp-world-card--${st.id}`}
+                  style={{ '--w-accent': st.accentColor, '--w-glow': st.glowColor } as React.CSSProperties}
+                  onClick={() => { haptic('medium'); navigate(`/studios/${st.id}`); }}
+                >
+                  <span className="hp-world-card__glow" aria-hidden="true" />
+                  <span className="hp-world-card__badge">{st.badgeText}</span>
+                  <span className="hp-world-card__name">{st.shortName}</span>
+                  <span className="hp-world-card__sub">{st.name}</span>
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* ── ТОП-10 сегодня в ZENOVA (с крупными номерами 1..10) ── */}
+          {trending.length >= 5 && (
+            <section className="hp-top10">
+              <div className="hp-row__header">
+                <h3 className="hp-row__title">🔥 ТОП-10 сегодня в ZENOVA</h3>
+              </div>
+              <div className="hp-top10__scroll">
+                {trending.slice(0, 10).map((m, idx) => (
+                  <div
+                    key={m.id}
+                    className="hp-top10__item"
+                    onClick={() => go(m.id)}
+                  >
+                    <span className="hp-top10__num" aria-hidden="true">{idx + 1}</span>
+                    <div className="hp-top10__poster">
+                      <img src={m.poster_path} alt={m.title} loading="lazy" />
+                      {m.vote_average > 0 && (
+                        <span className="hp-card__rating">★ {m.vote_average.toFixed(1)}</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
           {season.collectionQuery && seasonMovies.length > 0 && (
             <Row
               title={`${season.icon} ${season.collectionQuery!.label}`}
@@ -1009,6 +1091,25 @@ const HomePage: React.FC = () => {
               </span>
             </div>
             <div className="hp-header__actions">
+              {/* 🎬 КИНО-МИРЫ (Netflix, Disney+, HBO, Apple TV+, Marvel, A24, Anime) */}
+              <button
+                className="hp-header__worlds-btn"
+                onClick={() => {
+                  haptic('medium');
+                  setShowWorldsModal(true);
+                }}
+                aria-label="Кино-Миры и Студии"
+                title="Выбрать кино по разделам: Netflix, Disney+, HBO Max, Apple TV+"
+              >
+                <span className="hp-header__worlds-dot" />
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7.5" height="7.5" rx="2" />
+                  <rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
+                  <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" />
+                  <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
+                </svg>
+                <span>Миры</span>
+              </button>
               {/* 🎲 Мне повезёт — случайный фильм */}
               <button
                 className={`hp-header__btn hp-header__lucky-btn ${luckySpinning ? 'spinning' : ''}`}
@@ -1078,13 +1179,21 @@ const HomePage: React.FC = () => {
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
-      {/* ── 🎄 Отсчёт до Нового года (только в новогодней теме) ── */}
-      {false && (
-        <button className="hp-ny-count" onClick={() => { haptic('light'); navigate('/new-year'); }}>
+      {/* ── 🎄 Отсчёт до Нового года (в новогодней теме) ── */}
+      {!showSearch && !activeCategory && season.id === 'winter' && (
+        <button
+          className="hp-ny-count"
+          onClick={() => {
+            haptic('light');
+            navigate('/new-year');
+          }}
+        >
           <span className="hp-ny-count__tree">🎄</span>
-          <span className="hp-ny-count__label">До Нового года</span>
+          <span className="hp-ny-count__label">Новогодний марафон</span>
           <span className="hp-ny-count__time">
-            <i>д</i> <i>ч</i> <i>мин</i>
+            <b>{nyTime.d}</b><i>д</i> <b>{String(nyTime.h).padStart(2, '0')}</b><i>ч</i>{' '}
+            <b>{String(nyTime.m).padStart(2, '0')}</b><i>м</i>{' '}
+            <b>{String(nyTime.s).padStart(2, '0')}</b><i>с</i>
           </span>
           <span className="hp-ny-count__spark">✨</span>
         </button>
@@ -1098,6 +1207,15 @@ const HomePage: React.FC = () => {
               {t.label}
             </button>
           ))}
+          <button
+            className="hp-tab hp-tab--worlds"
+            onClick={() => {
+              haptic('light');
+              navigate('/studios');
+            }}
+          >
+            ✦ Кино-Миры
+          </button>
         </div>
       )}
 
@@ -1218,6 +1336,47 @@ const HomePage: React.FC = () => {
         document.body
       )}
 
+
+      {/* ── Портал выбора Кино-Мира из шапки ── */}
+      {showWorldsModal && createPortal(
+        <div className="hp-worlds-modal-overlay" onClick={() => setShowWorldsModal(false)}>
+          <div className="hp-worlds-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="hp-worlds-modal__head">
+              <div>
+                <span className="hp-worlds-modal__kicker">ZENOVA • PORTALS</span>
+                <h3 className="hp-worlds-modal__title">Выберите Кино-Мир</h3>
+                <p className="hp-worlds-modal__sub">Каждая студия оформлена в своём уникальном фирменном стиле</p>
+              </div>
+              <button className="hp-worlds-modal__close" onClick={() => setShowWorldsModal(false)} aria-label="Закрыть">
+                ✕
+              </button>
+            </div>
+            <div className="hp-worlds-modal__grid">
+              {STUDIO_WORLDS.map((st) => (
+                <button
+                  key={st.id}
+                  type="button"
+                  className={`hp-world-portal-card hp-world-portal-card--${st.id}`}
+                  style={{ '--w-accent': st.accentColor, '--w-glow': st.glowColor } as React.CSSProperties}
+                  onClick={() => {
+                    haptic('medium');
+                    setShowWorldsModal(false);
+                    navigate(`/studios/${st.id}`);
+                  }}
+                >
+                  <div className="hp-world-portal-card__top">
+                    <span className="hp-world-portal-card__badge">{st.badgeText}</span>
+                    <span className="hp-world-portal-card__arrow">→</span>
+                  </div>
+                  <div className="hp-world-portal-card__name">{st.shortName}</div>
+                  <div className="hp-world-portal-card__desc">{st.name}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
     </div>
   );

@@ -780,3 +780,305 @@ export async function getRussianSeries(): Promise<Movie[]> {
 export async function getRussianCinema(): Promise<Movie[]> {
   return [];
 }
+
+/* ════════════ Кино-Миры и Студии (Netflix, Disney+, HBO, Apple TV+, Marvel, A24, Anime) ════════════ */
+
+export type StudioId = 'netflix' | 'disney' | 'hbo' | 'apple' | 'marvel' | 'a24' | 'anime';
+
+export interface StudioWorldConfig {
+  id: StudioId;
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  badgeText: string;
+  accentColor: string;
+  secondaryColor: string;
+  glowColor: string;
+  /** TMDB TV Network IDs (separated by | for OR) */
+  tvNetworks?: string;
+  /** TMDB Movie Production Company IDs (separated by | for OR) */
+  movieCompanies?: string;
+  /** Optional watch provider ID */
+  watchProviderId?: string;
+  /** Optional genre filter */
+  withGenresMovie?: string;
+  withGenresTv?: string;
+  /** Optional original language filter */
+  origLang?: string;
+  /** Default media tab for this studio */
+  defaultTab: 'all' | 'movie' | 'tv';
+  /** Curated sub-collections / filter pills specific to this studio */
+  collections: Array<{
+    id: string;
+    label: string;
+    genreMovie?: string;
+    genreTv?: string;
+    sortBy?: string;
+  }>;
+}
+
+export const STUDIO_WORLDS: StudioWorldConfig[] = [
+  {
+    id: 'netflix',
+    name: 'Netflix Originals',
+    shortName: 'Netflix',
+    tagline: 'TUDUM • ГЛАВНЫЕ МИРОВЫЕ ПРЕМЬЕРЫ И СЕРИАЛЫ',
+    description: 'Эксклюзивные блокбастеры, культовые сериалы N-Series, триллеры и документальные хиты в фирменном стиле Netflix.',
+    badgeText: 'N SERIES',
+    accentColor: '#e50914',
+    secondaryColor: '#b20710',
+    glowColor: 'rgba(229, 9, 20, 0.45)',
+    tvNetworks: '213',
+    movieCompanies: '178464',
+    watchProviderId: '8',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Топ-хиты Netflix' },
+      { id: 'thriller', label: 'Остросюжетные', genreMovie: '53|80', genreTv: '80|9648' },
+      { id: 'scifi', label: 'Фантастика и мистика', genreMovie: '878|14', genreTv: '10765' },
+      { id: 'action', label: 'Экшн-блокбастеры', genreMovie: '28', genreTv: '10759' },
+      { id: 'top', label: 'Высший рейтинг', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'disney',
+    name: 'Disney+ & Pixar',
+    shortName: 'Disney+',
+    tagline: 'ВОЛШЕБНЫЕ МИРЫ DISNEY • PIXAR • ЗАМКИ И ЗВЁЗДЫ',
+    description: 'Легендарная анимация Walt Disney и Pixar, семейные сказки, фэнтези-приключения и галактические саги.',
+    badgeText: 'DISNEY+ ORIGINAL',
+    accentColor: '#0072d2',
+    secondaryColor: '#38bdf8',
+    glowColor: 'rgba(56, 189, 248, 0.45)',
+    tvNetworks: '2739',
+    movieCompanies: '2|3|6125',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Волшебная коллекция' },
+      { id: 'pixar', label: 'Шедевры анимации', genreMovie: '16', genreTv: '16' },
+      { id: 'family', label: 'Семейное кино', genreMovie: '10751|14', genreTv: '10751|10765' },
+      { id: 'adventure', label: 'Приключения', genreMovie: '12', genreTv: '10759' },
+      { id: 'top', label: 'Золотая классика', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'hbo',
+    name: 'HBO Max & Warner',
+    shortName: 'HBO Max',
+    tagline: 'ПРЕСТИЖНОЕ КИНО • КУЛЬТОВЫЕ ДРАМЫ И БЛОКБАСТЕРЫ',
+    description: 'Золотой стандарт сериалов HBO, эпические драмы, мрачные детективы и масштабные киноленты Warner Bros.',
+    badgeText: 'HBO ORIGINAL',
+    accentColor: '#9333ea',
+    secondaryColor: '#c084fc',
+    glowColor: 'rgba(147, 51, 234, 0.48)',
+    tvNetworks: '49|3186',
+    movieCompanies: '174',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Выбор HBO & WB' },
+      { id: 'drama', label: 'Престижные драмы', genreMovie: '18', genreTv: '18' },
+      { id: 'fantasy', label: 'Эпическое фэнтези', genreMovie: '14|878', genreTv: '10765' },
+      { id: 'crime', label: 'Детективы и нуар', genreMovie: '80|9648', genreTv: '80|9648' },
+      { id: 'top', label: 'Шедевры по рейтингу', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'apple',
+    name: 'Apple TV+',
+    shortName: 'Apple TV+',
+    tagline: 'APPLE ORIGINALS • ЭСТЕТИКА И ВИЗУАЛЬНОЕ СОВЕРШЕНСТВО',
+    description: 'Интеллектуальная научная фантастика, авторские триллеры и лауреаты премий с эталонным звуком и картинкой.',
+    badgeText: 'APPLE ORIGINAL',
+    accentColor: '#f5f5f7',
+    secondaryColor: '#94a3b8',
+    glowColor: 'rgba(245, 245, 247, 0.32)',
+    tvNetworks: '2552',
+    movieCompanies: '194232',
+    watchProviderId: '350',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Все Apple Originals' },
+      { id: 'scifi', label: 'Sci-Fi будущего', genreMovie: '878', genreTv: '10765' },
+      { id: 'thriller', label: 'Психологические триллеры', genreMovie: '53|9648', genreTv: '9648' },
+      { id: 'comedy', label: 'Драмеди и тепло', genreMovie: '35|18', genreTv: '35' },
+      { id: 'top', label: 'Фавориты критиков', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'marvel',
+    name: 'Marvel Studios',
+    shortName: 'Marvel',
+    tagline: 'КИНОВСЕЛЕННАЯ MARVEL • САГА МУЛЬТИВСЕЛЕННОЙ',
+    description: 'Все фазы КВМ, блокбастеры о Мстителях, сольные фильмы супергероев и сериалы вселенной Marvel.',
+    badgeText: 'MARVEL STUDIOS',
+    accentColor: '#f0131e',
+    secondaryColor: '#fbbf24',
+    glowColor: 'rgba(240, 19, 30, 0.48)',
+    tvNetworks: '2739',
+    movieCompanies: '420|7505',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Хроника Marvel' },
+      { id: 'action', label: 'Блокбастеры', genreMovie: '28|12', genreTv: '10759' },
+      { id: 'scifi', label: 'Космос и мультивселенная', genreMovie: '878', genreTv: '10765' },
+      { id: 'top', label: 'Легенды по рейтингу', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'a24',
+    name: 'A24 Arthouse',
+    shortName: 'A24',
+    tagline: 'АВТОРСКОЕ КИНО • НЕОНОВЫЙ ЭСТЕТИЗМ И ФЕСТИВАЛЬНЫЕ ХИТЫ',
+    description: 'Культовая независимая студия современности: гипнотические хорроры, визионерские драмы и обладатели «Оскара».',
+    badgeText: 'A24 FILM',
+    accentColor: '#e7e5e4',
+    secondaryColor: '#d97706',
+    glowColor: 'rgba(217, 119, 6, 0.36)',
+    tvNetworks: '49|213',
+    movieCompanies: '41077',
+    defaultTab: 'movie',
+    collections: [
+      { id: 'all', label: 'Коллекция A24' },
+      { id: 'horror', label: 'Интеллектуальный хоррор', genreMovie: '27|9648', genreTv: '9648' },
+      { id: 'drama', label: 'Авторская драма', genreMovie: '18', genreTv: '18' },
+      { id: 'scifi', label: 'Сюрреализм и Sci-Fi', genreMovie: '878|14', genreTv: '10765' },
+      { id: 'top', label: 'Культовая классика', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'anime',
+    name: 'Anime & Ghibli',
+    shortName: 'Аниме',
+    tagline: 'ЯПОНСКАЯ АНИМАЦИЯ • CRUNCHYROLL ХИТЫ И STUDIO GHIBLI',
+    description: 'От полнометражных шедевров Хаяо Миядзаки и Макото Синкая до самых громких сёнэн-сериалов сезона.',
+    badgeText: 'ANIME HUB',
+    accentColor: '#ff2a85',
+    secondaryColor: '#fb923c',
+    glowColor: 'rgba(255, 42, 133, 0.45)',
+    movieCompanies: '10342',
+    withGenresMovie: '16',
+    withGenresTv: '16',
+    origLang: 'ja',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Главные хиты' },
+      { id: 'shonen', label: 'Экшн и Фэнтези', genreMovie: '16,28,14', genreTv: '16,10759,10765' },
+      { id: 'romance', label: 'Драма и Романтика', genreMovie: '16,18,10749', genreTv: '16,18' },
+      { id: 'top', label: 'Зал славы Аниме', sortBy: 'vote_average.desc' },
+    ],
+  },
+];
+
+export async function discoverByStudio(
+  studioId: StudioId,
+  opts: {
+    page?: number;
+    mediaType?: 'all' | 'movie' | 'tv';
+    collectionId?: string;
+  } = {}
+): Promise<{ hero: Movie[]; items: Movie[]; top10: Movie[] }> {
+  const studio = STUDIO_WORLDS.find((s) => s.id === studioId) || STUDIO_WORLDS[0];
+  const page = opts.page || 1;
+  const mediaType = opts.mediaType || studio.defaultTab;
+  const collection = studio.collections.find((c) => c.id === opts.collectionId) || studio.collections[0];
+  const sortBy = collection?.sortBy || 'popularity.desc';
+  const minVotes = sortBy === 'vote_average.desc' ? 250 : 45;
+
+  const buildMovieParams = (p: number): Record<string, any> => {
+    const params: Record<string, any> = {
+      page: p,
+      sort_by: sortBy,
+      include_adult: false,
+      'vote_count.gte': minVotes,
+    };
+    if (studio.id === 'anime') {
+      params.with_genres = collection?.genreMovie || studio.withGenresMovie || '16';
+      params.with_original_language = 'ja';
+    } else if (studio.id === 'netflix' || studio.id === 'apple') {
+      if (studio.movieCompanies) params.with_companies = studio.movieCompanies;
+      if (collection?.genreMovie) params.with_genres = collection.genreMovie;
+    } else {
+      if (studio.movieCompanies) params.with_companies = studio.movieCompanies;
+      if (collection?.genreMovie) params.with_genres = collection.genreMovie;
+    }
+    return params;
+  };
+
+  const buildTvParams = (p: number): Record<string, any> => {
+    const params: Record<string, any> = {
+      page: p,
+      sort_by: sortBy,
+      include_adult: false,
+      'vote_count.gte': minVotes,
+    };
+    if (studio.id === 'anime') {
+      params.with_genres = collection?.genreTv || studio.withGenresTv || '16';
+      params.with_original_language = 'ja';
+    } else if (studio.id === 'marvel') {
+      params.with_companies = '420';
+      if (collection?.genreTv) params.with_genres = collection.genreTv;
+    } else if (studio.id === 'a24') {
+      params.with_companies = '41077';
+      if (collection?.genreTv) params.with_genres = collection.genreTv;
+    } else {
+      if (studio.tvNetworks) params.with_networks = studio.tvNetworks;
+      if (collection?.genreTv) params.with_genres = collection.genreTv;
+    }
+    return params;
+  };
+
+  try {
+    let movies: Movie[] = [];
+    let series: Movie[] = [];
+
+    if (mediaType === 'movie' || mediaType === 'all') {
+      const mData = await tmdb<any>('/discover/movie', buildMovieParams(page)).catch(() => ({ results: [] }));
+      movies = (mData.results || []).map((i: any) => toMovie(i, 'movie'));
+      // Для Netflix или Apple подгрузим также фильмы по watch provider, если компания вернула мало результатов
+      if (movies.length < 8 && studio.watchProviderId) {
+        const wpData = await tmdb<any>('/discover/movie', {
+          page,
+          sort_by: sortBy,
+          with_watch_providers: studio.watchProviderId,
+          watch_region: 'US',
+          'vote_count.gte': minVotes,
+          ...(collection?.genreMovie ? { with_genres: collection.genreMovie } : {}),
+        }).catch(() => ({ results: [] }));
+        const extra = (wpData.results || []).map((i: any) => toMovie(i, 'movie'));
+        const seen = new Set(movies.map((m) => m.id));
+        for (const item of extra) {
+          if (!seen.has(item.id)) {
+            seen.add(item.id);
+            movies.push(item);
+          }
+        }
+      }
+    }
+
+    if (mediaType === 'tv' || mediaType === 'all') {
+      const tData = await tmdb<any>('/discover/tv', buildTvParams(page)).catch(() => ({ results: [] }));
+      series = (tData.results || []).map((i: any) => toMovie(i, 'tv'));
+    }
+
+    let combined: Movie[] = [];
+    if (mediaType === 'movie') {
+      combined = movies;
+    } else if (mediaType === 'tv') {
+      combined = series;
+    } else {
+      const maxLen = Math.max(series.length, movies.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (series[i]) combined.push(series[i]);
+        if (movies[i]) combined.push(movies[i]);
+      }
+    }
+
+    const hero = combined.filter((m) => m.backdrop_path && !m.backdrop_path.includes('placeholder')).slice(0, 6);
+    const top10 = combined.slice(0, 10);
+    return { hero, items: combined, top10 };
+  } catch {
+    return { hero: [], items: [], top10: [] };
+  }
+}
+

@@ -1835,3 +1835,130 @@
   .ym-wave-card__cover > img { transition: none; }
   .ym-wave-card.is-playing .ym-wave-card__spectrum i { animation: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ZENOVA SOUND PRO — ВИНИЛОВЫЙ ДИСК, HI-RES БЕЙДЖИ И СТЕКЛЯННЫЕ ТРЕКИ
+   ═══════════════════════════════════════════════════════════════════ */
+
+.ym-wave-vinyl {
+  position: absolute;
+  top: 22px;
+  right: 22px;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #111 0%, #191724 38%, #0a0910 68%, #231f32 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.7),
+    0 0 28px rgba(244, 63, 94, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ym-wave-vinyl.spinning {
+  animation: ymVinylSpin 7s linear infinite;
+}
+
+@keyframes ymVinylSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.ym-wave-vinyl__grooves {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 9px rgba(255, 255, 255, 0.04);
+}
+
+.ym-wave-vinyl__center {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(135deg, #f43f5e, #8b5cf6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.ym-wave-vinyl__center img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ym-wave-card__badges-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.ym-wave-card__badges-row .ym-wave-card__badge {
+  margin-bottom: 0;
+}
+
+.ym-wave-card__hires {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.16);
+  border: 1px solid rgba(250, 204, 21, 0.42);
+  color: #fde047;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+}
+
+.ym-wave-card__next {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(18, 16, 28, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.2s ease;
+}
+
+.ym-wave-card__next:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.ym-wave-card__next:active {
+  transform: scale(0.92);
+}
+
+.ym-track {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(145deg, rgba(26, 24, 36, 0.78), rgba(14, 13, 21, 0.88));
+  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ym-track:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.ym-track.active {
+  border-color: rgba(244, 63, 94, 0.55);
+  box-shadow: 0 8px 24px -6px rgba(244, 63, 94, 0.3);
+}
+

@@ -1,15 +1,13 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- *  ✨ SeasonFx — сезонные частицы с изюминками
+ *  ✨ SeasonFx PRO — Кинематографичные сезонные эффекты и новогодняя магия
  *
- *  • Зима  ❄️ : снегопад + СУГРОБ: снег накапливается внизу экрана,
- *                каждые ~12 сек «оседает» и сползает — и снова растёт.
- *                Плюс снежные шапки на постерах (CSS, см. SeasonFx.css).
- *  • Весна 🌸 : лепестки сакуры кружатся по синусоиде.
- *  • Осень 🍁 : листья покачиваются и «дрейфуют» вбок.
- *  • Лето  🌞 : светлячки-блики, плавно мерцающие в тёплом свете.
- *
- *  Canvas 60 FPS, пауза при скрытой вкладке, почитает настройку
- *  «снег/эффекты выключены» (localStorage zenova_fx_off).
+ *  • Зима (Новогодняя) 🎄:
+ *      - Праздничная гирлянда с мягким мерцанием тёплых огоньков сверху
+ *      - 3D-снегопад (кристальные снежинки + мягкий пух + золотые искры боке)
+ *      - Морозный иней по углам экрана
+ *  • Весна 🌸 : кружащиеся 3D-лепестки сакуры + нежная розовая пыльца
+ *  • Лето  🌞 : золотые светлячки и солнечные блики
+ *  • Осень 🍁 : янтарные и багряные листья в тёплом ветре
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -32,7 +30,17 @@ interface Particle {
   rot: number;
   rotSpeed: number;
   hue: number;
+  kind: 'crystal' | 'fluff' | 'spark';
 }
+
+const GARLAND_BULBS = Array.from({ length: 18 }, (_, i) => {
+  const colors = ['gold', 'ruby', 'ice', 'emerald', 'gold', 'amber'] as const;
+  return {
+    id: i,
+    color: colors[i % colors.length],
+    delay: `${(i * 0.37) % 2.4}s`,
+  };
+});
 
 const SeasonFx: React.FC<Props> = ({ season }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -44,12 +52,22 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
     }
   });
 
+  const [garlandOn, setGarlandOn] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_garland_off') !== '1';
+    } catch {
+      return true;
+    }
+  });
+
   useEffect(() => {
     const updateEnabled = () => {
       try {
         setEnabled(localStorage.getItem('zenova_fx_off') !== '1');
+        setGarlandOn(localStorage.getItem('zenova_garland_off') !== '1');
       } catch {
         setEnabled(true);
+        setGarlandOn(true);
       }
     };
     window.addEventListener('zenova-fx-change', updateEnabled);
@@ -75,19 +93,41 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
     resize();
     window.addEventListener('resize', resize);
 
-    const N = season === 'winter' ? 52 : 30;
-    const mk = (): Particle => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: 1 + Math.random() * (season === 'winter' ? 2.6 : 3.4),
-      speed: 0.35 + Math.random() * 0.85,
-      drift: 0.3 + Math.random() * 0.7,
-      phase: Math.random() * Math.PI * 2,
-      opacity: 0.35 + Math.random() * 0.5,
-      rot: Math.random() * Math.PI,
-      rotSpeed: (Math.random() - 0.5) * 0.04,
-      hue: Math.random(),
-    });
+    const N = season === 'winter' ? 58 : 34;
+    const mk = (_: unknown, idx: number): Particle => {
+      const roll = idx / N;
+      const kind: Particle['kind'] =
+        season === 'winter'
+          ? roll < 0.42
+            ? 'crystal'
+            : roll < 0.84
+              ? 'fluff'
+              : 'spark'
+          : 'crystal';
+
+      return {
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r:
+          kind === 'spark'
+            ? 2.2 + Math.random() * 3.8
+            : 1.1 + Math.random() * (season === 'winter' ? 2.8 : 3.5),
+        speed:
+          kind === 'spark'
+            ? 0.18 + Math.random() * 0.35
+            : 0.35 + Math.random() * 0.85,
+        drift: 0.3 + Math.random() * 0.75,
+        phase: Math.random() * Math.PI * 2,
+        opacity:
+          kind === 'spark'
+            ? 0.18 + Math.random() * 0.32
+            : 0.35 + Math.random() * 0.52,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.032,
+        hue: Math.random(),
+        kind,
+      };
+    };
     const parts: Particle[] = Array.from({ length: N }, mk);
 
     const onVisibility = () => {
@@ -99,31 +139,59 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
     let t = 0;
 
     const drawWinter = (f: Particle) => {
-      const length = f.r * 1.65;
+      if (f.kind === 'spark') {
+        const pulse = 0.45 + 0.55 * Math.sin(t * 2.1 + f.phase);
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+        const isGold = f.hue > 0.35;
+        ctx.fillStyle = isGold
+          ? `rgba(253, 224, 138, ${f.opacity * pulse})`
+          : `rgba(186, 230, 253, ${f.opacity * pulse})`;
+        ctx.shadowColor = isGold ? 'rgba(251, 191, 36, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+        ctx.shadowBlur = f.r * 3.5;
+        ctx.fill();
+        ctx.restore();
+        return;
+      }
+
+      if (f.kind === 'fluff') {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(f.x, f.y, f.r * 0.95, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240, 249, 255, ${f.opacity * 0.88})`;
+        ctx.shadowColor = 'rgba(186, 230, 253, 0.65)';
+        ctx.shadowBlur = f.r * 2.2;
+        ctx.fill();
+        ctx.restore();
+        return;
+      }
+
+      const length = f.r * 1.75;
       ctx.save();
       ctx.translate(f.x, f.y);
       ctx.rotate(f.rot);
       ctx.globalAlpha = f.opacity;
-      ctx.strokeStyle = '#e8f4ff';
-      ctx.lineWidth = Math.max(0.7, f.r * 0.35);
+      ctx.strokeStyle = '#f0f9ff';
+      ctx.lineWidth = Math.max(0.75, f.r * 0.34);
       ctx.lineCap = 'round';
-      ctx.shadowColor = 'rgba(186, 220, 255, 0.55)';
-      ctx.shadowBlur = f.r * 1.2;
+      ctx.shadowColor = 'rgba(125, 211, 252, 0.65)';
+      ctx.shadowBlur = f.r * 1.4;
       ctx.beginPath();
       for (let arm = 0; arm < 6; arm += 1) {
         const angle = (arm * Math.PI) / 3;
         const x = Math.cos(angle) * length;
         const y = Math.sin(angle) * length;
-        const branchX = x * 0.65;
-        const branchY = y * 0.65;
+        const branchX = x * 0.64;
+        const branchY = y * 0.64;
         ctx.moveTo(0, 0);
         ctx.lineTo(x, y);
         for (const direction of [-1, 1]) {
-          const branchAngle = angle + direction * 0.8;
+          const branchAngle = angle + direction * 0.78;
           ctx.moveTo(branchX, branchY);
           ctx.lineTo(
-            branchX - Math.cos(branchAngle) * length * 0.38,
-            branchY - Math.sin(branchAngle) * length * 0.38
+            branchX - Math.cos(branchAngle) * length * 0.36,
+            branchY - Math.sin(branchAngle) * length * 0.36
           );
         }
       }
@@ -137,12 +205,12 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
       ctx.rotate(f.rot);
       ctx.globalAlpha = f.opacity;
       const grad = ctx.createLinearGradient(-f.r, -f.r, f.r, f.r);
-      grad.addColorStop(0, '#fbcfe8');
-      grad.addColorStop(1, '#f9a8d4');
+      grad.addColorStop(0, '#fce7f3');
+      grad.addColorStop(0.6, '#f9a8d4');
+      grad.addColorStop(1, '#f472b6');
       ctx.fillStyle = grad;
       ctx.beginPath();
-      // Лепесток — два скруглённых лепестка
-      ctx.ellipse(0, 0, f.r * 1.6, f.r * 0.9, 0, 0, Math.PI * 2);
+      ctx.ellipse(0, 0, f.r * 1.65, f.r * 0.95, 0, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
     };
@@ -152,24 +220,29 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
       ctx.translate(f.x, f.y);
       ctx.rotate(f.rot);
       ctx.globalAlpha = f.opacity;
-      const warm = f.hue > 0.5 ? '#fdba74' : '#fb923c';
+      const warm = f.hue > 0.6 ? '#fbbf24' : f.hue > 0.3 ? '#fb923c' : '#f87171';
       ctx.fillStyle = warm;
       ctx.beginPath();
-      ctx.moveTo(0, -f.r * 1.4);
-      ctx.quadraticCurveTo(f.r, 0, 0, f.r * 1.4);
-      ctx.quadraticCurveTo(-f.r, 0, 0, -f.r * 1.4);
+      ctx.moveTo(0, -f.r * 1.45);
+      ctx.quadraticCurveTo(f.r * 1.1, 0, 0, f.r * 1.45);
+      ctx.quadraticCurveTo(-f.r * 1.1, 0, 0, -f.r * 1.45);
       ctx.fill();
       ctx.restore();
     };
 
     const drawFirefly = (f: Particle) => {
-      const pulse = 0.4 + 0.6 * Math.abs(Math.sin(t * 1.4 + f.phase));
+      const pulse = 0.38 + 0.62 * Math.abs(Math.sin(t * 1.5 + f.phase));
+      ctx.save();
       ctx.beginPath();
       ctx.arc(f.x, f.y, f.r * 0.9, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(253, 224, 71, ${f.opacity * pulse})`;
-      ctx.shadowColor = 'rgba(253, 224, 71, 0.9)';
+      const isCyan = f.hue > 0.7;
+      ctx.fillStyle = isCyan
+        ? `rgba(103, 232, 249, ${f.opacity * pulse})`
+        : `rgba(253, 224, 71, ${f.opacity * pulse})`;
+      ctx.shadowColor = isCyan ? 'rgba(34, 211, 238, 0.85)' : 'rgba(253, 224, 71, 0.9)';
       ctx.shadowBlur = f.r * 5;
       ctx.fill();
+      ctx.restore();
     };
 
     const drawers: Record<string, (f: Particle) => void> = {
@@ -188,23 +261,25 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
       ctx.scale(DPR, DPR);
 
       for (const f of parts) {
-        if (season === 'summer') {
-          // Светлячки медленно плывут вверх-вбок
+        if (season === 'summer' || f.kind === 'spark') {
           f.y -= f.speed * 0.35;
-          f.x += Math.sin(t * f.drift + f.phase) * 0.5;
-          if (f.y < -8) { f.y = window.innerHeight + 8; f.x = Math.random() * window.innerWidth; }
+          f.x += Math.sin(t * f.drift + f.phase) * 0.45;
+          if (f.y < -12) {
+            f.y = window.innerHeight + 12;
+            f.x = Math.random() * window.innerWidth;
+          }
         } else {
           f.y += f.speed;
-          f.x += Math.sin(t * f.drift + f.phase) * (season === 'autumn' ? 0.8 : 0.4);
+          f.x += Math.sin(t * f.drift + f.phase) * (season === 'autumn' ? 0.82 : 0.45);
           f.rot += f.rotSpeed;
         }
 
-        if (f.y > window.innerHeight + 8) {
-          f.y = -8;
+        if (f.y > window.innerHeight + 12) {
+          f.y = -12;
           f.x = Math.random() * window.innerWidth;
         }
-        if (f.x > window.innerWidth + 8) f.x = -8;
-        if (f.x < -8) f.x = window.innerWidth + 8;
+        if (f.x > window.innerWidth + 12) f.x = -12;
+        if (f.x < -12) f.x = window.innerWidth + 12;
 
         draw(f);
       }
@@ -220,13 +295,32 @@ const SeasonFx: React.FC<Props> = ({ season }) => {
     };
   }, [season, enabled]);
 
-  if (season === 'none' || !enabled) return null;
+  if (season === 'none') return null;
 
   return (
     <>
-      <canvas ref={canvasRef} className="season-fx-canvas" aria-hidden="true" />
-      {/* Морозный оттенок сверху */}
-      {season === 'winter' && <div className="season-fx-frost" aria-hidden="true" />}
+      {enabled && <canvas ref={canvasRef} className="season-fx-canvas" aria-hidden="true" />}
+
+      {/* Новогодняя гирлянда и морозное сияние */}
+      {season === 'winter' && (
+        <>
+          {enabled && <div className="season-fx-frost" aria-hidden="true" />}
+          {garlandOn && (
+            <div className="season-fx-garland" aria-hidden="true">
+              <div className="season-fx-garland__wire" />
+              <div className="season-fx-garland__bulbs">
+                {GARLAND_BULBS.map((b) => (
+                  <span
+                    key={b.id}
+                    className={`season-fx-bulb season-fx-bulb--${b.color}`}
+                    style={{ animationDelay: b.delay }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </>
   );
 };

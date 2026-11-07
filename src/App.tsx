@@ -13,6 +13,7 @@ import RulesPage from './pages/RulesPage';
 import FeedPage from './pages/FeedPage';
 import NewYearPage from './pages/NewYearPage';
 import HalloweenPage from './pages/HalloweenPage';
+import { StudiosPage } from './pages/StudiosPage';
 import TabBar from './components/TabBar';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
@@ -41,11 +42,21 @@ function App() {
     setRulesGate(false);
   };
 
-  /* ═══ Сезонная тема: новогодняя зимой, сакура весной и т.д. ═══ */
-  const season = getStoredSeason().season;
+  /* ═══ Сезонная тема: новогодняя зимой, сакура весной и т.д. (реактивно) ═══ */
+  const [season, setSeason] = useState(() => getStoredSeason().season);
   useEffect(() => {
     applySeason(season);
-  }, [season.id]);
+  }, [season]);
+
+  useEffect(() => {
+    const syncSeason = () => setSeason(getStoredSeason().season);
+    window.addEventListener('zenova-season-change', syncSeason);
+    window.addEventListener('storage', syncSeason);
+    return () => {
+      window.removeEventListener('zenova-season-change', syncSeason);
+      window.removeEventListener('storage', syncSeason);
+    };
+  }, []);
 
   /* ═══ Фоновая облачная синхронизация при запуске (0 мс задержки) ═══ */
   useEffect(() => {
@@ -103,6 +114,8 @@ function App() {
           {/* Всегда главная по умолчанию */}
           <Route path="/" element={<HomePage />} />
           <Route path="/feed" element={<FeedPage />} />
+          <Route path="/studios" element={<StudiosPage />} />
+          <Route path="/studios/:studioId" element={<StudiosPage />} />
           <Route path="/new-year" element={<NewYearPage />} />
           <Route path="/halloween" element={<HalloweenPage />} />
           <Route path="/movie/:id" element={<MovieDetailPage />} />

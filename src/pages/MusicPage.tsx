@@ -44,6 +44,7 @@ const MusicPage: React.FC = () => {
     isPlaying,
     setTrack,
     setPlaying,
+    nextTrack,
     likedTracks,
     toggleLike,
     isLiked,
@@ -481,7 +482,7 @@ const MusicPage: React.FC = () => {
         )}
       </header>
 
-      {/* ── Фирменный музыкальный визуализатор ZENOVA SOUND ── */}
+      {/* ── Фирменный музыкальный визуализатор ZENOVA SOUND PRO ── */}
       {tab === 'wave' && !searchMode && (
         <section className={`ym-wave-card ${isPlaying ? 'is-playing' : ''}`}>
           <div className="ym-wave-card__cover" aria-hidden="true">
@@ -498,17 +499,34 @@ const MusicPage: React.FC = () => {
               </div>
             )}
             <div className="ym-wave-card__cover-shade" />
+
+            {/* Виниловый голографический диск справа */}
+            <div className={`ym-wave-vinyl ${isPlaying ? 'spinning' : ''}`}>
+              <div className="ym-wave-vinyl__grooves" />
+              <div className="ym-wave-vinyl__center">
+                {currentTrack?.artwork && !waveArtworkError ? (
+                  <img src={currentTrack.artwork} alt="" />
+                ) : (
+                  <span>✦</span>
+                )}
+              </div>
+            </div>
+
             <div className="ym-wave-card__spectrum">
-              {Array.from({ length: 17 }, (_, index) => <i key={index} />)}
+              {Array.from({ length: 21 }, (_, index) => <i key={index} />)}
             </div>
           </div>
+
           <div className="ym-wave-card__info">
-            <span className="ym-wave-card__badge">
-              <span className="ym-wave-card__live-dot" />
-              {currentMoodObj.label}
-            </span>
+            <div className="ym-wave-card__badges-row">
+              <span className="ym-wave-card__badge">
+                <span className="ym-wave-card__live-dot" />
+                {currentMoodObj.label}
+              </span>
+              <span className="ym-wave-card__hires">HI-RES · DOLBY</span>
+            </div>
             <p className="ym-wave-card__kicker">
-              {isPlaying ? 'СЕЙЧАС В ЭФИРЕ' : currentTrack ? 'ПОСЛЕДНИЙ ТРЕК' : 'МУЗЫКА ПОД НАСТРОЕНИЕ'}
+              {isPlaying ? 'СЕЙЧАС В ЭФИРЕ · АУДИО ПОТОК' : currentTrack ? 'НА ПАУЗЕ' : 'НЕЙРО-ВОЛНА ПОД НАСТРОЕНИЕ'}
             </p>
             <h2 className="ym-wave-card__title">{currentTrack?.title || 'ZENOVA Пульс'}</h2>
             <p className="ym-wave-card__desc">
@@ -531,6 +549,24 @@ const MusicPage: React.FC = () => {
                   </svg>
                 )}
               </button>
+
+              {currentTrack && (
+                <button
+                  className="ym-wave-card__next"
+                  type="button"
+                  onClick={() => {
+                    haptic('light');
+                    nextTrack();
+                  }}
+                  title="Следующий трек"
+                  aria-label="Следующий трек"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                  </svg>
+                </button>
+              )}
+
               <button
                 className="ym-wave-card__surprise"
                 type="button"

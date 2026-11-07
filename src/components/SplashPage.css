@@ -1,366 +1,161 @@
 /* ═══════════════════════════════════════════════════════════════════════════════════════
-   SplashPage — красивая сезонная загрузка ZENOVA с маской и стеклом
+   SplashPage — Кинематографичная видео-загрузка ZENOVA
    ═══════════════════════════════════════════════════════════════════════════════════════ */
 
 .sp {
   position: fixed;
   inset: 0;
   z-index: 99999;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
-  isolation: isolate;
-  color: #fff;
-  width: 100%;
-  height: 100%;
+  background: #050508;
+  width: 100vw;
+  height: 100vh;
   height: 100dvh;
-  transition: opacity 0.46s ease, transform 0.46s cubic-bezier(0.2, 0.75, 0.25, 1);
   user-select: none;
-  --sp-accent: #f9a8d4;
-  --sp-accent-soft: rgba(249, 168, 212, 0.22);
-  --sp-accent-warm: rgba(251, 113, 133, 0.14);
-  --sp-bg: #0b0910;
-}
-
-.sp::before,
-.sp::after {
-  position: absolute;
-  z-index: -1;
-  content: '';
-  pointer-events: none;
-}
-
-.sp::before {
-  inset: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 34px;
-  box-shadow: inset 0 0 90px rgba(255, 255, 255, 0.012), 0 0 45px rgba(168, 85, 247, 0.035);
-}
-
-.sp::after {
-  width: min(94vw, 680px);
-  aspect-ratio: 1;
-  border: 1px solid rgba(210, 190, 255, 0.055);
-  border-radius: 50%;
-  box-shadow: 0 0 0 34px rgba(255,255,255,0.012), 0 0 0 92px rgba(255,255,255,0.009);
-  animation: spRingDrift 24s linear infinite;
+  transition: opacity 0.48s cubic-bezier(0.22, 1, 0.36, 1), transform 0.48s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sp--fade {
   opacity: 0;
-  transform: scale(1.045);
+  transform: scale(1.04);
   pointer-events: none;
-}, 140, 248, 0.16);
-  background:
-    radial-gradient(ellipse 58% 42% at 50% 42%, rgba(125, 211, 252, 0.12), transparent 76%),
-    radial-gradient(ellipse 75% 55% at 50% 112%, rgba(129, 140, 248, 0.12), transparent 68%),
-    radial-gradient(ellipse 68% 60% at 0% 50%, rgba(33, 79, 148, 0.14), transparent 75%),
-    #080b12;
 }
 
-.sp--winter::before {
-  border-color: rgba(195, 234, 255, 0.12);
-  box-shadow: inset 0 0 90px rgba(180, 226, 255, 0.035), 0 0 45px rgba(91, 174, 231, 0.08);
+.sp__backdrop-blur {
+  position: absolute;
+  inset: -40px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(42px) brightness(0.45) saturate(1.35);
+  transform: scale(1.12);
+  pointer-events: none;
 }
 
-.sp--winter .sp__emblem-wrap {
-  background: radial-gradient(ellipse, rgba(107, 196, 255, 0.17), transparent 68%);
+.sp__backdrop-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 20%, rgba(4, 4, 8, 0.78) 100%);
+  pointer-events: none;
 }
 
-.sp--winter .sp__emblem > img {
-  filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 23px rgba(125, 211, 252, 0.36));
-}
-
-.sp--winter .sp__track {
-  background: rgba(209, 238, 255, 0.14);
-  box-shadow: 0 0 0 1px rgba(200, 235, 255, 0.09), 0 0 18px rgba(125, 211, 252, 0.09);
-}
-
-.sp--winter .sp__bar {
-  background: linear-gradient(90deg, #7dd3fc, #eafaff 48%, #a5b4fc);
-  box-shadow: 0 0 16px rgba(125, 211, 252, 0.65);
-}
-
-.sp--winter .sp__bar::after {
-  box-shadow: 0 0 10px 2px #c9f0ff;
-}
-
-.sp--winter .sp__loading-label {
-  color: rgba(205, 235, 255, 0.64);
-}
-
-.sp--spring {
-  --sp-accent: #ffb6d2;
-  --sp-accent-soft: rgba(249, 168, 212, 0.2);
-  --sp-accent-warm: rgba(134, 239, 172, 0.12);
-}
-
-.sp--summer {
-  --sp-accent: #ffd18a;
-  --sp-accent-soft: rgba(56, 189, 248, 0.2);
-  --sp-accent-warm: rgba(251, 191, 36, 0.16);
-}
-
-.sp--autumn {
-  --sp-accent: #ffc17a;
-  --sp-accent-soft: rgba(253, 186, 116, 0.2);
-  --sp-accent-warm: rgba(234, 88, 12, 0.14);
-}
-
-.sp__container {
+.sp__stage {
   position: relative;
-  z-index: 1;
-  display: flex;
-  width: min(100%, 520px);
-  flex-direction: column;
-  align-items: center;
-  gap: clamp(32px, 7vh, 56px);
-  padding: 32px;
-}
-
-.sp__identity {
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  max-width: 500px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(4px, 2vw, 18px);
-  width: 100%;
+  overflow: hidden;
+  background: #050508;
+  box-shadow: 0 0 90px rgba(0, 0, 0, 0.85);
 }
 
-.sp__emblem-wrap {
-  position: relative;
-  display: grid;
-  width: clamp(126px, 36vw, 184px);
-  height: clamp(126px, 36vw, 184px);
-  flex: 0 0 auto;
-  place-items: center;
-  background: radial-gradient(ellipse, rgba(192, 24, 55, 0.09), transparent 66%);
-  animation: spEmblemEnter 0.8s cubic-bezier(0.16, 1, 0.3, 1) both, spEmblemHover 5s ease-in-out 0.8s infinite;
+@media (min-width: 520px) {
+  .sp__stage {
+    height: min(94dvh, 920px);
+    aspect-ratio: 9 / 16;
+    max-width: none;
+    width: auto;
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 30px 90px rgba(0, 0, 0, 0.9),
+      0 0 50px rgba(225, 29, 72, 0.18);
+  }
 }
 
-.sp__emblem {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 20px rgba(188, 31, 59, 0.34));
-  animation: spMaskGlow 3.8s ease-in-out infinite alternate;
-}
-
-.sp__emblem > img {
+.sp__video {
   width: 100%;
   height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  opacity: 0.92;
+  transition: opacity 0.35s ease;
 }
 
-.sp--winter .sp__blood {
-  fill: #d8f4ff;
-  filter: drop-shadow(0 2px 6px rgba(125, 211, 252, 0.72));
+.sp__video--ready {
+  opacity: 1;
 }
 
-.sp--winter .sp__title {
-  background-image: linear-gradient(110deg, #fff 14%, #c9efff 34%, #fff 48%, #d8e5ff 62%, #fff 76%);
-}
-
-.sp__projector-beam {
+.sp__top-bar {
   position: absolute;
-  z-index: 0;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-  background: conic-gradient(from 220deg, transparent 0 39%, rgba(168, 85, 247, 0.12) 48%, rgba(255, 219, 171, 0.09) 53%, transparent 62%);
-  filter: blur(12px);
-  animation: spBeam 9s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-.sp__orbit {
-  position: absolute;
-  z-index: 2;
-  width: 8px;
-  height: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 12px 3px rgba(221, 175, 255, 0.7);
-}
-
-.sp__orbit--one { top: 17px; right: 29px; }
-.sp__orbit--two { bottom: 28px; left: 16px; width: 5px; height: 5px; background: #fda4af; }
-
-.sp__brand {
+  top: max(env(safe-area-inset-top, 14px), 16px);
+  left: 16px;
+  right: 16px;
+  z-index: 4;
   display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  animation: spTextEnter 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both;
 }
 
-.sp__title-wrap {
-  position: relative;
-  padding-bottom: 12px;
-}
-
-.sp__title {
-  margin: 0;
-  color: #fff;
-  background: linear-gradient(110deg, #fff 14%, #e4e0e5 34%, #fff 48%, #f6e8eb 62%, #fff 76%);
-  background-size: 220% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-size: clamp(31px, 8.2vw, 43px);
-  font-weight: 780;
-  letter-spacing: 0.14em;
-  line-height: 1;
-  text-shadow: 0 0 28px rgba(255, 255, 255, 0.2), 0 5px 24px rgba(255, 255, 255, 0.1);
-  filter: drop-shadow(0 0 12px rgba(220, 35, 58, 0.32));
-  animation: spBrandShimmer 5s ease-in-out infinite;
-}
-
-.sp__blood {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 19px;
-  overflow: visible;
-  fill: #a90f26;
-  filter: drop-shadow(0 2px 6px rgba(202, 19, 42, 0.48));
-}
-
-.sp__subtitle {
-  margin: 0;
-  color: rgba(235, 226, 245, 0.58);
-  font-size: 9px;
+.sp__pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  background: rgba(10, 10, 16, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.14em;
-  line-height: 1.5;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sp__loading {
+.sp__pill-btn:hover {
+  background: rgba(20, 20, 32, 0.68);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.sp__pill-btn:active {
+  transform: scale(0.94);
+}
+
+.sp__pill-btn--skip {
+  background: rgba(225, 29, 72, 0.22);
+  border-color: rgba(251, 113, 133, 0.36);
+  color: #fff;
+}
+
+.sp__bottom-hud {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: max(env(safe-area-inset-bottom, 16px), 18px);
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 13px;
-  margin-top: 8px;
-  animation: spTextEnter 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+  pointer-events: none;
 }
 
 .sp__track {
-  width: 194px;
-  height: 3px;
+  width: 100%;
+  max-width: 240px;
+  height: 3.5px;
   overflow: hidden;
-  border-radius: 99px;
-  background: rgba(255, 255, 255, 0.11);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.025);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
 
 .sp__bar {
-  position: relative;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #818cf8, var(--sp-accent) 48%, #fb7185 78%, #ffd1a8);
-  box-shadow: 0 0 16px rgba(218, 112, 255, 0.68);
-  transition: width 0.16s linear;
-}
-
-.sp__bar::after {
-  position: absolute;
-  top: -4px;
-  right: 0;
-  width: 8px;
-  height: 11px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 10px 2px #fda4af;
-  content: '';
-}
-
-.sp__loading-label {
-  color: rgba(221, 205, 239, 0.52);
-  font-size: 8px;
-  font-weight: 750;
-  letter-spacing: 0.24em;
-}
-
-@keyframes spBeam {
-  from { transform: rotate(-12deg) scale(0.9); opacity: 0.55; }
-  to { transform: rotate(12deg) scale(1.08); opacity: 1; }
-}
-
-@keyframes spEmblemEnter {
-  from { opacity: 0; transform: translateY(16px) scale(0.84) rotate(-5deg); }
-  to { opacity: 1; transform: translateY(0) scale(1) rotate(0); }
-}
-
-@keyframes spEmblemHover {
-  0%, 100% { translate: 0 0; }
-  50% { translate: 0 -7px; }
-}
-
-@keyframes spMaskGlow {
-  from { filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 14px rgba(188, 31, 59, 0.24)); }
-  to { filter: drop-shadow(0 12px 35px rgba(0, 0, 0, 0.58)) drop-shadow(0 0 28px rgba(231, 53, 78, 0.42)); }
-}
-
-@keyframes spTextEnter {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes spAmbient {
-  from { transform: rotate(-12deg) scale(0.88); opacity: 0.38; }
-  to { transform: rotate(20deg) scale(1.08); opacity: 0.74; }
-}
-
-@keyframes spRingDrift {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes spStar {
-  from { opacity: 0.22; transform: scale(0.65); }
-  to { opacity: 0.95; transform: scale(1.35); }
-}
-
-@keyframes spArtworkDrift {
-  from { translate: 0 0; }
-  to { translate: 0 7px; }
-}
-
-@keyframes spBrandShimmer {
-  0%, 100% { background-position: 100% 50%; }
-  50% { background-position: 0 50%; }
-}
-
-@media (max-width: 380px) {
-  .sp__container { padding: 20px; }
-  .sp__identity { gap: 1px; }
-  .sp__emblem-wrap { width: 126px; height: 126px; }
-  .sp__title { font-size: clamp(27px, 8vw, 31px); letter-spacing: 0.11em; }
-  .sp__subtitle { font-size: 7px; letter-spacing: 0.1em; }
-  .sp__projector-beam { width: 220px; height: 220px; }
-  .sp__season-artwork { top: max(12px, calc(50% - 240px)); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .sp,
-  .sp::after,
-  .sp__ambient,
-  .sp__starfield i,
-  .sp__emblem-wrap,
-  .sp__emblem,
-  .sp__season-artwork,
-  .sp__brand,
-  .sp__loading,
-  .sp__projector-beam,
-  .sp__title {
-    animation: none;
-  }
-
-  .sp,
-  .sp__bar {
-    transition: none;
-  }
+  background: linear-gradient(90deg, #f43f5e, #fbbf24 55%, #7dd3fc);
+  box-shadow: 0 0 14px rgba(251, 191, 36, 0.75);
+  transition: width 0.15s linear;
 }

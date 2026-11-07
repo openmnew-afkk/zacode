@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer, getRecommendations } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';
@@ -8,6 +8,58 @@ import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import AgeGateModal, { isAgeVerified } from '../components/AgeGateModal';
 import './MovieDetailPage.css';
+
+/* Студии дубляжа и озвучки для ZENOVA Cinema Studio */
+const DUBBING_STUDIOS = [
+  {
+    id: 'dub',
+    name: 'Дубляж (СНГ)',
+    tag: 'Официальный · 5.1',
+    quality: '4K UHD',
+    accent: '#f43f5e',
+    preferredIdx: 0,
+  },
+  {
+    id: 'rhs',
+    name: 'Red Head Sound',
+    tag: 'Фирменные голоса',
+    quality: '4K / 1080p',
+    accent: '#ef4444',
+    preferredIdx: 0,
+  },
+  {
+    id: 'rezka',
+    name: 'HDRezka Studio',
+    tag: 'Проф. многоголосый',
+    quality: '1080p HQ',
+    accent: '#8b5cf6',
+    preferredIdx: 1,
+  },
+  {
+    id: 'lostfilm',
+    name: 'LostFilm / TVShows',
+    tag: 'Топ для сериалов',
+    quality: 'Full HD',
+    accent: '#38bdf8',
+    preferredIdx: 2,
+  },
+  {
+    id: 'kubik',
+    name: 'Jaskier / Кубик',
+    tag: 'Авторский перевод',
+    quality: '1080p',
+    accent: '#f59e0b',
+    preferredIdx: 3,
+  },
+  {
+    id: 'orig',
+    name: 'Original + Sub',
+    tag: 'ENG + Субтитры',
+    quality: 'Multi-CDN',
+    accent: '#10b981',
+    preferredIdx: 4,
+  },
+];
 
 /* Статусы дневника */
 const STATUSES: Array<{ id: WatchStatus; label: string; icon: React.ReactNode }> = [
@@ -198,6 +250,52 @@ const MovieDetailPage: React.FC = () => {
   const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
   const [watchIdx, setWatchIdx] = useState(0);
   const [recs, setRecs] = useState<Movie[]>([]);
+  const [isPlayerFullscreen, setIsPlayerFullscreen] = useState(false);
+  const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [ambilightOn, setAmbilightOn] = useState(true);
+  const [activeDubStudio, setActiveDubStudio] = useState('dub');
+  const playerModalRef = useRef<HTMLDivElement>(null);
+
+  /* Надёжное раскрытие на весь экран (включая Telegram Web на ноутбуках/ПК) */
+  const togglePlayerFullscreen = () => {
+    haptic('medium');
+    const nextState = !isPlayerFullscreen;
+    setIsPlayerFullscreen(nextState);
+
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (nextState) {
+        if (typeof tg?.expand === 'function') tg.expand();
+        if (typeof tg?.requestFullscreen === 'function') tg.requestFullscreen();
+      } else {
+        if (typeof tg?.exitFullscreen === 'function') tg.exitFullscreen();
+      }
+    } catch {}
+
+    try {
+      const el = playerModalRef.current as any;
+      if (nextState && el) {
+        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
+        if (req) req.call(el).catch?.(() => {});
+      } else if (!nextState && document.fullscreenElement) {
+        document.exitFullscreen?.().catch?.(() => {});
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (!showWatch) {
+      setIsPlayerFullscreen(false);
+      return;
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isPlayerFullscreen) {
+        setIsPlayerFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showWatch, isPlayerFullscreen]);
 
   /* Поддержка звёздами: быстрые суммы + своя (1 – ∞) */
   const STARS_QUICK = [10, 25, 50, 100];
@@ -722,27 +820,115 @@ const MovieDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── Плеер (все студии озвучки: LostFilm, Red Head Sound, Дубляж, Резка) ── */}
+      {/* ── Плеер ZENOVA CINEMA STUDIO PRO (Студии озвучки, Полный экран для ТГ Вэб на ноуте, Ambilight) ── */}
       {showWatch && watchOptions.length > 0 && (
-        <div className="dp-trailer-overlay" onClick={() => setShowWatch(false)}>
-          <div className="dp-trailer" onClick={(e) => e.stopPropagation()}>
+        <div
+          className={`dp-trailer-overlay ${isPlayerFullscreen ? 'dp-trailer-overlay--fullscreen' : ''} ${
+            isTheaterMode ? 'dp-trailer-overlay--theater' : ''
+          }`}
+          onClick={() => {
+            if (!isPlayerFullscreen) setShowWatch(false);
+          }}
+        >
+          <div
+            ref={playerModalRef}
+            className={`dp-trailer dp-cinema-studio ${isPlayerFullscreen ? 'dp-trailer--fullscreen' : ''} ${
+              isTheaterMode ? 'dp-trailer--theater' : ''
+            } ${ambilightOn ? 'dp-cinema-studio--ambilight' : ''}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Фоновое свечение Ambilight вокруг экрана */}
+            {ambilightOn && (
+              <div
+                className="dp-cinema-ambilight"
+                style={{ backgroundImage: `url(${backdrop})` }}
+                aria-hidden="true"
+              />
+            )}
+
+            {/* Верхняя панель управления кинозалом */}
             <div className="dp-watch-bar">
               <div className="dp-watch-bar__info">
+                <div className="dp-watch-bar__live-row">
+                  <span className="dp-watch-bar__live-dot" />
+                  <span className="dp-watch-bar__kicker">ZENOVA CINEMA PRO</span>
+                  <span className="dp-watch-bar__quality-pill">4K UHD · HDR</span>
+                </div>
                 <span className="dp-watch-bar__title">
-                  {watchOptions[watchIdx]?.flag} {watchOptions[watchIdx]?.label} · {movie.title}
+                  {movie.title}
                 </span>
                 <span className="dp-watch-bar__sub">
-                  {watchOptions[watchIdx]?.sublabel}
+                  {watchOptions[watchIdx]?.flag} {watchOptions[watchIdx]?.label} · Озвучка:{' '}
+                  <b>{DUBBING_STUDIOS.find((d) => d.id === activeDubStudio)?.name || 'Дубляж'}</b>
                 </span>
               </div>
+
               <div className="dp-watch-bar__actions">
+                {/* Главная кнопка раскрытия на весь экран (исправляет баг на ноутбуках в Telegram Web) */}
                 <button
+                  type="button"
+                  className={`dp-watch-bar__fs-btn ${isPlayerFullscreen ? 'active' : ''}`}
+                  onClick={togglePlayerFullscreen}
+                  title={isPlayerFullscreen ? 'Выйти из полного экрана (Esc)' : 'Развернуть на весь экран ноутбука/телефона'}
+                >
+                  {isPlayerFullscreen ? (
+                    <>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                      </svg>
+                      <span>Свернуть</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                      </svg>
+                      <span>На весь экран</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Широкий режим (Театр) для ноутбуков */}
+                {!isPlayerFullscreen && (
+                  <button
+                    type="button"
+                    className={`dp-watch-bar__btn dp-watch-bar__btn--wide ${isTheaterMode ? 'active' : ''}`}
+                    onClick={() => {
+                      haptic('light');
+                      setIsTheaterMode((v) => !v);
+                    }}
+                    title="Широкий режим кинотеатра"
+                    aria-label="Широкий экран"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                      <rect x="2" y="5" width="20" height="14" rx="2.5" />
+                    </svg>
+                  </button>
+                )}
+
+                {/* Подсветка Ambilight */}
+                <button
+                  type="button"
+                  className={`dp-watch-bar__btn ${ambilightOn ? 'active' : ''}`}
+                  onClick={() => {
+                    haptic('light');
+                    setAmbilightOn((v) => !v);
+                  }}
+                  title="Фоновая подсветка Ambilight"
+                  aria-label="Подсветка Ambilight"
+                >
+                  ✨
+                </button>
+
+                {/* Перезагрузить поток */}
+                <button
+                  type="button"
                   className="dp-watch-bar__btn"
                   onClick={() => {
                     haptic('light');
                     const cur = watchIdx;
                     setWatchIdx(-1);
-                    setTimeout(() => setWatchIdx(cur), 50);
+                    setTimeout(() => setWatchIdx(cur), 60);
                   }}
                   title="Перезагрузить поток"
                   aria-label="Перезагрузить"
@@ -751,95 +937,134 @@ const MovieDetailPage: React.FC = () => {
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                   </svg>
                 </button>
-                <button className="dp-watch-bar__close" onClick={() => setShowWatch(false)} aria-label="Закрыть">✕</button>
+
+                <button
+                  type="button"
+                  className="dp-watch-bar__close"
+                  onClick={() => {
+                    setIsPlayerFullscreen(false);
+                    setShowWatch(false);
+                  }}
+                  aria-label="Закрыть"
+                >
+                  ✕
+                </button>
               </div>
-            </div>
-            <div className="dp-watch-hint">
-              {watchOptions[watchIdx]?.provider === 'Collaps' ? (
-                <>
-                  <span className="dp-watch-hint__badge">⚡ Плеер 1 (Основной):</span>
-                  <span className="dp-watch-hint__text">
-                    Ultra HD 4K · Дубляж и студийные озвучки. Если видео не запускается под вашим VPN — переключитесь на Плеер 2 или Плеер 3 ниже.
-                  </span>
-                </>
-              ) : watchOptions[watchIdx]?.provider === 'Voidboost' ? (
-                <>
-                  <span className="dp-watch-hint__badge">🍿 Плеер 2 (Резерв #1):</span>
-                  <span className="dp-watch-hint__text">Full HD · Студийные переводы и дубляж (отлично работает под любым VPN)</span>
-                </>
-              ) : watchOptions[watchIdx]?.provider === 'Alloha' ? (
-                <>
-                  <span className="dp-watch-hint__badge">✨ Плеер 3 (Резерв #2):</span>
-                  <span className="dp-watch-hint__text">Full HD · Альтернативный скоростной поток</span>
-                </>
-              ) : watchOptions[watchIdx]?.provider === 'Lumex' ? (
-                <>
-                  <span className="dp-watch-hint__badge">🎥 Плеер 4 (Резерв #3):</span>
-                  <span className="dp-watch-hint__text">Скоростной видео-CDN · Дубляж Full HD</span>
-                </>
-              ) : (
-                <>
-                  <span className="dp-watch-hint__badge">🌐 Альтернативный плеер:</span>
-                  <span className="dp-watch-hint__text">100% стабилен с любым VPN · Скоростной CDN</span>
-                </>
-              )}
             </div>
 
-            {/* Быстрый помощник при ошибке региона */}
-            {watchOptions[watchIdx]?.provider === 'Collaps' && (
-              <div className="dp-watch-vpn-quick">
-                <span className="dp-watch-vpn-quick__label">🛡️ Не запускается видео? Переключите плеер в 1 клик:</span>
-                <div className="dp-watch-vpn-quick__btns">
-                  {watchOptions.slice(1, 4).map((o, idx) => (
-                    <button
-                      key={o.id}
-                      type="button"
-                      className="dp-watch-vpn-quick__btn"
-                      onClick={() => { haptic('light'); setWatchIdx(idx + 1); }}
-                    >
-                      {o.flag} {o.label}
-                    </button>
-                  ))}
+            {/* ── Видео-экран с плавающей кнопкой масштабирования ── */}
+            <div className="dp-cinema-stage">
+              {watchIdx >= 0 ? (
+                <iframe
+                  key={`${watchOptions[watchIdx]?.url}-${watchIdx}-${activeDubStudio}`}
+                  src={watchOptions[watchIdx]?.url}
+                  className="dp-trailer__frame"
+                  title="Просмотр"
+                  allowFullScreen
+                  allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; clipboard-write *"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                />
+              ) : (
+                <div className="dp-watch-loading">
+                  <div className="dp-watch__spinner" />
+                  <span>Синхронизация студии озвучки и 4K потока…</span>
                 </div>
-              </div>
-            )}
-            {watchIdx >= 0 ? (
-              <iframe
-                key={`${watchOptions[watchIdx]?.url}-${watchIdx}`}
-                src={watchOptions[watchIdx]?.url}
-                className="dp-trailer__frame"
-                title="Просмотр"
-                allowFullScreen
-                allow="autoplay; fullscreen; encrypted-media; picture-in-picture; clipboard-write"
-                referrerPolicy="strict-origin-when-cross-origin"
-              />
-            ) : (
-              <div className="dp-watch-loading">
-                <div className="dp-watch__spinner" />
-                <span>Подключение к потоку…</span>
-              </div>
-            )}
-            <div className="dp-watch-sources-wrap">
-              <span className="dp-watch-sources-title">Серверы вещания (4K / 1080p, поддержка VPN и озвучки):</span>
-              <div className="dp-watch-sources">
-                {watchOptions.map((o, i) => (
-                  <button
-                    key={o.id}
-                    className={`dp-watch-src ${i === watchIdx ? 'active' : ''}`}
-                    onClick={() => { haptic('light'); setWatchIdx(i); }}
-                    title={o.sublabel}
-                  >
-                    <span className="dp-watch-src__flag">{o.flag}</span>
-                    <span className="dp-watch-src__name">{o.label}</span>
-                  </button>
-                ))}
-              </div>
+              )}
+
+              {/* Плавающая кнопка быстрого выхода/входа в полный экран поверх угла */}
+              <button
+                type="button"
+                className="dp-stage-fs-pill"
+                onClick={togglePlayerFullscreen}
+                title={isPlayerFullscreen ? 'Выйти из полного экрана' : 'Развернуть на весь экран'}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                  {isPlayerFullscreen ? (
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  ) : (
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  )}
+                </svg>
+                <span>{isPlayerFullscreen ? 'Обычный вид' : 'Увеличить экран'}</span>
+              </button>
             </div>
-            {isSerial && (
-              <div className="dp-watch-eps">
-                <button className="dp-watch-ep" onClick={() => { haptic('light'); setWatchIdx((i) => i); }}>
-                  Сезоны и серии переключаются напрямую в окне плеера
-                </button>
+
+            {/* ── Панель студий озвучки и серверов (скрывается в полноэкранном режиме для 100% обзора видео) ── */}
+            {!isPlayerFullscreen && (
+              <div className="dp-cinema-controls">
+                {/* 🎙️ Блок 1: Студии дубляжа и озвучки */}
+                <div className="dp-dub-section">
+                  <div className="dp-dub-header">
+                    <span className="dp-dub-title">🎙️ Студии озвучки и дубляжа</span>
+                    <span className="dp-dub-sub">Dolby Digital · Выбор голосовой дорожки</span>
+                  </div>
+                  <div className="dp-dub-grid">
+                    {DUBBING_STUDIOS.map((st) => {
+                      const active = activeDubStudio === st.id;
+                      return (
+                        <button
+                          key={st.id}
+                          type="button"
+                          className={`dp-dub-card ${active ? 'active' : ''}`}
+                          style={{ '--dub-accent': st.accent } as React.CSSProperties}
+                          onClick={() => {
+                            haptic('light');
+                            setActiveDubStudio(st.id);
+                            const targetIdx = Math.min(st.preferredIdx, Math.max(0, watchOptions.length - 1));
+                            if (watchIdx !== targetIdx) {
+                              setWatchIdx(targetIdx);
+                            }
+                          }}
+                        >
+                          <div className="dp-dub-card__top">
+                            <span className="dp-dub-card__quality">{st.quality}</span>
+                            <span className="dp-dub-card__eq" aria-hidden="true">
+                              <i /><i /><i />
+                            </span>
+                          </div>
+                          <span className="dp-dub-card__name">{st.name}</span>
+                          <span className="dp-dub-card__tag">{st.tag}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ⚡ Блок 2: Серверы вещания (Плееры 1..6) */}
+                <div className="dp-watch-sources-wrap">
+                  <div className="dp-dub-header">
+                    <span className="dp-watch-sources-title">⚡ Видео-серверы (переключите, если нужен обход VPN):</span>
+                    <span className="dp-dub-sub">Активен: {watchOptions[watchIdx]?.label}</span>
+                  </div>
+                  <div className="dp-watch-sources">
+                    {watchOptions.map((o, i) => (
+                      <button
+                        key={o.id}
+                        type="button"
+                        className={`dp-watch-src ${i === watchIdx ? 'active' : ''}`}
+                        onClick={() => { haptic('light'); setWatchIdx(i); }}
+                        title={o.sublabel}
+                      >
+                        <span className="dp-watch-src__dot" />
+                        <span className="dp-watch-src__flag">{o.flag}</span>
+                        <div className="dp-watch-src__text">
+                          <span className="dp-watch-src__name">{o.label}</span>
+                          <span className="dp-watch-src__meta">
+                            {i === 0 ? '4K Основной' : i === 1 ? 'Без лагов · VPN' : i === 2 ? 'Быстрый CDN' : 'Резерв HD'}
+                          </span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {isSerial && (
+                  <div className="dp-watch-eps">
+                    <span className="dp-watch-ep">
+                      📺 Сезоны, серии и дополнительная дорожка выбираются также внутри верхней панели самого плеера
+                    </span>
+                  </div>
+                )}
               </div>
             )}
           </div>

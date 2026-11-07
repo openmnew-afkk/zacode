@@ -1767,3 +1767,324 @@
   color: #fff;
   box-shadow: 0 6px 22px var(--accent-glow);
 }
+
+/* ════════════ Кнопка «Миры» в шапке и Витрина Кино-Миров ════════════ */
+
+.hp-header__worlds-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 13px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.22), rgba(56, 189, 248, 0.16));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: transform 0.18s ease, box-shadow 0.22s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hp-header__worlds-btn:hover {
+  box-shadow: 0 6px 22px rgba(229, 9, 20, 0.38);
+  transform: translateY(-1px);
+}
+
+.hp-header__worlds-btn:active {
+  transform: scale(0.94);
+}
+
+.hp-header__worlds-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f43f5e;
+  box-shadow: 0 0 8px #f43f5e;
+  animation: hpFeedPulse 2s infinite ease-in-out;
+}
+
+.hp-tab--worlds {
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(147, 51, 234, 0.2)) !important;
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  color: #fda4af !important;
+}
+
+/* Горизонтальная витрина Кино-Миров на главной */
+.hp-worlds-strip {
+  margin: 4px 0 16px;
+}
+
+.hp-worlds-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 16px 8px;
+  scrollbar-width: none;
+}
+.hp-worlds-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.hp-world-card {
+  position: relative;
+  overflow: hidden;
+  min-width: 138px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(25, 24, 36, 0.9), rgba(12, 11, 18, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.hp-world-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--w-accent);
+  box-shadow: 0 10px 26px -6px var(--w-glow);
+}
+
+.hp-world-card:active {
+  transform: scale(0.96);
+}
+
+.hp-world-card__glow {
+  position: absolute;
+  top: -28px;
+  right: -28px;
+  width: 86px;
+  height: 86px;
+  border-radius: 50%;
+  background: var(--w-accent);
+  filter: blur(28px);
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+.hp-world-card__badge {
+  position: relative;
+  z-index: 1;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: var(--w-accent);
+  text-transform: uppercase;
+}
+
+.hp-world-card--apple .hp-world-card__badge,
+.hp-world-card--a24 .hp-world-card__badge {
+  color: #e2e8f0;
+}
+
+.hp-world-card__name {
+  position: relative;
+  z-index: 1;
+  font-size: 16px;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.hp-world-card__sub {
+  position: relative;
+  z-index: 1;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.56);
+  font-weight: 600;
+}
+
+/* ТОП-10 сегодня с большими номерами */
+.hp-top10 {
+  margin: 4px 0 18px;
+}
+
+.hp-top10__scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 6px 16px 10px 28px;
+  scrollbar-width: none;
+}
+.hp-top10__scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.hp-top10__item {
+  position: relative;
+  width: 126px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.hp-top10__item:hover {
+  transform: translateY(-3px);
+}
+
+.hp-top10__num {
+  position: absolute;
+  left: -20px;
+  bottom: 4px;
+  font-size: 68px;
+  font-weight: 900;
+  line-height: 0.82;
+  color: rgba(12, 11, 18, 0.9);
+  -webkit-text-stroke: 2px var(--season-accent, #f43f5e);
+  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.85);
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.hp-top10__poster {
+  position: relative;
+  z-index: 2;
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+  background: #14131d;
+}
+
+.hp-top10__poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Модальное окно порталов Кино-Миров */
+.hp-worlds-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(5, 5, 10, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+@media (min-width: 640px) {
+  .hp-worlds-modal-overlay {
+    align-items: center;
+  }
+}
+
+.hp-worlds-modal {
+  width: min(560px, 100%);
+  max-height: 85dvh;
+  overflow-y: auto;
+  border-radius: 26px;
+  padding: 20px;
+  background: linear-gradient(165deg, rgba(24, 22, 34, 0.96), rgba(10, 10, 16, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 26px 64px rgba(0, 0, 0, 0.85);
+}
+
+.hp-worlds-modal__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.hp-worlds-modal__kicker {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  color: #f43f5e;
+}
+
+.hp-worlds-modal__title {
+  margin: 2px 0 4px;
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.hp-worlds-modal__sub {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hp-worlds-modal__close {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+}
+
+.hp-worlds-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.hp-world-portal-card {
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+  border-radius: 18px;
+  background: radial-gradient(120% 100% at 100% 0%, var(--w-glow) 0%, rgba(255, 255, 255, 0.04) 70%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  text-align: left;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.hp-world-portal-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--w-accent);
+}
+
+.hp-world-portal-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.hp-world-portal-card__badge {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--w-accent);
+}
+
+.hp-world-portal-card__arrow {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.hp-world-portal-card__name {
+  font-size: 17px;
+  font-weight: 900;
+  margin-bottom: 2px;
+}
+
+.hp-world-portal-card__desc {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
