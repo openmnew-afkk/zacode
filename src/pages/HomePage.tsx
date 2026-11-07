@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   getAllTrending, getTrendingMovies, getTrendingSeries,
   getTopRated, getNowPlaying, getPopularByGenre, searchMovies,
-  discoverMovies, discoverSeries, getKeywordCollection,
+  discoverMovies, discoverSeries, getKeywordCollection, STUDIO_WORLDS,
 } from '../api/catalog';
 
 import { useStore } from '../store';
@@ -1090,7 +1090,7 @@ const HomePage: React.FC = () => {
           >
             <span className="hp-header__studios-spark" aria-hidden="true">✦</span>
             <span className="hp-header__studios-text">Вселенные</span>
-            <span className="hp-header__studios-count">10</span>
+            <span className="hp-header__studios-count">{STUDIO_WORLDS.length}</span>
           </button>
 
           {/* Профиль пользователя в чистом золотом свечении */}
@@ -1159,13 +1159,13 @@ const HomePage: React.FC = () => {
 
             {luckySpinning || !luckyPick ? (
               <>
-                <h3 className="aip-lucky__title">КиноИИ думает…</h3>
+                <h3 className="aip-lucky__title">Оракул думает…</h3>
                 <div className="aip-lucky__dots"><i /><i /><i /></div>
                 <p className="aip-lucky__sub">Сканирую каталог и ваши вкусы</p>
               </>
             ) : (
               <>
-                <span className="aip-lucky__badge">🤖 КиноИИ рекомендует</span>
+                <span className="aip-lucky__badge">✦ Оракул рекомендует</span>
                 <div className="aip-lucky__card" onClick={() => { setLuckyPick(null); navigate(`/movie/${luckyPick.id}`); }}>
                   <img src={luckyPick.poster_path} alt="" className="aip-lucky__poster" />
                   <div className="aip-lucky__info">

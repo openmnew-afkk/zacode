@@ -16,56 +16,41 @@
   overflow-x: hidden;
 }
 
-/* ═══════════════════════ 1. ШАПКА ═══════════════════════ */
+/* ═══════════════════════ 1. МИНИМАЛИСТИЧНАЯ ШАПКА ═══════════════════════ */
 
-.ms-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  margin: 0 -16px;
-  padding: 10px 16px 12px;
-  padding-top: calc(var(--header-safe-top, 12px) + 6px);
-  background: rgba(9, 9, 13, 0.82);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ms-header__top {
+.ms-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  padding: calc(var(--header-safe-top, 12px) + 6px) 0 12px;
 }
 
-.ms-brand {
+.ms-top-bar__brand {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
-.ms-brand__badge {
+.ms-top-bar__kicker {
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   color: #fb7185;
   text-transform: uppercase;
 }
 
-.ms-brand__title {
+.ms-top-bar__title {
   margin: 0;
+  font-family: 'Unbounded', -apple-system, sans-serif;
   font-size: 22px;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: #ffffff;
-  line-height: 1.15;
+  line-height: 1.1;
 }
 
 /* Эквалайзер разворачивания плеера */
-.ms-header__equalizer {
+.ms-top-bar__eq {
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -79,177 +64,40 @@
   transition: transform 0.16s ease, background 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.ms-header__equalizer:disabled {
+.ms-top-bar__eq:disabled {
   opacity: 0.35;
   cursor: default;
 }
-.ms-header__equalizer:not(:disabled):active {
+.ms-top-bar__eq:not(:disabled):active {
   transform: scale(0.92);
   background: rgba(255, 255, 255, 0.1);
 }
 
-.ms-header__equalizer span {
+.ms-top-bar__eq span {
   width: 2.5px;
   height: 12px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.6);
   transition: height 0.2s ease;
 }
-.ms-header__equalizer.playing span {
+.ms-top-bar__eq.playing span {
   background: #fb7185;
   animation: msEqBar 1s ease-in-out infinite alternate;
 }
-.ms-header__equalizer.playing span:nth-child(1) { animation-delay: 0.1s; height: 16px; }
-.ms-header__equalizer.playing span:nth-child(2) { animation-delay: 0.35s; height: 20px; }
-.ms-header__equalizer.playing span:nth-child(3) { animation-delay: 0.2s; height: 14px; }
-.ms-header__equalizer.playing span:nth-child(4) { animation-delay: 0.45s; height: 18px; }
+.ms-top-bar__eq.playing span:nth-child(1) { animation-delay: 0.1s; height: 16px; }
+.ms-top-bar__eq.playing span:nth-child(2) { animation-delay: 0.35s; height: 20px; }
+.ms-top-bar__eq.playing span:nth-child(3) { animation-delay: 0.2s; height: 14px; }
+.ms-top-bar__eq.playing span:nth-child(4) { animation-delay: 0.45s; height: 18px; }
 
 @keyframes msEqBar {
   0% { transform: scaleY(0.4); }
   100% { transform: scaleY(1.15); }
 }
 
-/* Поиск */
-.ms-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.ms-search__icon {
-  position: absolute;
-  left: 14px;
-  color: rgba(255, 255, 255, 0.4);
-  pointer-events: none;
-}
-
-.ms-search__input {
-  width: 100%;
-  height: 42px;
-  padding: 0 38px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #ffffff;
-  font-size: 13.5px;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.18s ease, background 0.18s ease;
-}
-.ms-search__input:focus {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(251, 113, 133, 0.5);
-}
-.ms-search__input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.ms-search__clear {
-  position: absolute;
-  right: 12px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: none;
-  color: rgba(255, 255, 255, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  cursor: pointer;
-}
-
-.ms-search__spinner {
-  position: absolute;
-  right: 14px;
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #fb7185;
-  border-radius: 50%;
-  animation: msSpin 0.7s linear infinite;
-}
-@keyframes msSpin {
-  to { transform: rotate(360deg); }
-}
-
-/* ═════ Вкладки в стиле Profile (.pf-pill-tabs) ═════ */
-
-.ms-pill-tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.ms-pill-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.ms-pill-tab {
-  flex-shrink: 0;
-  padding: 8px 15px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.18s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.ms-pill-tab.active {
-  background: #ffffff;
-  color: #000000;
-  border-color: #ffffff;
-  font-weight: 700;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.18);
-}
-
-/* Чипсы настроений */
-.ms-moods-rail {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.ms-moods-rail::-webkit-scrollbar {
-  display: none;
-}
-
-.ms-mood-chip {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 11.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.ms-mood-chip.active {
-  background: rgba(251, 113, 133, 0.14);
-  border-color: rgba(251, 113, 133, 0.45);
-  color: #fecdd3;
-  font-weight: 700;
-}
-.ms-mood-chip__icon {
-  font-size: 13px;
-}
-
 /* ═══════════════════════ 2. 3D OBSIDIAN STAGE ═══════════════════════ */
 
 .ms-showcase {
-  margin: 14px 0 20px;
+  margin: 4px 0 18px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -462,9 +310,10 @@
 }
 .ms-stage__title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: #ffffff;
   line-height: 1.2;
   white-space: nowrap;
@@ -560,6 +409,151 @@
   color: rgba(255, 255, 255, 0.45);
 }
 
+/* ═══════════════════════ 3. НАВИГАЦИОННОЕ ПРОСТРАНСТВО ═══════════════════════ */
+
+.ms-nav-space {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 16px;
+}
+
+/* Поиск */
+.ms-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ms-search__icon {
+  position: absolute;
+  left: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.ms-search__input {
+  width: 100%;
+  height: 42px;
+  padding: 0 38px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 13.5px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.ms-search__input:focus {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(251, 113, 133, 0.5);
+}
+.ms-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.ms-search__clear {
+  position: absolute;
+  right: 12px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.ms-search__spinner {
+  position: absolute;
+  right: 14px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: #fb7185;
+  border-radius: 50%;
+  animation: msSpin 0.7s linear infinite;
+}
+@keyframes msSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Вкладки в стиле Profile (.pf-pill-tabs) */
+.ms-pill-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ms-pill-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.ms-pill-tab {
+  flex-shrink: 0;
+  padding: 8px 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ms-pill-tab.active {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.18);
+}
+
+/* Чипсы настроений */
+.ms-moods-rail {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.ms-moods-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.ms-mood-chip {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ms-mood-chip.active {
+  background: rgba(251, 113, 133, 0.14);
+  border-color: rgba(251, 113, 133, 0.45);
+  color: #fecdd3;
+  font-weight: 700;
+}
+.ms-mood-chip__icon {
+  font-size: 13px;
+}
+
 /* ═════ Баннеры ═════ */
 
 .ms-banner {
@@ -592,7 +586,7 @@
   line-height: 1.35;
 }
 
-/* ═══════════════════════ 3. ТРЕКЛИСТ ═══════════════════════ */
+/* ═══════════════════════ 4. ТРЕКЛИСТ ═══════════════════════ */
 
 .ms-list {
   display: flex;

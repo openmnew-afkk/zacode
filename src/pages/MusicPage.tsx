@@ -12,7 +12,6 @@ import './MusicPage.css';
 
 type Tab = 'wave' | 'chart' | 'radio' | 'library';
 
-/** Размер страницы подгрузки (бесконечная прокрутка) */
 const PAGE = 30;
 
 const fmtTime = (s: number): string => {
@@ -22,7 +21,6 @@ const fmtTime = (s: number): string => {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 };
 
-/** Тасовка Фишера—Йетса: каждый запуск Волны звучит по-новому */
 function shuffleArray<T>(arr: T[]): T[] {
   const a = [...arr];
   for (let i = a.length - 1; i > 0; i--) {
@@ -32,7 +30,6 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a;
 }
 
-/** Случайная стартовая страница трендов (0–3), чтобы при каждом открытии были новые треки */
 function randomBaseOffset(): number {
   return Math.floor(Math.random() * 4) * PAGE;
 }
@@ -64,7 +61,6 @@ const MusicPage: React.FC = () => {
     setWaveArtworkError(false);
   }, [currentTrack?.id]);
 
-  /* Плейлисты полных треков (кэш по ключу «wave:настроение» / «chart») */
   const [playlists, setPlaylists] = useState<Record<string, MusicTrack[]>>({});
   const [listLoading, setListLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -85,7 +81,6 @@ const MusicPage: React.FC = () => {
   const hasPlaylist = Boolean(playlists[listKey]);
   const searchMode = query.trim().length > 0;
 
-  /* Страница плейлиста по ключу */
   const fetchListPage = useCallback(async (key: string, offset: number): Promise<MusicTrack[]> => {
     if (key === 'chart') return getAudiusTrending(PAGE, undefined, offset);
     if (key.startsWith('wave:')) {
@@ -97,7 +92,6 @@ const MusicPage: React.FC = () => {
     return [];
   }, []);
 
-  /* Первичная загрузка плейлиста */
   useEffect(() => {
     if ((tab !== 'wave' && tab !== 'chart') || searchMode) return;
     if (playlists[listKey]) return;
@@ -120,7 +114,6 @@ const MusicPage: React.FC = () => {
     return () => { alive = false; };
   }, [tab, activeMood, searchMode, listKey, playlists, fetchListPage]);
 
-  /* Поиск */
   useEffect(() => {
     const q = query.trim();
     if (!q) {
@@ -165,7 +158,6 @@ const MusicPage: React.FC = () => {
     };
   }, [query]);
 
-  /* Бесконечная прокрутка */
   const loadMoreList = useCallback(async () => {
     if (listLoading || loadingMore || !hasPlaylist || exhausted[listKey]) return;
     setLoadingMore(true);
@@ -216,7 +208,6 @@ const MusicPage: React.FC = () => {
 
   loadMoreFnRef.current = searchMode ? loadMoreSearch : loadMoreList;
 
-  /* Фильтрация треков */
   const displayedTracks = useMemo(() => {
     const q = query.trim().toLowerCase();
 
@@ -250,7 +241,6 @@ const MusicPage: React.FC = () => {
     return [...moodTracks, ...radioMatches];
   }, [tab, activeMood, query, likedTracks, searchResults, playlists]);
 
-  /* Запуск воспроизведения трека */
   const handlePlayTrack = (track: MusicTrack, idx: number) => {
     haptic('medium');
     if (currentTrack?.id === track.id) {
@@ -261,7 +251,6 @@ const MusicPage: React.FC = () => {
     }
   };
 
-  /* Запуск Волны Пульс */
   const handleStartWave = () => {
     haptic('heavy');
     const localPool = displayedTracks.filter((t) => !t.isLiveRadio);
@@ -291,7 +280,6 @@ const MusicPage: React.FC = () => {
     }
   };
 
-  /* Волна дня */
   const dayWave = useMemo(() => {
     const h = new Date().getHours();
     if (h >= 6 && h < 11) return { mood: 'energy', icon: '🌅', label: 'Утренний старт' };
@@ -338,103 +326,27 @@ const MusicPage: React.FC = () => {
 
   return (
     <div className="music-page page ms-page">
-      {/* ════════════ 1. МИНИМАЛИСТИЧНАЯ ШАПКА В СТИЛЕ ПРОФИЛЯ ════════════ */}
-      <header className="ms-header">
-        <div className="ms-header__top">
-          <div className="ms-brand">
-            <span className="ms-brand__badge">✦ ZENOVA SOUND PRO</span>
-            <h1 className="ms-brand__title">
-              {tab === 'wave' && 'ZENOVA Пульс'}
-              {tab === 'chart' && 'Топ Чарты'}
-              {tab === 'radio' && 'Прямой Эфир'}
-              {tab === 'library' && 'Медиатека'}
-            </h1>
-          </div>
-
-          <button
-            type="button"
-            className={`ms-header__equalizer ${isPlaying ? 'playing' : ''}`}
-            onClick={() => {
-              if (currentTrack) {
-                haptic('medium');
-                setExpanded(true);
-              }
-            }}
-            aria-label={currentTrack ? 'Развернуть плеер' : 'Плеер выключен'}
-            disabled={!currentTrack}
-          >
-            <span /><span /><span /><span />
-          </button>
+      {/* ════════════ 1. МИНИМАЛИСТИЧНАЯ ШАПКА ZENOVA SOUND ════════════ */}
+      <header className="ms-top-bar">
+        <div className="ms-top-bar__brand">
+          <span className="ms-top-bar__kicker">ZENOVA · SOUND</span>
+          <h1 className="ms-top-bar__title">Музыка</h1>
         </div>
 
-        {/* ── Минималистичный поиск (smoked glass) ── */}
-        <div className="ms-search">
-          <svg className="ms-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-            <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
-          </svg>
-          <input
-            type="text"
-            className="ms-search__input"
-            placeholder="Трек, исполнитель или настроение…"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          {isSearching && <div className="ms-search__spinner" />}
-          {query && !isSearching && (
-            <button className="ms-search__clear" onClick={() => setQuery('')} aria-label="Очистить поиск">
-              ✕
-            </button>
-          )}
-        </div>
-
-        {/* ── Навигационные вкладки в точном стиле ProfilePage (.pf-pill-tabs) ── */}
-        <div className="ms-pill-tabs">
-          {([
-            { id: 'wave', label: '✦ Пульс' },
-            { id: 'chart', label: '🔥 Топ Хиты' },
-            { id: 'radio', label: '📻 Радио' },
-            { id: 'library', label: `💖 Любимое (${likedTracks.length})` },
-          ] as const).map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`ms-pill-tab ${tab === t.id ? 'active' : ''}`}
-              onClick={() => {
-                haptic('light');
-                setTab(t.id);
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
-
-        {/* ── Чипсы настроений (Минимализм) ── */}
-        {tab === 'wave' && !searchMode && (
-          <div className="ms-moods-rail">
-            <button
-              className={`ms-mood-chip ${activeMood === dayWave.mood ? 'active' : ''}`}
-              onClick={activateDayWave}
-            >
-              <span className="ms-mood-chip__icon">{dayWave.icon}</span>
-              <span>{dayWave.label}</span>
-            </button>
-            {WAVE_MOODS.map((m) => (
-              <button
-                key={m.id}
-                className={`ms-mood-chip ${activeMood === m.id ? 'active' : ''}`}
-                onClick={() => {
-                  haptic('light');
-                  setActiveMood(m.id);
-                  showToast(`${m.icon} ${m.label}`);
-                }}
-              >
-                <span className="ms-mood-chip__icon">{m.icon}</span>
-                <span>{m.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        <button
+          type="button"
+          className={`ms-top-bar__eq ${isPlaying ? 'playing' : ''}`}
+          onClick={() => {
+            if (currentTrack) {
+              haptic('medium');
+              setExpanded(true);
+            }
+          }}
+          aria-label={currentTrack ? 'Развернуть плеер' : 'Плеер выключен'}
+          disabled={!currentTrack}
+        >
+          <span /><span /><span /><span />
+        </button>
       </header>
 
       {/* ════════════ 2. 3D OBSIDIAN STAGE (Архитектура Профиля) ════════════ */}
@@ -498,7 +410,7 @@ const MusicPage: React.FC = () => {
                 <p className="ms-stage__artist">{currentTrack?.artist || currentMoodObj.description}</p>
               </div>
 
-              {/* Primary Minimalist Controls (NO surprise mix) */}
+              {/* Primary Minimalist Controls */}
               <div className="ms-stage__controls">
                 <button
                   type="button"
@@ -554,6 +466,78 @@ const MusicPage: React.FC = () => {
         </section>
       )}
 
+      {/* ════════════ 3. НАВИГАЦИОННОЕ ПРОСТРАНСТВО ════════════ */}
+      <section className="ms-nav-space">
+        {/* Минималистичный поиск (smoked glass) */}
+        <div className="ms-search">
+          <svg className="ms-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
+          </svg>
+          <input
+            type="text"
+            className="ms-search__input"
+            placeholder="Трек, исполнитель или настроение…"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          {isSearching && <div className="ms-search__spinner" />}
+          {query && !isSearching && (
+            <button className="ms-search__clear" onClick={() => setQuery('')} aria-label="Очистить поиск">
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Навигационные вкладки в точном стиле ProfilePage (.pf-pill-tabs) */}
+        <div className="ms-pill-tabs">
+          {([
+            { id: 'wave', label: '✦ Пульс' },
+            { id: 'chart', label: '🔥 Топ Хиты' },
+            { id: 'radio', label: '📻 Радио' },
+            { id: 'library', label: `💖 Любимое (${likedTracks.length})` },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`ms-pill-tab ${tab === t.id ? 'active' : ''}`}
+              onClick={() => {
+                haptic('light');
+                setTab(t.id);
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Чипсы настроений (Минимализм) */}
+        {tab === 'wave' && !searchMode && (
+          <div className="ms-moods-rail">
+            <button
+              className={`ms-mood-chip ${activeMood === dayWave.mood ? 'active' : ''}`}
+              onClick={activateDayWave}
+            >
+              <span className="ms-mood-chip__icon">{dayWave.icon}</span>
+              <span>{dayWave.label}</span>
+            </button>
+            {WAVE_MOODS.map((m) => (
+              <button
+                key={m.id}
+                className={`ms-mood-chip ${activeMood === m.id ? 'active' : ''}`}
+                onClick={() => {
+                  haptic('light');
+                  setActiveMood(m.id);
+                  showToast(`${m.icon} ${m.label}`);
+                }}
+              >
+                <span className="ms-mood-chip__icon">{m.icon}</span>
+                <span>{m.label}</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </section>
+
       {/* ── Баннеры остальных вкладок ── */}
       {tab === 'radio' && !searchMode && (
         <div className="ms-banner">
@@ -585,7 +569,7 @@ const MusicPage: React.FC = () => {
         </div>
       )}
 
-      {/* ════════════ 3. ТРЕКЛИСТ В СТИЛЕ SMOKED BENTO КАРТОЧЕК ════════════ */}
+      {/* ════════════ 4. ТРЕКЛИСТ В СТИЛЕ SMOKED BENTO КАРТОЧЕК ════════════ */}
       <main className="ms-list">
         {searchMode && (
           <div className="ms-list-header">
@@ -707,7 +691,6 @@ const MusicPage: React.FC = () => {
           })
         )}
 
-        {/* Сентинел бесконечной прокрутки */}
         {showSentinel && (
           <div ref={sentinelRef} className="ms-list-more">
             {loadingMore && (
