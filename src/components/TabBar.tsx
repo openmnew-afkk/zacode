@@ -18,19 +18,17 @@ const tabs: TabDef[] = [
     label: 'Главная',
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="m3.5 10.2 8.5-6.7 8.5 6.7v9.3a1.5 1.5 0 0 1-1.5 1.5h-4.2v-5.8a1.2 1.2 0 0 0-1.2-1.2h-3.2a1.2 1.2 0 0 0-1.2 1.2V21H5a1.5 1.5 0 0 1-1.5-1.5v-9.3Z" />
+        <path d="M4 10.4 12 4l8 6.4V19a1.8 1.8 0 0 1-1.8 1.8h-3.8v-5.2a1.4 1.4 0 0 0-1.4-1.4h-2a1.4 1.4 0 0 0-1.4 1.4v5.2H5.8A1.8 1.8 0 0 1 4 19v-8.6Z" />
       </svg>
     ),
   },
   {
-    path: '/studios',
-    label: 'Миры',
+    path: '/search',
+    label: 'Поиск',
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <rect x="3" y="4" width="7.5" height="7.5" rx="2.2" />
-        <rect x="13.5" y="4" width="7.5" height="7.5" rx="2.2" />
-        <rect x="3" y="13.5" width="7.5" height="7.5" rx="2.2" />
-        <path d="M17.25 13.5v7.5M13.5 17.25h7.5" />
+        <circle cx="11" cy="11" r="6.5" />
+        <path d="m16 16 4.2 4.2" />
       </svg>
     ),
   },
@@ -40,18 +38,7 @@ const tabs: TabDef[] = [
     accent: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 3.2 14.1 9.8l6.7 2.2-6.7 2.2L12 20.8l-2.1-6.6L3.2 12l6.7-2.2L12 3.2Z" />
-        <path d="m19 3 .5 1.8 1.8.5-1.8.5L19 7.6l-.5-1.8-1.8-.5 1.8-.5L19 3Z" />
-      </svg>
-    ),
-  },
-  {
-    path: '/search',
-    label: 'Поиск',
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none">
-        <circle cx="11" cy="11" r="6.8" />
-        <path d="m16.2 16.2 4.3 4.3" />
+        <path d="M12 3.5 14 9.8l6.5 2.2-6.5 2.2L12 20.5l-2-6.3L3.5 12 10 9.8 12 3.5Z" />
       </svg>
     ),
   },
@@ -60,9 +47,9 @@ const tabs: TabDef[] = [
     label: 'Музыка',
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="M9.5 18V5.5l10.5-2V16" />
-        <circle cx="6.8" cy="18" r="2.8" />
-        <circle cx="17.2" cy="16" r="2.8" />
+        <path d="M9.5 17.8V5.6l10-1.8v12" />
+        <circle cx="6.8" cy="17.8" r="2.6" />
+        <circle cx="16.8" cy="15.8" r="2.6" />
       </svg>
     ),
   },
@@ -71,8 +58,8 @@ const tabs: TabDef[] = [
     label: 'Профиль',
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <circle cx="12" cy="8.2" r="3.6" />
-        <path d="M4.8 19.8c.7-3.4 3.5-5.3 7.2-5.3s6.5 1.9 7.2 5.3" />
+        <circle cx="12" cy="8.2" r="3.4" />
+        <path d="M5.2 19.5c.8-3.2 3.4-5 6.8-5s6 1.8 6.8 5" />
       </svg>
     ),
   },
@@ -101,15 +88,6 @@ const TabBar: React.FC = () => {
       className={`tab-bar tab-bar--season-${seasonId}`}
       aria-label="Основная навигация"
     >
-      {/* Новогодняя снежная кромка и сияние на доке в зимнем режиме */}
-      {seasonId === 'winter' && (
-        <div className="tab-bar__frost-cap" aria-hidden="true">
-          <span className="tab-bar__frost-spark s1" />
-          <span className="tab-bar__frost-spark s2" />
-          <span className="tab-bar__frost-spark s3" />
-        </div>
-      )}
-
       <div className="tab-bar__inner">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
@@ -127,7 +105,7 @@ const TabBar: React.FC = () => {
               aria-label={tab.label}
               aria-current={active ? 'page' : undefined}
             >
-              <span className="tab-bar__pill-bg" aria-hidden="true" />
+              <span className="tab-bar__pill" aria-hidden="true" />
               <span className="tab-bar__icon" aria-hidden="true">
                 {tab.icon}
               </span>

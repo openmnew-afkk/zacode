@@ -1,5 +1,6 @@
 import React from 'react';
 import type { SeasonId } from '../services/seasons';
+import VeloraEmblem from './VeloraEmblem';
 import './SeasonalMask.css';
 
 interface SeasonalMaskProps {
@@ -8,10 +9,12 @@ interface SeasonalMaskProps {
   size?: number;
 }
 
-const SeasonalMask: React.FC<SeasonalMaskProps> = ({ season, className = '', size = 128 }) => (
-  <span className={`seasonal-mask seasonal-mask--${season} ${className}`.trim()} style={{ width: size, height: size }}>
-    <img src="/zenova-mask-icon.png" alt="ZENOVA" aria-hidden="true" className="seasonal-mask__base" style={{ borderRadius: '28%' }} />
-    <span className="seasonal-mask__shine" aria-hidden="true" />
+const SeasonalMask: React.FC<SeasonalMaskProps> = ({ season, className = '', size = 112 }) => (
+  <span
+    className={`seasonal-mask seasonal-mask--${season} ${className}`.trim()}
+    style={{ width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+  >
+    <VeloraEmblem size="hero" />
   </span>
 );
 

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   ✨ Сезонные эффекты + Новогодняя Гирлянда PRO
+   ✨ Сезонная атмосфера ZENOVA PRO (Aurora + 3D Particles)
    ═══════════════════════════════════════════════ */
 
 .season-fx-canvas {
@@ -8,132 +8,39 @@
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-  z-index: 80;
+  z-index: 78;
 }
 
-/* ── Новогодняя гирлянда сверху экрана ── */
-.season-fx-garland {
+/* Мягкое атмосферное северное/сезонное сияние без визуального шума */
+.season-fx-aurora {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 26px;
-  z-index: 82;
+  inset: 0;
   pointer-events: none;
+  z-index: 1;
   overflow: hidden;
 }
 
-.season-fx-garland__wire {
-  position: absolute;
-  top: -6px;
-  left: -2%;
-  right: -2%;
-  height: 12px;
-  border-bottom: 1.5px solid rgba(186, 230, 253, 0.22);
-  border-radius: 50%;
-}
-
-.season-fx-garland__bulbs {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-around;
-  width: 100%;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2px 8px 0;
-}
-
-.season-fx-bulb {
-  position: relative;
-  width: 7px;
-  height: 10px;
-  border-radius: 50% 50% 55% 55%;
-  transform-origin: top center;
-  animation: bulbTwinkle 2.8s ease-in-out infinite alternate;
-}
-
-.season-fx-bulb::before {
-  content: '';
-  position: absolute;
-  top: -3px;
-  left: 2px;
-  width: 3px;
-  height: 3px;
-  border-radius: 1px;
-  background: rgba(203, 213, 225, 0.55);
-}
-
-.season-fx-bulb--gold {
-  background: #fde68a;
-  box-shadow: 0 0 10px 2px rgba(251, 191, 36, 0.8), 0 0 22px 5px rgba(251, 191, 36, 0.35);
-}
-
-.season-fx-bulb--ruby {
-  background: #fda4af;
-  box-shadow: 0 0 10px 2px rgba(244, 63, 94, 0.85), 0 0 22px 5px rgba(244, 63, 94, 0.38);
-}
-
-.season-fx-bulb--ice {
-  background: #e0f2fe;
-  box-shadow: 0 0 10px 2px rgba(56, 189, 248, 0.85), 0 0 22px 5px rgba(56, 189, 248, 0.38);
-}
-
-.season-fx-bulb--emerald {
-  background: #a7f3d0;
-  box-shadow: 0 0 10px 2px rgba(16, 185, 129, 0.82), 0 0 22px 5px rgba(16, 185, 129, 0.34);
-}
-
-.season-fx-bulb--amber {
-  background: #fed7aa;
-  box-shadow: 0 0 10px 2px rgba(249, 115, 22, 0.82), 0 0 22px 5px rgba(249, 115, 22, 0.34);
-}
-
-@keyframes bulbTwinkle {
-  0% {
-    opacity: 0.48;
-    transform: scale(0.88) rotate(-3deg);
-  }
-  50% {
-    opacity: 0.92;
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.08) rotate(3deg);
-  }
-}
-
-/* Морозный оттенок сверху и по углам (зима) */
-.season-fx-frost {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 79;
+.season-fx-aurora--winter {
   background:
-    radial-gradient(ellipse 120% 45% at 50% -10%, rgba(125, 211, 252, 0.12) 0%, transparent 56%),
-    radial-gradient(ellipse 60% 25% at 15% 0%, rgba(251, 191, 36, 0.07) 0%, transparent 55%),
-    linear-gradient(180deg, rgba(224, 242, 254, 0.05) 0%, transparent 16%);
+    radial-gradient(ellipse 95% 28% at 50% -6%, rgba(56, 189, 248, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 20% at 85% 4%, rgba(251, 191, 36, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 20% at 15% 4%, rgba(244, 63, 94, 0.08) 0%, transparent 65%);
 }
 
-.season-fx-frost::before,
-.season-fx-frost::after {
-  position: absolute;
-  inset: 0;
-  content: '';
-}
-
-.season-fx-frost::before {
+.season-fx-aurora--spring {
   background:
-    radial-gradient(ellipse 130px 100px at 0 0, rgba(186, 230, 253, 0.12), transparent 80%),
-    radial-gradient(ellipse 130px 100px at 100% 0, rgba(186, 230, 253, 0.12), transparent 80%),
-    radial-gradient(ellipse 120px 90px at 0 100%, rgba(186, 230, 253, 0.08), transparent 80%),
-    radial-gradient(ellipse 120px 90px at 100% 100%, rgba(186, 230, 253, 0.08), transparent 80%);
-  opacity: 0.72;
+    radial-gradient(ellipse 90% 26% at 50% -6%, rgba(244, 114, 182, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 18% at 82% 6%, rgba(167, 243, 208, 0.07) 0%, transparent 65%);
 }
 
-.season-fx-frost::after {
+.season-fx-aurora--summer {
   background:
-    radial-gradient(ellipse 80% 16% at 50% 0%, rgba(216, 242, 255, 0.15), transparent 76%),
-    linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.12) 30%, rgba(125, 211, 252, 0.16) 50%, rgba(244, 63, 94, 0.12) 70%, transparent);
-  height: 20px;
-  opacity: 0.75;
+    radial-gradient(ellipse 90% 26% at 50% -6%, rgba(56, 189, 248, 0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 20% at 80% 4%, rgba(251, 191, 36, 0.1) 0%, transparent 65%);
+}
+
+.season-fx-aurora--autumn {
+  background:
+    radial-gradient(ellipse 90% 26% at 50% -6%, rgba(251, 146, 60, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 20% at 20% 5%, rgba(244, 63, 94, 0.09) 0%, transparent 65%);
 }

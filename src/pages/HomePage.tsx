@@ -13,6 +13,8 @@ import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
+import StudioWordmark from '../components/StudioWordmark';
+import { openSideMenu } from '../components/SideMenu';
 import './HomePage.css';
 
 const getNewYearTimeLeft = () => {
@@ -818,35 +820,6 @@ const HomePage: React.FC = () => {
             </div>
           )}
 
-          {/* ── Витрина Кино-Миров и Студий (Netflix, Disney+, HBO, Apple TV+, Marvel, A24, Аниме) ── */}
-          <section className="hp-worlds-strip">
-            <div className="hp-row__header hp-row__header--clickable" onClick={() => { haptic('light'); navigate('/studios'); }}>
-              <h3 className="hp-row__title">🎬 Кино-Миры и Студии</h3>
-              <span className="hp-row__more">
-                <span className="hp-row__more-text">Все миры</span>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M9 18l6-6-6-6"/>
-                </svg>
-              </span>
-            </div>
-            <div className="hp-worlds-scroll">
-              {STUDIO_WORLDS.map((st) => (
-                <button
-                  key={st.id}
-                  type="button"
-                  className={`hp-world-card hp-world-card--${st.id}`}
-                  style={{ '--w-accent': st.accentColor, '--w-glow': st.glowColor } as React.CSSProperties}
-                  onClick={() => { haptic('medium'); navigate(`/studios/${st.id}`); }}
-                >
-                  <span className="hp-world-card__glow" aria-hidden="true" />
-                  <span className="hp-world-card__badge">{st.badgeText}</span>
-                  <span className="hp-world-card__name">{st.shortName}</span>
-                  <span className="hp-world-card__sub">{st.name}</span>
-                </button>
-              ))}
-            </div>
-          </section>
-
           {/* ── ТОП-10 сегодня в ZENOVA (с крупными номерами 1..10) ── */}
           {trending.length >= 5 && (
             <section className="hp-top10">
@@ -1078,37 +1051,44 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <VeloraEmblem />
+              <button
+                type="button"
+                className="hp-header__menu-btn"
+                onClick={() => {
+                  haptic('light');
+                  openSideMenu();
+                }}
+                aria-label="Открыть меню"
+                title="Боковое меню разделов и студий"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M4 7h16M4 12h11M4 17h16" />
+                </svg>
+              </button>
+              <VeloraEmblem size="sm" />
               <span className="hp-header__wordmark">
                 <span>ZENOVA</span>
-                <svg viewBox="0 0 260 22" aria-hidden="true">
-                  {season.id === 'winter' ? (
-                    <path d="M4 2h252v3h-18l-3 5-2-5h-20v9l-3 5-3-5V5h-25l-2 4-2-4h-18v11l-3 5-3-5V5h-22l-2 4-2-4h-18v8l-3 5-3-5V5h-24l-2 4-2-4H4z" />
-                  ) : (
-                    <path d="M5 2h28l-3 10c-.6 2-3.4 2-4 0L24 6h-8l-1 12c-.2 3-4.8 3-5 0L9 6H5V2Zm54 0h32l-2 7c-.6 2-3.4 2-4 0l-1-3H74l-1 12c-.2 3-4.8 3-5 0L67 6h-8V2Zm53 0h36l-2 12c-.4 3-4.6 3-5 0l-1-8h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-11l-1 8c-.4 3-4.6 3-5 0l-1-12Zm59 0h32l-2 8c-.6 2-3.4 2-4 0l-1-4h-9l-1 10c-.3 3-4.7 3-5 0l-1-10h-8l-1 12c-.2 3-4.8 3-5 0l-1-16Zm51 0h33l-2 11c-.4 3-4.6 3-5 0l-1-7h-8l-1 13c-.2 3-4.8 3-5 0l-1-13h-10V2Z" />
-                  )}
-                </svg>
               </span>
             </div>
             <div className="hp-header__actions">
-              {/* 🎬 КИНО-МИРЫ (Netflix, Disney+, HBO, Apple TV+, Marvel, A24, Anime) */}
+              {/* 🎬 КИНО-МИРЫ (компактная PRO-кнопка без надписи в шапке) */}
               <button
+                type="button"
                 className="hp-header__worlds-btn"
                 onClick={() => {
                   haptic('medium');
                   setShowWorldsModal(true);
                 }}
                 aria-label="Кино-Миры и Студии"
-                title="Выбрать кино по разделам: Netflix, Disney+, HBO Max, Apple TV+"
+                title="Кино-Миры: Netflix, Disney+, HBO Max, Apple TV+, Marvel, A24, Anime"
               >
-                <span className="hp-header__worlds-dot" />
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="7.5" height="7.5" rx="2" />
-                  <rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
-                  <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" />
-                  <rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
+                <span className="hp-header__worlds-ring" aria-hidden="true" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7.2" height="7.2" rx="2.2" />
+                  <rect x="13.8" y="3" width="7.2" height="7.2" rx="2.2" />
+                  <rect x="3" y="13.8" width="7.2" height="7.2" rx="2.2" />
+                  <path d="M17.4 13.5l1.1 2.7 2.8 1.1-2.8 1.1-1.1 2.8-1.1-2.8-2.8-1.1 2.8-1.1 1.1-2.7z" fill="currentColor" stroke="none" />
                 </svg>
-                <span>Миры</span>
               </button>
               {/* 🎲 Мне повезёт — случайный фильм */}
               <button
@@ -1118,7 +1098,7 @@ const HomePage: React.FC = () => {
                 title="Случайный фильм"
                 disabled={luckySpinning}
               >
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
                   <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
                   <circle cx="8.7" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
                   <circle cx="15.3" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
@@ -1127,40 +1107,13 @@ const HomePage: React.FC = () => {
                   <circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none" />
                 </svg>
               </button>
-              {/* ✦ Журнал обновлений приложения */}
-              <button
-                className="hp-header__feed-btn"
-                onClick={() => navigate('/feed')}
-                aria-label="Что нового"
-                title="Что нового в приложении"
-              >
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2l2.4 6.2L21 9.3l-4.8 4.3 1.4 6.4L12 16.7l-5.6 3.3 1.4-6.4L3 9.3l6.6-1.1L12 2z" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" />
-                </svg>
-                <span className="hp-feed-badge-pulse" />
-              </button>
-              {/* 🌗 Переключатель темы — скрыт (светлая тема на паузе) */}
-              {false && (
-              <button
-                className="hp-header__btn hp-header__theme-btn"
-                onClick={() => { haptic('medium'); toggleTheme(); }}
-                aria-label="Сменить тему"
-                title={theme === 'dark' ? 'Включить нежную светлую тему' : 'Включить глубокую тёмную тему'}
-              >
-                {theme === 'dark' ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5" fill="#f43f5e" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /></svg>
-                )}
-              </button>
-              )}
-              <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}>
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <circle cx="8.5" cy="8.5" r="6" stroke="currentColor" strokeWidth="1.7"/>
-                  <path d="M13.5 13.5l4 4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round"/>
+              <button className="hp-header__btn" onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }} aria-label="Поиск">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <circle cx="8.5" cy="8.5" r="6" stroke="currentColor" strokeWidth="1.8"/>
+                  <path d="M13.5 13.5l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
                 </svg>
               </button>
-              <button className="hp-header__btn hp-header__btn--avatar" onClick={() => navigate('/profile')}>
+              <button className="hp-header__btn hp-header__btn--avatar" onClick={() => navigate('/profile')} aria-label="Профиль">
                 {tgUser?.photo_url ? (
                   <img src={tgUser.photo_url} alt="" className="hp-header__avatar" />
                 ) : (
@@ -1207,15 +1160,6 @@ const HomePage: React.FC = () => {
               {t.label}
             </button>
           ))}
-          <button
-            className="hp-tab hp-tab--worlds"
-            onClick={() => {
-              haptic('light');
-              navigate('/studios');
-            }}
-          >
-            ✦ Кино-Миры
-          </button>
         </div>
       )}
 
@@ -1337,26 +1281,28 @@ const HomePage: React.FC = () => {
       )}
 
 
-      {/* ── Портал выбора Кино-Мира из шапки ── */}
+      {/* ── Портал выбора Кино-Мира из шапки (СПИСКОМ с настоящими фирменными надписями) ── */}
       {showWorldsModal && createPortal(
         <div className="hp-worlds-modal-overlay" onClick={() => setShowWorldsModal(false)}>
           <div className="hp-worlds-modal" onClick={(e) => e.stopPropagation()}>
             <div className="hp-worlds-modal__head">
               <div>
-                <span className="hp-worlds-modal__kicker">ZENOVA • PORTALS</span>
-                <h3 className="hp-worlds-modal__title">Выберите Кино-Мир</h3>
-                <p className="hp-worlds-modal__sub">Каждая студия оформлена в своём уникальном фирменном стиле</p>
+                <span className="hp-worlds-modal__kicker">ZENOVA • STREAMING WORLDS</span>
+                <h3 className="hp-worlds-modal__title">Кино-Миры и Студии</h3>
+                <p className="hp-worlds-modal__sub">Оригинальные каталоги мировых платформ в фирменном оформлении</p>
               </div>
               <button className="hp-worlds-modal__close" onClick={() => setShowWorldsModal(false)} aria-label="Закрыть">
-                ✕
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
               </button>
             </div>
-            <div className="hp-worlds-modal__grid">
+            <div className="hp-worlds-modal__list">
               {STUDIO_WORLDS.map((st) => (
                 <button
                   key={st.id}
                   type="button"
-                  className={`hp-world-portal-card hp-world-portal-card--${st.id}`}
+                  className={`hp-world-row hp-world-row--${st.id}`}
                   style={{ '--w-accent': st.accentColor, '--w-glow': st.glowColor } as React.CSSProperties}
                   onClick={() => {
                     haptic('medium');
@@ -1364,12 +1310,18 @@ const HomePage: React.FC = () => {
                     navigate(`/studios/${st.id}`);
                   }}
                 >
-                  <div className="hp-world-portal-card__top">
-                    <span className="hp-world-portal-card__badge">{st.badgeText}</span>
-                    <span className="hp-world-portal-card__arrow">→</span>
+                  <div className="hp-world-row__logo">
+                    <StudioWordmark id={st.id} size="md" />
                   </div>
-                  <div className="hp-world-portal-card__name">{st.shortName}</div>
-                  <div className="hp-world-portal-card__desc">{st.name}</div>
+                  <div className="hp-world-row__info">
+                    <span className="hp-world-row__badge">{st.badgeText}</span>
+                    <span className="hp-world-row__tagline">{st.tagline}</span>
+                  </div>
+                  <span className="hp-world-row__arrow" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </span>
                 </button>
               ))}
             </div>

@@ -85,7 +85,7 @@
 
 .sp__top-bar {
   position: absolute;
-  top: max(env(safe-area-inset-top, 14px), 16px);
+  top: var(--header-safe-top, max(env(safe-area-inset-top, 16px), 18px));
   left: 16px;
   right: 16px;
   z-index: 4;
@@ -93,6 +93,19 @@
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.sp__pill-btn--pulse {
+  background: rgba(244, 63, 94, 0.28);
+  border-color: rgba(251, 113, 133, 0.55);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(244, 63, 94, 0.45);
+  animation: spAudioPulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes spAudioPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
 }
 
 .sp__pill-btn {

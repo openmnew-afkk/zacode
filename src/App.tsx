@@ -15,6 +15,7 @@ import NewYearPage from './pages/NewYearPage';
 import HalloweenPage from './pages/HalloweenPage';
 import { StudiosPage } from './pages/StudiosPage';
 import TabBar from './components/TabBar';
+import SideMenu from './components/SideMenu';
 import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
 import MandatorySubModal from './components/MandatorySubModal';
@@ -131,6 +132,9 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+
+      {/* Боковое выезжающее меню (разделы, Кино-Миры, сезоны) */}
+      <SideMenu />
 
       {/* Глобальная музыкальная панель над TabBar */}
       {currentTrack && <GlobalMusicBar />}

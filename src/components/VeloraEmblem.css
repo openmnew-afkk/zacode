@@ -9,24 +9,24 @@
 }
 
 .velora-emblem--sm { width: 32px; height: 32px; }
-.velora-emblem--md { width: 38px; height: 38px; }
-.velora-emblem--lg { width: 56px; height: 56px; }
-.velora-emblem--hero { width: 98px; height: 98px; }
+.velora-emblem--md { width: 36px; height: 36px; }
+.velora-emblem--lg { width: 54px; height: 54px; }
+.velora-emblem--hero { width: 92px; height: 92px; }
 
 .velora-emblem__halo {
   position: absolute;
-  inset: -18%;
+  inset: -16%;
   border-radius: 50%;
   background: radial-gradient(
     circle,
-    rgba(225, 29, 72, 0.48) 0%,
-    var(--season-glow, rgba(125, 211, 252, 0.28)) 52%,
+    rgba(225, 29, 72, 0.42) 0%,
+    var(--season-glow, rgba(125, 211, 252, 0.22)) 54%,
     transparent 74%
   );
-  filter: blur(8px);
-  opacity: 0.82;
+  filter: blur(7px);
+  opacity: 0.78;
   pointer-events: none;
-  animation: veloraHalo 3.4s ease-in-out infinite alternate;
+  animation: veloraHalo 3.6s ease-in-out infinite alternate;
 }
 
 .velora-emblem__frame {
@@ -36,57 +36,36 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  border-radius: 30%;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: #08070d;
+  border-radius: 28%;
+  background: #07060c;
   box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.22),
-    0 6px 18px rgba(0, 0, 0, 0.55),
-    0 0 14px rgba(225, 29, 72, 0.28);
+    0 6px 16px rgba(0, 0, 0, 0.55),
+    0 0 12px rgba(225, 29, 72, 0.22);
 }
 
 [data-season='winter'] .velora-emblem__frame {
-  border-color: rgba(186, 230, 253, 0.32);
   box-shadow:
-    inset 0 1px 1px rgba(224, 242, 254, 0.3),
-    0 6px 18px rgba(0, 0, 0, 0.55),
-    0 0 16px rgba(125, 211, 252, 0.32);
+    0 6px 16px rgba(0, 0, 0, 0.55),
+    0 0 14px rgba(125, 211, 252, 0.28);
 }
 
-.velora-emblem__mask {
-  width: 108%;
-  height: 108%;
-  object-fit: cover;
-  object-position: center 48%;
+.velora-emblem__svg {
+  width: 100%;
+  height: 100%;
   display: block;
-  transform: scale(1.04);
-  filter: contrast(1.08) saturate(1.12);
 }
 
-.velora-emblem__eyes-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 44%, rgba(244, 63, 94, 0.24) 0%, transparent 48%);
-  mix-blend-mode: screen;
-  pointer-events: none;
-  animation: veloraEyePulse 2.6s ease-in-out infinite alternate;
-}
-
-.velora-emblem__ring {
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.65);
-  pointer-events: none;
+.velora-emblem__optics {
+  animation: veloraEyePulse 2.8s ease-in-out infinite alternate;
 }
 
 .velora-emblem__glint {
   position: absolute;
-  top: -35%;
-  left: -35%;
-  width: 80%;
-  height: 80%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.26) 0%, transparent 56%);
+  top: -40%;
+  left: -40%;
+  width: 85%;
+  height: 85%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 54%);
   transform: rotate(-18deg);
   pointer-events: none;
 }
@@ -97,22 +76,22 @@
 
 @keyframes veloraFloat {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-4px) scale(1.02); }
+  50% { transform: translateY(-3px) scale(1.02); }
 }
 
 @keyframes veloraHalo {
-  from { opacity: 0.55; transform: scale(0.94); }
-  to { opacity: 0.95; transform: scale(1.08); }
+  from { opacity: 0.5; transform: scale(0.95); }
+  to { opacity: 0.9; transform: scale(1.06); }
 }
 
 @keyframes veloraEyePulse {
-  from { opacity: 0.45; }
+  from { opacity: 0.78; }
   to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .velora-emblem__halo,
-  .velora-emblem__eyes-glow,
+  .velora-emblem__optics,
   .velora-emblem--hero .velora-emblem__frame {
     animation: none;
   }

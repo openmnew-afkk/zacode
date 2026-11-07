@@ -28,11 +28,13 @@
   --sab: env(safe-area-inset-bottom, 0px);
   --tg-top-inset: 0px;
   --header-safe-top: max(
-    env(safe-area-inset-top, 12px),
-    var(--tg-content-safe-area-inset-top, 0px),
+    calc(env(safe-area-inset-top, 0px) + 14px),
+    calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 10px),
     var(--tg-top-inset, 0px),
-    12px
+    16px
   );
+  --safe-top: var(--header-safe-top);
+  --safe-bottom: var(--sab);
   --r-sm:  10px;
   --r-md:  14px;
   --r-lg:  20px;
@@ -56,7 +58,12 @@ html {
 }
 
 html.tg-fullscreen, body.tg-fullscreen {
-  --tg-top-inset: max(var(--tg-content-safe-area-inset-top, 94px), 94px);
+  --header-safe-top: max(
+    calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 10px),
+    var(--tg-top-inset, 96px),
+    96px
+  );
+  --safe-top: var(--header-safe-top);
 }
 
 body {

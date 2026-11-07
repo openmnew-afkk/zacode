@@ -10,70 +10,81 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px 10px;
+  gap: 8px;
+  padding: 10px 14px 10px;
   padding-top: var(--header-safe-top);
-  background: rgba(8,8,18,0.92);
-  backdrop-filter: blur(14px);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  min-height: 56px;
+  background: rgba(9, 8, 12, 0.86);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  min-height: 54px;
 }
 .hp-header__brand {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  min-width: 0;
 }
-.hp-header__emblem {
-  display: block;
+.hp-header__menu-btn {
   width: 36px;
   height: 36px;
-  overflow: visible;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.84);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.18s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.hp-header__menu-btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+.hp-header__menu-btn:active {
+  transform: scale(0.92);
 }
 .hp-header__wordmark {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  padding-bottom: 5px;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 850;
-  letter-spacing: 0.12em;
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
   line-height: 1;
   white-space: nowrap;
-  filter: drop-shadow(0 0 8px rgba(210, 35, 57, 0.3));
-}
-.hp-header__wordmark svg {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 8px;
-  overflow: visible;
-  fill: #b81430;
-  filter: drop-shadow(0 1px 3px rgba(202, 19, 42, 0.55));
-}
-.hp-header__wordmark--winter svg {
-  fill: #d8f4ff;
-  filter: drop-shadow(0 1px 4px rgba(125, 211, 252, 0.85));
 }
 .hp-header__actions {
   display: flex;
+  align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 .hp-header__btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.7);
+  width: 37px;
+  height: 37px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.78);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: transform 0.16s ease, background 0.18s ease, border-color 0.18s ease;
 }
-.hp-header__btn:active { background: rgba(255,255,255,0.12); }
+.hp-header__btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.hp-header__btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.12);
+}
 
 .hp-header__feed-btn {
   position: relative;
@@ -1768,139 +1779,50 @@
   box-shadow: 0 6px 22px var(--accent-glow);
 }
 
-/* ════════════ Кнопка «Миры» в шапке и Витрина Кино-Миров ════════════ */
+/* ════════════ Кнопка «Кино-Миры» в шапке (PRO иконка без текста) и Список Студий ════════════ */
 
 .hp-header__worlds-btn {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 38px;
-  padding: 0 13px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.22), rgba(56, 189, 248, 0.16));
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  width: 37px;
+  height: 37px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.24), rgba(147, 51, 234, 0.2), rgba(56, 189, 248, 0.18));
+  border: 1px solid rgba(251, 113, 133, 0.36);
   color: #ffffff;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(229, 9, 20, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  transition: transform 0.18s ease, box-shadow 0.22s ease;
+  box-shadow:
+    0 4px 16px -2px rgba(229, 9, 20, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  transition: transform 0.18s ease, box-shadow 0.22s ease, border-color 0.22s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .hp-header__worlds-btn:hover {
-  box-shadow: 0 6px 22px rgba(229, 9, 20, 0.38);
   transform: translateY(-1px);
+  border-color: rgba(251, 113, 133, 0.65);
+  box-shadow: 0 6px 22px rgba(229, 9, 20, 0.48);
 }
 
 .hp-header__worlds-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
-.hp-header__worlds-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #f43f5e;
-  box-shadow: 0 0 8px #f43f5e;
-  animation: hpFeedPulse 2s infinite ease-in-out;
-}
-
-.hp-tab--worlds {
-  background: linear-gradient(135deg, rgba(229, 9, 20, 0.2), rgba(147, 51, 234, 0.2)) !important;
-  border-color: rgba(244, 63, 94, 0.35) !important;
-  color: #fda4af !important;
-}
-
-/* Горизонтальная витрина Кино-Миров на главной */
-.hp-worlds-strip {
-  margin: 4px 0 16px;
-}
-
-.hp-worlds-scroll {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding: 4px 16px 8px;
-  scrollbar-width: none;
-}
-.hp-worlds-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.hp-world-card {
-  position: relative;
-  overflow: hidden;
-  min-width: 138px;
-  padding: 12px 14px;
-  border-radius: 18px;
-  background: linear-gradient(145deg, rgba(25, 24, 36, 0.9), rgba(12, 11, 18, 0.96));
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  text-align: left;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
-}
-
-.hp-world-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--w-accent);
-  box-shadow: 0 10px 26px -6px var(--w-glow);
-}
-
-.hp-world-card:active {
-  transform: scale(0.96);
-}
-
-.hp-world-card__glow {
+.hp-header__worlds-ring {
   position: absolute;
-  top: -28px;
-  right: -28px;
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
-  background: var(--w-accent);
-  filter: blur(28px);
-  opacity: 0.38;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid rgba(251, 113, 133, 0.32);
   pointer-events: none;
+  animation: hpWorldsPulse 2.8s ease-in-out infinite alternate;
 }
 
-.hp-world-card__badge {
-  position: relative;
-  z-index: 1;
-  font-size: 8.5px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: var(--w-accent);
-  text-transform: uppercase;
-}
-
-.hp-world-card--apple .hp-world-card__badge,
-.hp-world-card--a24 .hp-world-card__badge {
-  color: #e2e8f0;
-}
-
-.hp-world-card__name {
-  position: relative;
-  z-index: 1;
-  font-size: 16px;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-}
-
-.hp-world-card__sub {
-  position: relative;
-  z-index: 1;
-  font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.56);
-  font-weight: 600;
+@keyframes hpWorldsPulse {
+  from { opacity: 0.35; }
+  to { opacity: 0.95; }
 }
 
 /* ТОП-10 сегодня с большими номерами */
@@ -1964,18 +1886,18 @@
   display: block;
 }
 
-/* Модальное окно порталов Кино-Миров */
+/* Модальное окно порталов Кино-Миров (СПИСКОМ с настоящими фирменными надписями) */
 .hp-worlds-modal-overlay {
   position: fixed;
   inset: 0;
   z-index: 9500;
   background: rgba(5, 5, 10, 0.78);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 16px;
+  padding: 14px;
   animation: fadeIn 0.2s ease;
 }
 
@@ -1986,14 +1908,14 @@
 }
 
 .hp-worlds-modal {
-  width: min(560px, 100%);
+  width: min(500px, 100%);
   max-height: 85dvh;
   overflow-y: auto;
   border-radius: 26px;
-  padding: 20px;
-  background: linear-gradient(165deg, rgba(24, 22, 34, 0.96), rgba(10, 10, 16, 0.98));
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 26px 64px rgba(0, 0, 0, 0.85);
+  padding: 20px 18px;
+  background: linear-gradient(165deg, rgba(20, 19, 28, 0.98), rgba(9, 8, 13, 0.99));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 28px 68px rgba(0, 0, 0, 0.88);
 }
 
 .hp-worlds-modal__head {
@@ -2001,18 +1923,18 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .hp-worlds-modal__kicker {
-  font-size: 10px;
-  font-weight: 900;
+  font-size: 9.5px;
+  font-weight: 800;
   letter-spacing: 0.18em;
-  color: #f43f5e;
+  color: #fb7185;
 }
 
 .hp-worlds-modal__title {
-  margin: 2px 0 4px;
+  margin: 2px 0 3px;
   font-size: 20px;
   font-weight: 900;
   color: #fff;
@@ -2021,70 +1943,106 @@
 .hp-worlds-modal__sub {
   margin: 0;
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.54);
 }
 
 .hp-worlds-modal__close {
   width: 34px;
   height: 34px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
 }
 
-.hp-worlds-modal__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+.hp-worlds-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.hp-world-portal-card {
+.hp-world-row {
   position: relative;
   overflow: hidden;
-  padding: 14px;
-  border-radius: 18px;
-  background: radial-gradient(120% 100% at 100% 0%, var(--w-glow) 0%, rgba(255, 255, 255, 0.04) 70%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  text-align: left;
-  color: #fff;
-  cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.hp-world-portal-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--w-accent);
-}
-
-.hp-world-portal-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 14px;
+  padding: 13px 16px;
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 140% at 0% 50%, var(--w-glow) 0%, rgba(255, 255, 255, 0.03) 68%),
+    rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  text-align: left;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hp-world-portal-card__badge {
+.hp-world-row:hover {
+  transform: translateX(3px);
+  border-color: var(--w-accent);
+  box-shadow: 0 8px 24px -8px var(--w-glow);
+}
+
+.hp-world-row:active {
+  transform: scale(0.98);
+}
+
+.hp-world-row__logo {
+  display: flex;
+  align-items: center;
+  min-width: 118px;
+  flex-shrink: 0;
+}
+
+.hp-world-row__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.hp-world-row__badge {
   font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   color: var(--w-accent);
+  text-transform: uppercase;
 }
 
-.hp-world-portal-card__arrow {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.6);
+.hp-world-row--apple .hp-world-row__badge,
+.hp-world-row--a24 .hp-world-row__badge {
+  color: rgba(255, 255, 255, 0.85);
 }
 
-.hp-world-portal-card__name {
-  font-size: 17px;
-  font-weight: 900;
-  margin-bottom: 2px;
+.hp-world-row__tagline {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.56);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.hp-world-portal-card__desc {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
+.hp-world-row__arrow {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.72);
+  flex-shrink: 0;
 }
 

@@ -103,33 +103,43 @@ export const useTelegram = () => {
         const isFs = Boolean((tg as any)?.isFullscreen);
         const csTop = Number((tg as any)?.contentSafeAreaInset?.top || 0);
         const saTop = Number((tg as any)?.safeAreaInset?.top || 0);
+        const platform = (tg as any)?.platform || '';
+        const isMobileTg = platform === 'ios' || platform === 'android';
+        const combinedTop = saTop + csTop;
 
-        if (isFs || csTop > 40) {
+        if (isFs || csTop > 0 || (isMobileTg && saTop > 20)) {
           document.documentElement.classList.add('tg-fullscreen');
-          const offset = Math.max(csTop, saTop + 36, 92);
+          const minSafe = isFs ? 98 : isMobileTg ? 56 : 24;
+          const offset = Math.max(combinedTop + 8, saTop + 44, minSafe);
           document.documentElement.style.setProperty('--tg-top-inset', `${offset}px`);
         } else {
           document.documentElement.classList.remove('tg-fullscreen');
-          document.documentElement.style.setProperty('--tg-top-inset', '0px');
+          document.documentElement.style.setProperty('--tg-top-inset', `${Math.max(combinedTop, 14)}px`);
         }
       };
 
       updateSafeArea();
+      const t1 = setTimeout(updateSafeArea, 160);
+      const t2 = setTimeout(updateSafeArea, 520);
 
       if (typeof (tg as any)?.onEvent === 'function') {
         try {
           (tg as any).onEvent('fullscreenChanged', updateSafeArea);
           (tg as any).onEvent('contentSafeAreaChanged', updateSafeArea);
           (tg as any).onEvent('safeAreaChanged', updateSafeArea);
+          (tg as any).onEvent('viewportChanged', updateSafeArea);
         } catch {}
       }
 
       return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
         if (typeof (tg as any)?.offEvent === 'function') {
           try {
             (tg as any).offEvent('fullscreenChanged', updateSafeArea);
             (tg as any).offEvent('contentSafeAreaChanged', updateSafeArea);
             (tg as any).offEvent('safeAreaChanged', updateSafeArea);
+            (tg as any).offEvent('viewportChanged', updateSafeArea);
           } catch {}
         }
       };

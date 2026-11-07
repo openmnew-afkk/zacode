@@ -9,7 +9,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
+  const [needsTapForAudio, setNeedsTapForAudio] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const finishedRef = useRef(false);
@@ -24,23 +25,58 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     setTimeout(() => {
       setVisible(false);
       onDoneRef.current?.();
-    }, 480);
+    }, 460);
   }, []);
 
   useEffect(() => {
     const vid = videoRef.current;
+    let removeUnlockListeners: (() => void) | null = null;
+
     if (vid) {
-      vid.play().catch(() => {
-        // Fallback if autoplay is blocked
+      vid.volume = 1.0;
+      vid.muted = false;
+
+      vid.play().then(() => {
+        setMuted(false);
+        setNeedsTapForAudio(false);
+      }).catch(() => {
+        // Если браузер/WebView заблокировал автозапуск со звуком до первого касания —
+        // запускаем видео и мгновенно включаем звук при любом касании экрана
+        vid.muted = true;
+        setMuted(true);
+        setNeedsTapForAudio(true);
+        vid.play().catch(() => {});
+
+        const unlockAudio = () => {
+          const v = videoRef.current;
+          if (!v) return;
+          v.muted = false;
+          v.volume = 1.0;
+          setMuted(false);
+          setNeedsTapForAudio(false);
+          v.play().catch(() => {});
+          cleanup();
+        };
+
+        const cleanup = () => {
+          window.removeEventListener('pointerdown', unlockAudio);
+          window.removeEventListener('touchstart', unlockAudio);
+          window.removeEventListener('keydown', unlockAudio);
+        };
+
+        window.addEventListener('pointerdown', unlockAudio, { passive: true });
+        window.addEventListener('touchstart', unlockAudio, { passive: true });
+        window.addEventListener('keydown', unlockAudio, { passive: true });
+        removeUnlockListeners = cleanup;
       });
     }
 
-    // Safety fallback timer in case video is slow or blocked (max 9.8s)
+    // Страховочный таймер на случай медленной сети (макс 9.8с)
     const fallbackTimer = setTimeout(() => {
       finishSplash();
     }, 9800);
 
-    // Smooth fallback progress if video duration isn't reporting yet
+    // Плавный прогресс синхронно с временем видео
     const progInterval = setInterval(() => {
       const v = videoRef.current;
       if (v && v.duration && isFinite(v.duration) && v.currentTime > 0) {
@@ -49,11 +85,12 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       } else {
         setProgress((prev) => Math.min(96, prev + 2));
       }
-    }, 120);
+    }, 100);
 
     return () => {
       clearTimeout(fallbackTimer);
       clearInterval(progInterval);
+      removeUnlockListeners?.();
     };
   }, [finishSplash]);
 
@@ -63,7 +100,9 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     if (!v) return;
     const nextMuted = !muted;
     v.muted = nextMuted;
+    v.volume = 1.0;
     setMuted(nextMuted);
+    setNeedsTapForAudio(false);
     if (!nextMuted) {
       v.play().catch(() => {});
     }
@@ -76,8 +115,17 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       className={`sp ${fading ? 'sp--fade' : ''}`}
       role="status"
       aria-label="Загрузка ZENOVA"
+      onClick={() => {
+        if (muted && videoRef.current) {
+          videoRef.current.muted = false;
+          videoRef.current.volume = 1.0;
+          setMuted(false);
+          setNeedsTapForAudio(false);
+          videoRef.current.play().catch(() => {});
+        }
+      }}
     >
-      {/* Амбиент-фон для широких экранов (ноутбуки / планшеты) */}
+      {/* Амбиент-фон для широких экранов */}
       <div
         className="sp__backdrop-blur"
         style={{ backgroundImage: 'url(/zenova-splash-poster.jpg)' }}
@@ -101,11 +149,11 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           onError={finishSplash}
         />
 
-        {/* Верхняя панель управления загрузкой */}
+        {/* Верхняя панель управления загрузкой (с учётом безопасной зоны Telegram) */}
         <div className="sp__top-bar">
           <button
             type="button"
-            className="sp__pill-btn"
+            className={`sp__pill-btn ${needsTapForAudio ? 'sp__pill-btn--pulse' : ''}`}
             onClick={toggleSound}
             aria-label={muted ? 'Включить звук' : 'Выключить звук'}
           >
@@ -116,7 +164,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
                   <line x1="23" y1="9" x2="17" y2="15" />
                   <line x1="17" y1="9" x2="23" y2="15" />
                 </svg>
-                <span>Звук</span>
+                <span>{needsTapForAudio ? 'Включить звук' : 'Без звука'}</span>
               </>
             ) : (
               <>
@@ -125,7 +173,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
                   <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
                   <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
                 </svg>
-                <span>Звук вкл</span>
+                <span>Звук ON</span>
               </>
             )}
           </button>
@@ -133,7 +181,10 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           <button
             type="button"
             className="sp__pill-btn sp__pill-btn--skip"
-            onClick={finishSplash}
+            onClick={(e) => {
+              e.stopPropagation();
+              finishSplash();
+            }}
             aria-label="Пропустить заставку"
           >
             <span>Пропустить</span>

@@ -7,10 +7,11 @@
   top: 0;
   z-index: 40;
   background: #09080a;
+  padding-top: var(--header-safe-top);
 }
 
 .dp-hero--with-player {
-  padding-top: 12px;
+  padding-top: 14px !important;
   min-height: auto;
 }
 
@@ -74,7 +75,7 @@
   z-index: 2;
   display: flex;
   gap: 16px;
-  padding: 16px 16px 0;
+  padding: calc(var(--header-safe-top) + 46px) 16px 0;
   min-height: 200px;
 }
 
