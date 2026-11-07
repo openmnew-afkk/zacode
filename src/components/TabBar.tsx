@@ -83,12 +83,29 @@ const TabBar: React.FC = () => {
     return location.pathname.startsWith(path);
   };
 
+  const activeIndex = Math.max(
+    0,
+    tabs.findIndex((t) => isActive(t.path))
+  );
+
   return (
     <nav
       className={`tab-bar tab-bar--season-${seasonId}`}
+      style={{ '--active-idx': activeIndex } as React.CSSProperties}
       aria-label="Основная навигация"
     >
+      {/* Эффект заморозки и ледяного блика по контуру док-панели */}
+      <span className="tab-bar__frost-rim" aria-hidden="true" />
+      <span className="tab-bar__ice-drops" aria-hidden="true">
+        <i /><i /><i /><i />
+      </span>
+
       <div className="tab-bar__inner">
+        {/* Плавающая жидкая ледяная капля-линза в стиле iOS 26 Liquid Glass */}
+        <div className="tab-bar__liquid-slider" aria-hidden="true">
+          <div className="tab-bar__liquid-blob" />
+        </div>
+
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           return (
@@ -105,7 +122,11 @@ const TabBar: React.FC = () => {
               aria-label={tab.label}
               aria-current={active ? 'page' : undefined}
             >
-              <span className="tab-bar__pill" aria-hidden="true" />
+              {/* Индивидуальная стеклянная капля вокруг иконки */}
+              <span className="tab-bar__droplet" aria-hidden="true">
+                <span className="tab-bar__droplet-glint" />
+              </span>
+
               <span className="tab-bar__icon" aria-hidden="true">
                 {tab.icon}
               </span>

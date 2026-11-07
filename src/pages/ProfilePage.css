@@ -835,7 +835,259 @@
   color: rgba(255, 255, 255, 0.54);
 }
 
-/* Сезонная Студия PRO (Карточки сезонов) */
+/* Сезонная Студия PRO (Визуальные карточки сезонов с градиентами) */
+.pf__pass-top {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pf__pass-kicker {
+  font-size: 9.5px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  color: #fda4af;
+}
+
+.pf__pass-serial {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.pf__card-aurora {
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(244, 63, 94, 0.16),
+    rgba(56, 189, 248, 0.16),
+    rgba(168, 85, 247, 0.14),
+    rgba(244, 63, 94, 0.16)
+  );
+  filter: blur(42px);
+  animation: pfAuroraSpin 14s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes pfAuroraSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pf__emblem-pod {
+  margin-left: auto;
+  padding: 5px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* Достижения Киномана */
+.pf__section-wrap {
+  margin: 0 14px 18px;
+}
+
+@media (min-width: 760px) {
+  .pf__section-wrap {
+    width: min(calc(100% - 48px), 780px);
+    margin: 0 auto 18px;
+  }
+}
+
+.pf__achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pf__ach-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(28, 25, 38, 0.9), rgba(14, 13, 21, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pf__ach-card.unlocked {
+  border-color: rgba(250, 204, 21, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.pf__ach-card.locked {
+  opacity: 0.55;
+}
+
+.pf__ach-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.pf__ach-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf__ach-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.pf__ach-desc {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.52);
+}
+
+.pf__ach-state {
+  font-size: 11px;
+  font-weight: 900;
+  color: #fde047;
+}
+
+/* Интерактивный Кино-Дневник в профиле */
+.pf__diary-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.pf__diary-all-btn {
+  background: none;
+  border: none;
+  color: #fda4af;
+  font-size: 11.5px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pf__diary-box {
+  padding: 12px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, rgba(27, 25, 35, 0.92), rgba(14, 13, 20, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pf__diary-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.pf__diary-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 7px 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.pf__diary-tab b {
+  font-size: 12px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.pf__diary-tab.active {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.25), rgba(56, 189, 248, 0.18));
+  border-color: rgba(251, 113, 133, 0.5);
+  color: #fff;
+}
+
+.pf__diary-empty {
+  padding: 18px 12px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.pf__diary-scroll {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.pf__diary-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.pf__diary-card {
+  width: 96px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.pf__diary-poster {
+  position: relative;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pf__diary-poster img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.pf__diary-rate {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  padding: 1.5px 5px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #fde047;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.pf__diary-name {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .pf__season-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -851,31 +1103,50 @@
 .pf__season-card {
   position: relative;
   padding: 11px 12px;
-  border-radius: 15px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  background: var(--sc-bg), rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 3px;
   text-align: left;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
   transition: all 0.2s ease;
 }
 
 .pf__season-card:hover {
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  border-color: var(--sc-border, #38bdf8);
 }
 
 .pf__season-card.active {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
-  border-color: var(--sc-accent, #38bdf8);
-  box-shadow: 0 6px 20px -6px var(--sc-accent, rgba(56, 189, 248, 0.5));
+  border-color: var(--sc-border, #38bdf8);
+  box-shadow:
+    0 8px 22px -6px var(--sc-border, rgba(56, 189, 248, 0.55)),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.42);
+}
+
+.pf__season-card__top {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
 }
 
 .pf__season-card__emoji {
   font-size: 18px;
-  margin-bottom: 2px;
+}
+
+.pf__season-card__active-pill {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 900;
 }
 
 .pf__season-card__name {
@@ -886,7 +1157,7 @@
 
 .pf__season-card__sub {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.54);
+  color: rgba(255, 255, 255, 0.65);
   line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -907,23 +1178,63 @@
 
 .pf__ny-special-btn {
   width: 100%;
-  margin-top: 10px;
+  margin-top: 12px;
   padding: 11px 14px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(250, 204, 21, 0.18));
-  border: 1px solid rgba(125, 211, 252, 0.4);
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(244, 63, 94, 0.32), transparent 60%),
+    linear-gradient(135deg, rgba(14, 165, 233, 0.28), rgba(15, 23, 42, 0.92));
+  border: 1px solid rgba(125, 211, 252, 0.45);
   color: #f0f9ff;
-  font-size: 12px;
-  font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   cursor: pointer;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
   transition: transform 0.18s ease, box-shadow 0.2s ease;
 }
 
 .pf__ny-special-btn:hover {
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.28);
+  box-shadow: 0 12px 28px rgba(56, 189, 248, 0.32);
   transform: translateY(-1px);
+}
+
+.pf__ny-special-btn__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+}
+
+.pf__ny-special-btn__img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+}
+
+.pf__ny-special-btn__title {
+  display: block;
+  font-size: 13px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.pf__ny-special-btn__sub {
+  display: block;
+  font-size: 10.5px;
+  color: rgba(186, 230, 253, 0.8);
+  font-weight: 600;
+}
+
+.pf__ny-special-btn__arrow {
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  white-space: nowrap;
 }
 

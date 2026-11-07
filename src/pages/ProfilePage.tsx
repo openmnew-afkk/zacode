@@ -5,7 +5,7 @@ import { useStore } from '../store';
 import VeloraEmblem from '../components/VeloraEmblem';
 import RulesModal from '../components/RulesModal';
 import { resolveUserAccess } from '../services/accessControl';
-import { SEASONS, getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../services/seasons';
+import { getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../services/seasons';
 import type { SeasonId } from '../services/seasons';
 import './ProfilePage.css';
 
@@ -22,6 +22,64 @@ interface MenuGroup {
   items: MenuItem[];
 }
 
+const VISUAL_SEASONS: Array<{
+  id: SeasonId | 'auto';
+  name: string;
+  sub: string;
+  emoji: string;
+  bg: string;
+  border: string;
+}> = [
+  {
+    id: 'winter',
+    name: 'Супер Новогодняя',
+    sub: 'Морозный кристалл, Санта и гирлянда',
+    emoji: '🎄',
+    bg: 'linear-gradient(135deg, rgba(14, 165, 233, 0.36) 0%, rgba(244, 63, 94, 0.28) 55%, rgba(250, 204, 21, 0.24) 100%)',
+    border: 'rgba(125, 211, 252, 0.6)',
+  },
+  {
+    id: 'spring',
+    name: 'Неоновая Сакура',
+    sub: 'Цветущий Токио и лепестки сакуры',
+    emoji: '🌸',
+    bg: 'linear-gradient(135deg, rgba(244, 114, 182, 0.34) 0%, rgba(168, 85, 247, 0.26) 100%)',
+    border: 'rgba(244, 114, 182, 0.58)',
+  },
+  {
+    id: 'summer',
+    name: 'Солнечная Лазурь',
+    sub: 'Бирюзовый океан и золотые блики',
+    emoji: '🌞',
+    bg: 'linear-gradient(135deg, rgba(251, 191, 36, 0.34) 0%, rgba(6, 182, 212, 0.3) 100%)',
+    border: 'rgba(251, 191, 36, 0.58)',
+  },
+  {
+    id: 'autumn',
+    name: 'Тёплый Янтарь',
+    sub: 'Бархатный листопад и уютный свет',
+    emoji: '🍁',
+    bg: 'linear-gradient(135deg, rgba(249, 115, 22, 0.36) 0%, rgba(180, 83, 9, 0.28) 100%)',
+    border: 'rgba(251, 146, 60, 0.58)',
+  },
+  {
+    id: 'none',
+    name: 'Обсидиан PRO',
+    sub: 'Эталонный тёмный кинозал',
+    emoji: '✦',
+    bg: 'linear-gradient(135deg, rgba(244, 63, 94, 0.28) 0%, rgba(24, 22, 36, 0.8) 100%)',
+    border: 'rgba(251, 113, 133, 0.52)',
+  },
+  {
+    id: 'auto',
+    name: 'Авто-сезон',
+    sub: `По календарю (${detectSeason().label})`,
+    emoji: '⚡',
+    bg: 'linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(56, 189, 248, 0.26) 100%)',
+    border: 'rgba(52, 211, 153, 0.55)',
+  },
+];
+
 const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, closeApp, haptic, tg } = useTelegram();
@@ -36,14 +94,16 @@ const ProfilePage: React.FC = () => {
     telegramUsername,
   } = useStore();
   const [showRules, setShowRules] = useState(false);
+  const [diaryTab, setDiaryTab] = useState<'favorites' | 'watching' | 'want' | 'watched'>('favorites');
 
   /* Сезонное оформление */
   const [seasonState, setSeasonState] = useState(() => getStoredSeason());
   const seasonAuto = seasonState.auto;
   const currentSeasonId = seasonState.season.id;
+  const activeChoice: SeasonId | 'auto' = seasonAuto ? 'auto' : currentSeasonId;
 
-  const switchSeason = (id: SeasonId) => {
-    haptic('light');
+  const switchSeason = (id: SeasonId | 'auto') => {
+    haptic('medium');
     setStoredSeason(id);
     const next = getStoredSeason();
     applySeason(next.season);
@@ -88,10 +148,11 @@ const ProfilePage: React.FC = () => {
   const effectivePremium = isPremium || userAccess.isVip;
 
   /* Кино-ранг и XP прогресс для PRO-профиля */
-  const trackedCount = Object.keys(tracked || {}).length;
-  const totalXp = watchHistory.length * 45 + favorites.length * 30 + trackedCount * 25 + (effectivePremium ? 250 : 50);
-  const cineLevel = Math.min(25, Math.max(1, Math.floor(totalXp / 150) + 1));
-  const levelProgress = Math.min(100, Math.round(((totalXp % 150) / 150) * 100));
+  const trackedList = Object.values(tracked || {});
+  const trackedCount = trackedList.length;
+  const totalXp = watchHistory.length * 45 + favorites.length * 30 + trackedCount * 25 + (effectivePremium ? 250 : 60);
+  const cineLevel = Math.min(30, Math.max(1, Math.floor(totalXp / 140) + 1));
+  const levelProgress = Math.min(100, Math.round(((totalXp % 140) / 140) * 100));
   const rankTitle =
     cineLevel >= 10
       ? 'Легенда Кинозала'
@@ -101,10 +162,62 @@ const ProfilePage: React.FC = () => {
       ? 'Киноэстет PRO'
       : 'Первооткрыватель';
 
+  /* Достижения пользователя */
+  const achievements = [
+    {
+      id: 'cinephile',
+      icon: '🎬',
+      title: 'Киноэстет',
+      desc: 'Первые фильмы',
+      unlocked: watchHistory.length >= 1 || favorites.length >= 1,
+    },
+    {
+      id: 'collector',
+      icon: '💎',
+      title: 'Коллекционер',
+      desc: '3+ в избранном',
+      unlocked: favorites.length >= 3,
+    },
+    {
+      id: 'explorer',
+      icon: '🌐',
+      title: 'Покоритель Миров',
+      desc: '7 кино-студий',
+      unlocked: true,
+    },
+    {
+      id: 'vip',
+      icon: '👑',
+      title: 'VIP Клуб',
+      desc: 'PRO привилегии',
+      unlocked: effectivePremium || isAdminUser,
+    },
+  ];
+
+  /* Элементы интерактивного дневника в профиле */
+  const diaryMovies = (() => {
+    if (diaryTab === 'favorites') return favorites;
+    return trackedList
+      .filter((t) => t.status === diaryTab)
+      .map((t) => t.movie);
+  })();
+
   const groups: MenuGroup[] = [
     {
-      title: 'МЕДИАТЕКА И КИНО-МИРЫ',
+      title: 'ПОДПИСКА И ЭКОСИСТЕМА ZENOVA',
       items: [
+        {
+          icon: (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="1">
+              <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
+              <rect x="4" y="18" width="16" height="2" rx="1" />
+            </svg>
+          ),
+          label: effectivePremium ? 'ZENOVA VIP PRO Активен' : 'Оформить ZENOVA PRO',
+          sub: effectivePremium ? '4K потоки · Без рекламы · Приоритетный CDN' : 'Без рекламы · 4K HDR · Все привилегии',
+          action: () => navigate('/premium'),
+          highlight: !effectivePremium,
+        },
         {
           icon: (
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -117,45 +230,6 @@ const ProfilePage: React.FC = () => {
           label: 'Кино-Миры и Студии',
           sub: 'Netflix · Disney+ · HBO Max · Apple TV+ · Marvel · A24',
           action: () => navigate('/studios'),
-          highlight: true,
-        },
-        {
-          icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-          ),
-          label: 'Избранное и списки',
-          sub: `${favorites.length} в избранном · ${trackedCount} в дневнике`,
-          action: () => navigate('/favorites'),
-        },
-        {
-          icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" strokeWidth="2" strokeLinecap="round">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7V12L15 15" strokeLinecap="round" />
-            </svg>
-          ),
-          label: 'История просмотров',
-          sub: `${watchHistory.length} просмотрено`,
-          action: () => navigate('/favorites'),
-        },
-      ],
-    },
-    {
-      title: 'ПОДПИСКА И ЭКОСИСТЕМА',
-      items: [
-        {
-          icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="1">
-              <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
-              <rect x="4" y="18" width="16" height="2" rx="1" />
-            </svg>
-          ),
-          label: effectivePremium ? 'ZENOVA VIP PRO Активен' : 'Оформить ZENOVA PRO',
-          sub: effectivePremium ? '4K потоки · Без рекламы · Приоритетный CDN' : 'Без рекламы · 4K HDR · 3 дня бесплатно',
-          action: () => navigate('/premium'),
-          highlight: !effectivePremium,
         },
         {
           icon: (
@@ -166,7 +240,7 @@ const ProfilePage: React.FC = () => {
             </svg>
           ),
           label: 'Музыка ZENOVA PRO',
-          sub: 'Мировые хиты · Саундтреки · ZENOVA Пульс',
+          sub: 'Мировые хиты · Саундтреки · Моя Волна',
           action: () => navigate('/music'),
         },
         {
@@ -225,10 +299,19 @@ const ProfilePage: React.FC = () => {
     <div className="pf page">
       <div className="pf__bg" />
 
-      {/* ═════ PRO TITANIUM VIP PASSPORT CARD ═════ */}
+      {/* ═════ 3D HOLOGRAPHIC TITANIUM VIP MEMBER CARD ═════ */}
       <div className="pf__card pf__card--pro">
+        <div className="pf__card-aurora" aria-hidden="true" />
         <div className="pf__card-shine" />
         <div className="pf__card-mesh" aria-hidden="true" />
+
+        {/* Верхняя плашка клубной карты */}
+        <div className="pf__pass-top">
+          <span className="pf__pass-kicker">✦ ZENOVA CINEMA CLUB • PASS</span>
+          <span className="pf__pass-serial">
+            ID #{String(user?.id || 2027).slice(-4).padStart(4, '0')} • 4K HDR
+          </span>
+        </div>
 
         <div className="pf__card-top">
           <div className="pf__avatar-wrap">
@@ -255,22 +338,24 @@ const ProfilePage: React.FC = () => {
             {username && <p className="pf__username">{username}</p>}
             <div className="pf__badges">
               {effectivePremium ? (
-                <span className="pf__badge pf__badge--premium">👑 ZENOVA PRO PASS</span>
+                <span className="pf__badge pf__badge--premium">👑 ZENOVA VIP PRO</span>
               ) : (
                 <span className="pf__badge pf__badge--rank">✦ {rankTitle}</span>
               )}
-              {isAdminUser && <span className="pf__badge pf__badge--admin">FOUNDER / ADMIN</span>}
+              {isAdminUser && <span className="pf__badge pf__badge--admin">FOUNDER</span>}
             </div>
           </div>
 
-          <VeloraEmblem size="md" className="pf__card-emblem" />
+          <div className="pf__emblem-pod">
+            <VeloraEmblem size="md" className="pf__card-emblem" />
+          </div>
         </div>
 
         {/* Прогресс кино-ранга (PRO XP Bar) */}
         <div className="pf__xp-box">
           <div className="pf__xp-head">
             <span className="pf__xp-rank">🏆 Ранг: {rankTitle}</span>
-            <span className="pf__xp-val">{totalXp} XP · До ур. {cineLevel + 1}</span>
+            <span className="pf__xp-val">{totalXp} XP · {levelProgress}% до ур. {cineLevel + 1}</span>
           </div>
           <div className="pf__xp-bar">
             <div className="pf__xp-fill" style={{ width: `${levelProgress}%` }} />
@@ -283,7 +368,7 @@ const ProfilePage: React.FC = () => {
             <span className="pf__vip-status-text">
               {effectivePremium
                 ? (isAdminUser ? 'Бессрочный PRO VIP доступ активен' : `PRO активен · ${daysLeft ? `осталось ${daysLeft} дн.` : 'Безлимит'}`)
-                : 'Откройте 4K потоки, все озвучки и режим без рекламы'}
+                : 'Откройте 4K потоки, премиум-серверы и режим без рекламы'}
             </span>
           </div>
           <span className="pf__vip-action-btn">
@@ -311,43 +396,124 @@ const ProfilePage: React.FC = () => {
         </button>
         <button type="button" className="pf__bento-tile pf__bento-tile--pro" onClick={() => navigate('/premium')}>
           <span className="pf__bento-icon">👑</span>
-          <span className="pf__bento-val">{effectivePremium ? 'PRO' : 'START'}</span>
+          <span className="pf__bento-val">{effectivePremium ? 'VIP' : 'PRO'}</span>
           <span className="pf__bento-lbl">Статус</span>
         </button>
       </div>
 
+      {/* ═════ Медали и Достижения Киномана ═════ */}
+      <div className="pf__section-wrap">
+        <div className="pf__group-title">🏅 ДОСТИЖЕНИЯ КИНОМАНА</div>
+        <div className="pf__achievements-grid">
+          {achievements.map((ach) => (
+            <div
+              key={ach.id}
+              className={`pf__ach-card ${ach.unlocked ? 'unlocked' : 'locked'}`}
+            >
+              <span className="pf__ach-icon">{ach.icon}</span>
+              <div className="pf__ach-copy">
+                <span className="pf__ach-title">{ach.title}</span>
+                <span className="pf__ach-desc">{ach.desc}</span>
+              </div>
+              <span className="pf__ach-state">{ach.unlocked ? '✓' : '🔒'}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ═════ Интерактивный Кино-Дневник прямо в профиле ═════ */}
+      <div className="pf__section-wrap">
+        <div className="pf__diary-head">
+          <span className="pf__group-title" style={{ margin: 0 }}>📚 МОЯ КОЛЛЕКЦИЯ И ДНЕВНИК</span>
+          <button
+            type="button"
+            className="pf__diary-all-btn"
+            onClick={() => navigate('/favorites')}
+          >
+            Все списки →
+          </button>
+        </div>
+
+        <div className="pf__diary-box">
+          <div className="pf__diary-tabs">
+            {([
+              { id: 'favorites', label: 'Избранное', count: favorites.length },
+              { id: 'watching', label: 'Смотрю', count: trackedList.filter((t) => t.status === 'watching').length },
+              { id: 'want', label: 'В планах', count: trackedList.filter((t) => t.status === 'want').length },
+              { id: 'watched', label: 'Просмотрено', count: trackedList.filter((t) => t.status === 'watched').length },
+            ] as const).map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`pf__diary-tab ${diaryTab === t.id ? 'active' : ''}`}
+                onClick={() => {
+                  haptic('light');
+                  setDiaryTab(t.id);
+                }}
+              >
+                <span>{t.label}</span>
+                <b>{t.count}</b>
+              </button>
+            ))}
+          </div>
+
+          {diaryMovies.length === 0 ? (
+            <div className="pf__diary-empty">
+              <span>В этом списке пока пусто — добавляйте фильмы и сериалы со страницы любого тайтла</span>
+            </div>
+          ) : (
+            <div className="pf__diary-scroll">
+              {diaryMovies.slice(0, 12).map((m) => (
+                <div
+                  key={m.id}
+                  className="pf__diary-card"
+                  onClick={() => {
+                    haptic('light');
+                    navigate(`/movie/${m.id}`);
+                  }}
+                >
+                  <div className="pf__diary-poster">
+                    <img src={m.poster_path || ''} alt={m.title} loading="lazy" />
+                    {m.vote_average > 0 && (
+                      <span className="pf__diary-rate">★ {m.vote_average.toFixed(1)}</span>
+                    )}
+                  </div>
+                  <span className="pf__diary-name">{m.title}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* ═════ Секции настроек и сервисов ═════ */}
       <div className="pf__groups">
-        {/* ── СЕЗОННАЯ СТУДИЯ ОФОРМЛЕНИЯ (СУПЕР НОВОГОДНЯЯ ТЕМА И ДР.) ── */}
+        {/* ── СЕЗОННАЯ СТУДИЯ ОФОРМЛЕНИЯ (ВИЗУАЛЬНЫЕ КАРТОЧКИ С ГРАДИЕНТАМИ) ── */}
         <div className="pf__group">
-          <div className="pf__group-title">🎄 СЕЗОННАЯ СТУДИЯ И АТМОСФЕРА</div>
+          <div className="pf__group-title">🎨 СЕЗОННАЯ СТУДИЯ И АТМОСФЕРА</div>
           <div className="pf__group-box pf__season-box">
             <div className="pf__season-grid">
-              <button
-                type="button"
-                className={`pf__season-card ${seasonAuto ? 'active' : ''}`}
-                onClick={() => switchSeason('none')}
-              >
-                <span className="pf__season-card__emoji">✨</span>
-                <span className="pf__season-card__name">Авто-сезон</span>
-                <span className="pf__season-card__sub">По календарю ({detectSeason().label})</span>
-              </button>
-
-              {Object.values(SEASONS).map((s) => {
-                const isSelected = !seasonAuto && currentSeasonId === s.id;
+              {VISUAL_SEASONS.map((s) => {
+                const isSelected = activeChoice === s.id;
                 return (
                   <button
                     key={s.id}
                     type="button"
-                    className={`pf__season-card pf__season-card--${s.id} ${isSelected ? 'active' : ''}`}
-                    style={{ '--sc-accent': s.vars['--accent'] || '#38bdf8' } as React.CSSProperties}
+                    className={`pf__season-card ${isSelected ? 'active' : ''}`}
+                    style={
+                      {
+                        '--sc-bg': s.bg,
+                        '--sc-border': s.border,
+                      } as React.CSSProperties
+                    }
                     onClick={() => switchSeason(s.id)}
                   >
-                    <span className="pf__season-card__emoji">{s.icon}</span>
-                    <span className="pf__season-card__name">
-                      {s.id === 'winter' ? 'Супер Новогодняя' : s.label}
-                    </span>
-                    <span className="pf__season-card__sub">{s.description}</span>
+                    <div className="pf__season-card__top">
+                      <span className="pf__season-card__emoji">{s.emoji}</span>
+                      {isSelected && <span className="pf__season-card__active-pill">✓ Активна</span>}
+                    </div>
+                    <span className="pf__season-card__name">{s.name}</span>
+                    <span className="pf__season-card__sub">{s.sub}</span>
                   </button>
                 );
               })}
@@ -363,7 +529,7 @@ const ProfilePage: React.FC = () => {
                   <span className="pf__season-toggle__thumb" />
                 </span>
                 <span className="pf__season-toggle__label">
-                  {fxOff ? '❄️ 3D-снегопад и частицы выключены' : '❄️ 3D-снегопад, кристаллы и боке включены'}
+                  {fxOff ? '❄️ 3D-снегопад и частицы выключены' : '❄️ 3D-снегопад, кристаллы и лепестки включены'}
                 </span>
               </button>
 
@@ -383,19 +549,23 @@ const ProfilePage: React.FC = () => {
               )}
             </div>
 
-            {seasonState.season.id === 'winter' && (
-              <button
-                type="button"
-                className="pf__ny-special-btn"
-                onClick={() => {
-                  haptic('medium');
-                  navigate('/new-year');
-                }}
-              >
-                <span>🎄 Открыть Новогодний спецраздел и таймер 2027</span>
-                <span>→</span>
-              </button>
-            )}
+            <button
+              type="button"
+              className="pf__ny-special-btn"
+              onClick={() => {
+                haptic('medium');
+                navigate('/new-year');
+              }}
+            >
+              <div className="pf__ny-special-btn__left">
+                <img src="/zenova-mask-winter.png" alt="" className="pf__ny-special-btn__img" />
+                <div>
+                  <span className="pf__ny-special-btn__title">🎄 Новогодний марафон 2027</span>
+                  <span className="pf__ny-special-btn__sub">Праздничная рулетка фильмов и таймер</span>
+                </div>
+              </div>
+              <span className="pf__ny-special-btn__arrow">Открыть →</span>
+            </button>
           </div>
         </div>
 
@@ -430,7 +600,7 @@ const ProfilePage: React.FC = () => {
 
       {/* Недавно смотрели */}
       {watchHistory.length > 0 && (
-        <div className="pf__group">
+        <div className="pf__group" style={{ marginInline: 14 }}>
           <div className="pf__history-header">
             <span className="pf__group-title">НЕДАВНО СМОТРЕЛИ</span>
             <button className="pf__clear-btn" onClick={clearHistory}>

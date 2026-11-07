@@ -1,15 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
-   ZENOVA PRO — SLIDE-OUT SIDE DRAWER MENU
-   Минималистичное боковое меню в стиле Apple TV+ / Bang & Olufsen
+   ZENOVA PRO — SLIDE-OUT BENTO SIDE DRAWER MENU
+   Футуристичное матовое стекло, живые Bento-карточки тем и студий
    ═══════════════════════════════════════════════════════════════════ */
 
 .sm-overlay {
   position: fixed;
   inset: 0;
   z-index: 9800;
-  background: rgba(4, 4, 8, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(3, 4, 9, 0.76);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   display: flex;
   justify-content: flex-start;
   animation: smFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -21,16 +21,21 @@
 }
 
 .sm-drawer {
-  width: min(334px, 86vw);
+  position: relative;
+  overflow: hidden;
+  width: min(352px, 89vw);
   height: 100%;
-  background: linear-gradient(180deg, rgba(16, 15, 22, 0.98) 0%, rgba(9, 8, 13, 0.99) 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 24px 0 64px rgba(0, 0, 0, 0.85);
+  background: linear-gradient(175deg, rgba(16, 16, 26, 0.97) 0%, rgba(8, 8, 14, 0.99) 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    28px 0 80px rgba(0, 0, 0, 0.9),
+    inset -1px 0 0 rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
   padding-top: var(--header-safe-top, 20px);
   padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 16px);
-  animation: smSlideIn 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: smSlideIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  isolation: isolate;
 }
 
 @keyframes smSlideIn {
@@ -38,12 +43,26 @@
   to { transform: translateX(0); }
 }
 
+.sm-ambient-glow {
+  position: absolute;
+  top: -80px;
+  left: -60px;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--season-accent, rgba(244, 63, 94, 0.22)) 0%, transparent 70%);
+  filter: blur(48px);
+  opacity: 0.38;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .sm-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 6px 16px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sm-brand {
@@ -58,19 +77,35 @@
   flex-direction: column;
 }
 
+.sm-brand__row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .sm-brand__name {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 900;
   letter-spacing: 0.14em;
   color: #ffffff;
   line-height: 1.1;
 }
 
+.sm-brand__pro {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f43f5e, #38bdf8);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
 .sm-brand__tag {
   font-size: 8.5px;
   font-weight: 700;
   letter-spacing: 0.16em;
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.44);
   margin-top: 2px;
 }
 
@@ -78,9 +113,9 @@
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,39 +125,52 @@
 
 .sm-close:active {
   transform: scale(0.92);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
 }
 
-/* Мини-профиль */
-.sm-profile-card {
+/* ── Голографическая карточка профиля со статистикой ── */
+.sm-hero-card {
   margin: 12px 14px 8px;
-  padding: 11px 13px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 12px;
+  border-radius: 20px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(244, 63, 94, 0.18) 0%, transparent 60%),
+    radial-gradient(120% 140% at 100% 100%, rgba(56, 189, 248, 0.16) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sm-profile-top {
   display: flex;
   align-items: center;
   gap: 11px;
+  width: 100%;
+  padding: 0;
+  background: transparent;
+  border: none;
   text-align: left;
   color: #fff;
   cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.16s ease;
-}
-
-.sm-profile-card:active {
-  transform: scale(0.98);
 }
 
 .sm-profile-card__avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
   overflow: hidden;
   background: linear-gradient(135deg, #f43f5e, #881337);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 800;
   color: #fff;
   flex-shrink: 0;
@@ -134,6 +182,17 @@
   object-fit: cover;
 }
 
+.sm-profile-card__online {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
 .sm-profile-card__info {
   flex: 1;
   min-width: 0;
@@ -142,130 +201,311 @@
   gap: 2px;
 }
 
+.sm-profile-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .sm-profile-card__name {
-  font-size: 13.5px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+.sm-profile-card__vip {
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(250, 204, 21, 0.18);
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  color: #fde047;
+  font-size: 9px;
+  font-weight: 900;
+}
+
 .sm-profile-card__status {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.54);
   font-weight: 500;
+}
+
+.sm-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sm-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 4px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.16s ease;
+}
+
+.sm-stat-pill:active {
+  transform: scale(0.95);
+}
+
+.sm-stat-pill b {
+  font-size: 13.5px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.sm-stat-pill span {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.52);
 }
 
 /* Прокручиваемая область */
 .sm-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 6px 14px 16px;
+  padding: 6px 14px 18px;
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
+/* ── Быстрые Bento-фишки ── */
+.sm-bento-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sm-bento-btn {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 11px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transition: transform 0.18s ease, border-color 0.2s ease;
+}
+
+.sm-bento-btn:active {
+  transform: scale(0.96);
+}
+
+.sm-bento-btn--ny {
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(244, 63, 94, 0.35), transparent 65%),
+    linear-gradient(135deg, rgba(14, 116, 144, 0.42), rgba(15, 23, 42, 0.9));
+  border-color: rgba(125, 211, 252, 0.38);
+}
+
+.sm-bento-btn--lucky {
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(168, 85, 247, 0.35), transparent 65%),
+    linear-gradient(135deg, rgba(244, 63, 94, 0.28), rgba(24, 20, 38, 0.9));
+  border-color: rgba(251, 113, 133, 0.35);
+}
+
+.sm-bento-btn__mascot {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.6));
+}
+
+.sm-bento-btn__dice {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  flex-shrink: 0;
+}
+
+.sm-bento-btn__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.sm-bento-btn__kicker {
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.sm-bento-btn__title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.2;
+}
+
 .sm-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .sm-section__head {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
 }
 
 .sm-section__title {
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 900;
   letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.38);
-  padding-left: 4px;
+  color: rgba(255, 255, 255, 0.48);
+  padding-left: 2px;
 }
 
 .sm-section__count {
   font-size: 10px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.38);
 }
 
-/* Пункты навигации */
-.sm-nav-list {
+/* Тумблер спецэффектов */
+.sm-fx-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sm-fx-switch__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.sm-fx-switch.on {
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #bae6fd;
+}
+
+.sm-fx-switch.on .sm-fx-switch__dot {
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+/* ── Визуальные карточки сезонных тем ── */
+.sm-themes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sm-theme-card {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.sm-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  padding: 10px 12px;
-  border-radius: 13px;
-  background: transparent;
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.82);
-  font-size: 13px;
-  font-weight: 600;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 10px 11px;
+  border-radius: 15px;
+  background: var(--tc-bg), rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
   text-align: left;
   cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.sm-nav-item:hover,
-.sm-nav-item.active {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #ffffff;
+.sm-theme-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--tc-border);
 }
 
-.sm-nav-item__icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
+.sm-theme-card:active {
+  transform: scale(0.96);
+}
+
+.sm-theme-card.active {
+  border-color: var(--tc-border);
+  box-shadow:
+    0 8px 22px -6px var(--tc-border),
+    inset 0 1.5px 0 rgba(255, 255, 255, 0.42);
+}
+
+.sm-theme-card__top {
+  width: 100%;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.78);
-  flex-shrink: 0;
-  font-size: 14px;
+  justify-content: space-between;
+  margin-bottom: 2px;
 }
 
-.sm-nav-item__icon--rose {
-  background: rgba(244, 63, 94, 0.14);
-  color: #fb7185;
+.sm-theme-card__icon {
+  font-size: 16px;
 }
 
-.sm-nav-item__label {
-  flex: 1;
-  min-width: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.sm-theme-card__orb {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--tc-dot);
+  box-shadow: 0 0 8px var(--tc-dot);
+  opacity: 0.7;
 }
 
-.sm-nav-item__badge {
-  padding: 2px 7px;
+.sm-theme-card__check {
+  padding: 1.5px 6px;
   border-radius: 999px;
-  background: rgba(244, 63, 94, 0.2);
-  color: #fda4af;
-  font-size: 11px;
-  font-weight: 800;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 900;
 }
 
-.sm-nav-item__tag {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
-  color: #fff;
-  font-size: 9px;
+.sm-theme-card__title {
+  font-size: 12px;
   font-weight: 800;
-  letter-spacing: 0.08em;
+  color: #ffffff;
+  line-height: 1.15;
+}
+
+.sm-theme-card__sub {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.25;
 }
 
 /* Список студий (Кино-Миры) с настоящими надписями */
@@ -282,8 +522,8 @@
   gap: 10px;
   padding: 10px 13px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: #fff;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -299,7 +539,8 @@
 .sm-studio-row__logo {
   display: flex;
   align-items: center;
-  min-width: 96px;
+  min-width: 104px;
+  flex-shrink: 0;
 }
 
 .sm-studio-row__meta {
@@ -310,62 +551,92 @@
 
 .sm-studio-row__tagline {
   font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.46);
+  color: rgba(255, 255, 255, 0.5);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: block;
+}
+
+.sm-studio-row__chev {
+  color: rgba(255, 255, 255, 0.45);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Пункты навигации */
+.sm-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sm-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.sm-nav-item:hover,
+.sm-nav-item.active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.sm-nav-item__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.82);
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.sm-nav-item__icon--rose {
+  background: rgba(244, 63, 94, 0.16);
+  color: #fb7185;
+}
+
+.sm-nav-item__label {
+  flex: 1;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.sm-studio-row__chev {
-  color: rgba(255, 255, 255, 0.35);
-  display: flex;
-  align-items: center;
-}
-
-/* Переключатель сезонов */
-.sm-fx-toggle {
-  padding: 3px 9px;
+.sm-nav-item__badge {
+  padding: 2px 7px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 10px;
-  font-weight: 700;
-  cursor: pointer;
+  background: rgba(244, 63, 94, 0.22);
+  color: #fda4af;
+  font-size: 11px;
+  font-weight: 800;
 }
 
-.sm-fx-toggle.on {
-  background: rgba(125, 211, 252, 0.14);
-  border-color: rgba(125, 211, 252, 0.32);
-  color: #bae6fd;
-}
-
-.sm-seasons-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
-}
-
-.sm-season-pill {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 10px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.sm-season-pill.active {
-  background: rgba(255, 255, 255, 0.11);
-  border-color: var(--season-accent, #fb7185);
+.sm-nav-item__tag {
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
   color: #fff;
-  box-shadow: 0 4px 14px -4px var(--season-glow, rgba(244, 63, 94, 0.35));
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }

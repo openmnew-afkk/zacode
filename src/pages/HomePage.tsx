@@ -1071,13 +1071,13 @@ const HomePage: React.FC = () => {
               </span>
             </div>
             <div className="hp-header__actions">
-              {/* 🎬 КИНО-МИРЫ (компактная PRO-кнопка без надписи в шапке) */}
+              {/* 🎬 КИНО-МИРЫ (компактная PRO-кнопка без надписи в шапке — открывает верхний выпадающий список) */}
               <button
                 type="button"
-                className="hp-header__worlds-btn"
+                className={`hp-header__worlds-btn ${showWorldsModal ? 'active' : ''}`}
                 onClick={() => {
                   haptic('medium');
-                  setShowWorldsModal(true);
+                  setShowWorldsModal((v) => !v);
                 }}
                 aria-label="Кино-Миры и Студии"
                 title="Кино-Миры: Netflix, Disney+, HBO Max, Apple TV+, Marvel, A24, Anime"
@@ -1132,23 +1132,70 @@ const HomePage: React.FC = () => {
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
-      {/* ── 🎄 Отсчёт до Нового года (в новогодней теме) ── */}
+      {/* ── 🎄 WOW-кнопка Новогоднего марафона (в зимней/новогодней теме или с декабря по январь) ── */}
       {!showSearch && !activeCategory && season.id === 'winter' && (
         <button
+          type="button"
           className="hp-ny-count"
           onClick={() => {
-            haptic('light');
+            haptic('medium');
             navigate('/new-year');
           }}
         >
-          <span className="hp-ny-count__tree">🎄</span>
-          <span className="hp-ny-count__label">Новогодний марафон</span>
-          <span className="hp-ny-count__time">
-            <b>{nyTime.d}</b><i>д</i> <b>{String(nyTime.h).padStart(2, '0')}</b><i>ч</i>{' '}
-            <b>{String(nyTime.m).padStart(2, '0')}</b><i>м</i>{' '}
-            <b>{String(nyTime.s).padStart(2, '0')}</b><i>с</i>
-          </span>
-          <span className="hp-ny-count__spark">✨</span>
+          <span className="hp-ny-count__aurora" aria-hidden="true" />
+          <span className="hp-ny-count__sheen" aria-hidden="true" />
+
+          <div className="hp-ny-count__left">
+            <div className="hp-ny-count__mascot-wrap">
+              <span className="hp-ny-count__mascot-glow" aria-hidden="true" />
+              <img
+                src="/zenova-mask-winter.png"
+                alt="ZENOVA Santa"
+                className="hp-ny-count__mascot"
+                draggable={false}
+              />
+            </div>
+
+            <div className="hp-ny-count__copy">
+              <div className="hp-ny-count__kicker-row">
+                <span className="hp-ny-count__badge">🎄 HOLIDAY SPECIAL</span>
+                <span className="hp-ny-count__spark">✨</span>
+              </div>
+              <span className="hp-ny-count__title">Новогодний марафон</span>
+              <span className="hp-ny-count__sub">Рулетка фильмов • Зимняя коллекция 4K</span>
+            </div>
+          </div>
+
+          <div className="hp-ny-count__right">
+            <div className="hp-ny-count__timer">
+              <div className="hp-ny-count__unit">
+                <b>{nyTime.d}</b>
+                <i>дн</i>
+              </div>
+              <span className="hp-ny-count__sep">:</span>
+              <div className="hp-ny-count__unit">
+                <b>{String(nyTime.h).padStart(2, '0')}</b>
+                <i>ч</i>
+              </div>
+              <span className="hp-ny-count__sep">:</span>
+              <div className="hp-ny-count__unit">
+                <b>{String(nyTime.m).padStart(2, '0')}</b>
+                <i>м</i>
+              </div>
+              <span className="hp-ny-count__sep">:</span>
+              <div className="hp-ny-count__unit hp-ny-count__unit--sec">
+                <b>{String(nyTime.s).padStart(2, '0')}</b>
+                <i>с</i>
+              </div>
+            </div>
+
+            <span className="hp-ny-count__cta">
+              <span>Открыть</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 12h14M13 5l7 7-7 7" />
+              </svg>
+            </span>
+          </div>
         </button>
       )}
 
@@ -1281,7 +1328,7 @@ const HomePage: React.FC = () => {
       )}
 
 
-      {/* ── Портал выбора Кино-Мира из шапки (СПИСКОМ с настоящими фирменными надписями) ── */}
+      {/* ── Верхняя выезжающая шторка Кино-Миров из шапки (СПИСКОМ сверху вниз с фирменными надписями) ── */}
       {showWorldsModal && createPortal(
         <div className="hp-worlds-modal-overlay" onClick={() => setShowWorldsModal(false)}>
           <div className="hp-worlds-modal" onClick={(e) => e.stopPropagation()}>
@@ -1289,7 +1336,7 @@ const HomePage: React.FC = () => {
               <div>
                 <span className="hp-worlds-modal__kicker">ZENOVA • STREAMING WORLDS</span>
                 <h3 className="hp-worlds-modal__title">Кино-Миры и Студии</h3>
-                <p className="hp-worlds-modal__sub">Оригинальные каталоги мировых платформ в фирменном оформлении</p>
+                <p className="hp-worlds-modal__sub">Выберите вселенную — внутри откроется каталог плитками</p>
               </div>
               <button className="hp-worlds-modal__close" onClick={() => setShowWorldsModal(false)} aria-label="Закрыть">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
@@ -1298,12 +1345,18 @@ const HomePage: React.FC = () => {
               </button>
             </div>
             <div className="hp-worlds-modal__list">
-              {STUDIO_WORLDS.map((st) => (
+              {STUDIO_WORLDS.map((st, idx) => (
                 <button
                   key={st.id}
                   type="button"
                   className={`hp-world-row hp-world-row--${st.id}`}
-                  style={{ '--w-accent': st.accentColor, '--w-glow': st.glowColor } as React.CSSProperties}
+                  style={
+                    {
+                      '--w-accent': st.accentColor,
+                      '--w-glow': st.glowColor,
+                      '--row-idx': idx,
+                    } as React.CSSProperties
+                  }
                   onClick={() => {
                     haptic('medium');
                     setShowWorldsModal(false);

@@ -35,7 +35,6 @@ export function StudiosPage() {
 
   const [mediaType, setMediaType] = useState<'all' | 'movie' | 'tv'>('all');
   const [collectionId, setCollectionId] = useState<string>('all');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [showStudioList, setShowStudioList] = useState(false);
   const [heroList, setHeroList] = useState<Movie[]>([]);
   const [top10List, setTop10List] = useState<Movie[]>([]);
@@ -209,10 +208,10 @@ export function StudiosPage() {
           </button>
         </div>
 
-        {/* Выпадающий вертикальный список студий с настоящими надписями */}
+        {/* Выезжающий сверху вниз вертикальный список студий с настоящими надписями */}
         {showStudioList && (
           <div className="sw-studios-dropdown" role="listbox" aria-label="Список студий">
-            {STUDIO_WORLDS.map((item) => {
+            {STUDIO_WORLDS.map((item, idx) => {
               const active = item.id === studio.id;
               return (
                 <button
@@ -225,6 +224,7 @@ export function StudiosPage() {
                     {
                       '--row-accent': item.accentColor,
                       '--row-glow': item.glowColor,
+                      '--row-idx': idx,
                     } as React.CSSProperties
                   }
                   onClick={() => handleSelectStudio(item.id)}
@@ -242,24 +242,6 @@ export function StudiosPage() {
             })}
           </div>
         )}
-
-        {/* Компактная полоса студий с настоящими фирменными надписями */}
-        <div className="sw-dock" role="tablist" aria-label="Выбор студии">
-          {STUDIO_WORLDS.map((item) => {
-            const active = item.id === studio.id;
-            return (
-              <button
-                key={item.id}
-                role="tab"
-                aria-selected={active}
-                className={`sw-dock-item ${active ? 'sw-dock-item--active' : ''} sw-dock-item--${item.id}`}
-                onClick={() => handleSelectStudio(item.id)}
-              >
-                <StudioWordmark id={item.id} size="sm" />
-              </button>
-            );
-          })}
-        </div>
       </header>
 
       {/* ═════ Фирменный Hero-блок выбранной студии ═════ */}
@@ -436,60 +418,19 @@ export function StudiosPage() {
         </section>
       )}
 
-      {/* ═════ Каталог студии (СПИСКОМ по умолчанию + переключатель Список / Плитка) ═════ */}
+      {/* ═════ Каталог студии (ТОЛЬКО ПЛИТКАМИ без выбора вида) ═════ */}
       <section className="sw-catalog-section">
         <div className="sw-section-head">
           <div className="sw-section-title-group">
             <h3 className="sw-section-title">Каталог {studio.name}</h3>
             <span className="sw-section-sub">• {items.length} тайтлов</span>
           </div>
-
-          <div className="sw-view-toggle" role="group" aria-label="Вид каталога">
-            <button
-              type="button"
-              className={`sw-view-btn ${viewMode === 'list' ? 'active' : ''}`}
-              onClick={() => {
-                haptic('light');
-                setViewMode('list');
-              }}
-              aria-label="Списком"
-              title="Списком"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                <line x1="8" y1="6" x2="21" y2="6" />
-                <line x1="8" y1="12" x2="21" y2="12" />
-                <line x1="8" y1="18" x2="21" y2="18" />
-                <line x1="3" y1="6" x2="3.01" y2="6" />
-                <line x1="3" y1="12" x2="3.01" y2="12" />
-                <line x1="3" y1="18" x2="3.01" y2="18" />
-              </svg>
-              <span>Список</span>
-            </button>
-            <button
-              type="button"
-              className={`sw-view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-              onClick={() => {
-                haptic('light');
-                setViewMode('grid');
-              }}
-              aria-label="Плиткой"
-              title="Плиткой"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                <rect x="14" y="14" width="7" height="7" rx="1.5" />
-              </svg>
-              <span>Плитка</span>
-            </button>
-          </div>
         </div>
 
         {loading ? (
-          <div className="sw-list">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="sw-list-skeleton skeleton" />
+          <div className="sw-grid">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div key={i} className="sw-grid-skeleton skeleton" />
             ))}
           </div>
         ) : items.length === 0 ? (
@@ -498,93 +439,38 @@ export function StudiosPage() {
           </div>
         ) : (
           <>
-            {viewMode === 'list' ? (
-              <div className="sw-list">
-                {items.map((movie, idx) => (
-                  <article
-                    key={movie.id}
-                    className="sw-list-card"
-                    onClick={() => {
-                      haptic('light');
-                      navigate(`/movie/${movie.id}`);
-                    }}
-                  >
-                    <div className="sw-list-card__poster-wrap">
-                      <img
-                        src={movie.poster_path}
-                        alt={movie.title}
-                        loading="lazy"
-                        className="sw-list-card__poster"
-                      />
-                      <span className="sw-list-card__idx">#{idx + 1}</span>
-                    </div>
-
-                    <div className="sw-list-card__body">
-                      <div className="sw-list-card__top">
-                        <span className="sw-list-card__brand">{studio.shortName}</span>
-                        {movie.vote_average > 0 && (
-                          <span className="sw-list-card__rate">★ {movie.vote_average.toFixed(1)}</span>
-                        )}
-                        {movie.release_date && (
-                          <span className="sw-list-card__meta">{movie.release_date.slice(0, 4)}</span>
-                        )}
-                        <span className="sw-list-card__meta">
-                          {movie.is_serial ? 'Сериал' : 'Фильм'}
-                        </span>
-                      </div>
-
-                      <h4 className="sw-list-card__title">{movie.title}</h4>
-
-                      {movie.overview && (
-                        <p className="sw-list-card__desc">{movie.overview}</p>
-                      )}
-
-                      <div className="sw-list-card__footer">
-                        <span className="sw-list-card__play">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M8 5.14v14l11-7-11-7z" />
-                          </svg>
-                          Смотреть
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            ) : (
-              <div className="sw-grid">
-                {items.map((movie) => (
-                  <div
-                    key={movie.id}
-                    className="sw-grid-item"
-                    onClick={() => {
-                      haptic('light');
-                      navigate(`/movie/${movie.id}`);
-                    }}
-                  >
-                    <div className="sw-movie-card__poster-wrap">
-                      <img
-                        src={movie.poster_path}
-                        alt={movie.title}
-                        loading="lazy"
-                        className="sw-movie-card__poster"
-                      />
-                      <span className="sw-grid-ribbon">{studio.shortName}</span>
-                      {movie.vote_average > 0 && (
-                        <span className="sw-movie-card__rating">★ {movie.vote_average.toFixed(1)}</span>
-                      )}
-                      {movie.is_serial && (
-                        <span className="sw-movie-card__serial">Сериал</span>
-                      )}
-                    </div>
-                    <p className="sw-movie-card__title">{movie.title}</p>
-                    {movie.release_date && (
-                      <span className="sw-movie-card__year">{movie.release_date.slice(0, 4)}</span>
+            <div className="sw-grid">
+              {items.map((movie) => (
+                <div
+                  key={movie.id}
+                  className="sw-grid-item"
+                  onClick={() => {
+                    haptic('light');
+                    navigate(`/movie/${movie.id}`);
+                  }}
+                >
+                  <div className="sw-movie-card__poster-wrap">
+                    <img
+                      src={movie.poster_path}
+                      alt={movie.title}
+                      loading="lazy"
+                      className="sw-movie-card__poster"
+                    />
+                    <span className="sw-grid-ribbon">{studio.shortName}</span>
+                    {movie.vote_average > 0 && (
+                      <span className="sw-movie-card__rating">★ {movie.vote_average.toFixed(1)}</span>
+                    )}
+                    {movie.is_serial && (
+                      <span className="sw-movie-card__serial">Сериал</span>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
+                  <p className="sw-movie-card__title">{movie.title}</p>
+                  {movie.release_date && (
+                    <span className="sw-movie-card__year">{movie.release_date.slice(0, 4)}</span>
+                  )}
+                </div>
+              ))}
+            </div>
 
             <div className="sw-load-more-wrap">
               <button
