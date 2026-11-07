@@ -206,6 +206,14 @@ const MovieDetailPage: React.FC = () => {
   const isPlayerFullscreen = sheetMode === 'fullscreen';
   const isSheetTall = sheetMode === 'tall';
 
+  /* Быстрое и плавное сворачивание плеера на главную страницу каталога (как в Netflix / Кинопоиск) */
+  const minimizeToHome = () => {
+    haptic('light');
+    setSheetMode('normal');
+    setShowWatch(false);
+    navigate('/', { replace: true });
+  };
+
   /* Растяжка нижней шторки плеера вверх/вниз */
   const toggleSheetTall = () => {
     haptic('light');
@@ -338,11 +346,16 @@ const MovieDetailPage: React.FC = () => {
   /* ── Кнопка назад Telegram ── */
   useEffect(() => {
     const cleanup = showBackButton?.(() => {
-      if (showTrailer) setShowTrailer(false);
-      else navigate(-1);
+      if (showWatch) {
+        minimizeToHome();
+      } else if (showTrailer) {
+        setShowTrailer(false);
+      } else {
+        navigate('/');
+      }
     });
     return cleanup;
-  }, [showBackButton, navigate, showTrailer]);
+  }, [showBackButton, navigate, showTrailer, showWatch]);
 
   const handleStatus = (s: WatchStatus) => {
     if (!movie) return;
@@ -821,7 +834,7 @@ const MovieDetailPage: React.FC = () => {
         <div
           className={`dp-sheet-backdrop dp-sheet-backdrop--${sheetMode}`}
           onClick={() => {
-            if (!isPlayerFullscreen) setShowWatch(false);
+            if (!isPlayerFullscreen) minimizeToHome();
           }}
         >
           <div
@@ -851,6 +864,20 @@ const MovieDetailPage: React.FC = () => {
               </div>
 
               <div className="dp-watch-bar__actions">
+                {/* Свернуть кино на главную страницу (как в кинотеатрах на iOS / Android) */}
+                <button
+                  type="button"
+                  className="dp-watch-bar__minimize-btn"
+                  onClick={minimizeToHome}
+                  title="Свернуть кино на главную"
+                  aria-label="Свернуть на главную"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                  </svg>
+                  <span>Главная</span>
+                </button>
+
                 {/* Кнопка растягивания шторки сверху вниз */}
                 {!isPlayerFullscreen && (
                   <button
@@ -928,11 +955,9 @@ const MovieDetailPage: React.FC = () => {
                 <button
                   type="button"
                   className="dp-watch-bar__close"
-                  onClick={() => {
-                    setSheetMode('normal');
-                    setShowWatch(false);
-                  }}
-                  aria-label="Закрыть"
+                  onClick={minimizeToHome}
+                  aria-label="Свернуть плеер и перейти на главную"
+                  title="Свернуть на главную"
                 >
                   ✕
                 </button>
@@ -986,7 +1011,7 @@ const MovieDetailPage: React.FC = () => {
                       if (sheetMode === 'tall') {
                         setSheetMode('normal');
                       } else {
-                        setShowWatch(false);
+                        minimizeToHome();
                       }
                     }
                   }}

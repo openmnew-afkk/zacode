@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { getStoredSeason } from '../services/seasons';
 import { useNavigate } from 'react-router-dom';
@@ -28,9 +28,44 @@ const getNewYearTimeLeft = () => {
 };
 
 /* ──────────────────────────────────────────────────────── */
+/*  Изолированный таймер Зимнего марафона (не перерисовывает HomePage каждую секунду!) */
+/* ──────────────────────────────────────────────────────── */
+const WinterMarathonBanner: React.FC<{ onOpen: () => void }> = React.memo(({ onOpen }) => {
+  const [nyTime, setNyTime] = useState(getNewYearTimeLeft);
+
+  useEffect(() => {
+    const t = setInterval(() => setNyTime(getNewYearTimeLeft()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <button
+      type="button"
+      className="hp-ny-count"
+      onClick={onOpen}
+    >
+      <div className="hp-ny-count__left">
+        <span className="hp-ny-count__dot" aria-hidden="true">❄</span>
+        <span className="hp-ny-count__title">Зимний киномарафон</span>
+        <span className="hp-ny-count__sub">Коллекция и рулетка</span>
+      </div>
+
+      <div className="hp-ny-count__right">
+        <span className="hp-ny-count__timer">
+          {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
+        </span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-ny-count__arrow">
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </div>
+    </button>
+  );
+});
+
+/* ──────────────────────────────────────────────────────── */
 /*  Мини-карточка фильма (с длинным нажатием → превью)     */
 /* ──────────────────────────────────────────────────────── */
-const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movie) => void }> = ({ movie, onClick, onLongPress }) => {
+const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movie) => void }> = React.memo(({ movie, onClick, onLongPress }) => {
   const [err, setErr] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longFired = useRef(false);
@@ -68,6 +103,7 @@ const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movi
           src={err ? 'https://via.placeholder.com/200x300?text=?' : movie.poster_path}
           alt={movie.title}
           loading="lazy"
+          decoding="async"
           onError={() => setErr(true)}
         />
         {movie.vote_average > 0 && (
@@ -79,7 +115,7 @@ const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movi
       {movie.release_date && <p className="hp-card__year">{movie.release_date.slice(0, 4)}</p>}
     </div>
   );
-};
+});
 
 /* ──────────────────────────────────────────────────────── */
 /*  Горизонтальный ряд                                     */
@@ -91,10 +127,11 @@ const Row: React.FC<{
   onMovieClick: (id: string) => void;
   onMovieLongPress?: (m: Movie) => void;
   onTitleClick?: () => void;
-}> = ({ title, movies, loading, onMovieClick, onMovieLongPress, onTitleClick }) => {
+}> = React.memo(({ title, movies, loading, onMovieClick, onMovieLongPress, onTitleClick }) => {
   const { isMovieBlocked } = useStore();
-  const visibleMovies = movies.filter(
-    (m) => !isMovieBlocked(m.id) && !(m.kinopoisk_id && isMovieBlocked(m.kinopoisk_id))
+  const visibleMovies = useMemo(
+    () => movies.filter((m) => !isMovieBlocked(m.id) && !(m.kinopoisk_id && isMovieBlocked(m.kinopoisk_id))),
+    [movies, isMovieBlocked]
   );
   if (!loading && visibleMovies.length === 0) return null;
   return (
@@ -130,7 +167,7 @@ const Row: React.FC<{
       </div>
     </div>
   );
-};
+});
 
 /* ──────────────────────────────────────────────────────── */
 /*  Продолжить просмотр — градиентные карточки с прогрессом  */
@@ -380,19 +417,12 @@ const HomePage: React.FC = () => {
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [seasonMovies, setSeasonMovies] = useState<Movie[]>([]);
   const [season, setSeason] = useState(() => getStoredSeason().season);
-  const [nyTime, setNyTime] = useState(() => getNewYearTimeLeft());
 
   useEffect(() => {
     const sync = () => setSeason(getStoredSeason().season);
     window.addEventListener('zenova-season-change', sync);
     return () => window.removeEventListener('zenova-season-change', sync);
   }, []);
-
-  useEffect(() => {
-    if (season.id !== 'winter') return;
-    const t = setInterval(() => setNyTime(getNewYearTimeLeft()), 1000);
-    return () => clearInterval(t);
-  }, [season.id]);
 
   useEffect(() => {
     if (!season.collectionQuery) {
@@ -604,12 +634,21 @@ const HomePage: React.FC = () => {
     };
     load();
 
-    // Жанры загружаем лениво
-    GENRES_MOVIES.forEach(async (g) => {
-      try {
+    // Жанры загружаем одним пакетным обновлением без 10 отдельных ререндеров
+    Promise.allSettled(
+      GENRES_MOVIES.map(async (g) => {
         const res = await getPopularByGenre(g.id);
-        if (alive) setGenreRows(prev => ({ ...prev, [g.id]: res.results }));
-      } catch {}
+        return { id: g.id, results: res.results || [] };
+      })
+    ).then((settled) => {
+      if (!alive) return;
+      const batched: Record<number, Movie[]> = {};
+      for (const item of settled) {
+        if (item.status === 'fulfilled') {
+          batched[item.value.id] = item.value.results;
+        }
+      }
+      setGenreRows(batched);
     });
 
     return () => { alive = false; };
@@ -1114,31 +1153,14 @@ const HomePage: React.FC = () => {
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
-      {/* ── Минималистичная капсула Зимнего киномарафона (ненавязчиво, в едином тёмном стиле приложения) ── */}
+      {/* ── Минималистичная капсула Зимнего киномарафона (изолированный таймер без нагрузки на страницу) ── */}
       {!showSearch && !activeCategory && season.id === 'winter' && (
-        <button
-          type="button"
-          className="hp-ny-count"
-          onClick={() => {
+        <WinterMarathonBanner
+          onOpen={() => {
             haptic('light');
             navigate('/new-year');
           }}
-        >
-          <div className="hp-ny-count__left">
-            <span className="hp-ny-count__dot" aria-hidden="true">❄</span>
-            <span className="hp-ny-count__title">Зимний киномарафон</span>
-            <span className="hp-ny-count__sub">Коллекция и рулетка</span>
-          </div>
-
-          <div className="hp-ny-count__right">
-            <span className="hp-ny-count__timer">
-              {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
-            </span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-ny-count__arrow">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </div>
-        </button>
+        />
       )}
 
       {/* ── Вкладки — теперь строго НИЖЕ плавающих фильмов и ближе к каталогу! ── */}

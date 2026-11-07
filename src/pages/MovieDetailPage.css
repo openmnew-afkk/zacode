@@ -2321,6 +2321,33 @@
   font-weight: 700;
 }
 
+.dp-watch-bar__minimize-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dp-watch-bar__minimize-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.dp-watch-bar__minimize-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .dp-watch-bar__stretch-btn {
   display: inline-flex;
   align-items: center;
