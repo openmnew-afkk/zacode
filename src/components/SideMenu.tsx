@@ -18,6 +18,7 @@ export const SideMenu: React.FC = () => {
 
   const touchStartY = useRef<number | null>(null);
   const touchAccumY = useRef<number>(0);
+  const didDragRef = useRef<boolean>(false);
   const edgeSwipeStartX = useRef<number | null>(null);
   const edgeSwipeStartY = useRef<number | null>(null);
   const wheelLock = useRef<boolean>(false);
@@ -47,7 +48,7 @@ export const SideMenu: React.FC = () => {
     setOpen(false);
   }, [location.pathname]);
 
-  // Global left-edge swipe gesture to open the wheel effortlessly
+  // Global left-edge swipe gesture to open the roulette effortlessly
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {
       if (open || e.touches.length !== 1) return;
@@ -65,7 +66,7 @@ export const SideMenu: React.FC = () => {
       const t = e.touches[0];
       const dx = t.clientX - edgeSwipeStartX.current;
       const dy = Math.abs(t.clientY - edgeSwipeStartY.current);
-      if (dx > 36 && dx > dy * 1.4) {
+      if (dx > 34 && dx > dy * 1.35) {
         edgeSwipeStartX.current = null;
         edgeSwipeStartY.current = null;
         haptic('light');
@@ -89,6 +90,7 @@ export const SideMenu: React.FC = () => {
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartY.current = e.touches[0].clientY;
     touchAccumY.current = 0;
+    didDragRef.current = false;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -98,7 +100,11 @@ export const SideMenu: React.FC = () => {
     touchAccumY.current += dy;
     touchStartY.current = currentY;
 
-    const threshold = 40;
+    if (Math.abs(touchAccumY.current) > 10) {
+      didDragRef.current = true;
+    }
+
+    const threshold = 38;
     if (Math.abs(touchAccumY.current) >= threshold) {
       const steps = Math.trunc(touchAccumY.current / threshold);
       stepWheel(-steps);
@@ -119,10 +125,15 @@ export const SideMenu: React.FC = () => {
     stepWheel(e.deltaY > 0 ? 1 : -1);
     setTimeout(() => {
       wheelLock.current = false;
-    }, 140);
+    }, 130);
   };
 
-  const openStudio = (studioId: string) => {
+  const openStudio = (studioId: string, idx?: number) => {
+    if (didDragRef.current) {
+      didDragRef.current = false;
+      return;
+    }
+    if (typeof idx === 'number') setActiveIdx(idx);
     haptic('medium');
     setOpen(false);
     navigate(`/studios/${studioId}`);
@@ -142,7 +153,7 @@ export const SideMenu: React.FC = () => {
 
   return (
     <>
-      {/* ── Minimalist Floating Left-Edge Pull Tab (always discoverable, never intrusive) ── */}
+      {/* ── Ultra-Minimalist Left-Edge Capsule Trigger (middle of the screen) ── */}
       {!open && !hideEdgeTab && (
         <button
           type="button"
@@ -152,190 +163,160 @@ export const SideMenu: React.FC = () => {
             setOpen(true);
           }}
           aria-label="Открыть рулетку кино-вселенных"
-          title="Кино-Вселенные (Netflix, Disney+, HBO, Apple TV+)"
+          title="Кино-Вселенные"
         >
-          <span className="sm-edge-tab__glow" aria-hidden="true" />
-          <span className="sm-edge-tab__dots" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          <span className="sm-edge-tab__chev" aria-hidden="true">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </span>
+          <span className="sm-edge-tab__line" aria-hidden="true" />
         </button>
       )}
 
-      {/* ── Sculptural Curved Arc / Roulette Overlay ── */}
+      {/* ── Color-Shifting Curved Studio Wordmark Roulette ── */}
       {open && (
         <div
           className="sm-overlay"
+          style={
+            {
+              '--st-accent': activeStudio.accentColor,
+              '--st-glow': activeStudio.glowColor,
+            } as React.CSSProperties
+          }
           onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Карусель Кино-Вселенных"
+          aria-label="Рулетка Кино-Вселенных"
         >
+          {/* Dynamic Color-Shifting Ambient Aura matching active studio */}
+          <div className="sm-color-aura" aria-hidden="true" />
+
           <div
             className="sm-arc-scene"
-            style={
-              {
-                '--st-accent': activeStudio.accentColor,
-                '--st-glow': activeStudio.glowColor,
-              } as React.CSSProperties
-            }
             onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onWheel={handleWheel}
           >
-            {/* Precision Semi-Circular Glass Dial SVG */}
+            {/* Precision Curved Glass Dial SVG with Dynamic Color-Shifting Neon Rim */}
             <svg
               className="sm-dial-svg"
-              viewBox="0 0 360 640"
+              viewBox="0 0 380 640"
               fill="none"
               aria-hidden="true"
             >
               <defs>
-                <radialGradient id="smDialGlass" cx="0%" cy="50%" r="85%">
-                  <stop offset="0%" stopColor="#161622" stopOpacity="0.96" />
-                  <stop offset="68%" stopColor="#0d0d15" stopOpacity="0.94" />
-                  <stop offset="96%" stopColor="#09090f" stopOpacity="0.88" />
-                  <stop offset="100%" stopColor="#09090f" stopOpacity="0" />
+                <radialGradient id="smDialGlass" cx="0%" cy="50%" r="88%">
+                  <stop offset="0%" stopColor={activeStudio.accentColor} stopOpacity="0.24" />
+                  <stop offset="48%" stopColor="#12121c" stopOpacity="0.95" />
+                  <stop offset="92%" stopColor="#09090e" stopOpacity="0.92" />
+                  <stop offset="100%" stopColor="#09090e" stopOpacity="0" />
                 </radialGradient>
 
                 <linearGradient id="smOrbitStroke" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgba(255,255,255,0.02)" />
-                  <stop offset="25%" stopColor="rgba(255,255,255,0.16)" />
-                  <stop offset="50%" stopColor={activeStudio.accentColor} stopOpacity="0.9" />
-                  <stop offset="75%" stopColor="rgba(255,255,255,0.16)" />
-                  <stop offset="100%" stopColor="rgba(255,255,255,0.02)" />
+                  <stop offset="0%" stopColor="rgba(255,255,255,0.03)" />
+                  <stop offset="22%" stopColor={activeStudio.accentColor} stopOpacity="0.35" />
+                  <stop offset="50%" stopColor={activeStudio.accentColor} stopOpacity="1" />
+                  <stop offset="78%" stopColor={activeStudio.accentColor} stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="rgba(255,255,255,0.03)" />
                 </linearGradient>
               </defs>
 
               {/* Sculpted semi-circular dark glass body */}
-              <circle cx="-40" cy="320" r="278" fill="url(#smDialGlass)" />
+              <circle cx="-55" cy="320" r="286" fill="url(#smDialGlass)" />
 
-              {/* Outer hairline rim */}
+              {/* Outer color-shifting hairline rim */}
               <circle
-                cx="-40"
+                cx="-55"
                 cy="320"
-                r="278"
-                stroke="rgba(255,255,255,0.08)"
-                strokeWidth="1"
-              />
-
-              {/* Fine watchmaker degree ticks ring */}
-              <circle
-                cx="-40"
-                cy="320"
-                r="246"
-                stroke="rgba(255,255,255,0.1)"
-                strokeWidth="5"
-                strokeDasharray="1.5 7.5"
-              />
-
-              {/* Main orbital arc passing through the studio medallions */}
-              <circle
-                cx="-40"
-                cy="320"
-                r="196"
+                r="286"
                 stroke="url(#smOrbitStroke)"
-                strokeWidth="1.8"
+                strokeWidth="1.4"
+              />
+
+              {/* Watchmaker degree ticks ring */}
+              <circle
+                cx="-55"
+                cy="320"
+                r="242"
+                stroke="rgba(255,255,255,0.12)"
+                strokeWidth="4"
+                strokeDasharray="1.5 8"
+              />
+
+              {/* Main glowing orbital arc */}
+              <circle
+                cx="-55"
+                cy="320"
+                r="192"
+                stroke="url(#smOrbitStroke)"
+                strokeWidth="2.2"
               />
 
               {/* Inner core ring */}
               <circle
-                cx="-40"
+                cx="-55"
                 cy="320"
-                r="128"
-                stroke="rgba(255,255,255,0.06)"
+                r="112"
+                stroke="rgba(255,255,255,0.07)"
                 strokeWidth="1"
               />
             </svg>
 
             {/* Inner Hub Core (Left inside the semi-circle) */}
-            <div className="sm-hub-core" onClick={() => openStudio(activeStudio.id)}>
+            <div className="sm-hub-core">
+              <span className="sm-hub-core__dot" />
               <span className="sm-hub-core__count">
                 0{activeIdx + 1} <i>/ 0{count}</i>
               </span>
-              <span className="sm-hub-core__label">ВСЕЛЕННАЯ</span>
-              <span className="sm-hub-core__sub">Крутите дугу</span>
+              <span className="sm-hub-core__name">{activeStudio.name}</span>
+              <span className="sm-hub-core__sub">Нажмите на студию</span>
             </div>
 
-            {/* Center 3-o'clock Focus Ring on the Orbital Track */}
-            <div className="sm-focus-lens" aria-hidden="true">
-              <span className="sm-focus-lens__ring" />
-            </div>
-
-            {/* Rotating Studio Medallions along the Curved Arc (cx = -40, R = 196) */}
-            <div className="sm-medallions-layer">
+            {/* Curved Roulette of Direct One-Tap Studio Wordmark Buttons */}
+            <div className="sm-wordmarks-layer">
               {STUDIO_WORLDS.map((st, idx) => {
                 const offset = getSignedOffset(idx);
                 const isCenter = offset === 0;
-                // Spread items cleanly along the arc (-66deg to +66deg)
-                const angleDeg = offset * 23;
+                // Spread studio wordmark buttons along the curved arc
+                const angleDeg = offset * 21;
                 const angleRad = (angleDeg * Math.PI) / 180;
-                const radius = 196;
-                const x = Math.round(-40 + Math.cos(angleRad) * radius);
+                const radius = 192;
+                const x = Math.round(-55 + Math.cos(angleRad) * radius);
                 const y = Math.round(Math.sin(angleRad) * radius);
-                const scale = isCenter ? 1.16 : Math.max(0.68, 0.92 - Math.abs(offset) * 0.1);
-                const opacity = Math.abs(offset) > 3 ? 0 : Math.max(0.28, 1 - Math.abs(offset) * 0.24);
+                const scale = isCenter ? 1.08 : Math.max(0.76, 0.94 - Math.abs(offset) * 0.08);
+                const opacity = Math.abs(offset) > 3 ? 0 : Math.max(0.32, 1 - Math.abs(offset) * 0.22);
 
                 return (
                   <button
                     key={st.id}
                     type="button"
-                    className={`sm-medallion sm-medallion--${st.id} ${isCenter ? 'is-active' : ''}`}
+                    className={`sm-wordmark-btn sm-wordmark-btn--${st.id} ${isCenter ? 'is-active' : ''}`}
                     style={
                       {
-                        '--m-x': `${x}px`,
-                        '--m-y': `${y}px`,
-                        '--m-scale': scale,
-                        '--m-opacity': opacity,
-                        '--m-accent': st.accentColor,
-                        '--m-glow': st.glowColor,
+                        '--w-x': `${x}px`,
+                        '--w-y': `${y}px`,
+                        '--w-scale': scale,
+                        '--w-opacity': opacity,
+                        '--w-rot': `${offset * 5.5}deg`,
+                        '--w-accent': st.accentColor,
+                        '--w-glow': st.glowColor,
                         zIndex: 10 - Math.abs(offset),
                       } as React.CSSProperties
                     }
-                    onClick={() => {
-                      if (isCenter) {
-                        openStudio(st.id);
-                      } else {
-                        haptic('light');
-                        setActiveIdx(idx);
-                      }
-                    }}
-                    aria-label={st.name}
+                    onMouseEnter={() => setActiveIdx(idx)}
+                    onClick={() => openStudio(st.id, idx)}
+                    aria-label={`Перейти в раздел ${st.name}`}
                   >
-                    <span className="sm-medallion__inner">
-                      <StudioWordmark id={st.id} size="sm" />
+                    <span className="sm-wordmark-btn__glow" aria-hidden="true" />
+                    <span className="sm-wordmark-btn__logo">
+                      <StudioWordmark id={st.id} size="md" />
+                    </span>
+                    <span className="sm-wordmark-btn__arrow" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 18l6-6-6-6" />
+                      </svg>
                     </span>
                   </button>
                 );
               })}
-            </div>
-
-            {/* Minimalist Floating Selection Pill to the right of the Focus Lens */}
-            <div className="sm-active-callout">
-              <button
-                type="button"
-                className="sm-active-callout__card"
-                onClick={() => openStudio(activeStudio.id)}
-              >
-                <div className="sm-active-callout__info">
-                  <span className="sm-active-callout__kicker">{activeStudio.badgeText}</span>
-                  <span className="sm-active-callout__name">{activeStudio.name}</span>
-                  <span className="sm-active-callout__tag">{activeStudio.tagline}</span>
-                </div>
-                <span className="sm-active-callout__go">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12h14M13 5l7 7-7 7" />
-                  </svg>
-                </span>
-              </button>
             </div>
 
             {/* Subtle Close Button */}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getKeywordCollection, discoverMovies } from '../api/catalog';
+import { getKeywordCollection, CURATED_WINTER_MOVIES } from '../api/catalog';
 import type { Movie } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import './NewYearPage.css';
@@ -42,9 +42,9 @@ const NewYearPage: React.FC = () => {
   const { haptic } = useTelegram();
   const [countdown, setCountdown] = useState(getCountdown);
 
-  const [movies, setMovies] = useState<Movie[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [movies, setMovies] = useState<Movie[]>(CURATED_WINTER_MOVIES);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(2);
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeMood, setActiveMood] = useState('all');
 
@@ -58,30 +58,25 @@ const NewYearPage: React.FC = () => {
 
   useEffect(() => {
     let alive = true;
-    setLoading(true);
     const loadHolidayCatalog = async () => {
       try {
         const [kw1, kw2] = await Promise.all([
-          getKeywordCollection('207317|65|193122', 1),
-          getKeywordCollection('207317|65|193122', 2),
+          getKeywordCollection('christmas', 1),
+          getKeywordCollection('christmas', 2),
         ]);
-        let combined = [...(kw1 || []), ...(kw2 || [])];
-        if (combined.length < 10) {
-          const fallback = await discoverMovies({ page: 1, with_genres: '10751,14' });
-          combined = [...combined, ...(fallback.results || [])];
-        }
+        const combined = [...CURATED_WINTER_MOVIES, ...(kw1 || []), ...(kw2 || [])];
         const seen = new Set<string>();
         const unique = combined.filter((m) => {
           if (!m.poster_path || seen.has(m.id)) return false;
           seen.add(m.id);
           return true;
         });
-        if (alive) {
+        if (alive && unique.length > 0) {
           setMovies(unique);
           setPage(2);
         }
       } catch {
-        if (alive) setMovies([]);
+        if (alive) setMovies(CURATED_WINTER_MOVIES);
       } finally {
         if (alive) setLoading(false);
       }

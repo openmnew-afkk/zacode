@@ -100,52 +100,53 @@ const TabBar: React.FC = () => {
       aria-label="Основная навигация"
     >
       <div className="tab-bar__shell">
-        {/* ── Scalloped Dark-Glass Dock Body with Sliding Concave Cradle Cutout (Pinterest 627196685586474665) ── */}
+        {/* ── Transparent Glass-Bubble Scalloped Dock Body with Sliding Concave Cradle ── */}
         <div className="tab-bar__cradle-viewport" aria-hidden="true">
           <svg
             className="tab-bar__cradle-svg"
-            viewBox="0 0 1500 76"
+            viewBox="0 0 1500 84"
             preserveAspectRatio="none"
           >
             <defs>
-              {/* Deep obsidian-velvet body fill matching the app theme */}
+              {/* Translucent crystal-bubble glass fill */}
               <linearGradient id="zenovaDockBody" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#171621" stopOpacity="0.96" />
-                <stop offset="100%" stopColor="#0c0b12" stopOpacity="0.98" />
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.14)" />
+                <stop offset="35%" stopColor="rgba(24, 24, 38, 0.42)" />
+                <stop offset="100%" stopColor="rgba(10, 10, 18, 0.58)" />
               </linearGradient>
 
-              {/* Iridescent shimmering top rim stroke */}
+              {/* Soap-bubble iridescent top rim stroke */}
               <linearGradient id="zenovaDockShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.07)" />
-                <stop offset="28%" stopColor="rgba(244, 63, 94, 0.35)" />
-                <stop offset="36.6%" stopColor="rgba(253, 164, 175, 0.9)" />
-                <stop offset="45%" stopColor="rgba(192, 132, 252, 0.45)" />
-                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.07)" />
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.22)" />
+                <stop offset="28%" stopColor="rgba(125, 211, 252, 0.55)" />
+                <stop offset="36.6%" stopColor="rgba(255, 255, 255, 0.95)" />
+                <stop offset="45%" stopColor="rgba(244, 114, 182, 0.65)" />
+                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.22)" />
               </linearGradient>
 
-              {/* Soft ambient glow inside the concave dip */}
-              <radialGradient id="zenovaCradleGlow" cx="550" cy="18" r="56" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="rgba(244, 63, 94, 0.28)" />
-                <stop offset="60%" stopColor="rgba(168, 85, 247, 0.1)" />
+              {/* Soft bubble refraction glow inside the concave dip */}
+              <radialGradient id="zenovaCradleGlow" cx="550" cy="20" r="64" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.26)" />
+                <stop offset="50%" stopColor="rgba(244, 63, 94, 0.18)" />
                 <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
               </radialGradient>
             </defs>
 
-            {/* Main bar surface with smooth concave dip at x = 550 */}
+            {/* Main transparent glass surface with smooth concave dip at x = 550 */}
             <path
-              d="M 0 14 L 492 14 C 510 14, 514 54, 550 54 C 586 54, 590 14, 608 14 L 1500 14 L 1500 76 L 0 76 Z"
+              d="M 0 14 L 490 14 C 508 14, 514 54, 550 54 C 586 54, 592 14, 610 14 L 1500 14 L 1500 84 L 0 84 Z"
               fill="url(#zenovaDockBody)"
             />
 
-            {/* Subtle ambient luminescence hugging the concave cradle */}
+            {/* Bubble refraction glow hugging the concave cradle */}
             <path
-              d="M 480 14 L 492 14 C 510 14, 514 54, 550 54 C 586 54, 590 14, 608 14 L 620 14 L 620 76 L 480 76 Z"
+              d="M 476 14 L 490 14 C 508 14, 514 54, 550 54 C 586 54, 592 14, 610 14 L 624 14 L 624 84 L 476 84 Z"
               fill="url(#zenovaCradleGlow)"
             />
 
-            {/* Specular iridescent top edge & cradle contour */}
+            {/* Specular iridescent bubble contour */}
             <path
-              d="M 0 14.5 L 492 14.5 C 510 14.5, 514 54, 550 54 C 586 54, 590 14.5, 608 14.5 L 1500 14.5"
+              d="M 0 14.5 L 490 14.5 C 508 14.5, 514 54, 550 54 C 586 54, 592 14.5, 610 14.5 L 1500 14.5"
               fill="none"
               stroke="url(#zenovaDockShimmer)"
               strokeWidth="1.6"
@@ -154,10 +155,12 @@ const TabBar: React.FC = () => {
           </svg>
         </div>
 
-        {/* ── Floating Iridescent Orb sitting inside the concave cradle ── */}
+        {/* ── Floating 3D Transparent Soap/Glass Bubble Orb ── */}
         <div className="tab-bar__orb-track" aria-hidden="true">
-          <div className="tab-bar__orb">
+          <div key={activeIndex} className="tab-bar__orb">
             <span className="tab-bar__orb-shimmer" />
+            <span className="tab-bar__orb-specular" />
+            <span className="tab-bar__orb-caustic" />
             <span className="tab-bar__orb-ring" />
             <span className="tab-bar__orb-icon">{activeTab.icon}</span>
           </div>

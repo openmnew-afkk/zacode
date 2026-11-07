@@ -687,20 +687,309 @@ export async function discoverMovies(opts: {
 
 /* ════════════ Сезонные подборки (по ключевому слову TMDB: christmas и т.п.) ════════════ */
 
+/**
+ * Эталонная подборка настоящих зимних, новогодних и рождественских фильмов.
+ * Гарантирует, что в Зимнем киномарафоне и сезонной ленте всегда 100% зимнее и праздничное кино.
+ */
+function makeWinterMovie(raw: {
+  id: string;
+  title: string;
+  original_title: string;
+  overview: string;
+  poster_path: string;
+  backdrop_path: string;
+  release_date: string;
+  vote_average: number;
+  genre_ids: number[];
+}): Movie {
+  return {
+    ...raw,
+    imdbID: '',
+    imdb_rating: raw.vote_average,
+    runtime: null,
+    type: 'movie',
+    genres: [],
+    is_serial: false,
+    directors: [],
+    actors: [],
+    countries: [],
+    popularity: 100,
+    adult: false,
+    quality: 'Full HD',
+  };
+}
+
+export const CURATED_WINTER_MOVIES: Movie[] = [
+  {
+    id: 'movie-771',
+    title: 'Один дома',
+    original_title: 'Home Alone',
+    overview: 'Восьмилетний Кевин Маккаллистер случайно остаётся один в огромном доме накануне Рождества и даёт изобретательный отпор двум грабителям.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/9wSbe4CwObACCQvaUVhWQyLR5Vz.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/va6a30f2P3J4bl4bM7t2I4dJ2oP.jpg',
+    release_date: '1990-11-16',
+    vote_average: 7.4,
+    genre_ids: [35, 10751],
+  },
+  {
+    id: 'movie-772',
+    title: 'Один дома 2: Затерянный в Нью-Йорке',
+    original_title: 'Home Alone 2: Lost in New York',
+    overview: 'Кевин снова отбивается от семьи в аэропорту и оказывается один в рождественском Нью-Йорке с кредиткой отца и старыми знакомыми бандитами.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/uuitWHpJwxD1wruFl2nZHIb4UGN.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/1uHTuwx5h9T3XzsXijMMKybDFvZ.jpg',
+    release_date: '1992-11-19',
+    vote_average: 6.7,
+    genre_ids: [35, 10751, 12],
+  },
+  {
+    id: 'movie-508965',
+    title: 'Клаус',
+    original_title: 'Klaus',
+    overview: 'Эгоистичный почтальон Джаспер попадает на заснеженный северный остров Смиренсбург, где знакомится с угрюмым лесным плотником Клаусом.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/q125RHUDgR4gjwh1QkfYuJLYkL.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/mlxKite1x1PgmIhJgAxNS9eHmH8.jpg',
+    release_date: '2019-11-08',
+    vote_average: 8.2,
+    genre_ids: [16, 10751, 12, 35],
+  },
+  {
+    id: 'movie-1581',
+    title: 'Отпуск по обмену',
+    original_title: 'The Holiday',
+    overview: 'В преддверии Рождества две девушки из солнечной Калифорнии и заснеженной английской провинции меняются домами на две недели.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/6fbqG49Q7IWBWdyJ7asNTcNbnG6.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/s9Bn7Mx4U9cWOR1WdFZjU1DTAkh.jpg',
+    release_date: '2006-12-08',
+    vote_average: 7.1,
+    genre_ids: [35, 10749],
+  },
+  {
+    id: 'movie-8871',
+    title: 'Гринч — похититель Рождества',
+    original_title: 'How the Grinch Stole Christmas',
+    overview: 'Зелёный отшельник Гринч, живущий на вершине снежной горы, решает украсть у жителей Ктограда их любимый зимний праздник.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/1WZbbPApEivA421gCOluuzMMKCk.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/ab0j8C23M7qC9baC0tE12fDbl2F.jpg',
+    release_date: '1900-11-17'.replace('1900', '2000'),
+    vote_average: 6.8,
+    genre_ids: [10751, 35, 14],
+  },
+  {
+    id: 'movie-360920',
+    title: 'Гринч',
+    original_title: 'The Grinch',
+    overview: 'Анимационная зимняя сказка о ворчливом Гринче и его верном псе Максе, задумавших грандиозное похищение Рождества.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/stAu0oF6dYDhV5ssbmFUYkQPtCP.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/juc9wt7Eh2IarLL5S1yQ1a21O1A.jpg',
+    release_date: '2018-11-08',
+    vote_average: 6.9,
+    genre_ids: [16, 10751, 35, 14],
+  },
+  {
+    id: 'movie-5255',
+    title: 'Полярный экспресс',
+    original_title: 'The Polar Express',
+    overview: 'В канун Рождества у дома мальчика, перестающего верить в чудо, останавливается волшебный поезд, идущий на Северный полюс.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/eOoCzH0MqeGr2taUZO4SwG416PF.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/f2t4JbUvQIj15X3K2m28a6jQp9x.jpg',
+    release_date: '2004-11-10',
+    vote_average: 6.7,
+    genre_ids: [16, 12, 10751, 14],
+  },
+  {
+    id: 'movie-508',
+    title: 'Реальная любовь',
+    original_title: 'Love Actually',
+    overview: 'Девять трогательных и забавных историй любви разворачиваются в предновогоднем Лондоне за пять недель до Рождества.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/7QPeVsr9rcFU9Gl90yg0gTOTpVv.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/pW1s4c2vE6f8O0T1L9K3rU1mP0z.jpg',
+    release_date: '2003-09-07',
+    vote_average: 7.1,
+    genre_ids: [35, 10749, 18],
+  },
+  {
+    id: 'movie-109445',
+    title: 'Холодное сердце',
+    original_title: 'Frozen',
+    overview: 'Принцесса Анна и отважный Кристофф отправляются в путешествие сквозь снежные вершины, чтобы снять ледяное заклятие королевы Эльзы.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kgwjIb2JDHRhNk13lmSxiClFjVk.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/fydUcbkqLyESCFa9U5XKqi8dIVj.jpg',
+    release_date: '2013-11-20',
+    vote_average: 7.2,
+    genre_ids: [16, 10751, 12, 14],
+  },
+  {
+    id: 'movie-17979',
+    title: 'Рождественская история',
+    original_title: 'A Christmas Carol',
+    overview: 'В морозную рождественскую ночь старого скрягу Эбенезера Скруджа посещают три Духа Рождества.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/t4P2jC34h7tZ768oB65qJ4xL5qI.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/m9p23n1i76L73W2j3A9j6t8L4dC.jpg',
+    release_date: '2009-11-04',
+    vote_average: 6.9,
+    genre_ids: [16, 18, 10751, 14],
+  },
+  {
+    id: 'movie-81188',
+    title: 'Хранители снов',
+    original_title: 'Rise of the Guardians',
+    overview: 'Ледяной Джек, Северянин и Хранители объединяются, чтобы защитить детские сны и зимнее чудо от коварного Кромешника.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kW21B8X8A79k9T2R27q0y3fL7aW.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/sF9cQ2zK1z2d8G7j1x6E2P5y4tR.jpg',
+    release_date: '2012-11-21',
+    vote_average: 7.4,
+    genre_ids: [16, 10751, 14, 28, 12],
+  },
+  {
+    id: 'movie-546554',
+    title: 'Рождество на двоих',
+    original_title: 'Last Christmas',
+    overview: 'Кейт работает в магазине рождественских подарков в центре зимнего Лондона, и её жизнь меняется после встречи с загадочным Томом.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kDEj4N2F9B2W1h0L3g0O6q2J1hT.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/b8O0A3pX6M3y7P4k5q1R2z8T9vW.jpg',
+    release_date: '2019-11-07',
+    vote_average: 7.2,
+    genre_ids: [35, 10749, 18],
+  },
+  {
+    id: 'movie-10719',
+    title: 'Эльф',
+    original_title: 'Elf',
+    overview: 'Выросший среди эльфов Санта-Клауса на Северном полюсе Бадди отправляется в предпраздничный Нью-Йорк на поиски своего настоящего отца.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/oOleziEempUPu96jkGs0Pj6tKxj.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/v1QEIuBM1vvpvfqalahhIyXY0Cm.jpg',
+    release_date: '2003-10-09',
+    vote_average: 6.7,
+    genre_ids: [35, 10751, 14],
+  },
+  {
+    id: 'movie-411',
+    title: 'Хроники Нарнии: Лев, колдунья и волшебный шкаф',
+    original_title: 'The Chronicles of Narnia: The Lion, the Witch and the Wardrobe',
+    overview: 'Четверо детей находят за дверцей платяного шкафа волшебную страну Нарнию, скованную вечной зимой Белой Колдуньи.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/iREd0rNCjYdf5Ar0vfaW32yrkm.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/tuDhEdza074bA497bO9WFEPs6O6.jpg',
+    release_date: '2005-12-07',
+    vote_average: 7.1,
+    genre_ids: [12, 10751, 14],
+  },
+  {
+    id: 'movie-671',
+    title: 'Гарри Поттер и философский камень',
+    original_title: "Harry Potter and the Philosopher's Stone",
+    overview: 'Первая зима и Рождество Гарри Поттера в заснеженном замке Хогвартс, где начинаются главные чудеса его жизни.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/hziiv14OpD73u9gAak4XDDfBKa2.jpg',
+    release_date: '2001-11-16',
+    vote_average: 7.9,
+    genre_ids: [12, 14, 10751],
+  },
+  {
+    id: 'movie-9479',
+    title: 'Кошмар перед Рождеством',
+    original_title: 'The Nightmare Before Christmas',
+    overview: 'Царь тыкв Джек Скеллингтон случайно попадает в Город Рождества и очаровывается сверкающим зимним праздником.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/oQffRNjK8e19rF7xVYEN8ew0j7b.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/1imXh8sE2Y62mF0b7pG2y0mB1cT.jpg',
+    release_date: '1993-10-09',
+    vote_average: 7.8,
+    genre_ids: [14, 16, 10751],
+  },
+  {
+    id: 'movie-5994',
+    title: 'Семьянин',
+    original_title: 'The Family Man',
+    overview: 'В рождественское утро успешный финансист с Уолл-стрит просыпается в заснеженном пригороде в роли многодетного семьянина.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/m47UeI8t2l1dM16V0kG0s7b2O9F.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/9y5cO0V8d4q1s2t3w7p9R8m1k2J.jpg',
+    release_date: '2000-12-12',
+    vote_average: 6.9,
+    genre_ids: [35, 18, 10749, 14],
+  },
+  {
+    id: 'movie-840430',
+    title: 'Оставленные',
+    original_title: 'The Holdovers',
+    overview: 'Ворчливый преподаватель истории, повариха и своенравный ученик остаются на рождественские каникулы в пустом заснеженном кампусе 1970 года.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/VHSzNBTwxV8vh7wylo7O9CLdac.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/bWIIWhnaoWx3FTVXv6GkYDv3djL.jpg',
+    release_date: '2023-10-27',
+    vote_average: 7.8,
+    genre_ids: [35, 18],
+  },
+  {
+    id: 'movie-845781',
+    title: 'Миссия: Красный',
+    original_title: 'Red One',
+    overview: 'Накануне Рождества с Северного полюса похищают Санта-Клауса, и начальник службы безопасности объединяется с охотником за головами.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/cdqLnri3NEGcmfnqwk2TSIYtddg.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/rOmUuQEZfPXglwFs5ELLLUDKodL.jpg',
+    release_date: '2024-10-31',
+    vote_average: 7.0,
+    genre_ids: [28, 35, 14, 10751],
+  },
+  {
+    id: 'movie-11395',
+    title: 'Санта-Клаус',
+    original_title: 'The Santa Clause',
+    overview: 'В рождественскую ночь Скотт Кэлвин случайно пугает Санту на крыше своего дома и сам становится новым главным волшебником зимы.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/t55p6yA2k4v0W2hF6H7m8Z5k1cE.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/x7p4g6L5t2W9s1d3k5R8y0V2m4N.jpg',
+    release_date: '1994-11-11',
+    vote_average: 6.5,
+    genre_ids: [14, 18, 35, 10751],
+  },
+].map(makeWinterMovie);
+
 export async function getKeywordCollection(keyword: string, page = 1): Promise<Movie[]> {
+  const norm = keyword.trim().toLowerCase();
+  const isWinterQuery =
+    norm === 'christmas' ||
+    norm === 'winter' ||
+    norm === 'new year' ||
+    norm.includes('207317');
+
   try {
-    const kw = await tmdb<any>('/search/keyword', { query: keyword });
-    const id = kw?.results?.[0]?.id;
-    if (!id) return [];
+    let withKeywords = keyword.trim();
+
+    if (isWinterQuery) {
+      // Строго зимние и рождественские TMDB keyword IDs:
+      // 207317 (christmas), 4391 (santa claus), 260365 (christmas eve), 293198 (new year's eve)
+      withKeywords = '207317|4391|260365|293198';
+    } else if (!/^\d+(\|\d+)*$/.test(withKeywords)) {
+      const kw = await tmdb<any>('/search/keyword', { query: withKeywords });
+      const id = kw?.results?.[0]?.id;
+      if (!id) return [];
+      withKeywords = String(id);
+    }
+
     const data = await tmdb<any>('/discover/movie', {
-      with_keywords: id,
+      with_keywords: withKeywords,
       sort_by: 'popularity.desc',
-      'vote_count.gte': 80,
+      'vote_count.gte': 120,
       include_adult: false,
       page,
     });
-    return (data.results || []).map((i: any) => toMovie(i, 'movie'));
-  } catch { return []; }
+
+    const apiMovies = (data.results || [])
+      .map((i: any) => toMovie(i, 'movie'))
+      .filter((m: Movie) => Boolean(m.poster_path));
+
+    if (isWinterQuery) {
+      const merged = page === 1 ? [...CURATED_WINTER_MOVIES, ...apiMovies] : [...apiMovies, ...CURATED_WINTER_MOVIES];
+      const seen = new Set<string>();
+      return merged.filter((m) => {
+        if (!m.poster_path || seen.has(m.id)) return false;
+        seen.add(m.id);
+        return true;
+      });
+    }
+
+    return apiMovies;
+  } catch {
+    return isWinterQuery ? CURATED_WINTER_MOVIES : [];
+  }
 }
 
 /* ════════════ КиноИИ: умный подбор ════════════ */

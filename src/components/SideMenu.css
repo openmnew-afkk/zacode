@@ -1,103 +1,83 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ZENOVA SIDE MENU — MINIMALIST EDGE TRIGGER & SCULPTURAL ORBITAL DIAL
-   Reference: https://ru.pinterest.com/pin/744360644697474986/
+   ZENOVA SIDE MENU — ULTRA-MINIMALIST EDGE CAPSULE & COLOR-SHIFTING
+   STUDIO WORDMARK ROULETTE (One-tap direct studio buttons)
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── 1. Floating Left-Edge Pull Handle (Always discoverable, never intrusive) ── */
+/* ── 1. Ultra-Minimalist Left-Edge Capsule Trigger (middle of screen) ── */
 .sm-edge-tab {
   position: fixed;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
   z-index: 750;
-  width: 22px;
-  height: 78px;
+  width: 7px;
+  height: 54px;
   padding: 0;
-  border-radius: 0 16px 16px 0;
-  background: rgba(16, 16, 24, 0.76);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 0 999px 999px 0;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-left: none;
-  box-shadow:
-    6px 0 24px rgba(0, 0, 0, 0.55),
-    inset -1px 0 0 rgba(255, 255, 255, 0.14);
+  box-shadow: 2px 0 14px rgba(0, 0, 0, 0.4);
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  color: rgba(255, 255, 255, 0.72);
   cursor: pointer;
-  overflow: hidden;
   transition:
-    width 0.24s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.24s ease,
-    border-color 0.24s ease,
-    color 0.24s ease;
+    width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    height 0.22s ease,
+    background 0.22s ease,
+    border-color 0.22s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Invisible expanded touch target so it is effortless to tap or swipe */
+.sm-edge-tab::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -14px;
+  bottom: -14px;
+  width: 24px;
+}
+
 .sm-edge-tab:hover {
-  width: 28px;
-  background: rgba(22, 22, 34, 0.9);
-  border-color: rgba(244, 63, 94, 0.45);
-  color: #ffffff;
+  width: 11px;
+  height: 62px;
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
 }
 
 .sm-edge-tab:active {
-  transform: translateY(-50%) scale(0.95);
+  transform: translateY(-50%) scale(0.94);
 }
 
-/* Soft breathing iridescent line along the outer curved edge */
-.sm-edge-tab__glow {
-  position: absolute;
-  right: 0;
-  top: 14px;
-  bottom: 14px;
+.sm-edge-tab__line {
   width: 2px;
+  height: 26px;
   border-radius: 999px;
-  background: linear-gradient(180deg, transparent, #fb7185, #c084fc, transparent);
-  opacity: 0.85;
-  animation: smEdgePulse 3s ease-in-out infinite;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25));
+  animation: smEdgeBreath 3.2s ease-in-out infinite;
 }
 
-@keyframes smEdgePulse {
+@keyframes smEdgeBreath {
   0%, 100% { opacity: 0.45; transform: scaleY(0.85); }
-  50% { opacity: 1; transform: scaleY(1.08); }
+  50% { opacity: 0.95; transform: scaleY(1.08); }
 }
 
-.sm-edge-tab__dots {
-  display: flex;
-  flex-direction: column;
-  gap: 3.5px;
-}
-
-.sm-edge-tab__dots i {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.sm-edge-tab__chev {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.85;
-}
-
-/* ── 2. Fullscreen Blurred Backdrop when Orbital Dial is Open ── */
+/* ── 2. Fullscreen Blurred Backdrop with Dynamic Color-Shifting Aura ── */
 .sm-overlay {
   position: fixed;
   inset: 0;
   z-index: 2600;
-  background: rgba(6, 6, 10, 0.68);
-  backdrop-filter: blur(22px) saturate(140%);
-  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  background: rgba(6, 6, 10, 0.72);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  overflow: hidden;
   animation: smFadeIn 0.24s ease both;
 }
 
@@ -106,9 +86,26 @@
   to { opacity: 1; }
 }
 
-/* ── 3. Sculptural Curved Arc Scene (No boxy drawer!) ── */
+/* Ambient radial glow that dynamically changes color with active studio */
+.sm-color-aura {
+  position: absolute;
+  left: -120px;
+  top: 50%;
+  width: 480px;
+  height: 480px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--st-glow, rgba(229, 9, 20, 0.38)) 0%, transparent 70%);
+  filter: blur(42px);
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.4s ease;
+}
+
+/* ── 3. Sculptural Curved Roulette Scene ── */
 .sm-arc-scene {
   position: relative;
+  z-index: 2;
   width: min(100vw, 430px);
   height: 640px;
   max-height: 100vh;
@@ -116,13 +113,13 @@
   align-items: center;
   user-select: none;
   touch-action: none;
-  animation: smArcIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: smArcIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes smArcIn {
   from {
     opacity: 0;
-    transform: translateX(-48px) scale(0.94);
+    transform: translateX(-44px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -135,11 +132,11 @@
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 360px;
+  width: 380px;
   height: 640px;
   pointer-events: none;
   z-index: 1;
-  filter: drop-shadow(16px 0 44px rgba(0, 0, 0, 0.75));
+  filter: drop-shadow(16px 0 44px rgba(0, 0, 0, 0.78));
 }
 
 /* ── Inner Hub Core (Left inside the semi-circle) ── */
@@ -152,12 +149,22 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
-  cursor: pointer;
+  gap: 3px;
+  pointer-events: none;
+}
+
+.sm-hub-core__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--st-accent, #e50914);
+  box-shadow: 0 0 12px var(--st-accent, #e50914);
+  margin-bottom: 2px;
+  transition: background 0.32s ease, box-shadow 0.32s ease;
 }
 
 .sm-hub-core__count {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
   color: #ffffff;
   font-variant-numeric: tabular-nums;
@@ -170,194 +177,143 @@
   color: rgba(255, 255, 255, 0.36);
 }
 
-.sm-hub-core__label {
-  font-size: 9px;
+.sm-hub-core__name {
+  font-size: 10px;
   font-weight: 800;
-  letter-spacing: 0.18em;
-  color: var(--st-accent, #fb7185);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--st-accent, #e50914);
+  transition: color 0.32s ease;
 }
 
 .sm-hub-core__sub {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.42);
 }
 
-/* ── Center 3-o'clock Focus Lens on the Orbital Track (cx = -40 + 196 = 156px) ── */
-.sm-focus-lens {
-  position: absolute;
-  left: 156px;
-  top: 50%;
-  width: 84px;
-  height: 84px;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  border: 1.8px solid rgba(255, 255, 255, 0.88);
-  box-shadow:
-    0 0 28px var(--st-glow, rgba(244, 63, 94, 0.35)),
-    inset 0 0 18px var(--st-glow, rgba(244, 63, 94, 0.22));
-  pointer-events: none;
-  z-index: 11;
-  transition: box-shadow 0.32s ease;
-}
-
-.sm-focus-lens__ring {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-/* ── Rotating Circular Studio Medallions ── */
-.sm-medallions-layer {
+/* ── Curved Roulette of Direct Studio Wordmark Buttons ── */
+.sm-wordmarks-layer {
   position: absolute;
   left: 0;
   top: 50%;
-  width: 260px;
+  width: 100%;
   height: 0;
   z-index: 10;
 }
 
-.sm-medallion {
+.sm-wordmark-btn {
   position: absolute;
   left: 0;
   top: 0;
-  width: 68px;
-  height: 68px;
-  margin-left: -34px;
-  margin-top: -34px;
-  border-radius: 50%;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background:
-    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.12), rgba(17, 17, 25, 0.96) 72%);
-  box-shadow:
-    0 10px 24px rgba(0, 0, 0, 0.62),
-    inset 0 1px 0 rgba(255, 255, 255, 0.16);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transform: translate3d(var(--m-x, 156px), var(--m-y, 0px), 0) scale(var(--m-scale, 1));
-  opacity: var(--m-opacity, 1);
-  transition:
-    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.32s ease,
-    border-color 0.28s ease,
-    box-shadow 0.28s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.sm-medallion.is-active {
-  background:
-    radial-gradient(circle at 30% 25%, var(--m-glow, rgba(244, 63, 94, 0.32)), #111119 76%);
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow:
-    0 14px 32px rgba(0, 0, 0, 0.78),
-    0 0 22px var(--m-glow, rgba(244, 63, 94, 0.4));
-}
-
-.sm-medallion__inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 84%;
-  height: 84%;
-  border-radius: 50%;
-  overflow: hidden;
-  padding: 3px;
-}
-
-.sm-medallion__inner .swm {
-  transform: scale(0.72);
-  transform-origin: center center;
-}
-
-/* ── Minimalist Floating Callout Pill to the Right of the Focus Lens ── */
-.sm-active-callout {
-  position: absolute;
-  left: 210px;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 14;
-}
-
-.sm-active-callout__card {
-  width: 100%;
-  padding: 13px 14px;
-  border-radius: 22px;
-  background: rgba(18, 18, 26, 0.84);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  width: 178px;
+  height: 54px;
+  margin-left: -24px;
+  margin-top: -27px;
+  padding: 0 14px 0 16px;
+  border-radius: 999px;
+  background: rgba(16, 16, 24, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.11);
   box-shadow:
-    0 16px 38px rgba(0, 0, 0, 0.6),
+    0 12px 28px rgba(0, 0, 0, 0.62),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  text-align: left;
+  gap: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.22s ease;
+  overflow: hidden;
+  transform:
+    translate3d(var(--w-x, 137px), var(--w-y, 0px), 0)
+    rotate(var(--w-rot, 0deg))
+    scale(var(--w-scale, 1));
+  opacity: var(--w-opacity, 1);
+  transition:
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease,
+    border-color 0.28s ease,
+    box-shadow 0.28s ease,
+    background 0.28s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.sm-active-callout__card:hover {
-  border-color: rgba(255, 255, 255, 0.24);
+/* Subtle brand color aura inside each studio button */
+.sm-wordmark-btn__glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(110% 120% at 15% 50%, var(--w-glow, rgba(229, 9, 20, 0.25)) 0%, transparent 70%);
+  opacity: 0.55;
+  pointer-events: none;
+  transition: opacity 0.28s ease;
 }
 
-.sm-active-callout__card:active {
-  transform: scale(0.96);
+.sm-wordmark-btn:hover,
+.sm-wordmark-btn.is-active {
+  background: rgba(20, 20, 30, 0.96);
+  border-color: var(--w-accent, rgba(255, 255, 255, 0.55));
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.78),
+    0 0 26px var(--w-glow, rgba(229, 9, 20, 0.42)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
-.sm-active-callout__info {
+.sm-wordmark-btn:hover .sm-wordmark-btn__glow,
+.sm-wordmark-btn.is-active .sm-wordmark-btn__glow {
+  opacity: 1;
+}
+
+.sm-wordmark-btn:active {
+  transform:
+    translate3d(var(--w-x, 137px), var(--w-y, 0px), 0)
+    rotate(var(--w-rot, 0deg))
+    scale(0.95);
+}
+
+.sm-wordmark-btn__logo {
+  position: relative;
+  z-index: 2;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: flex-start;
   min-width: 0;
+  flex: 1;
 }
 
-.sm-active-callout__kicker {
-  font-size: 8.5px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  color: var(--st-accent, #fb7185);
-  text-transform: uppercase;
+.sm-wordmark-btn__logo svg {
+  max-width: 118px;
+  height: 23px;
+  width: auto;
+  display: block;
 }
 
-.sm-active-callout__name {
-  font-size: 14px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sm-active-callout__tag {
-  font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.48);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  line-height: 1.3;
-}
-
-.sm-active-callout__go {
-  width: 34px;
-  height: 34px;
+.sm-wordmark-btn__arrow {
+  position: relative;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.68);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease;
+}
+
+.sm-wordmark-btn.is-active .sm-wordmark-btn__arrow,
+.sm-wordmark-btn:hover .sm-wordmark-btn__arrow {
+  background: var(--w-accent, #ffffff);
+  border-color: var(--w-accent, #ffffff);
+  color: #ffffff;
+}
+
+.sm-wordmark-btn--apple.is-active .sm-wordmark-btn__arrow,
+.sm-wordmark-btn--apple:hover .sm-wordmark-btn__arrow {
+  color: #09090d;
 }
 
 /* ── Subtle Close Button ── */
@@ -369,7 +325,7 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(18, 18, 26, 0.72);
+  background: rgba(18, 18, 26, 0.76);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.78);
   display: flex;
@@ -384,19 +340,10 @@
 }
 
 @media (max-width: 370px) {
-  .sm-focus-lens {
-    left: 140px;
-    width: 76px;
-    height: 76px;
-  }
-  .sm-medallion {
-    width: 62px;
-    height: 62px;
-    margin-left: -31px;
-    margin-top: -31px;
-    transform: translate3d(calc(var(--m-x, 156px) - 16px), var(--m-y, 0px), 0) scale(var(--m-scale, 1));
-  }
-  .sm-active-callout {
-    left: 188px;
+  .sm-wordmark-btn {
+    width: 162px;
+    height: 50px;
+    margin-left: -32px;
+    margin-top: -25px;
   }
 }

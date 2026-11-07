@@ -1062,20 +1062,6 @@ const HomePage: React.FC = () => {
         ) : (
           <>
             <div className="hp-header__brand">
-              <button
-                type="button"
-                className="hp-header__menu-btn"
-                onClick={() => {
-                  haptic('light');
-                  openSideMenu();
-                }}
-                aria-label="Открыть меню вселенных"
-                title="Боковое меню Кино-Вселенных"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M4 7h16M4 12h11M4 17h16" />
-                </svg>
-              </button>
               <VeloraEmblem size="sm" />
               <span className="hp-header__wordmark">
                 <span>ZENOVA</span>

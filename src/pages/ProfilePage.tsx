@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -96,6 +96,52 @@ const ProfilePage: React.FC = () => {
   const [showRules, setShowRules] = useState(false);
   const [sectionFilter, setSectionFilter] = useState<'all' | 'diary' | 'seasons' | 'services'>('all');
   const [diaryTab, setDiaryTab] = useState<'favorites' | 'watching' | 'want' | 'watched'>('favorites');
+
+  /* Интерактивный ползунок (Slide-to-Unlock) для Привилегии PRO */
+  const sliderTrackRef = useRef<HTMLDivElement>(null);
+  const sliderThumbRef = useRef<HTMLSpanElement>(null);
+  const sliderStartClientX = useRef<number | null>(null);
+  const sliderMaxDist = useRef<number>(140);
+  const [sliderX, setSliderX] = useState(0);
+  const [sliderDragging, setSliderDragging] = useState(false);
+
+  const calcMaxSlide = () => {
+    const trackW = sliderTrackRef.current?.clientWidth || 320;
+    const thumbW = sliderThumbRef.current?.clientWidth || 180;
+    return Math.max(40, trackW - thumbW - 10);
+  };
+
+  const handleSliderDown = (clientX: number) => {
+    sliderMaxDist.current = calcMaxSlide();
+    sliderStartClientX.current = clientX - sliderX;
+    setSliderDragging(true);
+    haptic('light');
+  };
+
+  const handleSliderMove = (clientX: number) => {
+    if (sliderStartClientX.current === null) return;
+    const raw = clientX - sliderStartClientX.current;
+    const clamped = Math.max(0, Math.min(sliderMaxDist.current, raw));
+    setSliderX(clamped);
+  };
+
+  const handleSliderEnd = () => {
+    if (sliderStartClientX.current === null) return;
+    sliderStartClientX.current = null;
+    setSliderDragging(false);
+
+    const max = sliderMaxDist.current;
+    if (sliderX >= max * 0.56) {
+      setSliderX(max);
+      haptic('heavy');
+      setTimeout(() => {
+        navigate('/premium');
+        setTimeout(() => setSliderX(0), 250);
+      }, 150);
+    } else {
+      setSliderX(0);
+    }
+  };
 
   /* Сезонное оформление */
   const [seasonState, setSeasonState] = useState(() => getStoredSeason());
@@ -387,22 +433,67 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* ═════ 4. MINIMALIST SLIDER CTA BAR ═════ */}
-        <button
-          type="button"
-          className="pf-slider-cta"
-          onClick={() => {
-            haptic('light');
-            navigate('/premium');
+        {/* ═════ 4. INTERACTIVE DRAGGABLE SLIDER CTA BAR (Ползунок) ═════ */}
+        <div
+          ref={sliderTrackRef}
+          className={`pf-slider-cta ${sliderDragging ? 'is-dragging' : ''}`}
+          role="slider"
+          aria-label="Потяните ползунок вправо, чтобы открыть привилегии PRO"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round((sliderX / Math.max(1, sliderMaxDist.current)) * 100)}
+          tabIndex={0}
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture?.(e.pointerId);
+            handleSliderDown(e.clientX);
+          }}
+          onPointerMove={(e) => {
+            if (!sliderDragging) return;
+            handleSliderMove(e.clientX);
+          }}
+          onPointerUp={() => handleSliderEnd()}
+          onPointerCancel={() => handleSliderEnd()}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              haptic('medium');
+              navigate('/premium');
+            }
           }}
         >
-          <span className="pf-slider-cta__pill">
-            {effectivePremium ? 'Привилегии PRO' : 'Открыть PRO Доступ'}
+          <div
+            className="pf-slider-cta__fill"
+            style={{
+              width: sliderX > 0 ? `${sliderX + 190}px` : '0px',
+              opacity: sliderX > 0 ? Math.min(1, 0.25 + sliderX / Math.max(1, sliderMaxDist.current)) : 0,
+            }}
+            aria-hidden="true"
+          />
+
+          <span
+            ref={sliderThumbRef}
+            className="pf-slider-cta__pill"
+            style={{
+              transform: `translate3d(${sliderX}px, 0, 0)`,
+              transition: sliderDragging ? 'none' : 'transform 0.34s cubic-bezier(0.22, 1, 0.36, 1)',
+            }}
+          >
+            <span>{effectivePremium ? 'Привилегии PRO' : 'Открыть PRO Доступ'}</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
           </span>
-          <span className="pf-slider-cta__chevrons" aria-hidden="true">
+
+          <span
+            className="pf-slider-cta__chevrons"
+            style={{
+              opacity: Math.max(0, 1 - (sliderX / Math.max(1, sliderMaxDist.current)) * 1.4),
+            }}
+            aria-hidden="true"
+          >
+            <small>Потяните</small>
             <i>›</i><i>›</i><i>›</i>
           </span>
-        </button>
+        </div>
       </section>
 
       {/* ═════ 5. DISCOVER HEADER & PILL TABS ═════ */}

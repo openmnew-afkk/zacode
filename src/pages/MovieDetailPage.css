@@ -2131,17 +2131,17 @@
   position: relative;
   width: min(1040px, 100%) !important;
   max-width: 1040px !important;
-  max-height: calc(100dvh - 10px);
+  max-height: calc(100dvh - 8px);
   border-radius: 0 0 28px 28px;
-  background: linear-gradient(185deg, rgba(9, 9, 16, 0.99) 0%, rgba(19, 17, 31, 0.98) 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d0d13;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow:
     0 28px 80px rgba(0, 0, 0, 0.92),
-    0 6px 36px rgba(244, 63, 94, 0.18),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.22);
-  padding: calc(var(--tg-top-pad, 14px) + 8px) 12px 10px;
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+  /* Гарантированный отступ под кнопки Telegram сверху! */
+  padding: max(calc(var(--header-safe-top, 56px) + 10px), 68px) 14px 12px !important;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -2202,8 +2202,8 @@
 
 /* Режим 2: РАСТЯНУТАЯ ВВЕРХ ШТОРКА (tall) */
 .dp-player-sheet--tall {
-  height: calc(100dvh - var(--tg-top-pad, 14px) - 6px) !important;
-  max-height: calc(100dvh - var(--tg-top-pad, 14px) - 6px) !important;
+  height: calc(100dvh - 8px) !important;
+  max-height: calc(100dvh - 8px) !important;
 }
 
 .dp-player-sheet--tall .dp-cinema-stage {
@@ -2246,8 +2246,8 @@
 }
 
 .dp-player-sheet--fullscreen .dp-watch-bar {
-  padding: calc(env(safe-area-inset-top, 0px) + 6px) 14px 6px;
-  background: rgba(6, 6, 10, 0.94);
+  padding: max(calc(var(--header-safe-top, 56px) + 6px), 62px) 16px 8px !important;
+  background: rgba(9, 9, 13, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 0;
   flex-shrink: 0;
@@ -2435,10 +2435,408 @@
 
 .dp-sheet-voice-hint {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.48);
+  color: rgba(255, 255, 255, 0.44);
   text-align: center;
   padding: 2px 4px 0;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   MINIMALIST DARK-LUXURY SHOWCASE & CARDS (В ЕДИНОМ СТИЛЕ С ПРОФИЛЕМ)
+   Строго ниже кнопок Telegram (`padding-top: var(--header-safe-top)`)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dp {
+  min-height: 100vh;
+  padding: 0 0 124px !important;
+  padding-top: var(--header-safe-top, 56px) !important;
+  position: relative;
+  background: #09090d !important;
+  color: #f8fafc;
+  overflow-x: hidden;
+}
+
+.dp__bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: #09090d;
+  background-image:
+    radial-gradient(ellipse 80% 38% at 50% 0%, rgba(244, 63, 94, 0.06), transparent 68%),
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 100% 100%, 36px 36px, 36px 36px;
+  pointer-events: none;
+}
+
+.dp > *:not(.dp__bg) {
+  position: relative;
+  z-index: 1;
+}
+
+.dp-showcase {
+  margin: 12px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dp-stage {
+  position: relative;
+  min-height: 310px;
+  border-radius: 32px;
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 64px 16px 18px;
+}
+
+.dp-stage__backdrop {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 22%;
+  filter: brightness(0.56) saturate(110%);
+  transform: scale(1.03);
+  z-index: 0;
+}
+
+.dp-stage__vignette {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(9, 9, 13, 0.45) 0%, rgba(17, 17, 24, 0.78) 54%, #111118 100%);
+  z-index: 1;
+}
+
+/* Вырезы по верхним углам (как в Профиле) */
+.dp-stage__notch {
+  position: absolute;
+  top: 0;
+  width: 58px;
+  height: 58px;
+  background: #09090d;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dp-stage__notch--tl {
+  left: 0;
+  border-bottom-right-radius: 26px;
+}
+
+.dp-stage__notch--tr {
+  right: 0;
+  border-bottom-left-radius: 26px;
+}
+
+.dp-stage__corner-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #13131b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-stage__corner-btn:hover {
+  background: #1a1a25;
+}
+.dp-stage__corner-btn:active {
+  transform: scale(0.92);
+}
+.dp-stage__corner-btn.is-active {
+  border-color: rgba(251, 113, 133, 0.38);
+  background: rgba(244, 63, 94, 0.12);
+}
+
+.dp-stage__serial {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(9, 9, 14, 0.65);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.62);
+}
+.dp-stage__serial b {
+  color: #ffffff;
+}
+
+.dp-stage__content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dp-stage__main-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.dp-stage__poster-wrap {
+  width: 96px;
+  aspect-ratio: 2 / 3;
+  border-radius: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+  background: #161620;
+}
+
+.dp-stage__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.dp-stage__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dp-stage__title {
+  margin: 0;
+  font-size: clamp(20px, 5.4vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  color: #ffffff;
+}
+
+.dp-stage__orig {
+  margin: 0;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dp-stage__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.dp-stage__chip {
+  padding: 3.5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 11px;
   font-weight: 600;
 }
+
+.dp-stage__chip--rate {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.dp-stage__genres {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.dp-stage__genre {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.48);
+}
+.dp-stage__genre:not(:last-child)::after {
+  content: ' ·';
+  margin-left: 4px;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+.dp-stage__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dp-btn-primary {
+  flex: 1;
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #f8fafc;
+  color: #09090d;
+  font-size: 13.5px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: transform 0.16s ease, opacity 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-btn-primary:active {
+  transform: scale(0.97);
+}
+
+.dp-btn-secondary {
+  height: 46px;
+  padding: 0 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* ── Матовые карточки в стиле Профиля (.dp-meta-card & .dp-section--card) ── */
+.dp-meta-card {
+  border-radius: 22px;
+  background: #111118;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 15px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dp-meta-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.dp-meta-card__col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.dp-meta-card__col--right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.dp-meta-card__divider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+}
+
+.dp-meta-card__label {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.dp-meta-card__value {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dp-meta-card__story {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dp-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.dp-card-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.dp-card-sub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.dp-section--card {
+  margin: 10px 16px 0 !important;
+  padding: 15px 16px !important;
+  border-radius: 22px !important;
+  background: #111118 !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: none !important;
+}
+
+.dp-status {
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 14px !important;
+}
+
+.dp-status.active {
+  background: #f8fafc !important;
+  border-color: #f8fafc !important;
+  color: #09090d !important;
+}
+
+.dp-status.active .dp-status__label,
+.dp-status.active .dp-status__icon {
+  color: #09090d !important;
+}
+
 
 
