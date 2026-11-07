@@ -143,14 +143,33 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const daysLeft = premiumExpiry
+    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
+    : null;
+
+  const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Киноман ZENOVA';
+  const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '@zenova_member');
+  const effectiveUser = user?.username || telegramUsername || '';
+  const userAccess = resolveUserAccess(effectiveUser);
+  const isAdminUser = userAccess.isAdmin || userAccess.isModerator || role === 'admin' || role === 'moderator' || user?.username === 'ZenovaAdmin';
+  const effectivePremium = isPremium || userAccess.isVip;
+
   /* Сезонное оформление */
   const [seasonState, setSeasonState] = useState(() => getStoredSeason());
+  const [seasonProToast, setSeasonProToast] = useState<string | null>(null);
   const seasonAuto = seasonState.auto;
   const currentSeasonId = seasonState.season.id;
   const activeChoice: SeasonId | 'auto' = seasonAuto ? 'auto' : currentSeasonId;
 
   const switchSeason = (id: SeasonId | 'auto') => {
     haptic('light');
+    const isPro = effectivePremium || isAdminUser;
+    if (id !== 'auto' && !isPro) {
+      haptic('heavy');
+      setSeasonProToast('Ручная смена сезона доступна только с подпиской PRO. В базовой версии тема меняется автоматически!');
+      setTimeout(() => setSeasonProToast(null), 4500);
+      return;
+    }
     setStoredSeason(id);
     const next = getStoredSeason();
     applySeason(next.season);
@@ -182,17 +201,6 @@ const ProfilePage: React.FC = () => {
     try { localStorage.setItem('zenova_garland_off', next ? '1' : '0'); } catch {}
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
   };
-
-  const daysLeft = premiumExpiry
-    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
-    : null;
-
-  const displayName = user ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}` : 'Киноман ZENOVA';
-  const username = user?.username ? `@${user.username}` : (telegramUsername ? `@${telegramUsername}` : '@zenova_member');
-  const effectiveUser = user?.username || telegramUsername || '';
-  const userAccess = resolveUserAccess(effectiveUser);
-  const isAdminUser = userAccess.isAdmin || userAccess.isModerator || role === 'admin' || role === 'moderator' || user?.username === 'ZenovaAdmin';
-  const effectivePremium = isPremium || userAccess.isVip;
 
   /* Кино-ранг и XP прогресс */
   const trackedList = Object.values(tracked || {});
@@ -661,24 +669,36 @@ const ProfilePage: React.FC = () => {
           <div className="pf-capsules-rail">
             {VISUAL_SEASONS.map((s) => {
               const isSelected = activeChoice === s.id;
+              const isProLocked = s.id !== 'auto' && !(effectivePremium || isAdminUser);
               return (
                 <button
                   key={s.id}
                   type="button"
-                  className={`pf-capsule ${isSelected ? 'active' : ''}`}
+                  className={`pf-capsule ${isSelected ? 'active' : ''} ${isProLocked ? 'pf-capsule--locked' : ''}`}
                   style={{ '--cap-dot': s.dotColor } as React.CSSProperties}
                   onClick={() => switchSeason(s.id)}
+                  title={isProLocked ? 'Доступно в PRO подписке' : s.name}
                 >
                   <span className="pf-capsule__orb">{s.emoji}</span>
                   <span className="pf-capsule__chevrons" aria-hidden="true">
-                    <i>⌃</i>
-                    <i>⌃</i>
+                    {isProLocked ? <i className="pf-capsule__pro-tag">PRO</i> : <><i>⌃</i><i>⌃</i></>}
                   </span>
                   <span className="pf-capsule__name">{s.shortName}</span>
                 </button>
               );
             })}
           </div>
+
+          {seasonProToast && (
+            <div className="pf-season-pro-alert" onClick={() => navigate('/premium')}>
+              <div className="pf-season-pro-alert__icon">👑</div>
+              <div className="pf-season-pro-alert__text">
+                <strong>Привилегия ZENOVA PRO</strong>
+                <span>{seasonProToast}</span>
+              </div>
+              <span className="pf-season-pro-alert__action">В PRO →</span>
+            </div>
+          )}
 
           <div className="pf-season-controls">
             <button

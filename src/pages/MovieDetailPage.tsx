@@ -206,11 +206,21 @@ const MovieDetailPage: React.FC = () => {
   const isPlayerFullscreen = sheetMode === 'fullscreen';
   const isSheetTall = sheetMode === 'tall';
 
-  /* Быстрое и плавное сворачивание плеера на главную страницу каталога (как в Netflix / Кинопоиск) */
+  /* Быстрое и плавное сворачивание плеера на главную страницу каталога (гарантированно на iOS и Android) */
   const minimizeToHome = () => {
-    haptic('light');
-    setSheetMode('normal');
+    haptic('medium');
+    try {
+      if (document.fullscreenElement) {
+        document.exitFullscreen?.().catch?.(() => {});
+      }
+      const tg = (window as any).Telegram?.WebApp;
+      if (typeof tg?.exitFullscreen === 'function') {
+        tg.exitFullscreen();
+      }
+    } catch {}
     setShowWatch(false);
+    setSheetMode('normal');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     navigate('/', { replace: true });
   };
 
@@ -851,80 +861,69 @@ const MovieDetailPage: React.FC = () => {
               />
             )}
 
-            {/* Компактная верхняя панель управления (ниже кнопок Telegram) */}
+            {/* Компактная двухуровневая верхняя панель: исключает заезжание текста на кнопки */}
             <div className="dp-watch-bar">
-              <div className="dp-watch-bar__info">
-                <div className="dp-watch-bar__live-row">
+              <div className="dp-watch-bar__row1">
+                <div className="dp-watch-bar__info">
                   <span className="dp-watch-bar__live-dot" />
-                  <span className="dp-watch-bar__kicker">ZENOVA CINEMA</span>
+                  <span className="dp-watch-bar__kicker">ZENOVA</span>
+                  <span className="dp-watch-bar__sep">·</span>
+                  <span className="dp-watch-bar__title" title={movie.title}>
+                    {movie.title}
+                  </span>
                 </div>
-                <span className="dp-watch-bar__title">
-                  {movie.title}
-                </span>
-              </div>
 
-              <div className="dp-watch-bar__actions">
-                {/* Свернуть кино на главную страницу (как в кинотеатрах на iOS / Android) */}
                 <button
                   type="button"
-                  className="dp-watch-bar__minimize-btn"
+                  className="dp-watch-bar__close"
+                  onClick={minimizeToHome}
+                  aria-label="Свернуть плеер и перейти на главную"
+                  title="Закрыть плеер"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="dp-watch-bar__row2">
+                {/* Свернуть кино на главную */}
+                <button
+                  type="button"
+                  className="dp-watch-bar__pill-btn"
                   onClick={minimizeToHome}
                   title="Свернуть кино на главную"
-                  aria-label="Свернуть на главную"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M19 12H5M12 19l-7-7 7-7" />
                   </svg>
                   <span>Главная</span>
                 </button>
 
-                {/* Кнопка растягивания шторки сверху вниз */}
+                {/* Плавный размер */}
                 {!isPlayerFullscreen && (
                   <button
                     type="button"
-                    className={`dp-watch-bar__stretch-btn ${isSheetTall ? 'active' : ''}`}
+                    className={`dp-watch-bar__pill-btn ${isSheetTall ? 'is-active' : ''}`}
                     onClick={toggleSheetTall}
-                    title={isSheetTall ? 'Вернуть стандартную высоту шторки' : 'Растянуть плеер сверху вниз'}
+                    title={isSheetTall ? 'Стандартный размер' : 'Увеличить экран'}
                   >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                      {isSheetTall ? (
-                        <path d="M17 14l-5-5-5 5" />
-                      ) : (
-                        <path d="M7 10l5 5 5-5" />
-                      )}
-                    </svg>
-                    <span>{isSheetTall ? 'Свернуть' : 'Растянуть'}</span>
+                    <span>{isSheetTall ? '↕ Стандарт' : '↕ Экран +'}</span>
                   </button>
                 )}
 
-                {/* Главная кнопка раскрытия на весь экран (исправляет баг на ноутбуках в Telegram Web) */}
+                {/* На весь экран */}
                 <button
                   type="button"
-                  className={`dp-watch-bar__fs-btn ${isPlayerFullscreen ? 'active' : ''}`}
+                  className={`dp-watch-bar__pill-btn dp-watch-bar__pill-btn--primary ${isPlayerFullscreen ? 'is-active' : ''}`}
                   onClick={togglePlayerFullscreen}
-                  title={isPlayerFullscreen ? 'Выйти из полного экрана (Esc)' : 'Развернуть на весь экран'}
+                  title="На весь экран"
                 >
-                  {isPlayerFullscreen ? (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
-                      </svg>
-                      <span>Обычный</span>
-                    </>
-                  ) : (
-                    <>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
-                      </svg>
-                      <span>Экран 100%</span>
-                    </>
-                  )}
+                  <span>{isPlayerFullscreen ? '⛶ Обычный' : '⛶ 100%'}</span>
                 </button>
 
                 {/* Подсветка Ambilight */}
                 <button
                   type="button"
-                  className={`dp-watch-bar__btn ${ambilightOn ? 'active' : ''}`}
+                  className={`dp-watch-bar__icon-btn ${ambilightOn ? 'is-active' : ''}`}
                   onClick={() => {
                     haptic('light');
                     setAmbilightOn((v) => !v);
@@ -938,7 +937,7 @@ const MovieDetailPage: React.FC = () => {
                 {/* Перезагрузить поток */}
                 <button
                   type="button"
-                  className="dp-watch-bar__btn"
+                  className="dp-watch-bar__icon-btn"
                   onClick={() => {
                     haptic('light');
                     setWatchIdx(-1);
@@ -947,19 +946,9 @@ const MovieDetailPage: React.FC = () => {
                   title="Перезагрузить поток"
                   aria-label="Перезагрузить"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                   </svg>
-                </button>
-
-                <button
-                  type="button"
-                  className="dp-watch-bar__close"
-                  onClick={minimizeToHome}
-                  aria-label="Свернуть плеер и перейти на главную"
-                  title="Свернуть на главную"
-                >
-                  ✕
                 </button>
               </div>
             </div>
@@ -991,34 +980,13 @@ const MovieDetailPage: React.FC = () => {
                   Озвучка, качество 4K/1080p{isSerial ? ' и выбор серий' : ''} доступны внутри верхнего меню плеера
                 </div>
 
-                {/* Нижняя ручка растягивания шторки сверху вниз (поддерживает свайп вниз/вверх и клик) */}
                 <div
                   className="dp-sheet-pull-area"
                   onClick={toggleSheetTall}
-                  onTouchStart={(e) => {
-                    dragStartY.current = e.touches[0]?.clientY ?? null;
-                  }}
-                  onTouchEnd={(e) => {
-                    if (dragStartY.current === null) return;
-                    const endY = e.changedTouches[0]?.clientY ?? dragStartY.current;
-                    const deltaY = endY - dragStartY.current;
-                    dragStartY.current = null;
-                    if (deltaY > 35) {
-                      haptic('light');
-                      setSheetMode('tall');
-                    } else if (deltaY < -45) {
-                      haptic('light');
-                      if (sheetMode === 'tall') {
-                        setSheetMode('normal');
-                      } else {
-                        minimizeToHome();
-                      }
-                    }
-                  }}
-                  title="Потяните вниз или нажмите, чтобы растянуть плеер"
+                  title="Переключить размер плеера"
                 >
                   <span className="dp-sheet-pull-hint">
-                    {isSheetTall ? '⬆ Нажмите или потяните вверх — обычный размер' : '⬇ Потяните вниз или нажмите — растянуть плеер'}
+                    {isSheetTall ? '↕ Нажмите, чтобы вернуть стандартный размер' : '↕ Нажмите, чтобы развернуть плеер вниз'}
                   </span>
                   <div className="dp-sheet-pull-bar" />
                 </div>

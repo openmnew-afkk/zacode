@@ -68,46 +68,58 @@
 .hp-header__studios-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   height: 36px;
-  padding: 0 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 0 13px;
+  border-radius: 999px;
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(244, 63, 94, 0.22) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
 .hp-header__studios-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgba(244, 63, 94, 0.35) 0%, transparent 60%),
+    rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.22);
 }
 .hp-header__studios-btn:active {
   transform: scale(0.94);
-  background: rgba(255, 255, 255, 0.12);
 }
-.hp-header__studios-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #fda4af;
-  box-shadow: 0 0 8px #fda4af;
-  flex-shrink: 0;
-  animation: studiosDotPulse 2s ease-in-out infinite alternate;
+.hp-header__studios-spark {
+  color: #fda4af;
+  font-size: 13px;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(251, 113, 133, 0.8));
+  animation: sparkPulse 2.2s ease-in-out infinite alternate;
 }
-@keyframes studiosDotPulse {
-  from { opacity: 0.6; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1.2); }
+@keyframes sparkPulse {
+  from { transform: scale(0.9); opacity: 0.8; }
+  to   { transform: scale(1.25); opacity: 1; }
 }
 .hp-header__studios-text {
-  font-size: 11.5px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+.hp-header__studios-count {
+  font-size: 9px;
+  font-weight: 850;
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1;
 }
 
-/* 👤 Роскошная оправа кнопки профиля в шапке */
+/* 👤 Роскошная оправа кнопки профиля в шапке (чистое золотое свечение) */
 .hp-header__avatar-pod {
   position: relative;
   display: flex;
@@ -123,19 +135,26 @@
 .hp-header__avatar-pod:active {
   transform: scale(0.92);
 }
-.hp-header__avatar-frame {
+.hp-header__avatar-gold-frame {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
+  padding: 1.5px;
+  background: linear-gradient(135deg, #fde047 0%, #d97706 100%);
+  box-shadow:
+    0 0 16px rgba(251, 191, 36, 0.45),
+    0 2px 8px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .hp-header__avatar-img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.4);
   display: block;
 }
 .hp-header__avatar-txt {
@@ -143,29 +162,13 @@
   height: 100%;
   border-radius: 50%;
   background: linear-gradient(135deg, #1c1a29, #0e0d16);
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffffff;
   font-size: 13px;
   font-weight: 800;
-}
-.hp-header__avatar-pod.is-pro .hp-header__avatar-img,
-.hp-header__avatar-pod.is-pro .hp-header__avatar-txt {
-  border-color: #fbbf24;
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
-}
-.hp-header__avatar-mask {
-  position: absolute;
-  bottom: -4px;
-  right: -5px;
-  width: 19px;
-  height: 19px;
-  z-index: 2;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.9));
-  pointer-events: none;
 }
 .hp-header__btn {
   width: 37px;
@@ -2007,29 +2010,39 @@
 
 .hp-top10__item {
   position: relative;
-  width: 126px;
+  width: 130px;
   flex-shrink: 0;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  padding-left: 18px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hp-top10__item:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.hp-top10__item:active {
+  transform: scale(0.96);
 }
 
 .hp-top10__num {
   position: absolute;
-  left: -20px;
-  bottom: 4px;
-  font-size: 68px;
-  font-weight: 900;
-  line-height: 0.82;
-  color: rgba(12, 11, 18, 0.9);
-  -webkit-text-stroke: 2px var(--season-accent, #f43f5e);
-  text-shadow: 0 8px 20px rgba(0, 0, 0, 0.85);
-  z-index: 1;
+  left: 0px;
+  bottom: -6px;
+  font-size: 82px;
+  font-weight: 950;
+  line-height: 0.78;
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, sans-serif);
+  color: #0b0a12;
+  -webkit-text-stroke: 3px #ffffff;
+  text-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(255, 255, 255, 0.35);
+  z-index: 5;
   pointer-events: none;
   user-select: none;
+  letter-spacing: -4px;
 }
 
 .hp-top10__poster {
@@ -2039,7 +2052,7 @@
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
   background: #14131d;
 }
 

@@ -64,8 +64,7 @@ const MusicPage: React.FC = () => {
     setWaveArtworkError(false);
   }, [currentTrack?.id]);
 
-  /* Плейлисты полных треков (кэш по ключу «wave:настроение» / «chart»,
-     догружаются страницами при прокрутке) */
+  /* Плейлисты полных треков (кэш по ключу «wave:настроение» / «chart») */
   const [playlists, setPlaylists] = useState<Record<string, MusicTrack[]>>({});
   const [listLoading, setListLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -75,7 +74,6 @@ const MusicPage: React.FC = () => {
   const iaPageRef = useRef(1);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const loadMoreFnRef = useRef<() => void>(() => {});
-  /* Случайный стартовый offset плейлиста (запоминается для бесконечной прокрутки) */
   const baseOffsetRef = useRef<Record<string, number>>({});
 
   const showToast = (msg: string) => {
@@ -87,7 +85,7 @@ const MusicPage: React.FC = () => {
   const hasPlaylist = Boolean(playlists[listKey]);
   const searchMode = query.trim().length > 0;
 
-  /* Страница плейлиста по ключу: чарт / настроение (жанр или запрос) */
+  /* Страница плейлиста по ключу */
   const fetchListPage = useCallback(async (key: string, offset: number): Promise<MusicTrack[]> => {
     if (key === 'chart') return getAudiusTrending(PAGE, undefined, offset);
     if (key.startsWith('wave:')) {
@@ -99,7 +97,7 @@ const MusicPage: React.FC = () => {
     return [];
   }, []);
 
-  /* Первичная загрузка плейлиста — со случайной страницы и в случайном порядке */
+  /* Первичная загрузка плейлиста */
   useEffect(() => {
     if ((tab !== 'wave' && tab !== 'chart') || searchMode) return;
     if (playlists[listKey]) return;
@@ -107,7 +105,6 @@ const MusicPage: React.FC = () => {
     let alive = true;
     setListLoading(true);
 
-    // Для запросов-настроений offset не важен, для трендов — случайная страница
     const isTrending = listKey === 'chart' || (() => {
       const mood = WAVE_MOODS.find((m) => m.id === listKey.slice(5));
       return Boolean(mood && !mood.query);
@@ -123,7 +120,7 @@ const MusicPage: React.FC = () => {
     return () => { alive = false; };
   }, [tab, activeMood, searchMode, listKey, playlists, fetchListPage]);
 
-  /* Поиск: Audius (миллионный каталог) + Internet Archive (сотни тысяч) */
+  /* Поиск */
   useEffect(() => {
     const q = query.trim();
     if (!q) {
@@ -144,12 +141,10 @@ const MusicPage: React.FC = () => {
 
     searchDebounceRef.current = setTimeout(async () => {
       try {
-        // Audius быстрый — показываем сразу
         const audiusTracks = await searchAudius(q, PAGE).catch(() => [] as MusicTrack[]);
         setSearchResults(audiusTracks);
         setIsSearching(false);
 
-        // Internet Archive медленнее — догружаем поверх
         const iaTracks = await searchInternetArchive(q, 1, 10).catch(() => [] as MusicTrack[]);
         if (iaTracks.length > 0) {
           setSearchResults((prev) => {
@@ -157,7 +152,7 @@ const MusicPage: React.FC = () => {
             return [...prev, ...iaTracks.filter((t) => !ids.has(t.id))];
           });
         }
-      } catch (e) {
+      } catch {
         setSearchResults([]);
         setIsSearching(false);
       }
@@ -170,14 +165,12 @@ const MusicPage: React.FC = () => {
     };
   }, [query]);
 
-  /* ── Бесконечная прокрутка ── */
-
+  /* Бесконечная прокрутка */
   const loadMoreList = useCallback(async () => {
     if (listLoading || loadingMore || !hasPlaylist || exhausted[listKey]) return;
     setLoadingMore(true);
     try {
       const current = playlists[listKey] || [];
-      // offset = случайная база этой сессии + сколько уже загрузили
       const base = baseOffsetRef.current[listKey] || 0;
       const offset = base + current.filter((t) => !t.isLiveRadio).length;
       const next = await fetchListPage(listKey, offset);
@@ -223,11 +216,10 @@ const MusicPage: React.FC = () => {
 
   loadMoreFnRef.current = searchMode ? loadMoreSearch : loadMoreList;
 
-  /* Фильтрация треков для отображения */
+  /* Фильтрация треков */
   const displayedTracks = useMemo(() => {
     const q = query.trim().toLowerCase();
 
-    // Поиск: полные треки из Audius + Internet Archive + радиостанции
     if (q) {
       const localMatches = LIVE_RADIO_STATIONS.filter(
         (t) =>
@@ -235,9 +227,7 @@ const MusicPage: React.FC = () => {
           t.artist.toLowerCase().includes(q) ||
           t.genre.toLowerCase().includes(q)
       );
-
-      const combined = [...localMatches, ...searchResults];
-      return combined;
+      return [...localMatches, ...searchResults];
     }
 
     if (tab === 'radio') {
@@ -252,7 +242,6 @@ const MusicPage: React.FC = () => {
       return playlists['chart'] || [];
     }
 
-    // Поток ZENOVA Пульс: плейлист настроения и подходящие радиостанции.
     const moodTracks = playlists[`wave:${activeMood}`] || [];
     const radioMatches =
       activeMood === 'all'
@@ -272,45 +261,37 @@ const MusicPage: React.FC = () => {
     }
   };
 
-  /* Запуск ZENOVA Пульс; surprise игнорирует настроение и выбирает трек случайно. */
-  const handleStartWave = (surprise = false) => {
+  /* Запуск Волны Пульс */
+  const handleStartWave = () => {
     haptic('heavy');
     const localPool = displayedTracks.filter((t) => !t.isLiveRadio);
-    if (currentTrack && !surprise && localPool.some((track) => track.id === currentTrack.id)) {
+    if (currentTrack && localPool.some((track) => track.id === currentTrack.id)) {
       setPlaying(!isPlaying);
       showToast(isPlaying ? '⏸ Пауза' : '▶️ Возобновлено');
       return;
     }
     if (listLoading && !hasPlaylist) {
-      showToast('🌊 Подбираем треки для Волны…');
+      showToast('✦ Подбираем треки для Пульса…');
       return;
     }
-    // У обычного запуска очередь соответствует выбранному экрану; «Удиви меня» — всему кэшу.
-    const combined = surprise
-      ? [...localPool, ...Object.values(playlists).flat().filter((t) => !t.isLiveRadio)]
-      : localPool;
     const seen = new Set<string>();
-    const pool = combined.filter((track) => {
+    const pool = localPool.filter((track) => {
       if (seen.has(track.id)) return false;
       seen.add(track.id);
       return true;
     });
     if (pool.length > 0) {
-      const idx = Math.floor(Math.random() * pool.length);
+      const idx = 0;
       const first = pool[idx];
       setTrack(first as any, pool as any[], idx);
       setPlaying(true);
-      showToast(
-        surprise
-          ? `🎲 Удиви меня: ${first.artist} — ${first.title}`
-          : `✦ ZENOVA Пульс: ${first.artist} — ${first.title}`
-      );
+      showToast(`✦ ZENOVA Пульс: ${first.artist} — ${first.title}`);
     } else {
       showToast('В этом списке пока нет доступных треков');
     }
   };
 
-  /* 🌅 Волна дня: настроение подбирается по времени суток */
+  /* Волна дня */
   const dayWave = useMemo(() => {
     const h = new Date().getHours();
     if (h >= 6 && h < 11) return { mood: 'energy', icon: '🌅', label: 'Утренний старт' };
@@ -330,7 +311,6 @@ const MusicPage: React.FC = () => {
     currentTrack && displayedTracks.some((track) => !track.isLiveRadio && track.id === currentTrack.id)
   );
 
-  /* Скелетоны при первой загрузке плейлиста */
   const showSkeletons =
     (tab === 'wave' || tab === 'chart') && !searchMode && listLoading && !hasPlaylist;
 
@@ -343,7 +323,6 @@ const MusicPage: React.FC = () => {
     tab !== 'radio' &&
     tab !== 'library';
 
-  /* Сентинел для IntersectionObserver (переподключается при появлении) */
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el || typeof IntersectionObserver === 'undefined') return;
@@ -358,290 +337,280 @@ const MusicPage: React.FC = () => {
   }, [showSentinel]);
 
   return (
-    <div className="music-page page ym-music-page">
-      {/* ── Премиальная шапка в стиле Яндекс Музыки ── */}
-      <header className="ym-header">
-        <div className="ym-header__top">
-          <div className="ym-brand">
-            <div className="ym-brand__badge-row">
-              <span className="ym-brand__badge">✦ ZENOVA SOUND</span>
-            </div>
-            <h1 className="ym-brand__title">
+    <div className="music-page page ms-page">
+      {/* ════════════ 1. МИНИМАЛИСТИЧНАЯ ШАПКА В СТИЛЕ ПРОФИЛЯ ════════════ */}
+      <header className="ms-header">
+        <div className="ms-header__top">
+          <div className="ms-brand">
+            <span className="ms-brand__badge">✦ ZENOVA SOUND PRO</span>
+            <h1 className="ms-brand__title">
               {tab === 'wave' && 'ZENOVA Пульс'}
               {tab === 'chart' && 'Топ Чарты'}
               {tab === 'radio' && 'Прямой Эфир'}
-              {tab === 'library' && 'Коллекция'}
+              {tab === 'library' && 'Медиатека'}
             </h1>
           </div>
 
-          <div className="ym-header__right">
-            <button
-              className="ym-header__surprise"
-              onClick={() => handleStartWave(true)}
-              title="Удиви меня"
-              aria-label="Удиви меня"
-            >
-              🎲
-            </button>
-            <button
-              type="button"
-              className={`ym-header__equalizer ${isPlaying ? 'playing' : ''}`}
-              onClick={() => currentTrack && setExpanded(true)}
-              aria-label={currentTrack ? 'Открыть плеер' : 'Плеер не запущен'}
-              disabled={!currentTrack}
-            >
-              <span /><span /><span /><span />
-            </button>
-          </div>
+          <button
+            type="button"
+            className={`ms-header__equalizer ${isPlaying ? 'playing' : ''}`}
+            onClick={() => {
+              if (currentTrack) {
+                haptic('medium');
+                setExpanded(true);
+              }
+            }}
+            aria-label={currentTrack ? 'Развернуть плеер' : 'Плеер выключен'}
+            disabled={!currentTrack}
+          >
+            <span /><span /><span /><span />
+          </button>
         </div>
 
-        {/* ── Умный поисковик ── */}
-        <div className="ym-search">
-          <svg className="ym-search__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+        {/* ── Минималистичный поиск (smoked glass) ── */}
+        <div className="ms-search">
+          <svg className="ms-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
             <circle cx="11" cy="11" r="7" /><path d="M16.5 16.5L21 21" />
           </svg>
           <input
             type="text"
-            className="ym-search__input"
-            placeholder="Любой трек мира — миллионы полных записей…"
+            className="ms-search__input"
+            placeholder="Трек, исполнитель или настроение…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          {isSearching && (
-            <div className="ym-search__spinner" />
-          )}
+          {isSearching && <div className="ms-search__spinner" />}
           {query && !isSearching && (
-            <button
-              className="ym-search__clear"
-              onClick={() => setQuery('')}
-              aria-label="Очистить поиск"
-            >
+            <button className="ms-search__clear" onClick={() => setQuery('')} aria-label="Очистить поиск">
               ✕
             </button>
           )}
         </div>
 
-        {/* ── Навигационные вкладки сервиса ── */}
-        <div className="ym-tabs">
-          <button
-            className={`ym-tab ${tab === 'wave' ? 'active' : ''}`}
-            onClick={() => { haptic('light'); setTab('wave'); }}
-          >
-            <span className="ym-tab__icon">✦</span>
-            <span>Пульс</span>
-          </button>
-          <button
-            className={`ym-tab ${tab === 'chart' ? 'active' : ''}`}
-            onClick={() => { haptic('light'); setTab('chart'); }}
-          >
-            <span className="ym-tab__icon">🔥</span>
-            <span>Топ Хиты</span>
-          </button>
-          <button
-            className={`ym-tab ${tab === 'radio' ? 'active' : ''}`}
-            onClick={() => { haptic('light'); setTab('radio'); }}
-          >
-            <span className="ym-tab__icon">📻</span>
-            <span>Радио 24/7</span>
-          </button>
-          <button
-            className={`ym-tab ${tab === 'library' ? 'active' : ''}`}
-            onClick={() => { haptic('light'); setTab('library'); }}
-          >
-            <span className="ym-tab__icon">💖</span>
-            <span>Любимое ({likedTracks.length})</span>
-          </button>
+        {/* ── Навигационные вкладки в точном стиле ProfilePage (.pf-pill-tabs) ── */}
+        <div className="ms-pill-tabs">
+          {([
+            { id: 'wave', label: '✦ Пульс' },
+            { id: 'chart', label: '🔥 Топ Хиты' },
+            { id: 'radio', label: '📻 Радио' },
+            { id: 'library', label: `💖 Любимое (${likedTracks.length})` },
+          ] as const).map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              className={`ms-pill-tab ${tab === t.id ? 'active' : ''}`}
+              onClick={() => {
+                haptic('light');
+                setTab(t.id);
+              }}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
-        {/* ── Селектор музыкальных настроений ── */}
+        {/* ── Чипсы настроений (Минимализм) ── */}
         {tab === 'wave' && !searchMode && (
-          <div className="ym-moods">
+          <div className="ms-moods-rail">
             <button
-              className={`ym-mood-chip ym-mood-chip--daywave ${activeMood === dayWave.mood ? 'active' : ''}`}
+              className={`ms-mood-chip ${activeMood === dayWave.mood ? 'active' : ''}`}
               onClick={activateDayWave}
-              title="Волна подбирается по времени суток"
             >
-              <span className="ym-mood-chip__icon">{dayWave.icon}</span>
-              <span className="ym-mood-chip__label">Волна дня · {dayWave.label}</span>
+              <span className="ms-mood-chip__icon">{dayWave.icon}</span>
+              <span>{dayWave.label}</span>
             </button>
             {WAVE_MOODS.map((m) => (
               <button
                 key={m.id}
-                className={`ym-mood-chip ${activeMood === m.id ? 'active' : ''}`}
+                className={`ms-mood-chip ${activeMood === m.id ? 'active' : ''}`}
                 onClick={() => {
                   haptic('light');
                   setActiveMood(m.id);
-                  showToast(`${m.icon} Режим Волны: ${m.label}`);
+                  showToast(`${m.icon} ${m.label}`);
                 }}
               >
-                <span className="ym-mood-chip__icon">{m.icon}</span>
-                <span className="ym-mood-chip__label">{m.label}</span>
+                <span className="ms-mood-chip__icon">{m.icon}</span>
+                <span>{m.label}</span>
               </button>
             ))}
           </div>
         )}
       </header>
 
-      {/* ── Фирменный музыкальный визуализатор ZENOVA SOUND PRO ── */}
+      {/* ════════════ 2. 3D OBSIDIAN STAGE (Архитектура Профиля) ════════════ */}
       {tab === 'wave' && !searchMode && (
-        <section className={`ym-wave-card ${isPlaying ? 'is-playing' : ''}`}>
-          <div className="ym-wave-card__cover" aria-hidden="true">
-            {currentTrack?.artwork && !waveArtworkError ? (
-              <img src={currentTrack.artwork} alt="" onError={() => setWaveArtworkError(true)} />
-            ) : (
-              <div className="ym-wave-card__cover-art" style={{ background: currentMoodObj.gradient }}>
-                <svg className="ym-wave-card__art-mark" viewBox="0 0 100 100" fill="none">
-                  <circle cx="50" cy="50" r="36" stroke="rgba(255,255,255,.24)" />
-                  <circle cx="50" cy="50" r="28" stroke="rgba(255,255,255,.42)" />
-                  <path d="M20 53h13l7-21 13 39 9-27 6 14h12" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <circle cx="50" cy="50" r="3" fill="#ffe2cc" />
-                </svg>
-              </div>
-            )}
-            <div className="ym-wave-card__cover-shade" />
-
-            {/* Виниловый голографический диск справа */}
-            <div className={`ym-wave-vinyl ${isPlaying ? 'spinning' : ''}`}>
-              <div className="ym-wave-vinyl__grooves" />
-              <div className="ym-wave-vinyl__center">
-                {currentTrack?.artwork && !waveArtworkError ? (
-                  <img src={currentTrack.artwork} alt="" />
-                ) : (
-                  <span>✦</span>
-                )}
-              </div>
+        <section className="ms-showcase">
+          <div className="ms-stage">
+            {/* Notched Corners matching ProfilePage */}
+            <div className="ms-stage__notch ms-stage__notch--tl">
+              <span className="ms-stage__format-tag">HI-RES</span>
             </div>
 
-            <div className="ym-wave-card__spectrum">
-              {Array.from({ length: 21 }, (_, index) => <i key={index} />)}
+            <div className="ms-stage__notch ms-stage__notch--tr">
+              <button
+                type="button"
+                className={`ms-stage__corner-btn ${currentTrack && isLiked(currentTrack.id) ? 'liked' : ''}`}
+                onClick={() => {
+                  if (currentTrack) {
+                    haptic('medium');
+                    toggleLike(currentTrack as any);
+                    showToast(isLiked(currentTrack.id) ? 'Удалено из избранного' : 'Добавлено в Избранное 💖');
+                  }
+                }}
+                disabled={!currentTrack}
+                aria-label="В избранное"
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill={currentTrack && isLiked(currentTrack.id) ? '#fb7185' : 'none'} stroke={currentTrack && isLiked(currentTrack.id) ? '#fb7185' : 'currentColor'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Ambient concentric halo */}
+            <div className={`ms-stage__halo ${isPlaying ? 'pulse' : ''}`} />
+
+            {/* Serial badge */}
+            <div className="ms-stage__serial">
+              <span>ZENOVA SOUND ID · <b>96kHz/24bit</b></span>
+            </div>
+
+            {/* Center Hero Pod: 3D Holographic Vinyl */}
+            <div className="ms-stage__center">
+              <div className="ms-stage__vinyl-pod" onClick={() => currentTrack && setExpanded(true)}>
+                <div className={`ms-stage__vinyl ${isPlaying ? 'spinning' : ''}`}>
+                  <div className="ms-stage__vinyl-grooves" />
+                  <div className="ms-stage__vinyl-core">
+                    {currentTrack?.artwork && !waveArtworkError ? (
+                      <img src={currentTrack.artwork} alt="" onError={() => setWaveArtworkError(true)} />
+                    ) : (
+                      <span className="ms-stage__vinyl-mark">✦</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Meta: Title & Artist */}
+              <div className="ms-stage__meta">
+                <span className="ms-stage__kicker">
+                  {isPlaying ? 'СЕЙЧАС В ЭФИРЕ · LOSSLESS' : currentTrack ? 'НА ПАУЗЕ' : currentMoodObj.label}
+                </span>
+                <h2 className="ms-stage__title">{currentTrack?.title || 'ZENOVA Пульс'}</h2>
+                <p className="ms-stage__artist">{currentTrack?.artist || currentMoodObj.description}</p>
+              </div>
+
+              {/* Primary Minimalist Controls (NO surprise mix) */}
+              <div className="ms-stage__controls">
+                <button
+                  type="button"
+                  className={`ms-stage__play-btn ${isPlaying ? 'playing' : ''}`}
+                  onClick={handleStartWave}
+                  aria-label={currentTrackIsInWave && isPlaying ? 'Пауза' : 'Слушать'}
+                >
+                  {currentTrackIsInWave && isPlaying ? (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M7 5h4v14H7zM15 5h4v14h-4z" />
+                    </svg>
+                  ) : (
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 2 }}>
+                      <path d="M8 5v14l11-7z" />
+                    </svg>
+                  )}
+                </button>
+
+                {currentTrack && (
+                  <button
+                    type="button"
+                    className="ms-stage__next-btn"
+                    onClick={() => {
+                      haptic('light');
+                      nextTrack();
+                    }}
+                    aria-label="Следующий трек"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="ym-wave-card__info">
-            <div className="ym-wave-card__badges-row">
-              <span className="ym-wave-card__badge">
-                <span className="ym-wave-card__live-dot" />
-                {currentMoodObj.label}
-              </span>
-              <span className="ym-wave-card__hires">HI-RES · DOLBY</span>
+          {/* 3-Cell stats bar underneath matching Profile */}
+          <div className="ms-stats-row">
+            <div className="ms-stat-cell">
+              <span className="ms-stat-cell__val">Lossless</span>
+              <span className="ms-stat-cell__lbl">Качество</span>
             </div>
-            <p className="ym-wave-card__kicker">
-              {isPlaying ? 'СЕЙЧАС В ЭФИРЕ · АУДИО ПОТОК' : currentTrack ? 'НА ПАУЗЕ' : 'НЕЙРО-ВОЛНА ПОД НАСТРОЕНИЕ'}
-            </p>
-            <h2 className="ym-wave-card__title">{currentTrack?.title || 'ZENOVA Пульс'}</h2>
-            <p className="ym-wave-card__desc">
-              {currentTrack?.artist || currentMoodObj.description}
-            </p>
-            <div className="ym-wave-card__controls">
-              <button
-                className="ym-wave-card__play"
-                type="button"
-                onClick={() => handleStartWave(false)}
-                aria-label={currentTrackIsInWave ? (isPlaying ? 'Пауза' : 'Продолжить') : 'Запустить ZENOVA Пульс'}
-              >
-                {currentTrackIsInWave && isPlaying ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M7 5h4v14H7zM15 5h4v14h-4z" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                )}
-              </button>
-
-              {currentTrack && (
-                <button
-                  className="ym-wave-card__next"
-                  type="button"
-                  onClick={() => {
-                    haptic('light');
-                    nextTrack();
-                  }}
-                  title="Следующий трек"
-                  aria-label="Следующий трек"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-                  </svg>
-                </button>
-              )}
-
-              <button
-                className="ym-wave-card__surprise"
-                type="button"
-                onClick={() => handleStartWave(true)}
-                aria-label="Включить случайный трек"
-              >
-                <span aria-hidden="true">⤨</span>
-                Случайный микс
-              </button>
+            <div className="ms-stat-cell">
+              <span className="ms-stat-cell__val">320 kbps</span>
+              <span className="ms-stat-cell__lbl">Битрейт</span>
+            </div>
+            <div className="ms-stat-cell">
+              <span className="ms-stat-cell__val">{displayedTracks.length}</span>
+              <span className="ms-stat-cell__lbl">В подборке</span>
             </div>
           </div>
         </section>
       )}
 
-      {/* ── Баннер радиостанций ── */}
+      {/* ── Баннеры остальных вкладок ── */}
       {tab === 'radio' && !searchMode && (
-        <div className="ym-radio-banner">
-          <div className="ym-radio-banner__icon">📻</div>
-          <div className="ym-radio-banner__content">
-            <strong>Прямой эфир топ-радиостанций в HD качестве</strong>
-            <p>100% стабильные открытые HTTPS-потоки без задержек и рекламы 24/7.</p>
+        <div className="ms-banner">
+          <div className="ms-banner__icon">📻</div>
+          <div className="ms-banner__text">
+            <strong>Прямой эфир FM радиостанций</strong>
+            <span>Стабильные открытые потоки в HD качестве 24/7 без рекламы.</span>
           </div>
         </div>
       )}
 
-      {/* ── Баннер чарта ── */}
       {tab === 'chart' && !searchMode && (
-        <div className="ym-library-banner">
-          <div className="ym-library-banner__icon">🔥</div>
-          <div className="ym-library-banner__content">
-            <strong>Топ хиты недели — полные треки</strong>
-            <p>Открытые каталоги Audius и Internet Archive: миллионы легальных треков. Листайте вниз — список бесконечный.</p>
+        <div className="ms-banner">
+          <div className="ms-banner__icon">🔥</div>
+          <div className="ms-banner__text">
+            <strong>Главные треки недели</strong>
+            <span>Топ прослушиваний и трендов со всего мира. Листайте вниз.</span>
           </div>
         </div>
       )}
 
-      {/* ── Баннер библиотеки избранного ── */}
       {tab === 'library' && !searchMode && (
-        <div className="ym-library-banner">
-          <div className="ym-library-banner__icon">💖</div>
-          <div className="ym-library-banner__content">
-            <strong>Ваша персональная медиатека</strong>
-            <p>{likedTracks.length > 0 ? `Сохранено ${likedTracks.length} треков` : 'Нажимайте на сердечко у любого трека, чтобы добавить его сюда'}</p>
+        <div className="ms-banner">
+          <div className="ms-banner__icon">💖</div>
+          <div className="ms-banner__text">
+            <strong>Ваша личная медиатека</strong>
+            <span>{likedTracks.length > 0 ? `Сохранено ${likedTracks.length} треков` : 'Нажмите сердечко на любом треке, чтобы сохранить его.'}</span>
           </div>
         </div>
       )}
 
-      {/* ── Список треков / Результаты поиска ── */}
-      <main className="ym-list">
+      {/* ════════════ 3. ТРЕКЛИСТ В СТИЛЕ SMOKED BENTO КАРТОЧЕК ════════════ */}
+      <main className="ms-list">
         {searchMode && (
-          <div className="ym-list-header">
-            <span className="ym-list-header__title">
-              {isSearching ? 'Ищем в миллионном каталоге…' : `Найдено: ${displayedTracks.length}+ треков`}
-            </span>
+          <div className="ms-list-header">
+            <span>{isSearching ? 'Поиск треков…' : `Найдено: ${displayedTracks.length} записей`}</span>
           </div>
         )}
 
         {showSkeletons ? (
           [0, 1, 2, 3, 4, 5].map((i) => (
-            <div className="ym-skeleton-row" key={i}>
-              <div className="ym-skeleton-row__art skeleton-pulse" />
-              <div className="ym-skeleton-row__lines">
-                <div className="ym-skeleton-row__line skeleton-pulse" style={{ width: '62%' }} />
-                <div className="ym-skeleton-row__line skeleton-pulse" style={{ width: '40%' }} />
+            <div className="ms-track-skeleton" key={i}>
+              <div className="ms-track-skeleton__art" />
+              <div className="ms-track-skeleton__body">
+                <div className="ms-track-skeleton__line" style={{ width: '60%' }} />
+                <div className="ms-track-skeleton__line" style={{ width: '38%' }} />
               </div>
             </div>
           ))
         ) : displayedTracks.length === 0 ? (
-          <div className="ym-empty">
-            <div className="ym-empty__icon">🎵</div>
-            <p className="ym-empty__title">Ничего не найдено</p>
-            <span className="ym-empty__sub">
+          <div className="ms-empty">
+            <div className="ms-empty__icon">🎵</div>
+            <strong className="ms-empty__title">Треков не найдено</strong>
+            <span className="ms-empty__sub">
               {tab === 'library'
-                ? 'Вы пока не сохранили ни одного трека в любимые'
-                : 'Попробуйте изменить запрос или выберите другое настроение'}
+                ? 'Вы пока не сохранили ни одного трека'
+                : 'Попробуйте изменить запрос или переключить настроение'}
             </span>
           </div>
         ) : (
@@ -652,92 +621,84 @@ const MusicPage: React.FC = () => {
             return (
               <div
                 key={t.id}
-                className={`ym-track ${isCurrent ? 'active' : ''}`}
+                className={`ms-track-card ${isCurrent ? 'active' : ''}`}
                 onClick={() => handlePlayTrack(t, idx)}
               >
-                {/* Номер в чарте */}
-                {tab === 'chart' && !searchMode && (
-                  <div className={`ym-track__rank ${idx < 3 ? 'ym-track__rank--top' : ''}`}>
-                    {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
-                  </div>
-                )}
+                {/* Номер трека или эквалайзер */}
+                <div className="ms-track-card__index">
+                  {isCurrent && isPlaying ? (
+                    <div className="ms-track-card__bars">
+                      <span /><span /><span />
+                    </div>
+                  ) : tab === 'chart' && !searchMode ? (
+                    <span className={`ms-track-card__rank ${idx < 3 ? 'top' : ''}`}>
+                      {idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                    </span>
+                  ) : (
+                    <span>{idx + 1}</span>
+                  )}
+                </div>
 
-                {/* Обложка с кнопкой Play и эквалайзером */}
-                <div className="ym-track__art-wrap">
+                {/* Обложка */}
+                <div className="ms-track-card__art-wrap">
                   <img
                     src={t.artwork}
                     alt={t.title}
-                    className="ym-track__art"
+                    className="ms-track-card__art"
                     loading="lazy"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src =
                         'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600&auto=format&fit=crop&q=80';
                     }}
                   />
-                  <div className={`ym-track__overlay ${isCurrent ? 'force-show' : ''}`}>
+                  <div className={`ms-track-card__play-overlay ${isCurrent ? 'visible' : ''}`}>
                     {isCurrent && isPlaying ? (
-                      <div className="ym-track__bars">
-                        <span /><span /><span />
-                      </div>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7 5h4v14H7zM15 5h4v14h-4z" />
+                      </svg>
                     ) : (
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     )}
                   </div>
                 </div>
 
-                {/* Метаданные трека */}
-                <div className="ym-track__meta">
-                  <div className="ym-track__title-row">
-                    <span className="ym-track__title">{t.title}</span>
-                    {t.isLiveRadio && (
-                      <span className="ym-badge-live">Live</span>
-                    )}
-                    {t.source === 'radio' && (
-                      <span className="ym-badge-source ym-badge-source--radio">FM HD</span>
-                    )}
-                    {t.source === 'archive' && (
-                      <span className="ym-badge-source ym-badge-source--archive">Архив</span>
-                    )}
+                {/* Метаданные */}
+                <div className="ms-track-card__info">
+                  <div className="ms-track-card__title-row">
+                    <span className="ms-track-card__title">{t.title}</span>
+                    {t.isLiveRadio && <span className="ms-badge-live">LIVE</span>}
                   </div>
-                  <div className="ym-track__sub">
-                    <span className="ym-track__artist">{t.artist}</span>
+                  <div className="ms-track-card__sub-row">
+                    <span className="ms-track-card__artist">{t.artist}</span>
                     {t.genre && (
                       <>
-                        <span className="ym-track__dot">·</span>
-                        <span className="ym-track__genre">{t.genre}</span>
+                        <span className="ms-track-card__dot">·</span>
+                        <span className="ms-track-card__genre">{t.genre}</span>
                       </>
                     )}
                   </div>
                 </div>
 
-                {/* Длительность или статус эфира */}
-                <span className="ym-track__dur">
+                {/* Время */}
+                <span className="ms-track-card__dur">
                   {t.isLiveRadio ? 'Эфир' : fmtTime(t.duration)}
                 </span>
 
-                {/* Кнопка "Мне нравится" (сердечко) */}
+                {/* Like Button */}
                 <button
-                  className={`ym-track__like ${liked ? 'liked' : ''}`}
+                  type="button"
+                  className={`ms-track-card__like ${liked ? 'liked' : ''}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     haptic('medium');
                     toggleLike(t as any);
-                    showToast(liked ? 'Удалено из медиатеки' : 'Добавлено в Мою Коллекцию 💖');
+                    showToast(liked ? 'Удалено из медиатеки' : 'Добавлено в Любимое 💖');
                   }}
                   aria-label="Мне нравится"
                 >
-                  <svg
-                    width="19"
-                    height="19"
-                    viewBox="0 0 24 24"
-                    fill={liked ? 'var(--accent, #fb7185)' : 'none'}
-                    stroke={liked ? 'var(--accent, #fb7185)' : 'currentColor'}
-                    strokeWidth="2.2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill={liked ? '#fb7185' : 'none'} stroke={liked ? '#fb7185' : 'currentColor'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                   </svg>
                 </button>
@@ -748,10 +709,10 @@ const MusicPage: React.FC = () => {
 
         {/* Сентинел бесконечной прокрутки */}
         {showSentinel && (
-          <div ref={sentinelRef} className="ym-list-more">
+          <div ref={sentinelRef} className="ms-list-more">
             {loadingMore && (
               <>
-                <div className="ym-search__spinner" />
+                <div className="ms-search__spinner" />
                 <span>Подгружаем ещё треки…</span>
               </>
             )}
@@ -761,7 +722,7 @@ const MusicPage: React.FC = () => {
 
       {/* Быстрое тост-уведомление */}
       {toastMsg && (
-        <div className="ym-toast">
+        <div className="ms-toast">
           <span>{toastMsg}</span>
         </div>
       )}

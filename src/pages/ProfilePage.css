@@ -851,6 +851,66 @@
   font-weight: 700;
 }
 
+.pf-capsule--locked {
+  opacity: 0.65;
+}
+.pf-capsule__pro-tag {
+  font-style: normal;
+  font-size: 7.5px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: #fbbf24;
+  background: rgba(251, 191, 36, 0.16);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+}
+
+.pf-season-pro-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(217, 119, 6, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  animation: pfAlertFadeIn 0.28s ease;
+}
+@keyframes pfAlertFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.pf-season-pro-alert__icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.pf-season-pro-alert__text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pf-season-pro-alert__text strong {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #fde047;
+  letter-spacing: 0.02em;
+}
+.pf-season-pro-alert__text span {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.76);
+  line-height: 1.35;
+}
+.pf-season-pro-alert__action {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #fbbf24;
+  flex-shrink: 0;
+}
+
 .pf-season-controls {
   display: flex;
   flex-direction: column;

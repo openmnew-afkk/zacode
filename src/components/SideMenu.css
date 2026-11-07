@@ -1,85 +1,19 @@
 /* ════════════════════════════════════════════════════════════════
-   SideMenu — ZENOVA Multiverse & Studio Vault
-   Tactile, ergonomic trigger + luxury slide drawer
+   SideMenu — ZENOVA Minimalist Multiverse Carousel
+   Buttery smooth horizontal snap carousel of 10 studios
    ════════════════════════════════════════════════════════════════ */
 
-/* ── Тактильная плавающая кнопка-капсула на левом краю экрана ── */
-.sm-edge-trigger {
-  position: fixed;
-  left: 0;
-  top: 48%;
-  transform: translateY(-50%);
-  z-index: 85;
-  padding: 0;
-  margin: 0;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  /* Расширенная зона нажатия для пальцев */
-  padding-right: 12px;
-  padding-top: 10px;
-  padding-bottom: 10px;
-}
-
-.sm-edge-trigger__body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  width: 38px;
-  height: 58px;
-  border-radius: 0 16px 16px 0;
-  background: rgba(18, 18, 26, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-left: none;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow:
-    4px 0 20px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease;
-}
-
-.sm-edge-trigger:hover .sm-edge-trigger__body {
-  background: rgba(28, 28, 40, 0.96);
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow:
-    6px 0 24px rgba(0, 0, 0, 0.7),
-    0 0 14px rgba(255, 255, 255, 0.15);
-}
-
-.sm-edge-trigger:active .sm-edge-trigger__body {
-  transform: scale(0.92);
-  background: rgba(35, 35, 52, 1);
-}
-
-.sm-edge-trigger__icon {
-  color: #fda4af;
-  flex-shrink: 0;
-}
-
-.sm-edge-trigger__label {
-  font-size: 8.5px;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1;
-}
-
-/* ── Backdrop ── */
 .sm-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 999;
-  background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  background: rgba(4, 4, 8, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
   display: flex;
-  align-items: stretch;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
   animation: smFadeIn 0.22s ease-out;
 }
 
@@ -88,227 +22,220 @@
   to   { opacity: 1; }
 }
 
-/* ── Drawer Body ── */
-.sm-drawer {
-  width: min(340px, 86vw);
-  max-width: 380px;
-  height: 100%;
+.sm-carousel-modal {
+  width: min(520px, 100%);
   background: #09090f;
-  border-right: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.9),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  padding: 20px 0 18px;
   display: flex;
   flex-direction: column;
-  box-shadow: 18px 0 50px rgba(0, 0, 0, 0.85);
-  padding: calc(var(--header-safe-top, 14px) + 12px) 14px calc(var(--tab-bar-safe-bottom, 20px) + 16px);
-  animation: smSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
+  animation: smPopUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes smSlideIn {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+@keyframes smPopUp {
+  from { transform: scale(0.94) translateY(12px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
 }
 
 /* Head */
-.sm-drawer__head {
+.sm-carousel-head {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
-  padding: 0 4px 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  flex-shrink: 0;
+  padding: 0 20px 14px;
 }
 
-.sm-drawer__title-wrap {
-  min-width: 0;
+.sm-carousel-head__copy {
+  display: flex;
+  flex-direction: column;
 }
 
-.sm-drawer__kicker {
-  display: block;
+.sm-carousel-head__kicker {
   font-size: 9.5px;
-  font-weight: 800;
+  font-weight: 850;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #fda4af;
-  margin-bottom: 2px;
 }
 
-.sm-drawer__title {
-  margin: 0;
-  font-size: 20px;
+.sm-carousel-head__title {
+  margin: 2px 0 0;
+  font-size: 21px;
   font-weight: 800;
   letter-spacing: -0.02em;
   color: #ffffff;
-  line-height: 1.2;
 }
 
-.sm-drawer__sub {
-  margin: 3px 0 0;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.42);
-}
-
-.sm-drawer__close {
+.sm-carousel-head__close {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 13px;
-  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  flex-shrink: 0;
   transition: all 0.15s ease;
 }
 
-.sm-drawer__close:active {
+.sm-carousel-head__close:active {
   transform: scale(0.9);
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
 }
 
-/* Studio Cards List */
-.sm-drawer__list {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  padding: 12px 2px;
+/* Track */
+.sm-carousel-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding: 10px 20px 14px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sm-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Card */
+.sm-carousel-card {
+  position: relative;
+  flex: 0 0 260px;
+  scroll-snap-align: center;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
-}
-
-.sm-drawer__list::-webkit-scrollbar {
-  width: 4px;
-}
-.sm-drawer__list::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
-}
-
-/* Studio Card */
-.sm-card {
-  position: relative;
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  cursor: pointer;
+  min-height: 230px;
   overflow: hidden;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.2s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.sm-card__glow-aura {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 80px;
-  height: 100%;
-  background: radial-gradient(circle at 0% 50%, var(--st-glow, rgba(255, 255, 255, 0.15)), transparent 70%);
-  opacity: 0.6;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
+.sm-carousel-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.sm-card:hover {
+.sm-carousel-card.is-active {
   background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.16);
-  transform: translateX(3px);
-}
-
-.sm-card:hover .sm-card__glow-aura {
-  opacity: 1;
-}
-
-.sm-card:active {
-  transform: scale(0.97);
-  background: rgba(255, 255, 255, 0.09);
-}
-
-.sm-card.is-active {
-  background: rgba(255, 255, 255, 0.08);
   border-color: var(--st-accent, #fda4af);
-  box-shadow: 0 0 16px var(--st-glow, rgba(255, 255, 255, 0.12));
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.7),
+    0 0 20px var(--st-glow, rgba(255, 255, 255, 0.15));
 }
 
-.sm-card__content {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.sm-carousel-card__halo {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--st-glow, rgba(255, 255, 255, 0.15)) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0.75;
 }
 
-.sm-card__top {
+.sm-carousel-card__badge-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
 }
 
-.sm-card__wordmark-wrap {
-  display: flex;
-  align-items: center;
-  height: 24px;
-}
-
-.sm-card__badge {
-  font-size: 8.5px;
-  font-weight: 800;
+.sm-carousel-card__badge {
+  font-size: 9px;
+  font-weight: 850;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--st-accent, #ffffff);
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 2px 6px;
-  border-radius: 5px;
-  white-space: nowrap;
+  padding: 2.5px 7px;
+  border-radius: 6px;
 }
 
-.sm-card__tagline {
-  margin: 0;
-  font-size: 10.5px;
-  color: rgba(255, 255, 255, 0.45);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.sm-carousel-card__num {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.25);
 }
 
-.sm-card__arrow {
-  color: rgba(255, 255, 255, 0.3);
+.sm-carousel-card__logo-wrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.18s ease, color 0.18s ease;
+  height: 48px;
+  margin: 12px 0;
 }
 
-.sm-card:hover .sm-card__arrow {
-  color: #ffffff;
-  transform: translateX(2px);
-}
-
-/* Footer note */
-.sm-drawer__footer {
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+.sm-carousel-card__tagline {
+  margin: 0 0 14px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.35;
   text-align: center;
-  flex-shrink: 0;
+  min-height: 30px;
 }
 
-.sm-drawer__footer-note {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.32);
+.sm-carousel-card__enter-btn {
+  width: 100%;
+  height: 36px;
+  border-radius: 11px;
+  background: #ffffff;
+  border: none;
+  color: #09090f;
+  font-size: 12px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.sm-carousel-card__enter-btn:active {
+  transform: scale(0.96);
+  background: #e2e8f0;
+}
+
+/* Dots */
+.sm-carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 6px 0 0;
+}
+
+.sm-carousel-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sm-carousel-dot.is-active {
+  width: 18px;
+  border-radius: 999px;
+  background: #ffffff;
 }

@@ -15,12 +15,14 @@ export const closeSideMenu = () => {
 
 export const SideMenu: React.FC = () => {
   const [open, setOpen] = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
   const { haptic } = useTelegram();
 
   const edgeSwipeStartX = useRef<number | null>(null);
   const edgeSwipeStartY = useRef<number | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const onOpen = () => setOpen(true);
@@ -34,17 +36,17 @@ export const SideMenu: React.FC = () => {
     };
   }, []);
 
-  // Автозакрытие при переходе
+  // Автозакрытие при смене роута
   useEffect(() => {
     setOpen(false);
   }, [location.pathname]);
 
-  // Глобальный жест свайпа от левого края экрана для быстрого открытия
+  // Глобальный свайп от левого края для открытия
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {
       if (open || e.touches.length !== 1) return;
       const t = e.touches[0];
-      if (t.clientX <= 28) {
+      if (t.clientX <= 24) {
         edgeSwipeStartX.current = t.clientX;
         edgeSwipeStartY.current = t.clientY;
       } else {
@@ -57,7 +59,7 @@ export const SideMenu: React.FC = () => {
       const t = e.touches[0];
       const dx = t.clientX - edgeSwipeStartX.current;
       const dy = Math.abs(t.clientY - edgeSwipeStartY.current);
-      if (dx > 38 && dx > dy * 1.3) {
+      if (dx > 36 && dx > dy * 1.3) {
         edgeSwipeStartX.current = null;
         edgeSwipeStartY.current = null;
         haptic('light');
@@ -79,45 +81,20 @@ export const SideMenu: React.FC = () => {
     navigate(`/studios/${studioId}`);
   };
 
-  // Скрываем триггер на странице просмотра фильма, чтобы не перекрывать плеер
-  const hideEdgeTab = location.pathname.startsWith('/movie/');
+  const handleScroll = () => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const cardWidth = 270;
+    const scrollPos = el.scrollLeft;
+    const newIdx = Math.round(scrollPos / cardWidth);
+    if (newIdx >= 0 && newIdx < STUDIO_WORLDS.length && newIdx !== activeIdx) {
+      setActiveIdx(newIdx);
+    }
+  };
 
   return (
     <>
-      {/* ── Удобная, тактильная плавающая кнопка-капсула на левом краю экрана ── */}
-      {!open && !hideEdgeTab && (
-        <button
-          type="button"
-          className="sm-edge-trigger"
-          onClick={() => {
-            haptic('light');
-            setOpen(true);
-          }}
-          aria-label="Открыть каталог кино-вселенных и студий"
-          title="Студии & Вселенные"
-        >
-          <div className="sm-edge-trigger__body">
-            <svg
-              className="sm-edge-trigger__icon"
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0" />
-              <path d="M12 3a9 9 0 0 0 0 18" strokeDasharray="2 3" opacity="0.6" />
-            </svg>
-            <span className="sm-edge-trigger__label">Миры</span>
-          </div>
-        </button>
-      )}
-
-      {/* ── Премиальный боковой портал Вселенных (ZENOVA Multiverse Vault) ── */}
+      {/* ── Премиальная минималистичная Карусель Кино-Вселенных (ZENOVA Multiverse Carousel) ── */}
       {open && (
         <div
           className="sm-backdrop"
@@ -127,40 +104,43 @@ export const SideMenu: React.FC = () => {
           }}
           role="dialog"
           aria-modal="true"
-          aria-label="Кино-Вселенные и Студии"
+          aria-label="Карусель Кино-Вселенных"
         >
           <div
-            className="sm-drawer"
+            className="sm-carousel-modal"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Шапка меню */}
-            <div className="sm-drawer__head">
-              <div className="sm-drawer__title-wrap">
-                <span className="sm-drawer__kicker">ZENOVA MULTIVERSE</span>
-                <h2 className="sm-drawer__title">Кино-Вселенные</h2>
-                <p className="sm-drawer__sub">Эксклюзивные каталоги 10 мировых студий</p>
+            {/* Шапка модалки */}
+            <div className="sm-carousel-head">
+              <div className="sm-carousel-head__copy">
+                <span className="sm-carousel-head__kicker">ZENOVA MULTIVERSE</span>
+                <h2 className="sm-carousel-head__title">Кино-Вселенные</h2>
               </div>
               <button
                 type="button"
-                className="sm-drawer__close"
+                className="sm-carousel-head__close"
                 onClick={() => {
                   haptic('light');
                   setOpen(false);
                 }}
-                aria-label="Закрыть меню"
+                aria-label="Закрыть"
               >
                 ✕
               </button>
             </div>
 
-            {/* Быстрый горизонтальный / вертикальный список премиальных карточек */}
-            <div className="sm-drawer__list">
-              {STUDIO_WORLDS.map((studio) => {
-                const isCurrent = location.pathname === `/studios/${studio.id}`;
+            {/* Горизонтальная карусель карточек студий со скролл-снэпом */}
+            <div
+              ref={carouselRef}
+              className="sm-carousel-track"
+              onScroll={handleScroll}
+            >
+              {STUDIO_WORLDS.map((studio, idx) => {
+                const isActive = activeIdx === idx;
                 return (
                   <article
                     key={studio.id}
-                    className={`sm-card ${isCurrent ? 'is-active' : ''}`}
+                    className={`sm-carousel-card ${isActive ? 'is-active' : ''}`}
                     style={
                       {
                         '--st-accent': studio.accentColor,
@@ -169,33 +149,51 @@ export const SideMenu: React.FC = () => {
                     }
                     onClick={() => selectStudio(studio.id)}
                   >
-                    <div className="sm-card__glow-aura" aria-hidden="true" />
+                    <div className="sm-carousel-card__halo" aria-hidden="true" />
                     
-                    <div className="sm-card__content">
-                      <div className="sm-card__top">
-                        <div className="sm-card__wordmark-wrap">
-                          <StudioWordmark id={studio.id} size="sm" />
-                        </div>
-                        <span className="sm-card__badge">{studio.badgeText}</span>
-                      </div>
-
-                      <p className="sm-card__tagline">{studio.tagline}</p>
+                    <div className="sm-carousel-card__badge-row">
+                      <span className="sm-carousel-card__badge">{studio.badgeText}</span>
+                      <span className="sm-carousel-card__num">0{idx + 1}</span>
                     </div>
 
-                    <div className="sm-card__arrow" aria-hidden="true">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    <div className="sm-carousel-card__logo-wrap">
+                      <StudioWordmark id={studio.id} size="lg" />
+                    </div>
+
+                    <p className="sm-carousel-card__tagline">{studio.tagline}</p>
+
+                    <button
+                      type="button"
+                      className="sm-carousel-card__enter-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        selectStudio(studio.id);
+                      }}
+                    >
+                      <span>Войти в мир</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
-                    </div>
+                    </button>
                   </article>
                 );
               })}
             </div>
 
-            <div className="sm-drawer__footer">
-              <span className="sm-drawer__footer-note">
-                ✦ Выберите студию для просмотра персональной витрины
-              </span>
+            {/* Точки-индикаторы карусели */}
+            <div className="sm-carousel-dots">
+              {STUDIO_WORLDS.map((s, idx) => (
+                <span
+                  key={s.id}
+                  className={`sm-carousel-dot ${activeIdx === idx ? 'is-active' : ''}`}
+                  onClick={() => {
+                    const el = carouselRef.current;
+                    if (el) {
+                      el.scrollTo({ left: idx * 270, behavior: 'smooth' });
+                    }
+                  }}
+                />
+              ))}
             </div>
           </div>
         </div>

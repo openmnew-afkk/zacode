@@ -1077,7 +1077,7 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="hp-header__actions">
-          {/* ✦ Вселенные & Студии — быстрый доступ к каталогам 10 студий */}
+          {/* ✦ Вселенные — стильная роскошная капсула доступа к 10 студиям */}
           <button
             type="button"
             className="hp-header__studios-btn"
@@ -1085,35 +1085,18 @@ const HomePage: React.FC = () => {
               haptic('light');
               openSideMenu();
             }}
-            title="Студии & Вселенные"
+            title="Карусель Кино-Вселенных"
             aria-label="Кино-Вселенные"
           >
-            <span className="hp-header__studios-dot" />
+            <span className="hp-header__studios-spark" aria-hidden="true">✦</span>
             <span className="hp-header__studios-text">Вселенные</span>
+            <span className="hp-header__studios-count">10</span>
           </button>
 
-          {/* 🎲 Кино-Кубик (Мне повезёт) */}
-          <button
-            className={`hp-header__btn hp-header__lucky-btn ${luckySpinning ? 'spinning' : ''}`}
-            onClick={feelingLucky}
-            aria-label="Мне повезёт"
-            title="Кино-Кубик: Случайный хит"
-            disabled={luckySpinning}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-              <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
-              <circle cx="8.7" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
-              <circle cx="15.3" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
-              <circle cx="8.7" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
-              <circle cx="15.3" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
-              <circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none" />
-            </svg>
-          </button>
-
-          {/* Доработанная кнопка профиля: аватарка в роскошной оправе + бейдж маски */}
+          {/* Профиль пользователя в чистом золотом свечении */}
           <button
             type="button"
-            className={`hp-header__avatar-pod ${isPremium ? 'is-pro' : ''}`}
+            className="hp-header__avatar-pod"
             onClick={() => {
               haptic('light');
               navigate('/profile');
@@ -1121,7 +1104,7 @@ const HomePage: React.FC = () => {
             aria-label="Профиль"
             title="Мой профиль"
           >
-            <div className="hp-header__avatar-frame">
+            <div className="hp-header__avatar-gold-frame">
               {tgUser?.photo_url ? (
                 <img src={tgUser.photo_url} alt="" className="hp-header__avatar-img" />
               ) : (
@@ -1129,9 +1112,6 @@ const HomePage: React.FC = () => {
                   {(tgUser?.first_name || 'Г')[0]?.toUpperCase()}
                 </span>
               )}
-              <span className="hp-header__avatar-mask" aria-hidden="true">
-                <VeloraEmblem size="sm" />
-              </span>
             </div>
           </button>
         </div>
