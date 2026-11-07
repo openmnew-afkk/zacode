@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { smartDiscover, getRecommendations } from '../api/catalog';
+import { smartDiscover, getRecommendations, searchMovies } from '../api/catalog';
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
@@ -8,84 +8,74 @@ import SeasonalMask from '../components/SeasonalMask';
 import { getStoredSeason } from '../services/seasons';
 import './AiPickPage.css';
 
-/* ══════════════════════════════════════════════════════ */
-/*  КиноИИ — умный подбор «что посмотреть»                 */
-/* ══════════════════════════════════════════════════════ */
-
-interface MoodDef { id: string; label: string; genres: number[]; hint: string }
-const MOODS: MoodDef[] = [
-  { id: 'fun',     label: 'Весёлое & Лёгкое',       genres: [35],        hint: 'лёгкое и смешное' },
-  { id: 'thrill',  label: 'Захватывающий экшн',     genres: [28, 12, 53], hint: 'динамичный сюжет и драйв' },
-  { id: 'smart',   label: 'Головоломка & Детектив', genres: [9648, 80],  hint: 'сюжет-загадка с неожиданным финалом' },
-  { id: 'touch',   label: 'Глубокая драма',         genres: [18, 10751], hint: 'эмоциональная и сильная история' },
-  { id: 'scary',   label: 'Хоррор & Триллер',       genres: [27, 53],    hint: 'напряжённое и леденящее' },
-  { id: 'romance', label: 'Чувства & Романтика',     genres: [10749],     hint: 'история о любви и отношениях' },
-  { id: 'scifi',   label: 'Фантастика & Sci-Fi',    genres: [878, 14],   hint: 'другие миры и технологии будущего' },
-  { id: 'family',  label: 'Семейное кино',          genres: [10751, 16], hint: 'уютный вечер для всей семьи' },
-];
-
-interface TimeDef { id: string; label: string; min?: number; max?: number }
-const TIMES: TimeDef[] = [
-  { id: 'short',  label: 'До 100 минут',      max: 100 },
-  { id: 'medium', label: 'Около 2 часов',     min: 100, max: 130 },
-  { id: 'long',   label: 'Длинное · от 2ч+',  min: 130 },
-  { id: 'any',    label: 'Любой хронометраж' },
-];
-
-interface EraDef { id: string; label: string; from?: number; to?: number }
-const ERAS: EraDef[] = [
-  { id: 'new',     label: 'Новинки · 2021+',   from: 2021 },
-  { id: 'tens',    label: 'Хиты 2010-х',        from: 2010, to: 2019 },
-  { id: 'classic', label: 'Культовая классика',            to: 2005 },
-  { id: 'any',     label: 'Любая эпоха' },
-];
-
-interface Pick { movie: Movie; match: number; reason: string }
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-const numId = (id: string) => id.replace(/^(tv|movie)-/, '');
-
-/** Скоринг кандидатов под вкус пользователя (избранное + история) */
-function buildPicks(pool: Movie[], taste: Movie[], mood: MoodDef | null): Pick[] {
-  const genreWeight = new Map<number, number>();
-  for (const t of taste) (t.genre_ids || []).forEach((g) => genreWeight.set(g, (genreWeight.get(g) || 0) + 1));
-
-  const scored = pool.map((m) => {
-    const rating = m.vote_average || 0;
-    let overlap = 0;
-    let tasteRef: Movie | null = null;
-    for (const g of m.genre_ids || []) {
-      if (genreWeight.has(g)) {
-        overlap++;
-        if (!tasteRef) tasteRef = taste.find((t) => t.genre_ids?.includes(g)) || null;
-      }
-    }
-    const score = rating * 2 + overlap * 2.5 + Math.min((m.popularity || 0) / 300, 2);
-    return { m, rating, overlap, tasteRef, score };
-  });
-  scored.sort((a, b) => b.score - a.score);
-
-  const seen = new Set<string>();
-  const out: Pick[] = [];
-  for (const s of scored) {
-    if (out.length >= 6) break;
-    if (s.rating < 6.2) continue;
-    if (seen.has(s.m.id)) continue;
-    seen.add(s.m.id);
-
-    const parts: string[] = [];
-    if (s.tasteRef) parts.push(`похоже на «${s.tasteRef.title}» из вашей библиотеки`);
-    else if (s.overlap >= 2) parts.push('идеально под ваш любимый жанр');
-    else if (mood) parts.push(mood.hint);
-    if (s.rating >= 7.6) parts.push(`высокий рейтинг ★${s.rating.toFixed(1)}`);
-
-    const match = Math.max(75, Math.min(99, Math.round(72 + s.overlap * 6 + (s.rating - 6) * 4.5 + Math.random() * 4)));
-    out.push({ movie: s.m, match, reason: parts.slice(0, 2).join(' · ') });
-  }
-  return out;
+interface NeuralPreset {
+  id: string;
+  icon: string;
+  label: string;
+  query: string;
+  genres: number[];
+  hint: string;
 }
 
-type Stage = 'quiz' | 'thinking' | 'results' | 'empty';
+const NEURAL_PRESETS: NeuralPreset[] = [
+  {
+    id: 'mindfuck',
+    icon: '🧠',
+    label: 'Взрыв мозга',
+    query: 'триллер закрученный финал',
+    genres: [9648, 53, 878],
+    hint: 'Сложный нелинейный сюжет с шокирующей развязкой',
+  },
+  {
+    id: 'space',
+    icon: '🌌',
+    label: 'Космос & Sci-Fi',
+    query: 'космос научная фантастика',
+    genres: [878, 12],
+    hint: 'Другие миры, квантовые парадоксы и технологии будущего',
+  },
+  {
+    id: 'noir',
+    icon: '🕯️',
+    label: 'Тёмный нуар',
+    query: 'детектив расследование',
+    genres: [80, 9648, 53],
+    hint: 'Мрачный дождливый детектив и глубокий психологический саспенс',
+  },
+  {
+    id: 'chill',
+    icon: '🍿',
+    label: 'Уютный попкорн',
+    query: 'комедия приключения',
+    genres: [35, 12, 10751],
+    hint: 'Легкое позитивное кино для идеального отдыха после тяжелого дня',
+  },
+  {
+    id: 'hidden_gems',
+    icon: '🏆',
+    label: 'Скрытые шедевры',
+    query: 'шедевр кино',
+    genres: [18, 53],
+    hint: 'Редкие фестивальные жемчужины с выдающимся рейтингом 8.0+',
+  },
+  {
+    id: 'tearjerker',
+    icon: '💔',
+    label: 'Глубокая драма',
+    query: 'драма сильные чувства',
+    genres: [18, 10749],
+    hint: 'Трогательная история, вызывающая сильные искренние эмоции',
+  },
+];
+
+interface PickItem {
+  movie: Movie;
+  match: number;
+  reason: string;
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const cleanId = (id: string) => id.replace(/^(tv|movie)-/, '');
 
 const AiPickPage: React.FC = () => {
   const navigate = useNavigate();
@@ -94,281 +84,404 @@ const AiPickPage: React.FC = () => {
   const [season] = useState(() => getStoredSeason().season.id);
   const maskSeason = season === 'none' ? 'autumn' : season;
 
-  const [mood, setMood] = useState<MoodDef | null>(null);
-  const [time, setTime] = useState<TimeDef | null>(null);
-  const [era, setEra] = useState<EraDef | null>(null);
-  const [stage, setStage] = useState<Stage>('quiz');
-  const [picks, setPicks] = useState<Pick[]>([]);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [prompt, setPrompt] = useState('');
+  const [selectedPreset, setSelectedPreset] = useState<NeuralPreset | null>(null);
+  const [stage, setStage] = useState<'idle' | 'thinking' | 'results' | 'empty'>('idle');
+  const [picks, setPicks] = useState<PickItem[]>([]);
+  const [scanStep, setScanStep] = useState(0);
 
-  /* Автоскролл: на этапе результатов — вверх к первому фильму, в чате — к вопросу */
-  useEffect(() => {
-    if (stage === 'results') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-  }, [stage, mood, time, era]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const runSearch = async (selMood: MoodDef, selTime: TimeDef, selEra: EraDef) => {
-    setStage('thinking');
+  const taste = [...favorites, ...watchHistory.map((h) => h.movie)];
+
+  const runNeuralDiscovery = async (customText?: string, preset?: NeuralPreset) => {
     haptic('medium');
+    setStage('thinking');
+    setScanStep(1);
 
-    const taste = [...favorites, ...watchHistory.map((h) => h.movie)];
-    const seenIds = new Set(taste.map((m) => numId(m.id)));
+    const userText = (customText !== undefined ? customText : prompt).trim();
+    const activePreset = preset || selectedPreset;
 
-    /* Кандидаты по фильтрам + персональные рекомендации от последнего просмотра */
-    const last = watchHistory[0]?.movie;
-    const recP = last
-      ? getRecommendations(numId(last.id), last.id.startsWith('tv') ? 'tv' : 'movie').catch(() => [] as Movie[])
-      : Promise.resolve([] as Movie[]);
-
-    const [movies, tvs, recs] = await Promise.all([
-      smartDiscover({
-        mediaType: 'movie',
-        genres: selMood.genres,
-        minRuntime: selTime.min,
-        maxRuntime: selTime.max,
-        yearFrom: selEra.from,
-        yearTo: selEra.to,
-      }),
-      smartDiscover({
-        mediaType: 'tv',
-        genres: selMood.genres,
-        yearFrom: selEra.from,
-        yearTo: selEra.to,
-      }),
-      recP,
-      sleep(1500), // эффект «размышления»
-    ]);
-
-    /* Дедупликация + исключаем уже виденное */
-    const poolMap = new Map<string, Movie>();
-    for (const m of [...recs, ...movies, ...tvs]) {
-      if (!seenIds.has(numId(m.id))) poolMap.set(m.id, m);
+    const tasteIds = new Set(taste.map((m) => cleanId(m.id)));
+    const genreFreq = new Map<number, number>();
+    for (const t of taste) {
+      (t.genre_ids || []).forEach((g) => genreFreq.set(g, (genreFreq.get(g) || 0) + 1));
     }
-    const result = buildPicks([...poolMap.values()], taste, selMood);
-    setPicks(result);
-    setStage(result.length ? 'results' : 'empty');
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+
+    try {
+      setTimeout(() => setScanStep(2), 600);
+      setTimeout(() => setScanStep(3), 1100);
+
+      const fetchPool: Promise<Movie[]>[] = [];
+
+      // 1. Полнотекстовый семантический поиск, если введён промпт
+      if (userText) {
+        fetchPool.push(
+          searchMovies(userText, 1, 'movie')
+            .then((res) => res.results || [])
+            .catch(() => [])
+        );
+        fetchPool.push(
+          searchMovies(userText, 1, 'series')
+            .then((res) => res.results || [])
+            .catch(() => [])
+        );
+      }
+
+      // 2. Discover по жанрам пресета
+      if (activePreset) {
+        fetchPool.push(
+          smartDiscover({
+            mediaType: 'movie',
+            genres: activePreset.genres,
+          }).catch(() => [])
+        );
+        fetchPool.push(
+          smartDiscover({
+            mediaType: 'tv',
+            genres: activePreset.genres,
+          }).catch(() => [])
+        );
+      }
+
+      // 3. Персональные рекомендации по последнему просмотренному
+      const last = watchHistory[0]?.movie;
+      if (last) {
+        fetchPool.push(
+          getRecommendations(cleanId(last.id), last.is_serial ? 'tv' : 'movie').catch(() => [])
+        );
+      }
+
+      // Если ничего не было введено — берем топовые шедевры
+      if (!userText && !activePreset) {
+        fetchPool.push(
+          smartDiscover({
+            mediaType: 'movie',
+          }).catch(() => [])
+        );
+      }
+
+      const [poolArrays] = await Promise.all([
+        Promise.all(fetchPool),
+        sleep(1350), // приятный эффект нейро-сканирования
+      ]);
+
+      const flat = poolArrays.flat();
+      const uniqueMap = new Map<string, Movie>();
+
+      for (const m of flat) {
+        if (!m.id || !m.poster_path) continue;
+        if (!tasteIds.has(cleanId(m.id))) {
+          uniqueMap.set(m.id, m);
+        }
+      }
+
+      const scored = Array.from(uniqueMap.values()).map((m) => {
+        const rating = m.vote_average || 0;
+        let overlap = 0;
+        let tasteRef: Movie | null = null;
+        for (const g of m.genre_ids || []) {
+          if (genreFreq.has(g)) {
+            overlap++;
+            if (!tasteRef) tasteRef = taste.find((t) => t.genre_ids?.includes(g)) || null;
+          }
+        }
+        const score = rating * 2.2 + overlap * 2.8 + Math.min((m.popularity || 0) / 250, 2);
+        return { m, rating, overlap, tasteRef, score };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+
+      const items: PickItem[] = [];
+      const seen = new Set<string>();
+
+      for (const s of scored) {
+        if (items.length >= 8) break;
+        if (s.rating < 6.0 && scored.length > 8) continue;
+        if (seen.has(s.m.id)) continue;
+        seen.add(s.m.id);
+
+        const reasons: string[] = [];
+        if (s.tasteRef) {
+          reasons.push(`Похоже по атмосфере на «${s.tasteRef.title}»`);
+        } else if (activePreset) {
+          reasons.push(activePreset.hint);
+        } else if (s.overlap >= 2) {
+          reasons.push('Точно совпадает с вашим профилем жанров');
+        }
+
+        if (s.rating >= 7.6) {
+          reasons.push(`Признанный шедевр ★${s.rating.toFixed(1)}`);
+        }
+
+        const matchPercent = Math.min(
+          99,
+          Math.max(82, Math.round(76 + s.overlap * 5 + (s.rating - 6) * 4.2 + (Math.random() * 4)))
+        );
+
+        items.push({
+          movie: s.m,
+          match: matchPercent,
+          reason: reasons.slice(0, 2).join(' · ') || 'Персональная рекомендация нейросети',
+        });
+      }
+
+      setPicks(items);
+      setStage(items.length > 0 ? 'results' : 'empty');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+    } catch {
+      setStage('empty');
+    }
   };
 
-  const pickMood = (m: MoodDef) => { haptic('light'); setMood(m); };
-  const pickTime = (t: TimeDef) => { haptic('light'); setTime(t); };
-  const pickEra = (e: EraDef) => {
+  const handlePresetClick = (preset: NeuralPreset) => {
     haptic('light');
-    setEra(e);
-    if (mood && time) runSearch(mood, time, e); // третий ответ — сразу запускаем
+    setSelectedPreset(preset);
+    setPrompt(preset.query);
+    runNeuralDiscovery(preset.query, preset);
   };
 
-  const surprise = () => {
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prompt.trim() && !selectedPreset) return;
+    runNeuralDiscovery(prompt, selectedPreset || undefined);
+  };
+
+  const resetAll = () => {
     haptic('light');
-    const m = MOODS[Math.floor(Math.random() * MOODS.length)];
-    const t = TIMES[Math.floor(Math.random() * TIMES.length)];
-    const e = ERAS[Math.floor(Math.random() * ERAS.length)];
-    setMood(m); setTime(t); setEra(e);
-    runSearch(m, t, e);
+    setPrompt('');
+    setSelectedPreset(null);
+    setPicks([]);
+    setStage('idle');
   };
 
-  const reset = () => {
-    haptic('light');
-    setMood(null); setTime(null); setEra(null);
-    setPicks([]); setStage('quiz');
-  };
-
-  const again = () => {
-    if (mood && time && era) runSearch(mood, time, era);
-  };
-
-  /* ── Экраны результатов ── */
-  if (stage !== 'quiz') {
-    return (
-      <div className="aip page">
-        <header className="aip-header">
-          <SeasonalMask season={maskSeason} className="aip-header__avatar" />
-          <div className="aip-header__info">
-            <h1 className="aip-header__title">ZENOVA AI</h1>
-            <p className="aip-header__sub">{mood?.label} · {time?.label} · {era?.label}</p>
+  return (
+    <div className="aip page">
+      {/* ── Премиальный стеклянный заголовок ── */}
+      <header className="aip-header">
+        <div className="aip-header__brand">
+          <SeasonalMask season={maskSeason} className="aip-header__mask" />
+          <div className="aip-header__copy">
+            <span className="aip-header__kicker">ZENOVA NEURAL ENGINE</span>
+            <h1 className="aip-header__title">КиноИИ</h1>
           </div>
-          <button className="aip-icon-btn" onClick={reset} aria-label="Заново" title="Заново">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" />
-              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" />
+        </div>
+
+        {stage !== 'idle' && (
+          <button
+            type="button"
+            className="aip-header__reset-btn"
+            onClick={resetAll}
+            title="Новый запрос"
+          >
+            ✕ Сброс
+          </button>
+        )}
+      </header>
+
+      {/* ── Нейро-строка свободного ввода запроса ── */}
+      <div className="aip-search-shell">
+        <form className="aip-search-form" onSubmit={handleFormSubmit}>
+          <div className="aip-search-icon" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" strokeLinecap="round" />
+            </svg>
+          </div>
+          <input
+            ref={inputRef}
+            type="text"
+            className="aip-search-input"
+            placeholder="Спросите ИИ: фильм как Начало, или уютная комедия…"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+          />
+          {prompt && (
+            <button
+              type="button"
+              className="aip-search-clear"
+              onClick={() => {
+                haptic('light');
+                setPrompt('');
+                inputRef.current?.focus();
+              }}
+            >
+              ✕
+            </button>
+          )}
+          <button
+            type="submit"
+            className="aip-search-btn"
+            aria-label="Искать нейросетью"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </button>
-        </header>
+        </form>
+      </div>
 
-        {stage === 'thinking' && (
-          <div className="aip-chat">
-            <div className="aip-bubble aip-bubble--ai">
-              <span className="aip-dots"><i /><i /><i /></span>
-              ZENOVA AI анализирует ваши предпочтения и сканирует фильмотеку…
+      {/* ── Быстрые нейро-режимы подбора ── */}
+      {stage !== 'thinking' && (
+        <div className="aip-presets-section">
+          <div className="aip-presets-head">
+            <span className="aip-presets-title">Нейро-режимы под настроение</span>
+          </div>
+          <div className="aip-presets-grid">
+            {NEURAL_PRESETS.map((p) => {
+              const isActive = selectedPreset?.id === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  className={`aip-preset-chip ${isActive ? 'is-active' : ''}`}
+                  onClick={() => handlePresetClick(p)}
+                >
+                  <span className="aip-preset-chip__icon">{p.icon}</span>
+                  <div className="aip-preset-chip__info">
+                    <strong className="aip-preset-chip__label">{p.label}</strong>
+                    <span className="aip-preset-chip__hint">{p.hint}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Состояние глубокого анализа нейросети ── */}
+      {stage === 'thinking' && (
+        <div className="aip-thinking">
+          <div className="aip-radar-orb">
+            <div className="aip-radar-orb__ring" />
+            <div className="aip-radar-orb__ring aip-radar-orb__ring--delayed" />
+            <div className="aip-radar-orb__core">
+              <span>✦</span>
             </div>
           </div>
-        )}
-
-        {stage === 'empty' && (
-          <div className="aip-chat">
-            <div className="aip-bubble aip-bubble--ai">
-              По заданным параметрам ничего не найдено. Попробуем с другими фильтрами?
-              <div style={{ marginTop: 14 }}>
-                <button className="aip-btn" onClick={reset}>Попробовать снова</button>
-              </div>
-            </div>
+          <h2 className="aip-thinking__title">Нейросеть подбирает фильмы…</h2>
+          <div className="aip-thinking__steps">
+            <p className={scanStep >= 1 ? 'is-done' : ''}>
+              {scanStep >= 1 ? '✓' : '○'} Анализ семантического запроса и скрытых тропов
+            </p>
+            <p className={scanStep >= 2 ? 'is-done' : ''}>
+              {scanStep >= 2 ? '✓' : '○'} Сопоставление с вашей историей и любимыми жанрами
+            </p>
+            <p className={scanStep >= 3 ? 'is-done' : ''}>
+              {scanStep >= 3 ? '✓' : '○'} Ранжирование по рейтингу и совместимости
+            </p>
           </div>
-        )}
+        </div>
+      )}
 
-        {stage === 'results' && (
-          <>
-            <div className="aip-chat">
-              <div className="aip-bubble aip-bubble--ai">
-                Готово! Подборка рассчитана нейросетью на основе вашего персонального вкуса:
-              </div>
+      {/* ── Пустой результат ── */}
+      {stage === 'empty' && (
+        <div className="aip-empty">
+          <div className="aip-empty__icon">🔍</div>
+          <h3 className="aip-empty__title">Ничего не найдено</h3>
+          <p className="aip-empty__sub">
+            Попробуйте сформулировать запрос другими словами или выберите один из быстрых нейро-режимов выше.
+          </p>
+          <button type="button" className="aip-empty__btn" onClick={resetAll}>
+            Попробовать другой запрос
+          </button>
+        </div>
+      )}
+
+      {/* ── Результаты генерации ── */}
+      {stage === 'results' && picks.length > 0 && (
+        <section className="aip-results">
+          <div className="aip-results__head">
+            <div className="aip-results__title-box">
+              <h2 className="aip-results__title">Идеальные совпадения</h2>
+              <span className="aip-results__count">{picks.length} фильмов</span>
             </div>
-            <div className="aip-list">
-              {picks.map((p) => (
-                <div key={p.movie.id} className="aip-card" onClick={() => navigate(`/movie/${p.movie.id}`)}>
+            <button
+              type="button"
+              className="aip-results__regen-btn"
+              onClick={() => runNeuralDiscovery()}
+            >
+              🔄 Обновить
+            </button>
+          </div>
+
+          <div className="aip-cards-list">
+            {picks.map(({ movie, match, reason }) => {
+              const fav = isFavorite(movie.id);
+              return (
+                <article
+                  key={movie.id}
+                  className="aip-match-card"
+                  onClick={() => navigate(`/movie/${movie.id}`)}
+                >
                   <div
-                    className="aip-card__cover"
-                    style={{ backgroundImage: `url(${p.movie.backdrop_path || p.movie.poster_path})` }}
+                    className="aip-match-card__cover"
+                    style={{
+                      backgroundImage: `url(${movie.backdrop_path || movie.poster_path})`,
+                    }}
                   >
-                    <div className="aip-card__veil" />
-                    <div className="aip-card__top-badges">
-                      <span className="aip-card__type">{p.movie.is_serial ? 'Сериал' : 'Фильм'}</span>
-                      <span className="aip-card__match">{p.match}% совпадение</span>
+                    <div className="aip-match-card__cover-gradient" />
+                    
+                    <div className="aip-match-card__badges">
+                      <span className="aip-match-card__type">
+                        {movie.is_serial ? 'Сериал' : 'Фильм'}
+                      </span>
+                      <span className="aip-match-card__score">
+                        ★ {match}% совпадение
+                      </span>
                     </div>
-                    <div className="aip-card__cover-bottom">
-                      <h3 className="aip-card__title">{p.movie.title}</h3>
-                      <p className="aip-card__meta">
-                        {p.movie.release_date?.slice(0, 4)}
-                        {p.movie.vote_average > 0 ? ` · ★ ${p.movie.vote_average.toFixed(1)}` : ''}
+
+                    <div className="aip-match-card__bottom-info">
+                      <h3 className="aip-match-card__title">{movie.title}</h3>
+                      <p className="aip-match-card__year-rate">
+                        {movie.release_date?.slice(0, 4)}
+                        {movie.vote_average > 0 ? ` · ★ ${movie.vote_average.toFixed(1)}` : ''}
                       </p>
                     </div>
                   </div>
-                  <div className="aip-card__foot">
-                    {p.reason && (
-                      <div className="aip-card__reason-box">
-                        <span className="aip-card__reason-spark">✦</span>
-                        <p className="aip-card__reason">{p.reason}</p>
-                      </div>
-                    )}
-                    <div className="aip-card__actions">
+
+                  <div className="aip-match-card__body">
+                    <div className="aip-match-card__reason">
+                      <span className="aip-match-card__reason-glyph">✦</span>
+                      <span className="aip-match-card__reason-text">{reason}</span>
+                    </div>
+
+                    <div className="aip-match-card__actions">
                       <button
-                        className="aip-card__watch"
-                        onClick={(e) => { e.stopPropagation(); haptic('medium'); navigate(`/movie/${p.movie.id}`); }}
+                        type="button"
+                        className="aip-match-card__watch-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          haptic('medium');
+                          navigate(`/movie/${movie.id}`);
+                        }}
                       >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
-                        Смотреть
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                        <span>Смотреть</span>
                       </button>
+
                       <button
-                        className={`aip-card__fav ${isFavorite(p.movie.id) ? 'active' : ''}`}
+                        type="button"
+                        className={`aip-match-card__fav-btn ${fav ? 'is-fav' : ''}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           haptic('light');
-                          if (isFavorite(p.movie.id)) removeFavorite(p.movie.id);
-                          else addFavorite(p.movie);
+                          fav ? removeFavorite(movie.id) : addFavorite(movie);
                         }}
                         aria-label="В избранное"
                       >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite(p.movie.id) ? '#ec4899' : 'none'} stroke={isFavorite(p.movie.id) ? '#ec4899' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                        </svg>
+                        {fav ? '❤️' : '🤍'}
                       </button>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div className="aip-actions">
-              <button className="aip-btn" onClick={again}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
-                  <polyline points="23 4 23 10 17 10" />
-                  <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-                </svg>
-                Другие варианты
-              </button>
-              <button className="aip-btn aip-btn--ghost" onClick={reset}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }}>
-                  <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
-                </svg>
-                Новый запрос
-              </button>
-            </div>
-          </>
-        )}
-        <div ref={bottomRef} />
-      </div>
-    );
-  }
-
-  /* ── Викторина ── */
-  return (
-    <div className="aip page">
-      <header className="aip-header">
-        <SeasonalMask season={maskSeason} className="aip-header__avatar" />
-        <div className="aip-header__info">
-          <h1 className="aip-header__title">ZENOVA AI</h1>
-          <p className="aip-header__sub">Нейросетевой куратор кино</p>
-        </div>
-        <button className="aip-surprise" onClick={surprise}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 4 }}>
-            <path d="M16 3h5v5" /><path d="M4 20L21 3" />
-            <path d="M21 16v5h-5" /><path d="M15 15l6 6" /><path d="M4 4l5 5" />
-          </svg>
-          Удиви меня
-        </button>
-      </header>
-
-      <div className="aip-chat">
-        <div className="aip-bubble aip-bubble--ai">
-          Привет! Я <strong>ZENOVA AI</strong> ✦ Персональный киноинтеллект. Ответьте на три коротких вопроса — и я мгновенно подберу идеальный фильм или сериал.
-        </div>
-
-        {!mood ? (
-          <>
-            <div className="aip-bubble aip-bubble--ai">Какое настроение сегодня?</div>
-            <div className="aip-chips">
-              {MOODS.map((m) => (
-                <button key={m.id} className="aip-chip" onClick={() => pickMood(m)}>
-                  {m.label}
-                </button>
-              ))}
-            </div>
-          </>
-        ) : (
-          <div className="aip-bubble aip-bubble--user">{mood.label}</div>
-        )}
-
-        {mood && !time && (
-          <>
-            <div className="aip-bubble aip-bubble--ai">Сколько у вас времени?</div>
-            <div className="aip-chips">
-              {TIMES.map((t) => (
-                <button key={t.id} className="aip-chip" onClick={() => pickTime(t)}>{t.label}</button>
-              ))}
-            </div>
-          </>
-        )}
-        {mood && time && (
-          <div className="aip-bubble aip-bubble--user">{time.label}</div>
-        )}
-
-        {mood && time && !era && (
-          <>
-            <div className="aip-bubble aip-bubble--ai">И последний штрих: предпочтительная эпоха?</div>
-            <div className="aip-chips">
-              {ERAS.map((e) => (
-                <button key={e.id} className="aip-chip" onClick={() => pickEra(e)}>{e.label}</button>
-              ))}
-            </div>
-          </>
-        )}
-        {mood && time && era && (
-          <div className="aip-bubble aip-bubble--user">{era.label}</div>
-        )}
-
-        <div ref={bottomRef} />
-      </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

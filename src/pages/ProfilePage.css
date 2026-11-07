@@ -138,82 +138,157 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* 3D Character Mascot */
-.pf-stage__figure-wrap {
+/* ═════ Center Hero Avatar Stage ═════ */
+.pf-stage__hero-center {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 14px;
+  gap: 12px;
 }
 
-.pf-stage__figure {
-  width: 176px;
-  height: 176px;
-  object-fit: contain;
-  filter: drop-shadow(0 18px 26px rgba(0, 0, 0, 0.72));
-  animation: pfStageFloat 4.8s ease-in-out infinite;
+.pf-stage__avatar-pod {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pf-stage__avatar-ring {
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  padding: 4px;
+  background:
+    radial-gradient(120% 120% at 30% 20%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.04) 50%, rgba(0, 0, 0, 0.5) 100%),
+    #12121a;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pf-stage__avatar-main {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+}
+
+.pf-stage__avatar-fallback {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #222034, #100f1c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  font-weight: 800;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.14);
+}
+
+/* 3D Prestige Mask Crest */
+.pf-stage__mask-seal {
+  position: absolute;
+  top: -8px;
+  right: -14px;
+  width: 48px;
+  height: 48px;
+  z-index: 4;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.85));
+  animation: pfStageFloat 4.2s ease-in-out infinite;
   user-select: none;
+}
+
+.pf-stage__mask-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* PRO Status Seal */
+.pf-stage__pro-seal {
+  position: absolute;
+  bottom: -4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  box-shadow:
+    0 4px 14px rgba(245, 158, 11, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  color: #0b0904;
+  font-size: 10.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  z-index: 5;
+}
+
+/* User meta */
+.pf-stage__user-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-align: center;
+}
+
+.pf-stage__user-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.pf-stage__user-handle {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 @keyframes pfStageFloat {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+  50% { transform: translateY(-4px); }
 }
 
-.pf-stage__pedestal-shadow {
-  width: 100px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65) 0%, transparent 72%);
-  margin-top: -4px;
-}
-
-/* Bottom-left frosted user pill */
-.pf-stage__user-pill {
+/* Bottom pill indicators */
+.pf-stage__pass-pill {
   position: absolute;
-  left: 12px;
+  right: 14px;
   bottom: 12px;
   z-index: 4;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 12px 4px 4px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(9, 9, 14, 0.72);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.45);
 }
 
-.pf-stage__user-avatar {
-  width: 30px;
-  height: 30px;
+.pf-stage__lvl-dot {
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  overflow: hidden;
-  background: #1d1d29;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12.5px;
-  font-weight: 800;
-  color: #fff;
-  flex-shrink: 0;
-}
-.pf-stage__user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.pf-stage__user-copy {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  background: #fda4af;
+  box-shadow: 0 0 6px #fda4af;
+  margin-right: 4px;
+  display: inline-block;
 }
 
 .pf-stage__user-handle {

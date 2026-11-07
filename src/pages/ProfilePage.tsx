@@ -352,41 +352,56 @@ const ProfilePage: React.FC = () => {
 
           {/* Top Minimalist Serial Tag */}
           <div className="pf-stage__serial">
-            <span>ZENOVA PASS</span>
-            <b>#{String(user?.id || 2027).slice(-4).padStart(4, '0')}</b>
+            <span>ZENOVA IDENTITY</span>
           </div>
 
-          {/* 3D Mascot Showcase */}
-          <div className="pf-stage__figure-wrap">
-            <img
-              src={heroMaskSrc}
-              alt="ZENOVA Emblem"
-              className="pf-stage__figure"
-              draggable={false}
-            />
-            <div className="pf-stage__pedestal-shadow" aria-hidden="true" />
-          </div>
+          {/* ════ Center Hero: User Avatar Center-Stage with Prestige Mask Seal & PRO Badge ════ */}
+          <div className="pf-stage__hero-center">
+            <div className="pf-stage__avatar-pod">
+              <div className="pf-stage__avatar-ring">
+                {user?.photo_url ? (
+                  <img src={user.photo_url} alt={displayName} className="pf-stage__avatar-main" />
+                ) : (
+                  <div className="pf-stage__avatar-fallback">
+                    <span>{displayName[0]?.toUpperCase() || 'Z'}</span>
+                  </div>
+                )}
+              </div>
 
-          {/* Bottom-left frosted user pill */}
-          <div className="pf-stage__user-pill">
-            <div className="pf-stage__user-avatar">
-              {user?.photo_url ? (
-                <img src={user.photo_url} alt={displayName} />
-              ) : (
-                <span>{displayName[0]?.toUpperCase() || 'Z'}</span>
-              )}
-            </div>
-            <div className="pf-stage__user-copy">
-              <span className="pf-stage__user-handle">{username}</span>
+              {/* Престижная эмблема маски ZENOVA */}
+              <div className="pf-stage__mask-seal" title="ZENOVA Emblem">
+                <img
+                  src={heroMaskSrc}
+                  alt="ZENOVA Mascot"
+                  className="pf-stage__mask-img"
+                  draggable={false}
+                />
+              </div>
+
+              {/* Бейдж PRO статуса */}
               {(isAdminUser || effectivePremium) && (
-                <span className="pf-stage__user-verified">PRO</span>
+                <div className="pf-stage__pro-seal">
+                  <span>PRO</span>
+                </div>
               )}
+            </div>
+
+            {/* Имя пользователя и никнейм */}
+            <div className="pf-stage__user-meta">
+              <h2 className="pf-stage__user-name">{displayName}</h2>
+              <span className="pf-stage__user-handle">{username}</span>
             </div>
           </div>
 
-          {/* Bottom-right level tag */}
+          {/* Нижний левый бейдж уровня */}
           <div className="pf-stage__lvl-pill">
-            LVL {cineLevel}
+            <span className="pf-stage__lvl-dot" />
+            <span>LVL {cineLevel} · {rankTitle}</span>
+          </div>
+
+          {/* Нижний правый номер билета */}
+          <div className="pf-stage__pass-pill">
+            <span>#{String(user?.id || 2027).slice(-4).padStart(4, '0')}</span>
           </div>
         </div>
 

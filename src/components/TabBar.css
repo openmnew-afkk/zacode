@@ -134,9 +134,22 @@
   stroke-width: 2.15;
 }
 
-/* Subtle diamond fill on active КиноИИ star */
-.tab-bar__item--ai.tab-bar__item--active .tab-bar__icon svg path {
-  fill: rgba(255, 255, 255, 0.2);
+/* Специальный стиль кнопки КиноИИ в доке */
+.tab-bar__item--ai .tab-bar__icon {
+  color: #c084fc;
+  filter: drop-shadow(0 0 6px rgba(192, 132, 252, 0.45));
+}
+
+.tab-bar__item--ai.tab-bar__item--active .tab-bar__icon {
+  color: #ffffff;
+  filter: drop-shadow(0 0 10px rgba(192, 132, 252, 0.85));
+}
+
+.tab-bar__item--ai.tab-bar__item--active .tab-bar__label {
+  background: linear-gradient(135deg, #ffffff, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
 }
 
 .tab-bar__label {

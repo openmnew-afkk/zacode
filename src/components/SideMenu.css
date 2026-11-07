@@ -1,349 +1,314 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   ZENOVA SIDE MENU — ULTRA-MINIMALIST EDGE CAPSULE & COLOR-SHIFTING
-   STUDIO WORDMARK ROULETTE (One-tap direct studio buttons)
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════
+   SideMenu — ZENOVA Multiverse & Studio Vault
+   Tactile, ergonomic trigger + luxury slide drawer
+   ════════════════════════════════════════════════════════════════ */
 
-/* ── 1. Ultra-Minimalist Left-Edge Capsule Trigger (middle of screen) ── */
-.sm-edge-tab {
+/* ── Тактильная плавающая кнопка-капсула на левом краю экрана ── */
+.sm-edge-trigger {
   position: fixed;
   left: 0;
-  top: 50%;
+  top: 48%;
   transform: translateY(-50%);
-  z-index: 750;
-  width: 7px;
-  height: 54px;
+  z-index: 85;
   padding: 0;
-  border-radius: 0 999px 999px 0;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-left: none;
-  box-shadow: 2px 0 14px rgba(0, 0, 0, 0.4);
+  margin: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  /* Расширенная зона нажатия для пальцев */
+  padding-right: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.sm-edge-trigger__body {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition:
-    width 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.22s ease,
-    background 0.22s ease,
-    border-color 0.22s ease;
-  -webkit-tap-highlight-color: transparent;
+  gap: 3px;
+  width: 38px;
+  height: 58px;
+  border-radius: 0 16px 16px 0;
+  background: rgba(18, 18, 26, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-left: none;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    4px 0 20px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.18s ease;
 }
 
-/* Invisible expanded touch target so it is effortless to tap or swipe */
-.sm-edge-tab::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: -14px;
-  bottom: -14px;
-  width: 24px;
+.sm-edge-trigger:hover .sm-edge-trigger__body {
+  background: rgba(28, 28, 40, 0.96);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    6px 0 24px rgba(0, 0, 0, 0.7),
+    0 0 14px rgba(255, 255, 255, 0.15);
 }
 
-.sm-edge-tab:hover {
-  width: 11px;
-  height: 62px;
-  background: rgba(255, 255, 255, 0.16);
-  border-color: rgba(255, 255, 255, 0.34);
+.sm-edge-trigger:active .sm-edge-trigger__body {
+  transform: scale(0.92);
+  background: rgba(35, 35, 52, 1);
 }
 
-.sm-edge-tab:active {
-  transform: translateY(-50%) scale(0.94);
+.sm-edge-trigger__icon {
+  color: #fda4af;
+  flex-shrink: 0;
 }
 
-.sm-edge-tab__line {
-  width: 2px;
-  height: 26px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.25));
-  animation: smEdgeBreath 3.2s ease-in-out infinite;
+.sm-edge-trigger__label {
+  font-size: 8.5px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
 }
 
-@keyframes smEdgeBreath {
-  0%, 100% { opacity: 0.45; transform: scaleY(0.85); }
-  50% { opacity: 0.95; transform: scaleY(1.08); }
-}
-
-/* ── 2. Fullscreen Blurred Backdrop with Dynamic Color-Shifting Aura ── */
-.sm-overlay {
+/* ── Backdrop ── */
+.sm-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 2600;
-  background: rgba(6, 6, 10, 0.72);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  overflow: hidden;
-  animation: smFadeIn 0.24s ease both;
+  align-items: stretch;
+  animation: smFadeIn 0.22s ease-out;
 }
 
 @keyframes smFadeIn {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
-/* Ambient radial glow that dynamically changes color with active studio */
-.sm-color-aura {
-  position: absolute;
-  left: -120px;
-  top: 50%;
-  width: 480px;
-  height: 480px;
-  transform: translateY(-50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--st-glow, rgba(229, 9, 20, 0.38)) 0%, transparent 70%);
-  filter: blur(42px);
-  pointer-events: none;
-  z-index: 0;
-  transition: background 0.4s ease;
-}
-
-/* ── 3. Sculptural Curved Roulette Scene ── */
-.sm-arc-scene {
-  position: relative;
-  z-index: 2;
-  width: min(100vw, 430px);
-  height: 640px;
-  max-height: 100vh;
-  display: flex;
-  align-items: center;
-  user-select: none;
-  touch-action: none;
-  animation: smArcIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes smArcIn {
-  from {
-    opacity: 0;
-    transform: translateX(-44px) scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-.sm-dial-svg {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 380px;
-  height: 640px;
-  pointer-events: none;
-  z-index: 1;
-  filter: drop-shadow(16px 0 44px rgba(0, 0, 0, 0.78));
-}
-
-/* ── Inner Hub Core (Left inside the semi-circle) ── */
-.sm-hub-core {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 12;
+/* ── Drawer Body ── */
+.sm-drawer {
+  width: min(340px, 86vw);
+  max-width: 380px;
+  height: 100%;
+  background: #09090f;
+  border-right: 1px solid rgba(255, 255, 255, 0.09);
   display: flex;
   flex-direction: column;
+  box-shadow: 18px 0 50px rgba(0, 0, 0, 0.85);
+  padding: calc(var(--header-safe-top, 14px) + 12px) 14px calc(var(--tab-bar-safe-bottom, 20px) + 16px);
+  animation: smSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+@keyframes smSlideIn {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Head */
+.sm-drawer__head {
+  display: flex;
   align-items: flex-start;
-  gap: 3px;
-  pointer-events: none;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
-.sm-hub-core__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--st-accent, #e50914);
-  box-shadow: 0 0 12px var(--st-accent, #e50914);
-  margin-bottom: 2px;
-  transition: background 0.32s ease, box-shadow 0.32s ease;
+.sm-drawer__title-wrap {
+  min-width: 0;
 }
 
-.sm-hub-core__count {
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
-}
-.sm-hub-core__count i {
-  font-style: normal;
-  font-size: 11px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.36);
-}
-
-.sm-hub-core__name {
-  font-size: 10px;
+.sm-drawer__kicker {
+  display: block;
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--st-accent, #e50914);
-  transition: color 0.32s ease;
+  color: #fda4af;
+  margin-bottom: 2px;
 }
 
-.sm-hub-core__sub {
-  font-size: 9.5px;
-  font-weight: 500;
+.sm-drawer__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.sm-drawer__sub {
+  margin: 3px 0 0;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.42);
 }
 
-/* ── Curved Roulette of Direct Studio Wordmark Buttons ── */
-.sm-wordmarks-layer {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  height: 0;
-  z-index: 10;
+.sm-drawer__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
 }
 
-.sm-wordmark-btn {
+.sm-drawer__close:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Studio Cards List */
+.sm-drawer__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+}
+
+.sm-drawer__list::-webkit-scrollbar {
+  width: 4px;
+}
+.sm-drawer__list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+}
+
+/* Studio Card */
+.sm-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sm-card__glow-aura {
   position: absolute;
-  left: 0;
   top: 0;
-  width: 178px;
-  height: 54px;
-  margin-left: -24px;
-  margin-top: -27px;
-  padding: 0 14px 0 16px;
-  border-radius: 999px;
-  background: rgba(16, 16, 24, 0.88);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow:
-    0 12px 28px rgba(0, 0, 0, 0.62),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  left: 0;
+  width: 80px;
+  height: 100%;
+  background: radial-gradient(circle at 0% 50%, var(--st-glow, rgba(255, 255, 255, 0.15)), transparent 70%);
+  opacity: 0.6;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.sm-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateX(3px);
+}
+
+.sm-card:hover .sm-card__glow-aura {
+  opacity: 1;
+}
+
+.sm-card:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.sm-card.is-active {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--st-accent, #fda4af);
+  box-shadow: 0 0 16px var(--st-glow, rgba(255, 255, 255, 0.12));
+}
+
+.sm-card__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sm-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  cursor: pointer;
-  overflow: hidden;
-  transform:
-    translate3d(var(--w-x, 137px), var(--w-y, 0px), 0)
-    rotate(var(--w-rot, 0deg))
-    scale(var(--w-scale, 1));
-  opacity: var(--w-opacity, 1);
-  transition:
-    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 0.3s ease,
-    border-color 0.28s ease,
-    box-shadow 0.28s ease,
-    background 0.28s ease;
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Subtle brand color aura inside each studio button */
-.sm-wordmark-btn__glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(110% 120% at 15% 50%, var(--w-glow, rgba(229, 9, 20, 0.25)) 0%, transparent 70%);
-  opacity: 0.55;
-  pointer-events: none;
-  transition: opacity 0.28s ease;
-}
-
-.sm-wordmark-btn:hover,
-.sm-wordmark-btn.is-active {
-  background: rgba(20, 20, 30, 0.96);
-  border-color: var(--w-accent, rgba(255, 255, 255, 0.55));
-  box-shadow:
-    0 16px 36px rgba(0, 0, 0, 0.78),
-    0 0 26px var(--w-glow, rgba(229, 9, 20, 0.42)),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-
-.sm-wordmark-btn:hover .sm-wordmark-btn__glow,
-.sm-wordmark-btn.is-active .sm-wordmark-btn__glow {
-  opacity: 1;
-}
-
-.sm-wordmark-btn:active {
-  transform:
-    translate3d(var(--w-x, 137px), var(--w-y, 0px), 0)
-    rotate(var(--w-rot, 0deg))
-    scale(0.95);
-}
-
-.sm-wordmark-btn__logo {
-  position: relative;
-  z-index: 2;
+.sm-card__wordmark-wrap {
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  min-width: 0;
-  flex: 1;
+  height: 24px;
 }
 
-.sm-wordmark-btn__logo svg {
-  max-width: 118px;
-  height: 23px;
-  width: auto;
-  display: block;
-}
-
-.sm-wordmark-btn__arrow {
-  position: relative;
-  z-index: 2;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+.sm-card__badge {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--st-accent, #ffffff);
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2px 6px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+
+.sm-card__tagline {
+  margin: 0;
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sm-card__arrow {
+  color: rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.24s ease, color 0.24s ease, border-color 0.24s ease;
+  transition: transform 0.18s ease, color 0.18s ease;
 }
 
-.sm-wordmark-btn.is-active .sm-wordmark-btn__arrow,
-.sm-wordmark-btn:hover .sm-wordmark-btn__arrow {
-  background: var(--w-accent, #ffffff);
-  border-color: var(--w-accent, #ffffff);
+.sm-card:hover .sm-card__arrow {
   color: #ffffff;
+  transform: translateX(2px);
 }
 
-.sm-wordmark-btn--apple.is-active .sm-wordmark-btn__arrow,
-.sm-wordmark-btn--apple:hover .sm-wordmark-btn__arrow {
-  color: #09090d;
+/* Footer note */
+.sm-drawer__footer {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  text-align: center;
+  flex-shrink: 0;
 }
 
-/* ── Subtle Close Button ── */
-.sm-arc-close {
-  position: absolute;
-  top: max(18px, var(--header-safe-top, 18px));
-  right: 18px;
-  z-index: 20;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(18, 18, 26, 0.76);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.78);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.16s ease, background 0.18s ease;
-}
-
-.sm-arc-close:active {
-  transform: scale(0.9);
-}
-
-@media (max-width: 370px) {
-  .sm-wordmark-btn {
-    width: 162px;
-    height: 50px;
-    margin-left: -32px;
-    margin-top: -25px;
-  }
+.sm-drawer__footer-note {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.32);
 }

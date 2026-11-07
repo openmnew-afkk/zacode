@@ -225,26 +225,27 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 9px 16px;
-  border-radius: var(--r-full);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-2);
-  font-size: 13px;
-  font-weight: 700;
-  font-family: var(--font-body);
-  transition: all 0.22s var(--ease-spring);
+  padding: 8px 15px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ym-tab:active {
-  transform: scale(0.94);
+  transform: scale(0.95);
 }
 
 .ym-tab.active {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  border-color: transparent;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
-  box-shadow: 0 5px 18px var(--accent-glow);
+  font-weight: 750;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
 .ym-tab__icon {
@@ -548,23 +549,29 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 8px 10px;
-  border-radius: var(--r-md);
-  background: var(--surface);
-  border: 1px solid var(--border);
+  padding: 8px 12px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   cursor: pointer;
-  transition: transform 0.18s var(--ease-spring), background 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+  transition: transform 0.16s ease, background 0.18s ease, border-color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ym-track:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 .ym-track:active {
-  transform: scale(0.985);
-  background: var(--surface-2);
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .ym-track.active {
-  border-color: rgba(251, 113, 133, 0.5);
-  background: rgba(251, 113, 133, 0.1);
-  box-shadow: 0 4px 20px rgba(251, 113, 133, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
 }
 
 /* Ранг в чарте */
@@ -1334,21 +1341,24 @@
 
 .ym-wave-card__play {
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   flex: 0 0 auto;
   place-items: center;
   border: 0;
   border-radius: 50%;
-  background: linear-gradient(135deg, #f8f6ff, #d6c6ff);
-  color: #181320;
-  box-shadow: 0 6px 20px rgba(164, 127, 255, 0.3), inset 0 1px 0 #fff;
+  background: #ffffff;
+  color: #08080d;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  transition: transform 0.18s var(--ease-spring), box-shadow 0.2s ease;
+  transition: transform 0.16s ease, background 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.ym-wave-card__play:active { transform: scale(0.92); }
+.ym-wave-card__play:active {
+  transform: scale(0.92);
+  background: #e2e8f0;
+}
 
 .ym-wave-card__surprise {
   display: inline-flex;
@@ -1741,13 +1751,13 @@
   height: 44px;
   flex: 0 0 44px;
   place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.44);
+  border: none;
   border-radius: 50%;
-  background: linear-gradient(145deg, #fff, #e1d7f0);
-  box-shadow: 0 5px 20px rgba(202, 159, 255, 0.22);
-  color: #1d1728;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  color: #08080d;
   cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.2s ease;
+  transition: transform 0.16s ease, background 0.16s ease;
 }
 
 .ym-wave-card__play:active { transform: scale(0.94); }

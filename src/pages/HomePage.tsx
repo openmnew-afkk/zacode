@@ -1067,85 +1067,74 @@ const HomePage: React.FC = () => {
       )}
 
       {/* ── Шапка ── */}
+      {/* ── Шапка ── */}
       <div className="hp-header">
-        {showSearch ? (
-          <div className="hp-searchbar-shell">
-            <div className="hp-searchbar">
-              <input
-                ref={searchRef}
-                className="hp-searchbar__input"
-                placeholder="Поиск фильма, сериала, актёра…"
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                autoFocus
-              />
-              {query && (
-                <button className="hp-searchbar__clear" onClick={() => { setQuery(''); setSearchResults([]); searchRef.current?.focus(); }} aria-label="Очистить">
-                  ✕
-                </button>
+        <div className="hp-header__brand">
+          <VeloraEmblem size="sm" />
+          <span className="hp-header__wordmark">
+            <span>ZENOVA</span>
+          </span>
+        </div>
+
+        <div className="hp-header__actions">
+          {/* ✦ Вселенные & Студии — быстрый доступ к каталогам 10 студий */}
+          <button
+            type="button"
+            className="hp-header__studios-btn"
+            onClick={() => {
+              haptic('light');
+              openSideMenu();
+            }}
+            title="Студии & Вселенные"
+            aria-label="Кино-Вселенные"
+          >
+            <span className="hp-header__studios-dot" />
+            <span className="hp-header__studios-text">Вселенные</span>
+          </button>
+
+          {/* 🎲 Кино-Кубик (Мне повезёт) */}
+          <button
+            className={`hp-header__btn hp-header__lucky-btn ${luckySpinning ? 'spinning' : ''}`}
+            onClick={feelingLucky}
+            aria-label="Мне повезёт"
+            title="Кино-Кубик: Случайный хит"
+            disabled={luckySpinning}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+              <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
+              <circle cx="8.7" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
+              <circle cx="15.3" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
+              <circle cx="8.7" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
+              <circle cx="15.3" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
+              <circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none" />
+            </svg>
+          </button>
+
+          {/* Доработанная кнопка профиля: аватарка в роскошной оправе + бейдж маски */}
+          <button
+            type="button"
+            className={`hp-header__avatar-pod ${isPremium ? 'is-pro' : ''}`}
+            onClick={() => {
+              haptic('light');
+              navigate('/profile');
+            }}
+            aria-label="Профиль"
+            title="Мой профиль"
+          >
+            <div className="hp-header__avatar-frame">
+              {tgUser?.photo_url ? (
+                <img src={tgUser.photo_url} alt="" className="hp-header__avatar-img" />
+              ) : (
+                <span className="hp-header__avatar-txt">
+                  {(tgUser?.first_name || 'Г')[0]?.toUpperCase()}
+                </span>
               )}
-              <button
-                type="button"
-                className="hp-searchbar__submit"
-                onClick={() => { setShowSearch(false); setQuery(''); setSearchResults([]); }}
-                aria-label="Закрыть поиск"
-                title="Закрыть поиск"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="16.5" y1="16.5" x2="21" y2="21" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="hp-header__brand">
-              <VeloraEmblem size="sm" />
-              <span className="hp-header__wordmark">
-                <span>ZENOVA</span>
+              <span className="hp-header__avatar-mask" aria-hidden="true">
+                <VeloraEmblem size="sm" />
               </span>
             </div>
-            <div className="hp-header__actions">
-              {/* 🎲 Мне повезёт — случайный фильм */}
-              <button
-                className={`hp-header__btn hp-header__lucky-btn ${luckySpinning ? 'spinning' : ''}`}
-                onClick={feelingLucky}
-                aria-label="Мне повезёт"
-                title="Случайный фильм"
-                disabled={luckySpinning}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
-                  <rect x="3.5" y="3.5" width="17" height="17" rx="4.5" />
-                  <circle cx="8.7" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
-                  <circle cx="15.3" cy="8.7" r="1.35" fill="currentColor" stroke="none" />
-                  <circle cx="8.7" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
-                  <circle cx="15.3" cy="15.3" r="1.35" fill="currentColor" stroke="none" />
-                  <circle cx="12" cy="12" r="1.35" fill="currentColor" stroke="none" />
-                </svg>
-              </button>
-              <button
-                className="hp-header__btn hp-header__search-btn"
-                onClick={() => { setShowSearch(true); setTimeout(() => searchRef.current?.focus(), 50); }}
-                aria-label="Поиск"
-              >
-                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="16.5" y1="16.5" x2="21" y2="21" />
-                </svg>
-              </button>
-              <button className="hp-header__btn hp-header__btn--avatar" onClick={() => navigate('/profile')} aria-label="Профиль">
-                {tgUser?.photo_url ? (
-                  <img src={tgUser.photo_url} alt="" className="hp-header__avatar" />
-                ) : (
-                  <span className="hp-header__avatar hp-header__avatar--placeholder">
-                    {(tgUser?.first_name || 'Г')[0]?.toUpperCase()}
-                  </span>
-                )}
-              </button>
-            </div>
-          </>
-        )}
+          </button>
+        </div>
       </div>
 
       {/* ── Плавающие фильмы (Hero баннер) — строго ВЫШЕ вкладок! ── */}

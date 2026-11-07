@@ -40,7 +40,10 @@ const tabs: TabDef[] = [
     accent: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 3.5 14 9.8l6.5 2.2-6.5 2.2L12 20.5l-2-6.3L3.5 12 10 9.8 12 3.5Z" />
+        <path d="M12 2.5v3M12 18.5v3M4.5 12h3M16.5 12h3" strokeLinecap="round" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2.5" fill="currentColor" fillOpacity="0.4" />
+        <path d="M17.5 6.5l1.5-1.5M6.5 17.5l-1.5 1.5M17.5 17.5l1.5 1.5M6.5 6.5l-1.5-1.5" strokeLinecap="round" opacity="0.6" />
       </svg>
     ),
   },
