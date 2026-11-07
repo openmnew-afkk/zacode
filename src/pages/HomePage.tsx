@@ -1128,69 +1128,29 @@ const HomePage: React.FC = () => {
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
-      {/* ── 🎄 WOW-кнопка Новогоднего марафона (в зимней/новогодней теме или с декабря по январь) ── */}
+      {/* ── Минималистичная капсула Зимнего киномарафона (ненавязчиво, в едином тёмном стиле приложения) ── */}
       {!showSearch && !activeCategory && season.id === 'winter' && (
         <button
           type="button"
           className="hp-ny-count"
           onClick={() => {
-            haptic('medium');
+            haptic('light');
             navigate('/new-year');
           }}
         >
-          <span className="hp-ny-count__aurora" aria-hidden="true" />
-          <span className="hp-ny-count__sheen" aria-hidden="true" />
-
           <div className="hp-ny-count__left">
-            <div className="hp-ny-count__mascot-wrap">
-              <span className="hp-ny-count__mascot-glow" aria-hidden="true" />
-              <img
-                src="/zenova-mask-winter.png"
-                alt="ZENOVA Santa"
-                className="hp-ny-count__mascot"
-                draggable={false}
-              />
-            </div>
-
-            <div className="hp-ny-count__copy">
-              <div className="hp-ny-count__kicker-row">
-                <span className="hp-ny-count__badge">🎄 HOLIDAY SPECIAL</span>
-                <span className="hp-ny-count__spark">✨</span>
-              </div>
-              <span className="hp-ny-count__title">Новогодний марафон</span>
-              <span className="hp-ny-count__sub">Рулетка фильмов • Зимняя коллекция 4K</span>
-            </div>
+            <span className="hp-ny-count__dot" aria-hidden="true">❄</span>
+            <span className="hp-ny-count__title">Зимний киномарафон</span>
+            <span className="hp-ny-count__sub">Коллекция и рулетка</span>
           </div>
 
           <div className="hp-ny-count__right">
-            <div className="hp-ny-count__timer">
-              <div className="hp-ny-count__unit">
-                <b>{nyTime.d}</b>
-                <i>дн</i>
-              </div>
-              <span className="hp-ny-count__sep">:</span>
-              <div className="hp-ny-count__unit">
-                <b>{String(nyTime.h).padStart(2, '0')}</b>
-                <i>ч</i>
-              </div>
-              <span className="hp-ny-count__sep">:</span>
-              <div className="hp-ny-count__unit">
-                <b>{String(nyTime.m).padStart(2, '0')}</b>
-                <i>м</i>
-              </div>
-              <span className="hp-ny-count__sep">:</span>
-              <div className="hp-ny-count__unit hp-ny-count__unit--sec">
-                <b>{String(nyTime.s).padStart(2, '0')}</b>
-                <i>с</i>
-              </div>
-            </div>
-
-            <span className="hp-ny-count__cta">
-              <span>Открыть</span>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 12h14M13 5l7 7-7 7" />
-              </svg>
+            <span className="hp-ny-count__timer">
+              {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
             </span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-ny-count__arrow">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </div>
         </button>
       )}

@@ -28,55 +28,55 @@ const VISUAL_SEASONS: Array<{
   shortName: string;
   sub: string;
   emoji: string;
-  accent: string;
+  dotColor: string;
 }> = [
   {
     id: 'winter',
-    name: 'Супер Новогодняя',
+    name: 'Зимний Кристалл',
     shortName: 'Зима',
-    sub: 'Морозный кристалл, Санта и гирлянда',
-    emoji: '🎄',
-    accent: 'linear-gradient(180deg, #7dd3fc 0%, #c084fc 50%, #f43f5e 100%)',
+    sub: 'Морозный кристалл и мягкий снег',
+    emoji: '❄',
+    dotColor: '#7dd3fc',
   },
   {
     id: 'spring',
-    name: 'Неоновая Сакура',
-    shortName: 'Сакура',
-    sub: 'Цветущий Токио и лепестки сакуры',
-    emoji: '🌸',
-    accent: 'linear-gradient(180deg, #f9a8d4 0%, #ec4899 55%, #a855f7 100%)',
+    name: 'Сакура',
+    shortName: 'Весна',
+    sub: 'Тонкие лепестки и розовый свет',
+    emoji: '❀',
+    dotColor: '#f472b6',
   },
   {
     id: 'summer',
-    name: 'Солнечная Лазурь',
-    shortName: 'Лазурь',
-    sub: 'Бирюзовый океан и золотые блики',
-    emoji: '🌞',
-    accent: 'linear-gradient(180deg, #fde047 0%, #38bdf8 55%, #0284c7 100%)',
+    name: 'Лазурь',
+    shortName: 'Лето',
+    sub: 'Тёплые блики и морской бриз',
+    emoji: '☀',
+    dotColor: '#fbbf24',
   },
   {
     id: 'autumn',
-    name: 'Тёплый Янтарь',
-    shortName: 'Янтарь',
-    sub: 'Бархатный листопад и уютный свет',
-    emoji: '🍁',
-    accent: 'linear-gradient(180deg, #fdba74 0%, #f97316 55%, #b45309 100%)',
+    name: 'Янтарь',
+    shortName: 'Осень',
+    sub: 'Бархатный листопад и уютный тон',
+    emoji: '✦',
+    dotColor: '#fb923c',
   },
   {
     id: 'none',
-    name: 'Обсидиан PRO',
-    shortName: 'PRO',
-    sub: 'Эталонный тёмный кинозал',
-    emoji: '✦',
-    accent: 'linear-gradient(180deg, #d8b4fe 0%, #a855f7 55%, #6366f1 100%)',
+    name: 'Обсидиан',
+    shortName: 'База',
+    sub: 'Чистый тёмный кинозал без эффектов',
+    emoji: '●',
+    dotColor: '#fb7185',
   },
   {
     id: 'auto',
     name: 'Авто-сезон',
     shortName: 'Авто',
     sub: `По календарю (${detectSeason().label})`,
-    emoji: '⚡',
-    accent: 'linear-gradient(180deg, #6ee7b7 0%, #10b981 55%, #0ea5e9 100%)',
+    emoji: '◎',
+    dotColor: '#a78bfa',
   },
 ];
 
@@ -104,20 +104,20 @@ const ProfilePage: React.FC = () => {
   const activeChoice: SeasonId | 'auto' = seasonAuto ? 'auto' : currentSeasonId;
 
   const switchSeason = (id: SeasonId | 'auto') => {
-    haptic('medium');
+    haptic('light');
     setStoredSeason(id);
     const next = getStoredSeason();
     applySeason(next.season);
     setSeasonState(next);
   };
 
-  /* Тумблер сезонных эффектов (снег/лепестки/листья) */
+  /* Тумблер сезонных эффектов */
   const [fxOff, setFxOff] = useState(() => {
     try { return localStorage.getItem('zenova_fx_off') === '1'; } catch { return false; }
   });
 
   const toggleFx = () => {
-    haptic('medium');
+    haptic('light');
     const next = !fxOff;
     setFxOff(next);
     try { localStorage.setItem('zenova_fx_off', next ? '1' : '0'); } catch {}
@@ -130,7 +130,7 @@ const ProfilePage: React.FC = () => {
   });
 
   const toggleGarland = () => {
-    haptic('medium');
+    haptic('light');
     const next = !garlandOff;
     setGarlandOff(next);
     try { localStorage.setItem('zenova_garland_off', next ? '1' : '0'); } catch {}
@@ -167,7 +167,6 @@ const ProfilePage: React.FC = () => {
     ? '/zenova-mask-winter.png'
     : '/zenova-mask-default.png';
 
-  /* Элементы интерактивного дневника */
   const diaryMovies = (() => {
     if (diaryTab === 'favorites') return favorites;
     return trackedList
@@ -177,46 +176,46 @@ const ProfilePage: React.FC = () => {
 
   const groups: MenuGroup[] = [
     {
-      title: 'ЭКОСИСТЕМА И СЕРВИСЫ ZENOVA',
+      title: 'ЭКОСИСТЕМА ZENOVA',
       items: [
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fbbf24" stroke="#fbbf24" strokeWidth="1">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M5 16L3 5L8.5 10L12 4L15.5 10L21 5L19 16H5Z" />
-              <rect x="4" y="18" width="16" height="2" rx="1" />
+              <line x1="4" y1="19" x2="20" y2="19" />
             </svg>
           ),
-          label: effectivePremium ? 'ZENOVA VIP PRO Активен' : 'Оформить ZENOVA PRO',
-          sub: effectivePremium ? '4K потоки · Без рекламы · Приоритетный CDN' : 'Без рекламы · 4K HDR · Все привилегии',
+          label: effectivePremium ? 'ZENOVA PRO Активен' : 'Привилегии ZENOVA PRO',
+          sub: effectivePremium ? '4K потоки · Без рекламы · Приоритетный доступ' : '4K HDR · Без рекламы · Все возможности',
           action: () => navigate('/premium'),
           highlight: !effectivePremium,
         },
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="9" />
-              <circle cx="12" cy="12" r="3.5" />
+              <circle cx="12" cy="12" r="3.2" />
             </svg>
           ),
-          label: 'Карусель Кино-Вселенных',
+          label: 'Кино-Вселенные',
           sub: 'Netflix · Disney+ · HBO Max · Apple TV+ · Marvel · A24',
           action: () => openSideMenu(),
         },
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
               <path d="M9 18V5l12-2v13" />
               <circle cx="6" cy="18" r="3" />
               <circle cx="18" cy="16" r="3" />
             </svg>
           ),
-          label: 'Музыка ZENOVA PRO',
+          label: 'Музыка и Саундтреки',
           sub: 'Мировые хиты · Саундтреки · Моя Волна',
           action: () => navigate('/music'),
         },
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
               <path d="M12 3.2 14.1 9.8l6.7 2.2-6.7 2.2L12 20.8l-2.1-6.6L3.2 12l6.7-2.2L12 3.2Z" />
             </svg>
           ),
@@ -226,13 +225,13 @@ const ProfilePage: React.FC = () => {
         },
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2Z" />
               <polyline points="14 2 14 8 20 8" />
             </svg>
           ),
           label: 'Пользовательское соглашение',
-          sub: 'Правила сервиса и защита правообладателей',
+          sub: 'Правила сервиса и информация для правообладателей',
           action: () => {
             haptic('light');
             setShowRules(true);
@@ -244,17 +243,17 @@ const ProfilePage: React.FC = () => {
 
   if (isAdminUser) {
     groups.push({
-      title: 'АДМИНИСТРИРОВАНИЕ',
+      title: 'УПРАВЛЕНИЕ',
       items: [
         {
           icon: (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f472b6" strokeWidth="1.9" strokeLinecap="round">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
             </svg>
           ),
           label: role === 'moderator' && user?.username !== 'ZenovaAdmin' ? 'Панель модератора' : 'Панель администратора',
-          sub: 'Управление пользователями и контентом',
+          sub: 'Управление пользователями и каталогом',
           action: () => navigate('/admin'),
         },
       ],
@@ -263,13 +262,12 @@ const ProfilePage: React.FC = () => {
 
   return (
     <div className="pf page">
-      {/* Cyber Blueprint Grid Background */}
       <div className="pf__bg" aria-hidden="true" />
 
-      {/* ═════ 1. TALL ROUNDED PASTEL-LILAC 3D SHOWCASE STAGE (Pinterest 888405463989126482) ═════ */}
+      {/* ═════ 1. MINIMALIST DARK-OBSIDIAN 3D SHOWCASE STAGE ═════ */}
       <section className="pf-showcase">
         <div className="pf-stage">
-          {/* Top-left cutout notch with circular back button */}
+          {/* Top-left notched corner button */}
           <div className="pf-stage__notch pf-stage__notch--tl">
             <button
               type="button"
@@ -280,50 +278,50 @@ const ProfilePage: React.FC = () => {
               }}
               aria-label="На главную"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 12H5M12 19l-7-7 7-7" />
               </svg>
             </button>
           </div>
 
-          {/* Top-right cutout notch with circular VIP/bookmark button */}
+          {/* Top-right notched corner button */}
           <div className="pf-stage__notch pf-stage__notch--tr">
             <button
               type="button"
               className="pf-stage__corner-btn"
               onClick={() => {
-                haptic('medium');
-                navigate('/premium');
+                haptic('light');
+                navigate('/favorites');
               }}
-              aria-label="PRO Привилегии"
+              aria-label="Избранное"
             >
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
               </svg>
             </button>
           </div>
 
-          {/* Ambient glow rings inside lilac stage */}
+          {/* Subtle Concentric Rings */}
           <div className="pf-stage__halo" aria-hidden="true" />
 
-          {/* Top floating serial badge */}
+          {/* Top Minimalist Serial Tag */}
           <div className="pf-stage__serial">
-            <span>ZENOVA EDITION</span>
+            <span>ZENOVA PASS</span>
             <b>#{String(user?.id || 2027).slice(-4).padStart(4, '0')}</b>
           </div>
 
-          {/* 3D Character Mascot Showcase */}
+          {/* 3D Mascot Showcase */}
           <div className="pf-stage__figure-wrap">
             <img
               src={heroMaskSrc}
-              alt="ZENOVA 3D Character"
+              alt="ZENOVA Emblem"
               className="pf-stage__figure"
               draggable={false}
             />
             <div className="pf-stage__pedestal-shadow" aria-hidden="true" />
           </div>
 
-          {/* Bottom-left frosted user pill (exact match to Pinterest reference) */}
+          {/* Bottom-left frosted user pill */}
           <div className="pf-stage__user-pill">
             <div className="pf-stage__user-avatar">
               {user?.photo_url ? (
@@ -335,7 +333,7 @@ const ProfilePage: React.FC = () => {
             <div className="pf-stage__user-copy">
               <span className="pf-stage__user-handle">{username}</span>
               {(isAdminUser || effectivePremium) && (
-                <span className="pf-stage__user-verified">✓ PRO</span>
+                <span className="pf-stage__user-verified">PRO</span>
               )}
             </div>
           </div>
@@ -346,11 +344,11 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* ═════ 2. DARK SLATE RANK BAR (Current Bid / Rank row from reference) ═════ */}
+        {/* ═════ 2. MINIMALIST RANK BAR ═════ */}
         <div className="pf-rank-bar">
           <div className="pf-rank-bar__left">
             <span className="pf-rank-bar__diamond" aria-hidden="true">◆</span>
-            <span>Current Rank</span>
+            <span>Ранг профиля</span>
           </div>
           <div className="pf-rank-bar__right">
             <strong>{rankTitle}</strong>
@@ -358,64 +356,59 @@ const ProfilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* ═════ 3. 2-COLUMN INFO & DIGITAL TIMER CARD (Name | Ending In + Description) ═════ */}
+        {/* ═════ 3. 2-COLUMN INFO & STATUS CARD ═════ */}
         <div className="pf-meta-card">
           <div className="pf-meta-card__top">
             <div className="pf-meta-card__col">
-              <span className="pf-meta-card__label">Киноман</span>
+              <span className="pf-meta-card__label">Участник</span>
               <strong className="pf-meta-card__value">{displayName}</strong>
             </div>
             <div className="pf-meta-card__divider" />
             <div className="pf-meta-card__col pf-meta-card__col--right">
               <span className="pf-meta-card__label">
-                {effectivePremium ? 'PRO Активен' : 'Статус доступа'}
+                {effectivePremium ? 'Подписка' : 'Прогресс'}
               </span>
               <strong className="pf-meta-card__clock">
                 {effectivePremium
-                  ? (daysLeft ? `${String(daysLeft).padStart(2, '0')}d : 24h : 00m` : 'UNLIMITED • 4K')
-                  : `0${cineLevel}L : ${String(levelProgress).padStart(2, '0')}% : XP`}
+                  ? (daysLeft ? `${String(daysLeft).padStart(2, '0')}Д : АКТИВЕН` : 'PRO · 4K HDR')
+                  : `LVL ${cineLevel} · ${levelProgress}%`}
               </strong>
             </div>
           </div>
 
           <div className="pf-meta-card__desc">
             <div className="pf-meta-card__desc-head">
-              <span>Description</span>
+              <span>Статус аккаунта</span>
               <b>{levelProgress}% до LVL {cineLevel + 1}</b>
             </div>
-            <p>
-              {effectivePremium
-                ? 'Полный доступ к 4K HDR потокам, всем 7 Кино-Вселенным и приоритетному серверу без рекламы.'
-                : 'Смотрите фильмы, сохраняйте избранное и повышайте ранг в клубе ZENOVA.'}
-            </p>
             <div className="pf-meta-card__xp-track">
               <div className="pf-meta-card__xp-fill" style={{ width: `${levelProgress}%` }} />
             </div>
           </div>
         </div>
 
-        {/* ═════ 4. PILL SLIDER CTA BAR ("Place a bid >>>" style from reference) ═════ */}
+        {/* ═════ 4. MINIMALIST SLIDER CTA BAR ═════ */}
         <button
           type="button"
           className="pf-slider-cta"
           onClick={() => {
-            haptic('medium');
+            haptic('light');
             navigate('/premium');
           }}
         >
           <span className="pf-slider-cta__pill">
-            {effectivePremium ? '👑 VIP Привилегии' : '👑 PRO Доступ'}
+            {effectivePremium ? 'Привилегии PRO' : 'Открыть PRO Доступ'}
           </span>
           <span className="pf-slider-cta__chevrons" aria-hidden="true">
-            <i>›</i><i>›</i><i>›</i><i>›</i>
+            <i>›</i><i>›</i><i>›</i>
           </span>
         </button>
       </section>
 
-      {/* ═════ 5. DISCOVER HEADER & PILL TABS (Left screen of reference) ═════ */}
+      {/* ═════ 5. DISCOVER HEADER & PILL TABS ═════ */}
       <section className="pf-discover">
         <div className="pf-discover__head">
-          <h2 className="pf-discover__title">Коллекция и Студия</h2>
+          <h2 className="pf-discover__title">Пространство</h2>
           <button
             type="button"
             className="pf-discover__icon-btn"
@@ -425,7 +418,7 @@ const ProfilePage: React.FC = () => {
             }}
             aria-label="Открыть избранное"
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 17L17 7M17 7H8M17 7V16" />
             </svg>
           </button>
@@ -433,10 +426,10 @@ const ProfilePage: React.FC = () => {
 
         <div className="pf-pill-tabs">
           {([
-            { id: 'all', label: 'Все' },
+            { id: 'all', label: 'Обзор' },
             { id: 'diary', label: 'Дневник' },
-            { id: 'seasons', label: 'Сезоны' },
-            { id: 'services', label: 'Сервисы' },
+            { id: 'seasons', label: 'Атмосфера' },
+            { id: 'services', label: 'Разделы' },
           ] as const).map((tabItem) => (
             <button
               key={tabItem.id}
@@ -452,105 +445,110 @@ const ProfilePage: React.FC = () => {
           ))}
         </div>
 
-        {/* ═════ 6. 2×2 VIBRANT PASTEL-NEON BENTO GRID (Exact match to left screen of reference) ═════ */}
+        {/* ═════ 6. 2×2 SMOKED-GLASS BENTO GRID (Minimalist Dark-Luxury) ═════ */}
         {sectionFilter === 'all' && (
           <div className="pf-neon-grid">
-            {/* Card 1: Pastel Lime-Yellow */}
             <button
               type="button"
-              className="pf-neon-card pf-neon-card--lime"
+              className="pf-neon-card pf-neon-card--watched"
               onClick={() => {
                 haptic('light');
                 navigate('/favorites');
               }}
             >
               <div className="pf-neon-card__top">
-                <span className="pf-neon-card__stat">
-                  <i>🎬</i> {watchHistory.length}
-                </span>
+                <span className="pf-neon-card__stat">{watchHistory.length} фильмов</span>
                 <span className="pf-neon-card__arrow">↗</span>
               </div>
-              <div className="pf-neon-card__art">🎞️</div>
+              <div className="pf-neon-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3" />
+                </svg>
+              </div>
               <div className="pf-neon-card__bottom">
                 <strong>Просмотрено</strong>
-                <span>История кинозала</span>
+                <span>История просмотров</span>
               </div>
             </button>
 
-            {/* Card 2: Pastel Pink-Rose */}
             <button
               type="button"
-              className="pf-neon-card pf-neon-card--pink"
+              className="pf-neon-card pf-neon-card--fav"
               onClick={() => {
                 haptic('light');
                 navigate('/favorites');
               }}
             >
               <div className="pf-neon-card__top">
-                <span className="pf-neon-card__stat">
-                  <i>❤️</i> {favorites.length}
-                </span>
+                <span className="pf-neon-card__stat">{favorites.length} в списке</span>
                 <span className="pf-neon-card__arrow">↗</span>
               </div>
-              <div className="pf-neon-card__art">💎</div>
+              <div className="pf-neon-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
               <div className="pf-neon-card__bottom">
                 <strong>Избранное</strong>
-                <span>Золотая коллекция</span>
+                <span>Личная коллекция</span>
               </div>
             </button>
 
-            {/* Card 3: Pastel Cyan-Mint */}
             <button
               type="button"
-              className="pf-neon-card pf-neon-card--mint"
+              className="pf-neon-card pf-neon-card--worlds"
               onClick={() => {
-                haptic('medium');
+                haptic('light');
                 openSideMenu();
               }}
             >
               <div className="pf-neon-card__top">
-                <span className="pf-neon-card__stat">
-                  <i>🌐</i> 7 миров
-                </span>
+                <span className="pf-neon-card__stat">7 платформ</span>
                 <span className="pf-neon-card__arrow">↗</span>
               </div>
-              <div className="pf-neon-card__art">🪐</div>
+              <div className="pf-neon-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="9" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              </div>
               <div className="pf-neon-card__bottom">
                 <strong>Вселенные</strong>
                 <span>Netflix · Disney+ · HBO</span>
               </div>
             </button>
 
-            {/* Card 4: Pastel Violet-Sky */}
             <button
               type="button"
-              className="pf-neon-card pf-neon-card--violet"
+              className="pf-neon-card pf-neon-card--winter"
               onClick={() => {
-                haptic('medium');
+                haptic('light');
                 navigate('/new-year');
               }}
             >
               <div className="pf-neon-card__top">
-                <span className="pf-neon-card__stat">
-                  <i>🎄</i> 2027
-                </span>
+                <span className="pf-neon-card__stat">Сезон</span>
                 <span className="pf-neon-card__arrow">↗</span>
               </div>
-              <div className="pf-neon-card__art">✨</div>
+              <div className="pf-neon-card__icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07L19.07 4.93" />
+                </svg>
+              </div>
               <div className="pf-neon-card__bottom">
-                <strong>Марафон</strong>
-                <span>Новогодняя рулетка</span>
+                <strong>Зимний марафон</strong>
+                <span>Подборка и таймер</span>
               </div>
             </button>
           </div>
         )}
       </section>
 
-      {/* ═════ 7. VERTICAL OVAL CAPSULES — SEASONAL STUDIO (Right screen of reference) ═════ */}
+      {/* ═════ 7. VERTICAL OVAL CAPSULES — SEASONAL ATMOSPHERE ═════ */}
       {(sectionFilter === 'all' || sectionFilter === 'seasons') && (
         <section className="pf-section">
           <div className="pf-section__head">
-            <h3 className="pf-section__title">Сезонная Атмосфера</h3>
+            <h3 className="pf-section__title">Атмосфера</h3>
             <span className="pf-section__sub">{seasonState.season.label}</span>
           </div>
 
@@ -562,12 +560,11 @@ const ProfilePage: React.FC = () => {
                   key={s.id}
                   type="button"
                   className={`pf-capsule ${isSelected ? 'active' : ''}`}
-                  style={{ '--cap-accent': s.accent } as React.CSSProperties}
+                  style={{ '--cap-dot': s.dotColor } as React.CSSProperties}
                   onClick={() => switchSeason(s.id)}
                 >
                   <span className="pf-capsule__orb">{s.emoji}</span>
                   <span className="pf-capsule__chevrons" aria-hidden="true">
-                    <i>⌃</i>
                     <i>⌃</i>
                     <i>⌃</i>
                   </span>
@@ -587,7 +584,7 @@ const ProfilePage: React.FC = () => {
                 <span className="pf__season-toggle__thumb" />
               </span>
               <span className="pf__season-toggle__label">
-                {fxOff ? '❄️ 3D-снегопад и частицы выключены' : '❄️ 3D-снегопад, кристаллы и лепестки включены'}
+                {fxOff ? 'Фоновые сезонные частицы выключены' : 'Фоновые сезонные частицы включены'}
               </span>
             </button>
 
@@ -601,7 +598,7 @@ const ProfilePage: React.FC = () => {
                   <span className="pf__season-toggle__thumb" />
                 </span>
                 <span className="pf__season-toggle__label">
-                  {garlandOff ? '💡 Новогодняя гирлянда скрыта' : '💡 Светящаяся новогодняя гирлянда включена'}
+                  {garlandOff ? 'Верхняя гирлянда скрыта' : 'Верхняя гирлянда включена'}
                 </span>
               </button>
             )}
@@ -698,7 +695,7 @@ const ProfilePage: React.FC = () => {
                         <span className="pf__row-sub">{item.sub}</span>
                       </div>
                       <span className="pf__arrow">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                       </span>
                     </div>
                   </button>
@@ -745,7 +742,7 @@ const ProfilePage: React.FC = () => {
 
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
 
-      <div className="pf__footer">ZENOVA PRO · DIGITAL CINEMA CLUB</div>
+      <div className="pf__footer">ZENOVA · DIGITAL CINEMA</div>
     </div>
   );
 };

@@ -1,186 +1,245 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   ZENOVA SIDE MENU — CURVED ARC / WHEEL CAROUSEL OF UNIVERSES
-   Exact Reference: https://ru.pinterest.com/pin/744360644697474986/
+   ZENOVA SIDE MENU — MINIMALIST EDGE TRIGGER & SCULPTURAL ORBITAL DIAL
+   Reference: https://ru.pinterest.com/pin/744360644697474986/
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── 1. Floating Left-Edge Pull Handle (Always discoverable, never intrusive) ── */
+.sm-edge-tab {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 750;
+  width: 22px;
+  height: 78px;
+  padding: 0;
+  border-radius: 0 16px 16px 0;
+  background: rgba(16, 16, 24, 0.76);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-left: none;
+  box-shadow:
+    6px 0 24px rgba(0, 0, 0, 0.55),
+    inset -1px 0 0 rgba(255, 255, 255, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    width 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.24s ease,
+    border-color 0.24s ease,
+    color 0.24s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sm-edge-tab:hover {
+  width: 28px;
+  background: rgba(22, 22, 34, 0.9);
+  border-color: rgba(244, 63, 94, 0.45);
+  color: #ffffff;
+}
+
+.sm-edge-tab:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Soft breathing iridescent line along the outer curved edge */
+.sm-edge-tab__glow {
+  position: absolute;
+  right: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, #fb7185, #c084fc, transparent);
+  opacity: 0.85;
+  animation: smEdgePulse 3s ease-in-out infinite;
+}
+
+@keyframes smEdgePulse {
+  0%, 100% { opacity: 0.45; transform: scaleY(0.85); }
+  50% { opacity: 1; transform: scaleY(1.08); }
+}
+
+.sm-edge-tab__dots {
+  display: flex;
+  flex-direction: column;
+  gap: 3.5px;
+}
+
+.sm-edge-tab__dots i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.sm-edge-tab__chev {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.85;
+}
+
+/* ── 2. Fullscreen Blurred Backdrop when Orbital Dial is Open ── */
 .sm-overlay {
   position: fixed;
   inset: 0;
   z-index: 2600;
-  background: rgba(4, 6, 14, 0.76);
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  background: rgba(6, 6, 10, 0.68);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
   display: flex;
+  align-items: center;
   justify-content: flex-start;
-  animation: smOverlayIn 0.24s ease both;
+  animation: smFadeIn 0.24s ease both;
 }
 
-@keyframes smOverlayIn {
+@keyframes smFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
-.sm-carousel-drawer {
+/* ── 3. Sculptural Curved Arc Scene (No boxy drawer!) ── */
+.sm-arc-scene {
   position: relative;
-  width: min(94vw, 390px);
-  height: 100%;
-  background:
-    radial-gradient(circle at 0% 50%, var(--active-glow, rgba(229, 9, 20, 0.24)) 0%, transparent 65%),
-    linear-gradient(165deg, #0b0e18 0%, #060810 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 24px 0 80px rgba(0, 0, 0, 0.85);
+  width: min(100vw, 430px);
+  height: 640px;
+  max-height: 100vh;
   display: flex;
-  flex-direction: column;
-  padding-top: max(18px, var(--header-safe-top, 18px));
-  padding-bottom: max(22px, env(safe-area-inset-bottom, 20px));
-  overflow: hidden;
+  align-items: center;
   user-select: none;
   touch-action: none;
-  animation: smDrawerSlide 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: smArcIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes smDrawerSlide {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(0); }
+@keyframes smArcIn {
+  from {
+    opacity: 0;
+    transform: translateX(-48px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
 }
 
-/* ── Top Header ── */
-.sm-carousel__top {
-  position: relative;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 18px 10px;
-}
-
-.sm-carousel__title-block {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sm-carousel__kicker {
-  font-size: 9.5px;
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  color: var(--active-accent, #ef4444);
-  text-transform: uppercase;
-}
-
-.sm-carousel__title {
-  margin: 0;
-  font-size: 19px;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -0.02em;
-}
-
-.sm-carousel__close {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.16s ease, background 0.18s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.sm-carousel__close:hover {
-  background: rgba(255, 255, 255, 0.12);
-}
-.sm-carousel__close:active {
-  transform: scale(0.9);
-}
-
-/* ── Curved Arc Stage ── */
-.sm-wheel-stage {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  min-height: 500px;
-  overflow: hidden;
-}
-
-.sm-wheel-arc-svg {
+.sm-dial-svg {
   position: absolute;
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 240px;
-  height: 580px;
+  width: 360px;
+  height: 640px;
   pointer-events: none;
   z-index: 1;
+  filter: drop-shadow(16px 0 44px rgba(0, 0, 0, 0.75));
 }
 
-/* Glowing Focus Ring at Center of the Arc (exact match to Pinterest reference) */
-.sm-wheel-focus-ring {
+/* ── Inner Hub Core (Left inside the semi-circle) ── */
+.sm-hub-core {
   position: absolute;
-  left: 110px;
+  left: 14px;
   top: 50%;
-  width: 88px;
-  height: 88px;
+  transform: translateY(-50%);
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  cursor: pointer;
+}
+
+.sm-hub-core__count {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.sm-hub-core__count i {
+  font-style: normal;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.sm-hub-core__label {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--st-accent, #fb7185);
+}
+
+.sm-hub-core__sub {
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+/* ── Center 3-o'clock Focus Lens on the Orbital Track (cx = -40 + 196 = 156px) ── */
+.sm-focus-lens {
+  position: absolute;
+  left: 156px;
+  top: 50%;
+  width: 84px;
+  height: 84px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 2.5px solid #ffffff;
+  border: 1.8px solid rgba(255, 255, 255, 0.88);
   box-shadow:
-    0 0 24px var(--active-accent, #ef4444),
-    inset 0 0 18px var(--active-glow, rgba(239, 68, 68, 0.35));
+    0 0 28px var(--st-glow, rgba(244, 63, 94, 0.35)),
+    inset 0 0 18px var(--st-glow, rgba(244, 63, 94, 0.22));
   pointer-events: none;
-  z-index: 12;
-  transition: box-shadow 0.3s ease;
+  z-index: 11;
+  transition: box-shadow 0.32s ease;
 }
 
-.sm-wheel-focus-ring__halo {
+.sm-focus-lens__ring {
   position: absolute;
-  inset: -8px;
+  inset: -6px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  animation: smFocusPulse 2.4s ease-in-out infinite;
+  border: 1px solid rgba(255, 255, 255, 0.18);
 }
 
-@keyframes smFocusPulse {
-  0%, 100% { transform: scale(0.96); opacity: 0.45; }
-  50% { transform: scale(1.06); opacity: 0.9; }
-}
-
-/* ── Rotating Circular Studio Orbs along the Arc ── */
-.sm-wheel-orbs {
+/* ── Rotating Circular Studio Medallions ── */
+.sm-medallions-layer {
   position: absolute;
   left: 0;
   top: 50%;
-  width: 220px;
+  width: 260px;
   height: 0;
-  z-index: 8;
+  z-index: 10;
 }
 
-.sm-orb {
+.sm-medallion {
   position: absolute;
   left: 0;
   top: 0;
-  width: 72px;
-  height: 72px;
-  margin-left: -36px;
-  margin-top: -36px;
+  width: 68px;
+  height: 68px;
+  margin-left: -34px;
+  margin-top: -34px;
   border-radius: 50%;
   padding: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background:
-    radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.16), rgba(14, 18, 30, 0.95) 70%);
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.12), rgba(17, 17, 25, 0.96) 72%);
   box-shadow:
-    0 12px 26px rgba(0, 0, 0, 0.65),
-    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    0 10px 24px rgba(0, 0, 0, 0.62),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transform: translate3d(var(--orb-x, 110px), var(--orb-y, 0px), 0) scale(var(--orb-scale, 1));
-  opacity: var(--orb-opacity, 1);
+  transform: translate3d(var(--m-x, 156px), var(--m-y, 0px), 0) scale(var(--m-scale, 1));
+  opacity: var(--m-opacity, 1);
   transition:
     transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
     opacity 0.32s ease,
@@ -189,16 +248,16 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.sm-orb.is-active {
+.sm-medallion.is-active {
   background:
-    radial-gradient(circle at 30% 25%, var(--orb-glow, rgba(229, 9, 20, 0.42)), #0c0f1c 75%);
-  border-color: var(--orb-accent, #ffffff);
+    radial-gradient(circle at 30% 25%, var(--m-glow, rgba(244, 63, 94, 0.32)), #111119 76%);
+  border-color: rgba(255, 255, 255, 0.45);
   box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.8),
-    0 0 24px var(--orb-glow, rgba(229, 9, 20, 0.55));
+    0 14px 32px rgba(0, 0, 0, 0.78),
+    0 0 22px var(--m-glow, rgba(244, 63, 94, 0.4));
 }
 
-.sm-orb__inner {
+.sm-medallion__inner {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -206,153 +265,138 @@
   height: 84%;
   border-radius: 50%;
   overflow: hidden;
-  padding: 4px;
+  padding: 3px;
 }
 
-/* Scale wordmarks neatly inside circular orbs */
-.sm-orb__inner .swm {
-  transform: scale(0.76);
+.sm-medallion__inner .swm {
+  transform: scale(0.72);
   transform-origin: center center;
 }
 
-/* ── Right-Side Active Studio Spotlight Panel ── */
-.sm-spotlight {
-  position: relative;
-  z-index: 15;
-  margin-left: auto;
-  width: calc(100% - 172px);
-  padding: 0 16px 0 6px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 14px;
+/* ── Minimalist Floating Callout Pill to the Right of the Focus Lens ── */
+.sm-active-callout {
+  position: absolute;
+  left: 210px;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 14;
 }
 
-.sm-spotlight__controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.sm-spotlight__step-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  border: none;
-  color: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-.sm-spotlight__step-btn:active {
-  transform: scale(0.9);
-  background: rgba(255, 255, 255, 0.18);
-}
-
-.sm-spotlight__counter {
-  font-size: 11px;
-  font-weight: 800;
-  color: rgba(226, 232, 240, 0.78);
-  font-variant-numeric: tabular-nums;
-}
-
-.sm-spotlight__card {
+.sm-active-callout__card {
   width: 100%;
-  padding: 20px 14px 18px;
-  border-radius: 26px;
-  background:
-    radial-gradient(120% 120% at 50% 0%, var(--active-glow, rgba(229, 9, 20, 0.28)) 0%, rgba(15, 19, 32, 0.92) 70%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 13px 14px;
+  border-radius: 22px;
+  background: rgba(18, 18, 26, 0.84);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.11);
   box-shadow:
-    0 20px 44px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 16px 38px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
+  justify-content: space-between;
   gap: 10px;
+  text-align: left;
   cursor: pointer;
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease;
+  transition: transform 0.2s ease, border-color 0.22s ease;
+  -webkit-tap-highlight-color: transparent;
 }
-.sm-spotlight__card:hover {
-  border-color: var(--active-accent, #ffffff);
+
+.sm-active-callout__card:hover {
+  border-color: rgba(255, 255, 255, 0.24);
 }
-.sm-spotlight__card:active {
+
+.sm-active-callout__card:active {
   transform: scale(0.96);
 }
 
-.sm-spotlight__badge {
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  font-size: 9px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  color: #f8fafc;
+.sm-active-callout__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
-.sm-spotlight__wordmark {
-  min-height: 44px;
+.sm-active-callout__kicker {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  color: var(--st-accent, #fb7185);
+  text-transform: uppercase;
+}
+
+.sm-active-callout__name {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sm-active-callout__tag {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.48);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+
+.sm-active-callout__go {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
-.sm-spotlight__tagline {
-  margin: 0;
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: rgba(226, 232, 240, 0.76);
-  font-weight: 500;
-}
-
-.sm-spotlight__cta {
-  margin-top: 4px;
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 14px;
-  background: var(--active-accent, #e50914);
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 800;
-  display: inline-flex;
+/* ── Subtle Close Button ── */
+.sm-arc-close {
+  position: absolute;
+  top: max(18px, var(--header-safe-top, 18px));
+  right: 18px;
+  z-index: 20;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(18, 18, 26, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.78);
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  box-shadow: 0 8px 20px var(--active-glow, rgba(229, 9, 20, 0.4));
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.18s ease;
 }
 
-.sm-spotlight__hint {
-  font-size: 10.5px;
-  font-weight: 600;
-  color: rgba(148, 163, 184, 0.65);
-  text-align: center;
-  line-height: 1.35;
-  max-width: 170px;
+.sm-arc-close:active {
+  transform: scale(0.9);
 }
 
-@media (max-width: 360px) {
-  .sm-wheel-focus-ring {
-    left: 96px;
-    width: 78px;
-    height: 78px;
+@media (max-width: 370px) {
+  .sm-focus-lens {
+    left: 140px;
+    width: 76px;
+    height: 76px;
   }
-  .sm-orb {
-    width: 64px;
-    height: 64px;
-    margin-left: -32px;
-    margin-top: -32px;
-    transform: translate3d(calc(var(--orb-x, 110px) - 14px), var(--orb-y, 0px), 0) scale(var(--orb-scale, 1));
+  .sm-medallion {
+    width: 62px;
+    height: 62px;
+    margin-left: -31px;
+    margin-top: -31px;
+    transform: translate3d(calc(var(--m-x, 156px) - 16px), var(--m-y, 0px), 0) scale(var(--m-scale, 1));
   }
-  .sm-spotlight {
-    width: calc(100% - 150px);
+  .sm-active-callout {
+    left: 188px;
   }
 }

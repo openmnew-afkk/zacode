@@ -18,7 +18,10 @@ const tabs: TabDef[] = [
     label: 'Главная',
     icon: (
       <svg viewBox="0 0 24 24" fill="none">
-        <path d="M4 10.4 12 4l8 6.4V19a1.8 1.8 0 0 1-1.8 1.8h-3.8v-5.2a1.4 1.4 0 0 0-1.4-1.4h-2a1.4 1.4 0 0 0-1.4 1.4v5.2H5.8A1.8 1.8 0 0 1 4 19v-8.6Z" />
+        <rect x="3.5" y="3.5" width="7.2" height="7.2" rx="2.2" />
+        <rect x="13.3" y="3.5" width="7.2" height="7.2" rx="2.2" />
+        <rect x="3.5" y="13.3" width="7.2" height="7.2" rx="2.2" />
+        <rect x="13.3" y="13.3" width="7.2" height="7.2" rx="2.2" />
       </svg>
     ),
   },
@@ -88,60 +91,79 @@ const TabBar: React.FC = () => {
     tabs.findIndex((t) => isActive(t.path))
   );
 
+  const activeTab = tabs[activeIndex] || tabs[0];
+
   return (
     <nav
       className={`tab-bar tab-bar--season-${seasonId}`}
       style={{ '--active-idx': activeIndex } as React.CSSProperties}
       aria-label="Основная навигация"
     >
-      <div className="tab-bar__capsule">
-        {/* Плавная неоновая волна-арка в стиле референса Pinterest (огибает активную вкладку сверху и идёт по низу) */}
-        <div className="tab-bar__arch-viewport" aria-hidden="true">
+      <div className="tab-bar__shell">
+        {/* ── Scalloped Dark-Glass Dock Body with Sliding Concave Cradle Cutout (Pinterest 627196685586474665) ── */}
+        <div className="tab-bar__cradle-viewport" aria-hidden="true">
           <svg
-            className="tab-bar__arch-svg"
-            viewBox="0 0 1500 68"
+            className="tab-bar__cradle-svg"
+            viewBox="0 0 1500 76"
             preserveAspectRatio="none"
           >
             <defs>
-              <linearGradient id="zenovaArchStroke" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="rgba(229, 9, 20, 0.15)" />
-                <stop offset="30%" stopColor="#ff1f3d" />
-                <stop offset="36.6%" stopColor="#ff2a4b" />
-                <stop offset="44%" stopColor="#e50914" />
-                <stop offset="85%" stopColor="rgba(229, 9, 20, 0.25)" />
+              {/* Deep obsidian-velvet body fill matching the app theme */}
+              <linearGradient id="zenovaDockBody" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#171621" stopOpacity="0.96" />
+                <stop offset="100%" stopColor="#0c0b12" stopOpacity="0.98" />
               </linearGradient>
-              <linearGradient id="zenovaArchFill" x1="550" y1="6" x2="550" y2="66" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor="rgba(229, 9, 20, 0.24)" />
-                <stop offset="100%" stopColor="rgba(229, 9, 20, 0.0)" />
+
+              {/* Iridescent shimmering top rim stroke */}
+              <linearGradient id="zenovaDockShimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="rgba(255, 255, 255, 0.07)" />
+                <stop offset="28%" stopColor="rgba(244, 63, 94, 0.35)" />
+                <stop offset="36.6%" stopColor="rgba(253, 164, 175, 0.9)" />
+                <stop offset="45%" stopColor="rgba(192, 132, 252, 0.45)" />
+                <stop offset="100%" stopColor="rgba(255, 255, 255, 0.07)" />
               </linearGradient>
+
+              {/* Soft ambient glow inside the concave dip */}
+              <radialGradient id="zenovaCradleGlow" cx="550" cy="18" r="56" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stopColor="rgba(244, 63, 94, 0.28)" />
+                <stop offset="60%" stopColor="rgba(168, 85, 247, 0.1)" />
+                <stop offset="100%" stopColor="rgba(0, 0, 0, 0)" />
+              </radialGradient>
             </defs>
 
-            {/* Мягкое свечение внутри купола активной вкладки */}
+            {/* Main bar surface with smooth concave dip at x = 550 */}
             <path
-              d="M 492 64 C 512 64, 514 7, 550 7 C 586 7, 588 64, 608 64 Z"
-              fill="url(#zenovaArchFill)"
+              d="M 0 14 L 492 14 C 510 14, 514 54, 550 54 C 586 54, 590 14, 608 14 L 1500 14 L 1500 76 L 0 76 Z"
+              fill="url(#zenovaDockBody)"
             />
 
-            {/* Непрерывная неоновая линия с куполом-аркой над активной иконкой */}
+            {/* Subtle ambient luminescence hugging the concave cradle */}
             <path
-              className="tab-bar__arch-glow"
-              d="M 0 63 L 490 63 C 512 63, 514 7, 550 7 C 586 7, 588 63, 610 63 L 1500 63"
-              fill="none"
-              stroke="url(#zenovaArchStroke)"
-              strokeWidth="4.5"
-              strokeLinecap="round"
+              d="M 480 14 L 492 14 C 510 14, 514 54, 550 54 C 586 54, 590 14, 608 14 L 620 14 L 620 76 L 480 76 Z"
+              fill="url(#zenovaCradleGlow)"
             />
+
+            {/* Specular iridescent top edge & cradle contour */}
             <path
-              className="tab-bar__arch-line"
-              d="M 0 63 L 490 63 C 512 63, 514 7, 550 7 C 586 7, 588 63, 610 63 L 1500 63"
+              d="M 0 14.5 L 492 14.5 C 510 14.5, 514 54, 550 54 C 586 54, 590 14.5, 608 14.5 L 1500 14.5"
               fill="none"
-              stroke="url(#zenovaArchStroke)"
-              strokeWidth="2.3"
+              stroke="url(#zenovaDockShimmer)"
+              strokeWidth="1.6"
               strokeLinecap="round"
             />
           </svg>
         </div>
 
+        {/* ── Floating Iridescent Orb sitting inside the concave cradle ── */}
+        <div className="tab-bar__orb-track" aria-hidden="true">
+          <div className="tab-bar__orb">
+            <span className="tab-bar__orb-shimmer" />
+            <span className="tab-bar__orb-ring" />
+            <span className="tab-bar__orb-icon">{activeTab.icon}</span>
+          </div>
+        </div>
+
+        {/* ── 5 Interactive Tab Buttons ── */}
         <div className="tab-bar__inner">
           {tabs.map((tab) => {
             const active = isActive(tab.path);
@@ -149,9 +171,7 @@ const TabBar: React.FC = () => {
               <button
                 key={tab.path}
                 type="button"
-                className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}${
-                  tab.accent ? ' tab-bar__item--accent' : ''
-                }`}
+                className={`tab-bar__item${active ? ' tab-bar__item--active' : ''}`}
                 onClick={() => {
                   haptic('light');
                   navigate(tab.path);
@@ -162,9 +182,6 @@ const TabBar: React.FC = () => {
                 <span className="tab-bar__icon" aria-hidden="true">
                   {tab.icon}
                 </span>
-
-                {/* Светящаяся красная точка под активной иконкой как на референсе */}
-                <span className="tab-bar__dot" aria-hidden="true" />
 
                 <span className="tab-bar__label">{tab.label}</span>
 

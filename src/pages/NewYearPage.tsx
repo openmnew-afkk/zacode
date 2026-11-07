@@ -30,11 +30,11 @@ function getCountdown(): Countdown {
 }
 
 const HOLIDAY_MOODS = [
-  { id: 'all', label: '✨ Весь марафон', icon: '🎄' },
-  { id: 'family', label: '🎅 Семейное чудо', genre: 10751 },
-  { id: 'comedy', label: '🥂 Новогодняя комедия', genre: 35 },
-  { id: 'fantasy', label: '❄️ Зимняя сказка', genre: 14 },
-  { id: 'romance', label: '💝 Уют и романтика', genre: 10749 },
+  { id: 'all', label: 'Вся коллекция' },
+  { id: 'family', label: 'Семейное', genre: 10751 },
+  { id: 'comedy', label: 'Комедии', genre: 35 },
+  { id: 'fantasy', label: 'Фэнтези', genre: 14 },
+  { id: 'romance', label: 'Романтика', genre: 10749 },
 ];
 
 const NewYearPage: React.FC = () => {
@@ -48,7 +48,6 @@ const NewYearPage: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [activeMood, setActiveMood] = useState('all');
 
-  /* Новогодняя рулетка фильма на вечер */
   const [roulettePick, setRoulettePick] = useState<Movie | null>(null);
   const [spinning, setSpinning] = useState(false);
 
@@ -110,7 +109,7 @@ const NewYearPage: React.FC = () => {
       const randomMovie = source[Math.floor(Math.random() * source.length)];
       setRoulettePick(randomMovie);
       setSpinning(false);
-    }, 650);
+    }, 520);
   };
 
   const loadMoreHoliday = async () => {
@@ -134,122 +133,81 @@ const NewYearPage: React.FC = () => {
 
   return (
     <main className="ny-page page">
-      {/* Северное сияние и падающий снег */}
-      <div className="ny-aurora-bg" aria-hidden="true">
-        <span className="ny-aurora-orb ny-aurora-orb--1" />
-        <span className="ny-aurora-orb ny-aurora-orb--2" />
-        <span className="ny-aurora-orb ny-aurora-orb--3" />
-      </div>
+      <div className="ny-ambient" aria-hidden="true" />
 
-      {/* Верхняя шапка */}
+      {/* ── Минималистичная шапка ── */}
       <header className="ny-header">
         <button className="ny-back" type="button" onClick={() => navigate(-1)} aria-label="Назад">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="m15 18-6-6 6-6" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="m15 18-6-6 6-6" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span>Назад</span>
         </button>
-        <div className="ny-header__pill">
-          <span className="ny-header__dot" />
-          <span>ZENOVA HOLIDAY MARATHON</span>
-        </div>
-        <button
-          type="button"
-          className="ny-music-shortcut"
-          onClick={() => {
-            haptic('light');
-            navigate('/music');
-          }}
-          title="Праздничная музыка"
-        >
-          ♫
-        </button>
+        <span className="ny-header__kicker">WINTER COLLECTION</span>
       </header>
 
-      {/* ═════ WOW HERO КАРТОЧКА С НОВОГОДНЕЙ МАСКОЙ И ТАЙМЕРОМ 2027 ═════ */}
+      {/* ── Эстетичная минималистичная карточка марафона ── */}
       <section className="ny-hero-card" aria-labelledby="ny-title">
-        <div className="ny-hero-card__frost" aria-hidden="true" />
-        <div className="ny-hero-card__garland" aria-hidden="true">
-          <i /><i /><i /><i /><i /><i /><i /><i />
-        </div>
-
         <div className="ny-hero-top">
-          <div className="ny-mascot-stage">
-            <div className="ny-mascot-halo" />
-            <div className="ny-mascot-ring" />
+          <div className="ny-hero__copy">
+            <span className="ny-eyebrow">ЗИМНИЙ СЕЗОН · ZENOVA</span>
+            <h1 id="ny-title">
+              {countdown.celebrating ? 'С Новым годом' : 'Зимний киномарафон'}
+            </h1>
+            <p>
+              Избранная коллекция атмосферного зимнего и праздничного кино для уютного вечера.
+            </p>
+          </div>
+
+          <div className="ny-mascot-minimal">
             <img
               src="/zenova-mask-winter.png"
-              alt="ZENOVA Новогодний маскот"
+              alt=""
               className="ny-mascot-img"
               draggable={false}
             />
-            <span className="ny-mascot-badge">🎄 2027 EDITION</span>
-          </div>
-
-          <div className="ny-hero__copy">
-            <span className="ny-eyebrow">
-              <i /> ЗИМНЯЯ КИНО-СКАЗКА ZENOVA
-            </span>
-            <h1 id="ny-title">
-              {countdown.celebrating ? (
-                <>С Новым <em>2027</em> годом!</>
-              ) : (
-                <>Новогодний <em>Кино-Марафон</em></>
-              )}
-            </h1>
-            <p>
-              Главные рождественские и новогодние шедевры в 4K, праздничная кино-рулетка и живой отсчёт до боя курантов.
-            </p>
           </div>
         </div>
 
-        {/* 3D Ледяной таймер обратного отсчёта */}
-        <div className="ny-countdown" aria-label="Обратный отсчёт до Нового года">
-          <div className="ny-countdown__heading">
-            <span>{countdown.celebrating ? '🥂 Праздник наступил!' : '⏳ До Нового года осталось'}</span>
-            <i />
-          </div>
-          <div className="ny-countdown__units">
-            {[
-              { label: 'ДНЕЙ', value: countdown.days, gold: false },
-              { label: 'ЧАСОВ', value: countdown.hours, gold: false },
-              { label: 'МИНУТ', value: countdown.minutes, gold: false },
-              { label: 'СЕКУНД', value: countdown.seconds, gold: true },
-            ].map((unit) => (
-              <div className={`ny-time ${unit.gold ? 'ny-time--gold' : ''}`} key={unit.label}>
-                <strong>{String(unit.value).padStart(2, '0')}</strong>
-                <span>{unit.label}</span>
-              </div>
-            ))}
-          </div>
+        {/* Сдержанный стеклянный таймер */}
+        <div className="ny-countdown" aria-label="До Нового года">
+          {[
+            { label: 'дней', value: countdown.days },
+            { label: 'часов', value: countdown.hours },
+            { label: 'минут', value: countdown.minutes },
+            { label: 'секунд', value: countdown.seconds, accent: true },
+          ].map((unit) => (
+            <div className={`ny-time ${unit.accent ? 'ny-time--accent' : ''}`} key={unit.label}>
+              <strong>{String(unit.value).padStart(2, '0')}</strong>
+              <span>{unit.label}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Топ-кнопки быстрого действия */}
+        {/* Лаконичные кнопки */}
         <div className="ny-hero-btns">
           <button
             type="button"
-            className={`ny-pro-btn ny-pro-btn--roulette ${spinning ? 'spinning' : ''}`}
+            className="ny-btn ny-btn--primary"
             onClick={spinHolidayRoulette}
           >
-            <span className="ny-pro-btn__shine" aria-hidden="true" />
-            <span className="ny-pro-btn__icon">{spinning ? '❄️' : '🎰'}</span>
-            <span>{spinning ? 'Крутим барабан чуда…' : 'Новогодняя рулетка фильма'}</span>
+            <span>{spinning ? 'Подбираем фильм…' : 'Случайный фильм на вечер'}</span>
           </button>
 
           <button
             type="button"
-            className="ny-pro-btn ny-pro-btn--glass"
+            className="ny-btn ny-btn--secondary"
             onClick={() => {
               haptic('light');
               navigate('/music');
             }}
           >
-            <span>♫ Новогодний плейлист</span>
+            <span>Атмосферная музыка</span>
           </button>
         </div>
       </section>
 
-      {/* ═════ ВЫПАВШИЙ ФИЛЬМ В НОВОГОДНЕЙ РУЛЕТКЕ ═════ */}
+      {/* ── Карточка выпавшего фильма ── */}
       {roulettePick && (
         <section className="ny-roulette-result">
           <div className="ny-roulette-card" onClick={() => navigate(`/movie/${roulettePick.id}`)}>
@@ -260,7 +218,7 @@ const NewYearPage: React.FC = () => {
             />
             <div className="ny-roulette-card__body">
               <div className="ny-roulette-card__top">
-                <span className="ny-roulette-card__kicker">🎁 ВАШ ФИЛЬМ НА ВЕЧЕР</span>
+                <span className="ny-roulette-card__kicker">ВЫБОР НА ВЕЧЕР</span>
                 {roulettePick.vote_average > 0 && (
                   <span className="ny-roulette-card__rate">★ {roulettePick.vote_average.toFixed(1)}</span>
                 )}
@@ -275,14 +233,14 @@ const NewYearPage: React.FC = () => {
                   className="ny-roulette-card__play"
                   onClick={() => navigate(`/movie/${roulettePick.id}`)}
                 >
-                  ▶ Смотреть
+                  Смотреть
                 </button>
                 <button
                   type="button"
                   className="ny-roulette-card__again"
                   onClick={spinHolidayRoulette}
                 >
-                  🎲 Крутить ещё
+                  Другой вариант
                 </button>
               </div>
             </div>
@@ -290,14 +248,11 @@ const NewYearPage: React.FC = () => {
         </section>
       )}
 
-      {/* ═════ ФИЛЬТР ПРАЗДНИЧНОГО НАСТРОЕНИЯ ═════ */}
+      {/* ── Каталог фильмов ── */}
       <section className="ny-catalog-section">
         <div className="ny-section-head">
-          <div>
-            <span className="ny-section-kicker">🎄 ЗОЛОТАЯ КОЛЛЕКЦИЯ</span>
-            <h2 className="ny-section-title">Фильмы для новогоднего настроения</h2>
-          </div>
-          <span className="ny-section-count">{filteredMovies.length} фильмов</span>
+          <h2 className="ny-section-title">Подборка фильмов</h2>
+          <span className="ny-section-count">{filteredMovies.length}</span>
         </div>
 
         <div className="ny-mood-bar">
@@ -325,7 +280,7 @@ const NewYearPage: React.FC = () => {
         ) : (
           <>
             <div className="ny-grid">
-              {filteredMovies.map((movie, idx) => (
+              {filteredMovies.map((movie) => (
                 <article
                   key={movie.id}
                   className="ny-movie-card"
@@ -341,13 +296,9 @@ const NewYearPage: React.FC = () => {
                       loading="lazy"
                       className="ny-movie-card__poster"
                     />
-                    <span className="ny-movie-card__badge">🎄 #{idx + 1}</span>
                     {movie.vote_average > 0 && (
                       <span className="ny-movie-card__rate">★ {movie.vote_average.toFixed(1)}</span>
                     )}
-                    <div className="ny-movie-card__play-overlay">
-                      <span>▶ Смотреть</span>
-                    </div>
                   </div>
                   <h3 className="ny-movie-card__title">{movie.title}</h3>
                   {movie.release_date && (
@@ -364,7 +315,7 @@ const NewYearPage: React.FC = () => {
                 onClick={loadMoreHoliday}
                 disabled={loadingMore}
               >
-                {loadingMore ? '❄️ Загружаем ещё фильмы…' : '✨ Показать больше новогодних фильмов'}
+                {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
               </button>
             </div>
           </>
