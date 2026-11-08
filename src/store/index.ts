@@ -7,6 +7,16 @@ import { findLocalGrant } from '../api/backend';
 import { resolveUserAccess, MASTER_ADMINS } from '../services/accessControl';
 import { readTrackedCloud, writeTrackedCloud, type TrackedCloudRecord } from '../services/trackedCloud';
 import {
+  idbGet,
+  idbSet,
+  tgCloudSaveChunked,
+  tgCloudLoadChunked,
+  compactMovie,
+  compactFavoritesList,
+  compactHistoryList,
+  compactTrackedMap,
+} from '../services/userCloudStorage';
+import {
   getLocalMandatorySub,
   saveLocalMandatorySub,
   isUserSubscribed,
@@ -193,27 +203,45 @@ export const useStore = create<AppState>((set, get) => ({
   /* ═══ Избранное ═══ */
   favorites: load<Movie[]>('tc_favorites', []),
   addFavorite: (movie: Movie) => {
-    const updated = [...get().favorites, movie];
+    const compact = compactMovie(movie);
+    const updated = [compact, ...get().favorites.filter((m) => m.id !== compact.id)];
     save('tc_favorites', updated);
+    idbSet('tc_favorites', updated);
+    tgCloudSaveChunked('znv_favs', compactFavoritesList(updated));
     set({ favorites: updated });
   },
   removeFavorite: (id: string) => {
     const updated = get().favorites.filter((m) => m.id !== id);
     save('tc_favorites', updated);
+    idbSet('tc_favorites', updated);
+    tgCloudSaveChunked('znv_favs', compactFavoritesList(updated));
     set({ favorites: updated });
   },
   isFavorite: (id: string) => get().favorites.some((m) => m.id === id),
-  clearFavorites: () => { save('tc_favorites', []); set({ favorites: [] }); },
+  clearFavorites: () => {
+    save('tc_favorites', []);
+    idbSet('tc_favorites', []);
+    tgCloudSaveChunked('znv_favs', []);
+    set({ favorites: [] });
+  },
 
   /* ═══ История ═══ */
   watchHistory: load<WatchHistoryItem[]>('tc_history', []),
   addToHistory: (movie: Movie) => {
-    const filtered = get().watchHistory.filter((h) => h.movie.id !== movie.id);
-    const updated = [{ movie, watchedAt: Date.now() }, ...filtered].slice(0, 50);
+    const compact = compactMovie(movie);
+    const filtered = get().watchHistory.filter((h) => h.movie.id !== compact.id);
+    const updated = [{ movie: compact, watchedAt: Date.now() }, ...filtered].slice(0, 50);
     save('tc_history', updated);
+    idbSet('tc_history', updated);
+    tgCloudSaveChunked('znv_hist', compactHistoryList(updated));
     set({ watchHistory: updated });
   },
-  clearHistory: () => { save('tc_history', []); set({ watchHistory: [] }); },
+  clearHistory: () => {
+    save('tc_history', []);
+    idbSet('tc_history', []);
+    tgCloudSaveChunked('znv_hist', []);
+    set({ watchHistory: [] });
+  },
 
   /* ═══ Дневник киномана ═══ */
   tracked: load<Record<string, TrackedItem>>('tc_tracked', {}),
@@ -226,7 +254,7 @@ export const useStore = create<AppState>((set, get) => ({
       deletions[movie.id] = Date.now();
     } else {
       t[movie.id] = {
-        movie,
+        movie: compactMovie(movie),
         status,
         rating: t[movie.id]?.rating ?? null,
         addedAt: t[movie.id]?.addedAt ?? Date.now(),
@@ -236,6 +264,8 @@ export const useStore = create<AppState>((set, get) => ({
     }
     save('tc_tracked', t);
     save('tc_tracked_deleted', deletions);
+    idbSet('tc_tracked', t);
+    tgCloudSaveChunked('znv_trck', compactTrackedMap(t));
     set({ tracked: t, trackedDeletions: deletions });
     const record = t[movie.id]
       ? { kind: 'item' as const, item: t[movie.id] }
@@ -247,42 +277,109 @@ export const useStore = create<AppState>((set, get) => ({
     if (!t[id]) return;
     t[id] = { ...t[id], rating, updatedAt: Date.now() };
     save('tc_tracked', t);
+    idbSet('tc_tracked', t);
+    tgCloudSaveChunked('znv_trck', compactTrackedMap(t));
     set({ tracked: t });
     queueTrackedCloudWrite(id, { kind: 'item', item: t[id] });
   },
   getStatus: (id) => get().tracked[id]?.status ?? null,
   getRating: (id) => get().tracked[id]?.rating ?? null,
   syncTrackedCloud: async () => {
-    const remote = await readTrackedCloud();
-    if (!remote) return;
+    try {
+      /* 1. Восстановление Избранного (Favorites) из Telegram CloudStorage + IndexedDB */
+      let favs = get().favorites;
+      if (favs.length === 0) {
+        const idbFavs = await idbGet<Movie[]>('tc_favorites');
+        if (idbFavs && idbFavs.length > 0) {
+          favs = idbFavs;
+          save('tc_favorites', favs);
+          set({ favorites: favs });
+        }
+      }
+      const cloudFavs = await tgCloudLoadChunked<Movie[]>('znv_favs', []);
+      if (cloudFavs && cloudFavs.length > 0) {
+        const map = new Map<string, Movie>();
+        cloudFavs.forEach((m) => m?.id && map.set(m.id, m));
+        favs.forEach((m) => m?.id && map.set(m.id, m));
+        const mergedFavs = Array.from(map.values()).map(compactMovie);
+        save('tc_favorites', mergedFavs);
+        idbSet('tc_favorites', mergedFavs);
+        set({ favorites: mergedFavs });
+      }
 
-    const local = get().tracked;
-    const localDeletions = get().trackedDeletions;
-    const merged: Record<string, TrackedItem> = {};
-    const mergedDeletions: Record<string, number> = {};
-    const ids = new Set([...Object.keys(remote), ...Object.keys(local), ...Object.keys(localDeletions)]);
+      /* 2. Восстановление Истории (Watch History) */
+      let hist = get().watchHistory;
+      if (hist.length === 0) {
+        const idbHist = await idbGet<WatchHistoryItem[]>('tc_history');
+        if (idbHist && idbHist.length > 0) {
+          hist = idbHist;
+          save('tc_history', hist);
+          set({ watchHistory: hist });
+        }
+      }
+      const cloudHist = await tgCloudLoadChunked<WatchHistoryItem[]>('znv_hist', []);
+      if (cloudHist && cloudHist.length > 0) {
+        const map = new Map<string, WatchHistoryItem>();
+        cloudHist.forEach((h) => h?.movie?.id && map.set(h.movie.id, h));
+        hist.forEach((h) => {
+          if (!h?.movie?.id) return;
+          const prev = map.get(h.movie.id);
+          if (!prev || (h.watchedAt || 0) > (prev.watchedAt || 0)) {
+            map.set(h.movie.id, h);
+          }
+        });
+        const mergedHist = Array.from(map.values())
+          .sort((a, b) => (b.watchedAt || 0) - (a.watchedAt || 0))
+          .slice(0, 50);
+        save('tc_history', mergedHist);
+        idbSet('tc_history', mergedHist);
+        set({ watchHistory: mergedHist });
+      }
 
-    for (const id of ids) {
-      const localRecord: TrackedCloudRecord | undefined = local[id]
-        ? { kind: 'item', item: local[id] }
-        : localDeletions[id] !== undefined
-          ? { kind: 'deleted', deletedAt: localDeletions[id] }
-          : undefined;
-      const cloudRecord = remote[id];
-      const winner = !cloudRecord || (localRecord && trackedRecordTimestamp(localRecord) >= trackedRecordTimestamp(cloudRecord))
-        ? localRecord
-        : cloudRecord;
-      if (!winner) continue;
+      /* 3. Восстановление Дневника (Tracked & Ratings) */
+      let trackedLocal = get().tracked;
+      if (Object.keys(trackedLocal).length === 0) {
+        const idbTracked = await idbGet<Record<string, TrackedItem>>('tc_tracked');
+        if (idbTracked && Object.keys(idbTracked).length > 0) {
+          trackedLocal = idbTracked;
+          save('tc_tracked', trackedLocal);
+          set({ tracked: trackedLocal });
+        }
+      }
 
-      if (winner.kind === 'item') merged[id] = winner.item;
-      else mergedDeletions[id] = winner.deletedAt;
+      const cloudTracked = await tgCloudLoadChunked<Record<string, TrackedItem>>('znv_trck', {});
+      const legacyRemote = await readTrackedCloud();
 
-      if (!sameTrackedRecord(cloudRecord, winner)) queueTrackedCloudWrite(id, winner);
+      const mergedTracked: Record<string, TrackedItem> = { ...trackedLocal };
+
+      if (cloudTracked && typeof cloudTracked === 'object') {
+        for (const [id, item] of Object.entries(cloudTracked)) {
+          if (!item?.movie?.id) continue;
+          const curr = mergedTracked[id];
+          if (!curr || (item.updatedAt || 0) > (curr.updatedAt || 0)) {
+            mergedTracked[id] = item;
+          }
+        }
+      }
+
+      if (legacyRemote) {
+        for (const [id, rec] of Object.entries(legacyRemote)) {
+          if (rec.kind === 'item' && rec.item?.movie?.id) {
+            const curr = mergedTracked[id];
+            if (!curr || (rec.item.updatedAt || 0) > (curr.updatedAt || 0)) {
+              mergedTracked[id] = rec.item;
+            }
+          }
+        }
+      }
+
+      save('tc_tracked', mergedTracked);
+      idbSet('tc_tracked', mergedTracked);
+      tgCloudSaveChunked('znv_trck', compactTrackedMap(mergedTracked));
+      set({ tracked: mergedTracked });
+    } catch (e) {
+      console.warn('[ZenovaCloud] Error during syncUserDataCloud:', e);
     }
-
-    save('tc_tracked', merged);
-    save('tc_tracked_deleted', mergedDeletions);
-    set({ tracked: merged, trackedDeletions: mergedDeletions });
   },
 
   /* ═══ Тема ═══ */
