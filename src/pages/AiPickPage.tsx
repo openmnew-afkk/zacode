@@ -313,12 +313,12 @@ const AiPickPage: React.FC = () => {
         >
           <span className="orc-main-switch__icon">⚡</span>
           <span>SYNTHAX-9</span>
-          <span className="orc-main-switch__badge">PRO</span>
+          <span className="orc-main-switch__badge orc-main-switch__badge--dev">СКОРО</span>
         </button>
       </div>
 
       {mainTab === 'synthax' ? (
-        <SynthaxAiStudio />
+        <SynthaxAiStudio onBackToOracle={() => setMainTab('oracle')} />
       ) : (
         <>
           {/* ═════════ МЕНЮ ВЫБОРА (уезжает после нажатия) ═════════ */}

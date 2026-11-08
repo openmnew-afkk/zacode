@@ -150,6 +150,12 @@
   letter-spacing: 0.06em;
 }
 
+.orc-main-switch__badge--dev {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35));
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+}
+
 /* ═════════ МЕНЮ ═════════ */
 .orc-menu {
   display: flex;
