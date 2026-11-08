@@ -119,55 +119,6 @@
   line-height: 1;
 }
 
-/* 🪄 Сезонная кнопка-кристалл магии в шапке */
-.hp-header__season-magic {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  cursor: pointer;
-  transition: transform 0.16s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.hp-header__season-magic:active {
-  transform: scale(0.88);
-}
-.hp-header__season-icon {
-  font-size: 16px;
-  line-height: 1;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.6));
-}
-.hp-header__season-halo {
-  position: absolute;
-  inset: -1px;
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.6;
-  animation: hpSeasonHalo 3s ease-in-out infinite alternate;
-}
-@keyframes hpSeasonHalo {
-  0% { transform: scale(1); opacity: 0.4; }
-  100% { transform: scale(1.15); opacity: 0.8; }
-}
-
-.hp-header__season-magic--winter .hp-header__season-halo {
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
-}
-.hp-header__season-magic--spring .hp-header__season-halo {
-  box-shadow: 0 0 14px rgba(244, 114, 182, 0.5);
-}
-.hp-header__season-magic--summer .hp-header__season-halo {
-  box-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
-}
-.hp-header__season-magic--autumn .hp-header__season-halo {
-  box-shadow: 0 0 14px rgba(249, 115, 22, 0.5);
-}
-
 /* ✦ Сезонные стили для баннеров */
 .hp-season-banner--spring {
   background:
@@ -188,20 +139,18 @@
   border-color: rgba(249, 115, 22, 0.3) !important;
 }
 
-.hp-season-magic-sparkle {
+.hp-ny-count__badge {
+  display: inline-flex;
+  align-items: center;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
-  cursor: pointer;
-  transition: all 0.16s ease;
-}
-.hp-season-magic-sparkle:active {
-  transform: scale(0.92);
-  background: rgba(255, 255, 255, 0.22);
+  letter-spacing: 0.02em;
+  user-select: none;
 }
 
 /* 👤 Роскошная оправа кнопки профиля в шапке (чистое золотое свечение) */
@@ -532,12 +481,13 @@
   animation: dot-pulse 2s ease-in-out infinite;
 }
 .hp-hero__title {
-  font-size: 24px;
-  font-weight: 900;
+  font-family: var(--font-cinema);
+  font-size: 21px;
+  font-weight: 800;
   color: #fff;
-  line-height: 1.15;
+  line-height: 1.2;
   margin-bottom: 6px;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.02em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -643,8 +593,10 @@
   opacity: 0.7;
 }
 .hp-row__title {
-  font-size: 15px;
-  font-weight: 800;
+  font-family: var(--font-cinema);
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: -0.015em;
   color: var(--text, #fff);
   display: flex;
   align-items: center;
@@ -1739,8 +1691,9 @@
 }
 
 .hp-ny-count__title {
-  font-size: 13px;
-  font-weight: 700;
+  font-family: var(--font-cinema);
+  font-size: 12.5px;
+  font-weight: 750;
   color: #ffffff;
   letter-spacing: -0.01em;
   white-space: nowrap;

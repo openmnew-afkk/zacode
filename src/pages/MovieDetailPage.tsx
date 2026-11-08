@@ -6,6 +6,7 @@ import { createStarsInvoice } from '../api/backend';
 import type { Movie, MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
+import { getStoredSeason } from '../services/seasons';
 import AgeGateModal, { isAgeVerified } from '../components/AgeGateModal';
 import './MovieDetailPage.css';
 
@@ -211,13 +212,11 @@ const MovieDetailPage: React.FC = () => {
   const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
   const [watchIdx, setWatchIdx] = useState(0);
   const [recs, setRecs] = useState<Movie[]>([]);
-  const [sheetMode, setSheetMode] = useState<'normal' | 'tall' | 'fullscreen'>('normal');
+  const [sheetMode, setSheetMode] = useState<'normal' | 'fullscreen'>('normal');
   const [ambilightOn, setAmbilightOn] = useState(true);
   const playerModalRef = useRef<HTMLDivElement>(null);
-  const dragStartY = useRef<number | null>(null);
 
   const isPlayerFullscreen = sheetMode === 'fullscreen';
-  const isSheetTall = sheetMode === 'tall';
 
   /* Быстрое и плавное сворачивание плеера на главную страницу каталога (гарантированно на iOS и Android) */
   const minimizeToHome = () => {
@@ -235,12 +234,6 @@ const MovieDetailPage: React.FC = () => {
     setSheetMode('normal');
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     navigate('/', { replace: true });
-  };
-
-  /* Растяжка нижней шторки плеера вверх/вниз */
-  const toggleSheetTall = () => {
-    haptic('light');
-    setSheetMode((prev) => (prev === 'tall' ? 'normal' : 'tall'));
   };
 
   /* Надёжное раскрытие на весь экран (включая Telegram Web на ноутбуках/ПК) */
@@ -930,94 +923,116 @@ const MovieDetailPage: React.FC = () => {
               />
             )}
 
-            {/* Компактная двухуровневая верхняя панель: исключает заезжание текста на кнопки */}
-            <div className="dp-watch-bar">
-              <div className="dp-watch-bar__row1">
-                <div className="dp-watch-bar__info">
-                  <span className="dp-watch-bar__live-dot" />
-                  <span className="dp-watch-bar__kicker">ZENOVA</span>
-                  <span className="dp-watch-bar__sep">·</span>
-                  <span className="dp-watch-bar__title" title={movie.title}>
-                    {movie.title}
-                  </span>
+            {/* ── ЛЮКСОВЫЙ CINEMA HUD ВЕРХНЕЙ ПАНЕЛИ ПЛЕЕРА ZENOVA ── */}
+            <div className="dp-cinema-hud">
+              {/* Верхняя строка HUD: Маска ZENOVA + Название в Unbounded + Рейтинг меню + Закрыть */}
+              <div className="dp-cinema-hud__header">
+                <div className="dp-cinema-hud__brand">
+                  <div className="dp-cinema-hud__mask-wrap">
+                    <img
+                      src={getStoredSeason().season.id === 'winter' ? '/zenova-mask-mini-winter.png' : '/zenova-mask-mini.png'}
+                      alt="ZENOVA"
+                      className="dp-cinema-hud__mask"
+                    />
+                    <span className="dp-cinema-hud__mask-glow" />
+                  </div>
+                  <div className="dp-cinema-hud__meta">
+                    <div className="dp-cinema-hud__meta-top">
+                      <span className="dp-cinema-hud__brand-name">ZENOVA</span>
+                      <span className="dp-cinema-hud__badge-4k">4K ULTRA HD</span>
+                      <span className="dp-cinema-hud__live-dot" />
+                    </div>
+                    <h3 className="dp-cinema-hud__title" title={movie.title}>
+                      {movie.title}
+                    </h3>
+                  </div>
                 </div>
 
-                <button
-                  type="button"
-                  className="dp-watch-bar__close"
-                  onClick={minimizeToHome}
-                  aria-label="Свернуть плеер и перейти на главную"
-                  title="Закрыть плеер"
-                >
-                  ✕
-                </button>
+                <div className="dp-cinema-hud__right">
+                  {/* Рейтинг меню / плашка со звездой */}
+                  <div
+                    className="dp-cinema-hud__rating-pill"
+                    title={`Рейтинг: ${movie.vote_average.toFixed(1)}`}
+                    onClick={() => {
+                      haptic('light');
+                      showTipToast(`Рейтинг: ${movie.vote_average.toFixed(1)} / 10`);
+                    }}
+                  >
+                    <span className="dp-cinema-hud__star">★</span>
+                    <span className="dp-cinema-hud__score">{movie.vote_average.toFixed(1)}</span>
+                    <span className="dp-cinema-hud__rating-label">SCORE</span>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="dp-cinema-hud__close"
+                    onClick={minimizeToHome}
+                    aria-label="Свернуть плеер и перейти на главную"
+                    title="Закрыть плеер"
+                  >
+                    ✕
+                  </button>
+                </div>
               </div>
 
-              <div className="dp-watch-bar__row2">
-                {/* Свернуть кино на главную */}
+              {/* Быстрая панель управления кинозалом: Главная, 100% Экран, Ambilight, Перезапуск */}
+              <div className="dp-cinema-hud__actions">
                 <button
                   type="button"
-                  className="dp-watch-bar__pill-btn"
+                  className="dp-cinema-hud__btn dp-cinema-hud__btn--home"
                   onClick={minimizeToHome}
                   title="Свернуть кино на главную"
                 >
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
                   </svg>
                   <span>Главная</span>
                 </button>
 
-                {/* Плавный размер */}
-                {!isPlayerFullscreen && (
-                  <button
-                    type="button"
-                    className={`dp-watch-bar__pill-btn ${isSheetTall ? 'is-active' : ''}`}
-                    onClick={toggleSheetTall}
-                    title={isSheetTall ? 'Стандартный размер' : 'Увеличить экран'}
-                  >
-                    <span>{isSheetTall ? '↕ Стандарт' : '↕ Экран +'}</span>
-                  </button>
-                )}
-
-                {/* На весь экран */}
                 <button
                   type="button"
-                  className={`dp-watch-bar__pill-btn dp-watch-bar__pill-btn--primary ${isPlayerFullscreen ? 'is-active' : ''}`}
+                  className={`dp-cinema-hud__btn dp-cinema-hud__btn--fs ${isPlayerFullscreen ? 'is-active' : ''}`}
                   onClick={togglePlayerFullscreen}
                   title="На весь экран"
                 >
-                  <span>{isPlayerFullscreen ? '⛶ Обычный' : '⛶ 100%'}</span>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                    {isPlayerFullscreen ? (
+                      <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                    ) : (
+                      <path d="M15 3h6v6M9 21H3v-6M21 9v-6m0 0h-6M3 15v6m0 0h6" />
+                    )}
+                  </svg>
+                  <span>{isPlayerFullscreen ? 'Обычный' : '100% Экран'}</span>
                 </button>
 
-                {/* Подсветка Ambilight */}
                 <button
                   type="button"
-                  className={`dp-watch-bar__icon-btn ${ambilightOn ? 'is-active' : ''}`}
+                  className={`dp-cinema-hud__btn ${ambilightOn ? 'is-active' : ''}`}
                   onClick={() => {
                     haptic('light');
                     setAmbilightOn((v) => !v);
                   }}
-                  title="Фоновая подсветка Ambilight"
-                  aria-label="Подсветка Ambilight"
+                  title="Фоновое свечение Ambilight"
                 >
-                  ✨
+                  <span className="dp-cinema-hud__sparkle">✨</span>
+                  <span>Ambilight</span>
                 </button>
 
-                {/* Перезагрузить поток */}
                 <button
                   type="button"
-                  className="dp-watch-bar__icon-btn"
+                  className="dp-cinema-hud__btn"
                   onClick={() => {
                     haptic('light');
                     setWatchIdx(-1);
                     setTimeout(() => setWatchIdx(0), 60);
                   }}
                   title="Перезагрузить поток"
-                  aria-label="Перезагрузить"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                   </svg>
+                  <span>Перезапуск</span>
                 </button>
               </div>
             </div>
@@ -1042,22 +1057,16 @@ const MovieDetailPage: React.FC = () => {
               )}
             </div>
 
-            {/* ── Минималистичный нижний язычок растягивания шторки сверху вниз (без лишних переключателей плееров) ── */}
+            {/* ── Нижняя информационная полоса статуса потока (без дергающихся ручек) ── */}
             {!isPlayerFullscreen && (
-              <div className="dp-sheet-footer">
-                <div className="dp-sheet-voice-hint">
-                  Озвучка, качество 4K/1080p{isSerial ? ' и выбор серий' : ''} доступны внутри верхнего меню плеера
+              <div className="dp-cinema-bottom-strip">
+                <div className="dp-cinema-bottom-strip__left">
+                  <span className="dp-cinema-bottom-strip__tag">DOLBY ATMOS</span>
+                  <span className="dp-cinema-bottom-strip__dot">·</span>
+                  <span className="dp-cinema-bottom-strip__tag">HDR 60FPS</span>
                 </div>
-
-                <div
-                  className="dp-sheet-pull-area"
-                  onClick={toggleSheetTall}
-                  title="Переключить размер плеера"
-                >
-                  <span className="dp-sheet-pull-hint">
-                    {isSheetTall ? '↕ Нажмите, чтобы вернуть стандартный размер' : '↕ Нажмите, чтобы развернуть плеер вниз'}
-                  </span>
-                  <div className="dp-sheet-pull-bar" />
+                <div className="dp-cinema-bottom-strip__hint">
+                  Озвучка, качество и серии {isSerial ? 'сериала' : 'фильма'} доступны внутри плеера
                 </div>
               </div>
             )}

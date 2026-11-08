@@ -45,12 +45,6 @@ const SeasonalBanner: React.FC<{
     return () => clearInterval(t);
   }, [seasonId]);
 
-  const handleMagicClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const rect = e.currentTarget.getBoundingClientRect();
-    triggerSeasonalBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, true, seasonId);
-  };
-
   const getSub = () => {
     switch (seasonId) {
       case 'spring': return 'Цветущие новинки и романтика';
@@ -88,15 +82,9 @@ const SeasonalBanner: React.FC<{
             {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
           </span>
         ) : (
-          <button
-            type="button"
-            className="hp-season-magic-sparkle"
-            onClick={handleMagicClick}
-            title="Запустить всплеск магии сезона"
-            aria-label="Всплеск магии"
-          >
-            <span>✦ Магия</span>
-          </button>
+          <span className="hp-ny-count__badge">
+            ✦ Кинозал
+          </span>
         )}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-ny-count__arrow">
           <path d="M9 18l6-6-6-6" />
@@ -1145,22 +1133,6 @@ const HomePage: React.FC = () => {
             <span className="hp-header__studios-spark" aria-hidden="true">✦</span>
             <span className="hp-header__studios-text">Вселенные</span>
             <span className="hp-header__studios-count">{STUDIO_WORLDS.length}</span>
-          </button>
-
-          {/* 🪄 Сезонная магия ZENOVA — интерактивный перезвон и салют частиц */}
-          <button
-            type="button"
-            className={`hp-header__season-magic hp-header__season-magic--${season.id}`}
-            onClick={(e) => {
-              haptic('medium');
-              const rect = e.currentTarget.getBoundingClientRect();
-              triggerSeasonalBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, true, season.id);
-            }}
-            title={`${season.label} · Нажмите для всплеска сезонной магии`}
-            aria-label="Сезонная магия"
-          >
-            <span className="hp-header__season-icon">{season.icon}</span>
-            <span className="hp-header__season-halo" />
           </button>
 
           {/* Профиль пользователя в чистом золотом свечении */}

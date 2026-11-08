@@ -266,8 +266,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
-  font-weight: 700;
+  font-family: var(--font-cinema);
+  font-size: 15px;
+  font-weight: 750;
+  letter-spacing: -0.015em;
   color: #fff;
   margin-bottom: 12px;
 }
@@ -2324,62 +2326,11 @@
   }
 }
 
-/* Ручка растягивания шторки вверх/вниз */
-.dp-sheet-pull-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 4px 0 2px;
-  cursor: ns-resize;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZENOVA LUXURY CINEMA HUD & THEATER STAGE
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.dp-sheet-pull-bar {
-  width: 46px;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.32);
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.15);
-  transition: width 0.2s ease, background 0.2s ease;
-}
-
-.dp-sheet-pull-area:hover .dp-sheet-pull-bar,
-.dp-sheet-pull-area:active .dp-sheet-pull-bar {
-  width: 64px;
-  background: #fda4af;
-}
-
-.dp-sheet-pull-hint {
-  font-size: 10px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.46);
-  letter-spacing: 0.02em;
-}
-
-/* Режим 2: РАСТЯНУТАЯ ВВЕРХ ШТОРКА (tall) */
-.dp-player-sheet--tall {
-  height: calc(100dvh - 8px) !important;
-  max-height: calc(100dvh - 8px) !important;
-}
-
-.dp-player-sheet--tall .dp-cinema-stage {
-  flex: 1 1 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  min-height: 0 !important;
-}
-
-.dp-player-sheet--tall .dp-cinema-stage .dp-trailer__frame {
-  flex: 1 1 auto !important;
-  height: 100% !important;
-  max-height: none !important;
-  aspect-ratio: auto !important;
-}
-
-/* Режим 3: 100% ПОЛНЫЙ ЭКРАН (fullscreen — включая Telegram Web на ноутбуках) */
+/* Режим 100% ПОЛНЫЙ ЭКРАН (fullscreen — включая Telegram Web на ноутбуках) */
 .dp-sheet-backdrop--fullscreen {
   padding: 0 !important;
   background: #000 !important;
@@ -2404,9 +2355,9 @@
   overflow: hidden !important;
 }
 
-.dp-player-sheet--fullscreen .dp-watch-bar {
-  padding: max(calc(var(--header-safe-top, 56px) + 6px), 62px) 16px 8px !important;
-  background: rgba(9, 9, 13, 0.96);
+.dp-player-sheet--fullscreen .dp-cinema-hud {
+  padding: max(calc(var(--header-safe-top, 56px) + 6px), 60px) 16px 10px !important;
+  background: rgba(10, 10, 15, 0.96);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 0;
   flex-shrink: 0;
@@ -2416,7 +2367,7 @@
 .dp-player-sheet--fullscreen .dp-cinema-stage {
   flex: 1 1 auto !important;
   width: 100% !important;
-  height: calc(100dvh - 48px) !important;
+  height: calc(100dvh - 54px) !important;
   border-radius: 0 !important;
   border: none !important;
 }
@@ -2447,47 +2398,15 @@
   100% { opacity: 0.38; transform: scale(1.03); }
 }
 
-/* Верхняя панель кинозала */
-.dp-watch-bar__live-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 1px;
-}
-
-.dp-watch-bar__live-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px #10b981;
-}
-
-.dp-watch-bar__kicker {
-  font-size: 9.5px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: #fda4af;
-}
-
-.dp-watch-bar__quality-pill {
-  padding: 1px 7px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 9.5px;
-  font-weight: 700;
-}
-
-.dp-watch-bar {
+/* ✦ Роскошная верхняя панель Cinema HUD */
+.dp-cinema-hud {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   width: 100%;
 }
 
-.dp-watch-bar__row1 {
+.dp-cinema-hud__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -2495,53 +2414,200 @@
   width: 100%;
 }
 
-.dp-watch-bar__info {
+.dp-cinema-hud__brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   min-width: 0;
   flex: 1;
 }
 
-.dp-watch-bar__sep {
-  color: rgba(255, 255, 255, 0.3);
-  font-size: 11px;
+.dp-cinema-hud__mask-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.2) 0%, rgba(20, 20, 30, 0.7) 80%);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 
-.dp-watch-bar__title {
-  font-size: 13.5px;
-  font-weight: 750;
-  color: #ffffff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 68vw;
+.dp-cinema-hud__mask {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.5));
 }
 
-.dp-watch-bar__row2 {
+.dp-cinema-hud__mask-glow {
+  position: absolute;
+  inset: -2px;
+  border-radius: 12px;
+  pointer-events: none;
+  opacity: 0.45;
+  box-shadow: 0 0 14px rgba(245, 158, 11, 0.4);
+  animation: hudMaskGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes hudMaskGlow {
+  0% { opacity: 0.3; transform: scale(0.98); }
+  100% { opacity: 0.7; transform: scale(1.04); }
+}
+
+.dp-cinema-hud__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dp-cinema-hud__meta-top {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+.dp-cinema-hud__brand-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #fff;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+}
+
+.dp-cinema-hud__badge-4k {
+  padding: 1px 6px;
+  border-radius: 5px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+}
+
+.dp-cinema-hud__live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.dp-cinema-hud__title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 44vw;
+  letter-spacing: -0.01em;
+}
+
+.dp-cinema-hud__right {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.dp-cinema-hud__rating-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.16) 0%, rgba(217, 119, 6, 0.08) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.dp-cinema-hud__rating-pill:active {
+  transform: scale(0.94);
+  background: rgba(245, 158, 11, 0.25);
+}
+
+.dp-cinema-hud__star {
+  font-size: 12px;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 5px #fbbf24);
+  line-height: 1;
+}
+
+.dp-cinema-hud__score {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.dp-cinema-hud__rating-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  color: rgba(251, 191, 36, 0.7);
+  letter-spacing: 0.08em;
+  margin-left: 1px;
+}
+
+.dp-cinema-hud__close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dp-cinema-hud__close:active {
+  transform: scale(0.88);
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.dp-cinema-hud__actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   overflow-x: auto;
   scrollbar-width: none;
   width: 100%;
   padding-bottom: 2px;
 }
 
-.dp-watch-bar__row2::-webkit-scrollbar {
+.dp-cinema-hud__actions::-webkit-scrollbar {
   display: none;
 }
 
-.dp-watch-bar__pill-btn {
+.dp-cinema-hud__btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   height: 30px;
-  padding: 0 10px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #ffffff;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
@@ -2551,101 +2617,65 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.dp-watch-bar__pill-btn:active {
-  transform: scale(0.95);
-  background: rgba(255, 255, 255, 0.18);
+.dp-cinema-hud__btn:active {
+  transform: scale(0.93);
+  background: rgba(255, 255, 255, 0.16);
 }
 
-.dp-watch-bar__pill-btn.is-active {
+.dp-cinema-hud__btn.is-active {
   background: rgba(56, 189, 248, 0.22);
   border-color: rgba(56, 189, 248, 0.5);
   color: #bae6fd;
 }
 
-.dp-watch-bar__pill-btn--primary {
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 12px rgba(244, 63, 94, 0.35);
+.dp-cinema-hud__btn--fs.is-active {
+  background: linear-gradient(135deg, rgba(244, 63, 94, 0.28), rgba(225, 29, 72, 0.35));
+  border-color: rgba(251, 113, 133, 0.5);
+  color: #fff;
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.2);
 }
 
-.dp-watch-bar__icon-btn {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
+.dp-cinema-hud__sparkle {
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* ✦ Нижняя информационная полоса статуса потока */
+.dp-cinema-bottom-strip {
   display: flex;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 6px 2px;
+}
+
+.dp-cinema-bottom-strip__left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   flex-shrink: 0;
-  transition: all 0.15s ease;
-  -webkit-tap-highlight-color: transparent;
 }
 
-.dp-watch-bar__icon-btn:active {
-  transform: scale(0.92);
-}
-
-.dp-watch-bar__icon-btn.is-active {
-  background: rgba(244, 63, 94, 0.22);
-  border-color: rgba(244, 63, 94, 0.5);
-}
-
-.dp-watch-bar__stretch-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 32px;
-  padding: 0 10px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #fff;
-  font-size: 11.5px;
+.dp-cinema-bottom-strip__tag {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8.5px;
   font-weight: 700;
-  cursor: pointer;
-  transition: all 0.18s ease;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.dp-cinema-bottom-strip__dot {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 9px;
+}
+
+.dp-cinema-bottom-strip__hint {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.42);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.dp-watch-bar__stretch-btn.active {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: rgba(56, 189, 248, 0.5);
-  color: #bae6fd;
-}
-
-.dp-watch-bar__fs-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  height: 32px;
-  padding: 0 11px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  font-size: 11.5px;
-  font-weight: 800;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(244, 63, 94, 0.36);
-  transition: transform 0.18s ease, filter 0.18s ease;
-  white-space: nowrap;
-}
-
-.dp-watch-bar__fs-btn:hover {
-  filter: brightness(1.08);
-}
-
-.dp-watch-bar__fs-btn:active {
-  transform: scale(0.95);
-}
-
-.dp-watch-bar__btn.active {
-  background: rgba(244, 63, 94, 0.22);
-  border-color: rgba(244, 63, 94, 0.5);
-  color: #fff;
 }
 
 /* Контейнер видео-экрана (без перекрывающих кнопок) */
@@ -2675,43 +2705,7 @@
   }
 }
 
-/* Компактный футер выбора серверов */
-.dp-sheet-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding-top: 2px;
-}
 
-.dp-watch-src {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  padding: 7px 12px !important;
-  border-radius: 11px !important;
-  font-size: 12px !important;
-  font-weight: 700 !important;
-}
-
-.dp-watch-src__dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.28);
-}
-
-.dp-watch-src.active .dp-watch-src__dot {
-  background: #10b981;
-  box-shadow: 0 0 8px #10b981;
-}
-
-.dp-sheet-voice-hint {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.44);
-  text-align: center;
-  padding: 2px 4px 0;
-  font-weight: 500;
-}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    MINIMALIST DARK-LUXURY SHOWCASE & CARDS (В ЕДИНОМ СТИЛЕ С ПРОФИЛЕМ)
@@ -2901,10 +2895,11 @@
 
 .dp-stage__title {
   margin: 0;
-  font-size: clamp(20px, 5.4vw, 26px);
+  font-family: var(--font-cinema);
+  font-size: clamp(19px, 5.2vw, 25px);
   font-weight: 800;
   letter-spacing: -0.025em;
-  line-height: 1.12;
+  line-height: 1.15;
   color: #ffffff;
 }
 
