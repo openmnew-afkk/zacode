@@ -49,6 +49,19 @@ const STATUSES: Array<{ id: WatchStatus; label: string; icon: React.ReactNode }>
   },
 ];
 
+const RATING_EMOTIONS: Record<number, { text: string; emoji: string }> = {
+  1: { text: 'Ужасно', emoji: '🥱' },
+  2: { text: 'Очень слабо', emoji: '👎' },
+  3: { text: 'Не понравилось', emoji: '😕' },
+  4: { text: 'Ниже среднего', emoji: '😐' },
+  5: { text: 'Проходное кино', emoji: '🍿' },
+  6: { text: 'Неплохо', emoji: '👍' },
+  7: { text: 'Хороший фильм', emoji: '✨' },
+  8: { text: 'Отличное кино!', emoji: '🔥' },
+  9: { text: 'Великолепно!', emoji: '🌟' },
+  10: { text: 'Шедевр кинематографа!', emoji: '👑' },
+};
+
 const formatActorName = (name: string) =>
   name.replace(/^[A-ZА-ЯЁ]{2}(?=[A-ZА-ЯЁ][a-zа-яё])/, '');
 
@@ -568,8 +581,12 @@ const MovieDetailPage: React.FC = () => {
 
                 <div className="dp-stage__chips">
                   {movie.vote_average > 0 && (
-                    <span className="dp-stage__chip dp-stage__chip--rate">
-                      ★ {movie.vote_average.toFixed(1)}
+                    <span className="dp-stage__chip dp-stage__chip--score" title={`Рейтинг TMDB: ${movie.vote_average.toFixed(1)}/10`}>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24" aria-hidden="true">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <b>{movie.vote_average.toFixed(1)}</b>
+                      <small>/10</small>
                     </span>
                   )}
                   {movie.release_date && (
@@ -708,22 +725,74 @@ const MovieDetailPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Личная оценка 1-10 */}
+        {/* Личная оценка 1-10 — Премиальная кинематографическая система звезд */}
         {status === 'watched' && (
-          <div className="dp-rate">
-            <p className="dp-rate__title">Моя оценка</p>
-            <div className="dp-rate__stars">
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => (
+          <div className="dp-cinema-rating">
+            <div className="dp-cinema-rating__head">
+              <div className="dp-cinema-rating__title-group">
+                <span className="dp-cinema-rating__kicker">КИНО-РЕЦЕНЗИЯ</span>
+                <p className="dp-cinema-rating__title">Ваша оценка фильму</p>
+              </div>
+              {rating !== null && rating > 0 && (
                 <button
-                  key={r}
-                  className={`dp-rate__star ${rating && r <= rating ? 'on' : ''}`}
-                  onClick={() => handleRate(r)}
+                  type="button"
+                  className="dp-cinema-rating__clear-btn"
+                  onClick={() => handleRate(0)}
+                  title="Удалить оценку"
                 >
-                  {r}
+                  Сбросить
                 </button>
-              ))}
+              )}
             </div>
-            {rating !== null && <p className="dp-rate__value">Моя оценка: {rating}/10</p>}
+
+            {/* 10 сияющих золотых векторных звезд */}
+            <div className="dp-cinema-stars" role="radiogroup" aria-label="Оценка от 1 до 10">
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((r) => {
+                const isActive = Boolean(rating && r <= rating);
+                const isExact = Boolean(rating && r === rating);
+                return (
+                  <button
+                    key={r}
+                    type="button"
+                    className={`dp-cinema-star ${isActive ? 'is-active' : ''} ${isExact ? 'is-exact' : ''}`}
+                    onClick={() => handleRate(r)}
+                    aria-label={`Оценить на ${r} из 10`}
+                    title={`${r} из 10`}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      className="dp-cinema-star__svg"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                    <span className="dp-cinema-star__num">{r}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Статусная эмодзи-плашка с оценкой */}
+            {rating && rating > 0 ? (
+              <div className="dp-cinema-rating__verdict">
+                <div className="dp-cinema-rating__score-badge">
+                  <span className="dp-cinema-rating__score-num">{rating}</span>
+                  <span className="dp-cinema-rating__score-max">/10</span>
+                </div>
+                <div className="dp-cinema-rating__verdict-copy">
+                  <span className="dp-cinema-rating__emoji">
+                    {RATING_EMOTIONS[rating]?.emoji || '✨'}
+                  </span>
+                  <strong className="dp-cinema-rating__verdict-text">
+                    {RATING_EMOTIONS[rating]?.text || 'Оценено'}
+                  </strong>
+                </div>
+              </div>
+            ) : (
+              <p className="dp-cinema-rating__hint">
+                Коснитесь любой звезды, чтобы оценить фильм и сохранить в свой кино-дневник
+              </p>
+            )}
           </div>
         )}
       </div>

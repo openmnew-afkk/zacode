@@ -13,6 +13,7 @@ import { useTelegram } from '../hooks/useTelegram';
 import type { Movie, TrackedItem } from '../types';
 import VeloraEmblem from '../components/VeloraEmblem';
 import { openSideMenu } from '../components/SideMenu';
+import { triggerSeasonalBurst } from '../components/SeasonFx';
 import './HomePage.css';
 
 const getNewYearTimeLeft = () => {
@@ -28,37 +29,80 @@ const getNewYearTimeLeft = () => {
 };
 
 /* ──────────────────────────────────────────────────────── */
-/*  Изолированный таймер Зимнего марафона (не перерисовывает HomePage каждую секунду!) */
+/*  Изолированный таймер и сезонный киномарафон            */
 /* ──────────────────────────────────────────────────────── */
-const WinterMarathonBanner: React.FC<{ onOpen: () => void }> = React.memo(({ onOpen }) => {
+const SeasonalBanner: React.FC<{
+  seasonId: string;
+  seasonName: string;
+  seasonIcon: string;
+  onOpen: () => void;
+}> = React.memo(({ seasonId, seasonName, seasonIcon, onOpen }) => {
   const [nyTime, setNyTime] = useState(getNewYearTimeLeft);
 
   useEffect(() => {
+    if (seasonId !== 'winter') return;
     const t = setInterval(() => setNyTime(getNewYearTimeLeft()), 1000);
     return () => clearInterval(t);
-  }, []);
+  }, [seasonId]);
+
+  const handleMagicClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    triggerSeasonalBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, true, seasonId);
+  };
+
+  const getSub = () => {
+    switch (seasonId) {
+      case 'spring': return 'Цветущие новинки и романтика';
+      case 'summer': return 'Блокбастеры и яркие премьеры';
+      case 'autumn': return 'Уютные вечера и атмосферный нуар';
+      default: return 'Коллекция, таймер и рулетка';
+    }
+  };
+
+  const getTitle = () => {
+    switch (seasonId) {
+      case 'spring': return 'Весенний кинофестиваль';
+      case 'summer': return 'Летний кинозал';
+      case 'autumn': return 'Осенний киноуют';
+      default: return 'Зимний киномарафон';
+    }
+  };
 
   return (
-    <button
-      type="button"
-      className="hp-ny-count"
+    <div
+      className={`hp-ny-count hp-season-banner hp-season-banner--${seasonId}`}
       onClick={onOpen}
+      role="button"
+      tabIndex={0}
     >
       <div className="hp-ny-count__left">
-        <span className="hp-ny-count__dot" aria-hidden="true">❄</span>
-        <span className="hp-ny-count__title">Зимний киномарафон</span>
-        <span className="hp-ny-count__sub">Коллекция и рулетка</span>
+        <span className="hp-ny-count__dot" aria-hidden="true">{seasonIcon}</span>
+        <span className="hp-ny-count__title">{getTitle()}</span>
+        <span className="hp-ny-count__sub">{getSub()}</span>
       </div>
 
       <div className="hp-ny-count__right">
-        <span className="hp-ny-count__timer">
-          {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
-        </span>
+        {seasonId === 'winter' ? (
+          <span className="hp-ny-count__timer">
+            {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
+          </span>
+        ) : (
+          <button
+            type="button"
+            className="hp-season-magic-sparkle"
+            onClick={handleMagicClick}
+            title="Запустить всплеск магии сезона"
+            aria-label="Всплеск магии"
+          >
+            <span>✦ Магия</span>
+          </button>
+        )}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-ny-count__arrow">
           <path d="M9 18l6-6-6-6" />
         </svg>
       </div>
-    </button>
+    </div>
   );
 });
 
@@ -107,7 +151,12 @@ const Card: React.FC<{ movie: Movie; onClick: () => void; onLongPress?: (m: Movi
           onError={() => setErr(true)}
         />
         {movie.vote_average > 0 && (
-          <span className="hp-card__rating">★ {movie.vote_average.toFixed(1)}</span>
+          <span className="hp-card__rating">
+            <svg width="9.5" height="9.5" viewBox="0 0 24 24" fill="#fbbf24" aria-hidden="true">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+            </svg>
+            <span>{movie.vote_average.toFixed(1)}</span>
+          </span>
         )}
         {movie.is_serial && <span className="hp-card__badge">Сериал</span>}
       </div>
@@ -873,7 +922,12 @@ const HomePage: React.FC = () => {
                     <div className="hp-top10__poster">
                       <img src={m.poster_path} alt={m.title} loading="lazy" />
                       {m.vote_average > 0 && (
-                        <span className="hp-card__rating">★ {m.vote_average.toFixed(1)}</span>
+                        <span className="hp-card__rating">
+                          <svg width="9.5" height="9.5" viewBox="0 0 24 24" fill="#fbbf24" aria-hidden="true">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                          </svg>
+                          <span>{m.vote_average.toFixed(1)}</span>
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1093,6 +1147,22 @@ const HomePage: React.FC = () => {
             <span className="hp-header__studios-count">{STUDIO_WORLDS.length}</span>
           </button>
 
+          {/* 🪄 Сезонная магия ZENOVA — интерактивный перезвон и салют частиц */}
+          <button
+            type="button"
+            className={`hp-header__season-magic hp-header__season-magic--${season.id}`}
+            onClick={(e) => {
+              haptic('medium');
+              const rect = e.currentTarget.getBoundingClientRect();
+              triggerSeasonalBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, true, season.id);
+            }}
+            title={`${season.label} · Нажмите для всплеска сезонной магии`}
+            aria-label="Сезонная магия"
+          >
+            <span className="hp-header__season-icon">{season.icon}</span>
+            <span className="hp-header__season-halo" />
+          </button>
+
           {/* Профиль пользователя в чистом золотом свечении */}
           <button
             type="button"
@@ -1122,12 +1192,19 @@ const HomePage: React.FC = () => {
         <Hero movies={heroMovies} onWatch={go} />
       )}
 
-      {/* ── Минималистичная капсула Зимнего киномарафона (изолированный таймер без нагрузки на страницу) ── */}
-      {!showSearch && !activeCategory && season.id === 'winter' && (
-        <WinterMarathonBanner
+      {/* ── Минималистичная капсула Сезонного киномарафона ── */}
+      {!showSearch && !activeCategory && season.id !== 'none' && (
+        <SeasonalBanner
+          seasonId={season.id}
+          seasonName={season.label}
+          seasonIcon={season.icon}
           onOpen={() => {
             haptic('light');
-            navigate('/new-year');
+            if (season.id === 'winter') {
+              navigate('/new-year');
+            } else if (season.collectionQuery && seasonMovies.length > 0) {
+              openCategory('season', `${season.icon} ${season.collectionQuery.label}`, seasonMovies, undefined, 'movie');
+            }
           }}
         />
       )}

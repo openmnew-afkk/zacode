@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════
-   ✦ ZENOVA Multiverse — 3D Coverflow карусель кино-вселенных
-   Полноэкранная сцена · живой фон · фирменные логотипы студий
+   ✦ ZENOVA Multiverse — 120 FPS Ультра-плавная карусель студий
+   Без квадратных багов, с нативным скролл-снэпом и идеальными углами
    ════════════════════════════════════════════════════════════════ */
 
 .mv {
@@ -11,35 +11,41 @@
   z-index: 9999;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   background: #050508;
   color: #fff;
   overflow: hidden;
-  animation: mvIn 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: mvIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-.mv.is-closing { animation: mvOut 0.24s ease forwards; }
-@keyframes mvIn { from { opacity: 0; transform: translateY(-4%); } to { opacity: 1; transform: none; } }
-@keyframes mvOut { to { opacity: 0; transform: translateY(-3%); } }
+.mv.is-closing { animation: mvOut 0.22s ease forwards; }
+@keyframes mvIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes mvOut { to { opacity: 0; transform: scale(0.98); } }
 
 /* Живой фон */
-.mv-bg { position: absolute; inset: 0; z-index: 0; }
+.mv-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
 .mv-bg__layer {
   position: absolute;
-  inset: -40px;
+  inset: -20px;
   background-size: cover;
   background-position: center;
-  filter: blur(38px) saturate(1.3) brightness(0.55);
+  filter: blur(40px) brightness(0.35) saturate(1.4);
   opacity: 0;
-  transform: scale(1.1);
-  transition: opacity 0.6s ease;
+  transform: scale(1.05);
+  transition: opacity 0.45s ease;
 }
 .mv-bg__layer.on { opacity: 1; }
 .mv-bg__veil {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 50% 46%, var(--mv-glow) 0%, transparent 70%),
-    linear-gradient(180deg, rgba(5, 5, 8, 0.55) 0%, rgba(5, 5, 8, 0.2) 35%, rgba(5, 5, 8, 0.75) 75%, #050508 100%);
-  transition: background 0.5s ease;
+    radial-gradient(circle at 50% 45%, var(--mv-glow) 0%, transparent 65%),
+    linear-gradient(180deg, rgba(5, 5, 8, 0.6) 0%, rgba(5, 5, 8, 0.2) 30%, rgba(5, 5, 8, 0.85) 75%, #050508 100%);
+  transition: background 0.4s ease;
 }
 
 /* Шапка */
@@ -52,23 +58,24 @@
   padding: calc(var(--header-safe-top, 12px) + 8px) 20px 0;
 }
 .mv-head__kicker {
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.24em;
+  letter-spacing: 0.22em;
   color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
 }
 .mv-head__title {
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.01em;
 }
 .mv-head__close {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -76,46 +83,98 @@
   display: grid;
   place-items: center;
   cursor: pointer;
+  transition: transform 0.15s ease;
 }
 .mv-head__close:active { transform: scale(0.9); }
 
-/* 3D сцена */
-.mv-stage {
+/* ── Контейнер карусели ── */
+.mv-carousel-container {
   position: relative;
   z-index: 2;
-  flex: 1;
-  min-height: 300px;
-  perspective: 1100px;
-  transform-style: preserve-3d;
-  touch-action: pan-y;
-  user-select: none;
-  cursor: grab;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
 }
-.mv-stage.is-dragging { cursor: grabbing; }
 
-.mv-card {
+/* Навигационные стрелки для ноутов */
+.mv-nav-arrow {
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 62%;
-  max-width: 300px;
-  aspect-ratio: 3 / 4;
-  max-height: 78%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+.mv-nav-arrow:active { transform: translateY(-50%) scale(0.9); }
+.mv-nav-arrow:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+.mv-nav-arrow--left { left: 16px; }
+.mv-nav-arrow--right { right: 16px; }
+
+/* Трек со скролл-снэпом */
+.mv-track {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px calc(50vw - 130px);
+  scrollbar-width: none;
+}
+.mv-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* Карточки студий — фиксация скруглений без багов обрезания */
+.mv-card {
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  position: relative;
+  width: 260px;
+  height: 350px;
   border-radius: 28px;
   overflow: hidden;
+  /* Аппаратная изоляция WebKit для идеальных скруглений без квадратных скачков */
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
+  mask-image: radial-gradient(white, black);
+  transform: translateZ(0) scale(0.92);
+  opacity: 0.55;
   background: linear-gradient(160deg, #1a1a24, #0b0b10);
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.25, 1), opacity 0.4s ease, box-shadow 0.4s ease;
-  will-change: transform;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
   cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1),
+              opacity 0.3s ease,
+              box-shadow 0.3s ease,
+              border-color 0.3s ease;
+  will-change: transform, opacity;
   -webkit-tap-highlight-color: transparent;
 }
-.mv-stage.is-dragging .mv-card { transition: none; }
+
 .mv-card.is-active {
+  transform: translateZ(0) scale(1);
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--st-accent) 75%, transparent);
   box-shadow:
-    0 34px 70px rgba(0, 0, 0, 0.7),
-    0 0 0 1.5px color-mix(in srgb, var(--st-accent) 70%, transparent),
-    0 0 50px var(--st-glow);
+    0 24px 60px rgba(0, 0, 0, 0.8),
+    0 0 0 1.5px color-mix(in srgb, var(--st-accent) 65%, transparent),
+    0 0 45px var(--st-glow);
 }
 
 .mv-card__cover {
@@ -123,18 +182,19 @@
   inset: 0;
   background-size: cover;
   background-position: center;
-  transform: scale(1.05);
-  transition: transform 0.6s ease;
+  transition: transform 0.4s ease;
 }
-.mv-card.is-active .mv-card__cover { transform: scale(1); }
+.mv-card.is-active .mv-card__cover {
+  transform: scale(1.03);
+}
+
 .mv-card__shade {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(0,0,0,0.35) 0%, transparent 30%, transparent 45%, rgba(4,4,7,0.92) 85%),
-    linear-gradient(0deg, color-mix(in srgb, var(--st-accent) 22%, transparent), transparent 50%);
+    linear-gradient(180deg, rgba(0,0,0,0.3) 0%, transparent 25%, transparent 45%, rgba(4,4,7,0.92) 85%),
+    linear-gradient(0deg, color-mix(in srgb, var(--st-accent) 26%, transparent), transparent 50%);
 }
-.mv-card:not(.is-active) .mv-card__shade { background-color: rgba(0, 0, 0, 0.35); }
 
 .mv-card__num {
   position: absolute;
@@ -145,13 +205,14 @@
   font-weight: 700;
   color: rgba(255, 255, 255, 0.75);
 }
+
 .mv-card__badge {
   position: absolute;
   top: 14px;
   right: 14px;
   padding: 4px 9px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -160,48 +221,47 @@
   letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.85);
 }
+
 .mv-card__logo {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 22px;
+  bottom: 24px;
   display: flex;
   justify-content: center;
-  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.8));
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.85));
 }
-.mv-card__logo svg { max-width: 82%; height: auto; min-height: 30px; }
-
-.mv-card__shine {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.12) 50%, transparent 65%);
-  mix-blend-mode: screen;
+.mv-card__logo svg {
+  max-width: 82%;
+  height: auto;
+  min-height: 30px;
 }
 
 /* Инфо */
 .mv-info {
   position: relative;
   z-index: 2;
-  padding: 0 28px;
+  padding: 0 24px;
   text-align: center;
-  animation: mvInfo 0.4s ease both;
+  animation: mvInfo 0.3s ease both;
 }
-@keyframes mvInfo { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes mvInfo { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
 .mv-info__tagline {
   margin: 0;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.14em;
   color: var(--mv-accent);
-  filter: brightness(1.5);
+  filter: brightness(1.4);
+  text-transform: uppercase;
 }
 .mv-info__desc {
-  margin: 8px auto 0;
-  max-width: 340px;
+  margin: 6px auto 0;
+  max-width: 360px;
   font-size: 12.5px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.65);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -215,10 +275,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
-  padding: 18px 20px calc(max(env(safe-area-inset-bottom), 12px) + 16px);
+  gap: 14px;
+  padding: 10px 20px calc(max(env(safe-area-inset-bottom), 12px) + 14px);
 }
-.mv-dots { display: flex; gap: 6px; }
+
+.mv-dots {
+  display: flex;
+  gap: 6px;
+}
 .mv-dot {
   width: 6px;
   height: 6px;
@@ -227,29 +291,33 @@
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.25);
   cursor: pointer;
-  transition: width 0.3s ease, background 0.3s ease;
+  transition: width 0.25s ease, background 0.25s ease;
 }
-.mv-dot.on { width: 22px; background: #fff; }
+.mv-dot.on {
+  width: 22px;
+  background: #ffffff;
+}
 
 .mv-enter {
   width: min(100%, 360px);
-  height: 54px;
+  height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   border: none;
   border-radius: 999px;
-  background: #fff;
+  background: #ffffff;
   color: #07070b;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 14px 36px var(--mv-glow);
-  transition: transform 0.15s ease, box-shadow 0.4s ease;
+  box-shadow: 0 12px 32px var(--mv-glow);
+  transition: transform 0.15s ease, box-shadow 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 .mv-enter:active { transform: scale(0.97); }
 
-@media (min-height: 760px) {
-  .mv-card { max-width: 320px; }
+@media (max-width: 360px) {
+  .mv-card { width: 230px; height: 310px; }
 }

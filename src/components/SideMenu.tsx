@@ -14,27 +14,25 @@ export const closeSideMenu = () => {
   window.dispatchEvent(new CustomEvent('zenova-close-drawer'));
 };
 
-/* Кэш обложек студий на сессию — повторное открытие мгновенное */
+/* Кэш обложек студий на сессию */
 const coverCache: Partial<Record<StudioId, string>> = {};
 
 /* ═══════════════════════════════════════════════════════════════════════════
- *  ✦ ZENOVA Multiverse — 3D Coverflow-карусель 7 кино-вселенных
- *  Свайп / тап по боковой карточке — прокрутка, тап по центральной — вход.
+ *  ✦ ZENOVA Multiverse — Ультра-плавная карусель 7 кино-вселенных
+ *  Без квадратных артефактов, с нативным 120 FPS скролл-снэпом и стрелками
  * ═══════════════════════════════════════════════════════════════════════════ */
 export const SideMenu: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [active, setActive] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0); // в долях карточки
-  const [dragging, setDragging] = useState(false);
   const [covers, setCovers] = useState<Partial<Record<StudioId, string>>>(coverCache);
   const navigate = useNavigate();
   const location = useLocation();
   const { haptic } = useTelegram();
 
-  const startX = useRef<number | null>(null);
-  const moved = useRef(false);
-  const stageRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const cardsRef = useRef<(HTMLElement | null)[]>([]);
+  const scrollTimeout = useRef<any>(null);
   const total = STUDIO_WORLDS.length;
 
   const close = useCallback(() => {
@@ -42,7 +40,7 @@ export const SideMenu: React.FC = () => {
     setTimeout(() => {
       setOpen(false);
       setClosing(false);
-    }, 240);
+    }, 220);
   }, []);
 
   useEffect(() => {
@@ -58,7 +56,7 @@ export const SideMenu: React.FC = () => {
 
   useEffect(() => { setOpen(false); }, [location.pathname]);
 
-  /* Подгрузка обложек — один раз за сессию */
+  /* Загрузка постеров/бэкдропов студий */
   useEffect(() => {
     if (!open) return;
     STUDIO_WORLDS.forEach((s) => {
@@ -76,61 +74,76 @@ export const SideMenu: React.FC = () => {
     });
   }, [open]);
 
-  /* Клавиатура (ноутбук / TG Web) */
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') setActive((a) => Math.min(total - 1, a + 1));
-      if (e.key === 'ArrowLeft') setActive((a) => Math.max(0, a - 1));
-      if (e.key === 'Escape') close();
-      if (e.key === 'Enter') enter(STUDIO_WORLDS[active].id);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  });
-
   const enter = (id: StudioId) => {
     haptic('heavy');
     setOpen(false);
     navigate(`/studios/${id}`);
   };
 
-  const cardWidth = () => (stageRef.current?.clientWidth || 360) * 0.62;
-
-  const onDown = (e: React.PointerEvent) => {
-    startX.current = e.clientX;
-    moved.current = false;
-    setDragging(true);
-  };
-  const onMove = (e: React.PointerEvent) => {
-    if (startX.current === null) return;
-    const dx = e.clientX - startX.current;
-    if (Math.abs(dx) > 6) moved.current = true;
-    let off = -dx / cardWidth();
-    // резиновое сопротивление на краях
-    if (active + off < 0) off = -active + (active + off) * 0.3;
-    if (active + off > total - 1) off = total - 1 - active + (active + off - (total - 1)) * 0.3;
-    setDragOffset(off);
-  };
-  const onUp = () => {
-    if (startX.current === null) return;
-    startX.current = null;
-    setDragging(false);
-    const next = Math.max(0, Math.min(total - 1, Math.round(active + dragOffset)));
-    if (next !== active) haptic('light');
-    setActive(next);
-    setDragOffset(0);
+  const scrollToIdx = (idx: number, smooth = true) => {
+    const clamped = Math.max(0, Math.min(total - 1, idx));
+    const cardEl = cardsRef.current[clamped];
+    if (cardEl && trackRef.current) {
+      cardEl.scrollIntoView({
+        behavior: smooth ? 'smooth' : 'auto',
+        inline: 'center',
+        block: 'nearest',
+      });
+      setActive(clamped);
+    }
   };
 
-  const onCardClick = (idx: number) => {
-    if (moved.current) return;
-    if (idx === active) enter(STUDIO_WORLDS[idx].id);
-    else { haptic('light'); setActive(idx); }
+  /* Центрируем активную карточку при открытии */
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => scrollToIdx(active, false), 30);
+    }
+  }, [open]);
+
+  /* Быстрый и плавный расчёт активной карточки через scroll listener */
+  const handleScroll = () => {
+    const track = trackRef.current;
+    if (!track) return;
+
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+
+    scrollTimeout.current = setTimeout(() => {
+      const trackCenter = track.scrollLeft + track.clientWidth / 2;
+      let closestIdx = 0;
+      let minDiff = Infinity;
+
+      cardsRef.current.forEach((card, idx) => {
+        if (!card) return;
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const diff = Math.abs(trackCenter - cardCenter);
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestIdx = idx;
+        }
+      });
+
+      if (closestIdx !== active) {
+        setActive(closestIdx);
+        haptic('light');
+      }
+    }, 45);
   };
+
+  /* Поддержка клавиатуры (ноутбук / ПК / TG Web) */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') scrollToIdx(active + 1);
+      if (e.key === 'ArrowLeft') scrollToIdx(active - 1);
+      if (e.key === 'Escape') close();
+      if (e.key === 'Enter') enter(STUDIO_WORLDS[active].id);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, active]);
 
   if (!open) return null;
 
-  const pos = active + dragOffset;
   const current = STUDIO_WORLDS[active];
 
   return (
@@ -141,7 +154,7 @@ export const SideMenu: React.FC = () => {
       aria-modal="true"
       aria-label="Кино-вселенные"
     >
-      {/* Живой фон: размытая обложка активной вселенной */}
+      {/* Живой фон активной вселенной без тяжелых фильтров на мобильных */}
       <div className="mv-bg" aria-hidden="true">
         {STUDIO_WORLDS.map((s, i) => (
           <div
@@ -158,50 +171,76 @@ export const SideMenu: React.FC = () => {
           <span className="mv-head__kicker">ZENOVA MULTIVERSE</span>
           <h2 className="mv-head__title">Вселенные</h2>
         </div>
-        <button type="button" className="mv-head__close" onClick={() => { haptic('light'); close(); }} aria-label="Закрыть">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        <button
+          type="button"
+          className="mv-head__close"
+          onClick={() => { haptic('light'); close(); }}
+          aria-label="Закрыть"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
         </button>
       </header>
 
-      {/* 3D-сцена */}
-      <div
-        ref={stageRef}
-        className={`mv-stage ${dragging ? 'is-dragging' : ''}`}
-        onPointerDown={onDown}
-        onPointerMove={onMove}
-        onPointerUp={onUp}
-        onPointerCancel={onUp}
-        onPointerLeave={() => dragging && onUp()}
-      >
-        {STUDIO_WORLDS.map((s, i) => {
-          const off = i - pos;
-          const abs = Math.abs(off);
-          if (abs > 2.6) return null;
-          const style: React.CSSProperties = {
-            transform: `translate3d(calc(-50% + ${off * 58}%), -50%, ${-abs * 120}px) rotateY(${-off * 32}deg) scale(${1 - Math.min(abs, 2) * 0.1})`,
-            zIndex: 100 - Math.round(abs * 10),
-            opacity: abs > 2 ? Math.max(0, 2.6 - abs) : 1,
-            ['--st-accent' as any]: s.accentColor,
-            ['--st-glow' as any]: s.glowColor,
-          };
-          return (
-            <article
-              key={s.id}
-              className={`mv-card ${i === active ? 'is-active' : ''}`}
-              style={style}
-              onClick={() => onCardClick(i)}
-            >
-              <div className="mv-card__cover" style={covers[s.id] ? { backgroundImage: `url(${covers[s.id]})` } : undefined} />
-              <div className="mv-card__shade" />
-              <span className="mv-card__num">{String(i + 1).padStart(2, '0')}</span>
-              <span className="mv-card__badge">{s.badgeText}</span>
-              <div className="mv-card__logo">
-                <StudioWordmark id={s.id} size="lg" />
-              </div>
-              <div className="mv-card__shine" style={{ transform: `translateX(${off * 60}%)` }} />
-            </article>
-          );
-        })}
+      {/* ── Нативная карусель 120 FPS со скролл-снэпом — нулевой лаг, постоянные круглые углы ── */}
+      <div className="mv-carousel-container">
+        {/* Стрелки для ноутов и TG Web */}
+        <button
+          type="button"
+          className="mv-nav-arrow mv-nav-arrow--left"
+          onClick={() => scrollToIdx(active - 1)}
+          aria-label="Предыдущая вселенная"
+          disabled={active === 0}
+        >
+          ‹
+        </button>
+
+        <div
+          ref={trackRef}
+          className="mv-track"
+          onScroll={handleScroll}
+        >
+          {STUDIO_WORLDS.map((s, i) => {
+            const isActive = i === active;
+            return (
+              <article
+                key={s.id}
+                ref={(el) => { cardsRef.current[i] = el; }}
+                className={`mv-card ${isActive ? 'is-active' : ''}`}
+                style={{
+                  '--st-accent': s.accentColor,
+                  '--st-glow': s.glowColor,
+                } as React.CSSProperties}
+                onClick={() => {
+                  if (isActive) enter(s.id);
+                  else scrollToIdx(i);
+                }}
+              >
+                <div
+                  className="mv-card__cover"
+                  style={covers[s.id] ? { backgroundImage: `url(${covers[s.id]})` } : undefined}
+                />
+                <div className="mv-card__shade" />
+                <span className="mv-card__num">{String(i + 1).padStart(2, '0')}</span>
+                <span className="mv-card__badge">{s.badgeText}</span>
+                <div className="mv-card__logo">
+                  <StudioWordmark id={s.id} size="lg" />
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          className="mv-nav-arrow mv-nav-arrow--right"
+          onClick={() => scrollToIdx(active + 1)}
+          aria-label="Следующая вселенная"
+          disabled={active === total - 1}
+        >
+          ›
+        </button>
       </div>
 
       {/* Инфо активной вселенной */}
@@ -217,14 +256,20 @@ export const SideMenu: React.FC = () => {
               key={s.id}
               type="button"
               className={`mv-dot ${i === active ? 'on' : ''}`}
-              onClick={() => { haptic('light'); setActive(i); }}
+              onClick={() => scrollToIdx(i)}
               aria-label={s.shortName}
             />
           ))}
         </div>
-        <button type="button" className="mv-enter" onClick={() => enter(current.id)}>
-          Войти в {current.shortName}
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        <button
+          type="button"
+          className="mv-enter"
+          onClick={() => enter(current.id)}
+        >
+          <span>Войти в {current.shortName}</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
         </button>
       </div>
     </div>

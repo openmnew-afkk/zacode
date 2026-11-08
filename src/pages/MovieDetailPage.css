@@ -512,38 +512,197 @@
 }
 .dp-status.active .dp-status__label { color: #f0c96a; }
 
-/* ── Личная оценка 1-10 ── */
-.dp-rate { margin-top: 14px; }
-.dp-rate__title {
-  font-size: 13px;
-  font-weight: 700;
-  color: rgba(255,255,255,0.6);
-  margin: 0 0 8px;
+/* ── Премиальная кинематографическая система оценки и звезд ── */
+.dp-cinema-rating {
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(18, 18, 26, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.dp-rate__stars { display: flex; gap: 5px; flex-wrap: wrap; }
-.dp-rate__star {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.09);
-  color: rgba(255,255,255,0.5);
-  font-size: 12px;
-  font-weight: 700;
+
+.dp-cinema-rating__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.dp-cinema-rating__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dp-cinema-rating__kicker {
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: #fbbf24;
+  text-transform: uppercase;
+}
+
+.dp-cinema-rating__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+.dp-cinema-rating__clear-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
-.dp-rate__star:active { transform: scale(0.88); }
-.dp-rate__star.on {
-  background: rgba(251,113,133,0.18);
-  border-color: rgba(251,113,133,0.5);
-  color: #f0c96a;
+.dp-cinema-rating__clear-btn:active {
+  transform: scale(0.92);
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
 }
-.dp-rate__value {
+
+/* Ряд из 10 интерактивных звезд */
+.dp-cinema-stars {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  padding: 4px 0;
+}
+
+.dp-cinema-star {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.18);
+  transition: transform 0.18s cubic-bezier(0.2, 1.2, 0.4, 1), color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.dp-cinema-star:active {
+  transform: scale(1.3);
+}
+
+.dp-cinema-star__svg {
+  width: 22px;
+  height: 22px;
+  transition: all 0.18s ease;
+}
+
+.dp-cinema-star__num {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  transition: color 0.18s ease;
+}
+
+/* Активные звёзды */
+.dp-cinema-star.is-active {
+  color: #fbbf24;
+}
+.dp-cinema-star.is-active .dp-cinema-star__svg {
+  filter: drop-shadow(0 0 7px rgba(251, 191, 36, 0.55));
+}
+.dp-cinema-star.is-active .dp-cinema-star__num {
+  color: #fde047;
+}
+
+.dp-cinema-star.is-exact {
+  transform: scale(1.15);
+}
+.dp-cinema-star.is-exact .dp-cinema-star__svg {
+  filter: drop-shadow(0 0 12px rgba(251, 191, 36, 0.85));
+}
+
+/* Вердикт / статус оценки */
+.dp-cinema-rating__verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.12), rgba(217, 119, 6, 0.06));
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  animation: dpVerdictPop 0.25s cubic-bezier(0.2, 1, 0.3, 1) both;
+}
+@keyframes dpVerdictPop {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dp-cinema-rating__score-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 3px 8px;
+  border-radius: 8px;
+  background: #fbbf24;
+  color: #0c0a04;
+  font-family: 'Unbounded', sans-serif;
+  font-weight: 800;
+  line-height: 1;
+}
+.dp-cinema-rating__score-num {
+  font-size: 14px;
+}
+.dp-cinema-rating__score-max {
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+.dp-cinema-rating__verdict-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dp-cinema-rating__emoji {
+  font-size: 17px;
+}
+.dp-cinema-rating__verdict-text {
   font-size: 12.5px;
   font-weight: 700;
-  color: #f0c96a;
-  margin: 8px 0 0;
+  color: #ffffff;
+}
+
+.dp-cinema-rating__hint {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  line-height: 1.35;
+}
+
+.dp-stage__chip--score {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.16), rgba(217, 119, 6, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.38);
+  color: #fde047;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+}
+.dp-stage__chip--score b {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.dp-stage__chip--score small {
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.45);
 }
 
 /* ── Где посмотреть ── */
