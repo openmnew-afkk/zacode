@@ -23,7 +23,18 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     setTimeout(() => {
       setVisible(false);
       onDoneRef.current?.();
-    }, 420);
+    }, 450);
+  }, []);
+
+  const handleUnlockAudio = useCallback(() => {
+    const v = videoRef.current;
+    if (v) {
+      v.muted = false;
+      v.volume = 1.0;
+      if (v.paused) {
+        v.play().catch(() => {});
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -34,51 +45,58 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       vid.volume = 1.0;
       vid.muted = false;
 
-      // Пытаемся воспроизвести сразу со звуком
-      vid.play().catch(() => {
-        // Если строгая политика браузера временно заглушила — разблокируем аудио при первом таче
-        vid.muted = true;
-        vid.play().catch(() => {});
+      // Пытаемся воспроизвести сразу со звуком на полную громкость
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          // Если строгая политика браузера временно заблокировала звук:
+          // Запускаем видео и моментально разблокируем звук при первом касании экрана
+          vid.muted = true;
+          vid.play().catch(() => {});
 
-        const unlockAudio = () => {
-          const v = videoRef.current;
-          if (!v) return;
-          v.muted = false;
-          v.volume = 1.0;
-          v.play().catch(() => {});
-          cleanup();
-        };
+          const unlockAudio = () => {
+            const v = videoRef.current;
+            if (!v) return;
+            v.muted = false;
+            v.volume = 1.0;
+            cleanup();
+          };
 
-        const cleanup = () => {
-          window.removeEventListener('pointerdown', unlockAudio);
-          window.removeEventListener('touchstart', unlockAudio);
-          window.removeEventListener('click', unlockAudio);
-          window.removeEventListener('keydown', unlockAudio);
-        };
+          const cleanup = () => {
+            window.removeEventListener('pointerdown', unlockAudio);
+            window.removeEventListener('touchstart', unlockAudio);
+            window.removeEventListener('click', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+          };
 
-        window.addEventListener('pointerdown', unlockAudio, { passive: true });
-        window.addEventListener('touchstart', unlockAudio, { passive: true });
-        window.addEventListener('click', unlockAudio, { passive: true });
-        window.addEventListener('keydown', unlockAudio, { passive: true });
-        removeUnlockListeners = cleanup;
-      });
+          window.addEventListener('pointerdown', unlockAudio, { passive: true });
+          window.addEventListener('touchstart', unlockAudio, { passive: true });
+          window.addEventListener('click', unlockAudio, { passive: true });
+          window.addEventListener('keydown', unlockAudio, { passive: true });
+          removeUnlockListeners = cleanup;
+        });
+      }
     }
 
-    // Страховочный таймер на случай зависания сети
+    // Страховочный таймер (30 сек) ТОЛЬКО на случай критического сбоя сети
+    // Ни при каких обстоятельствах не прерывает проигрываемое видео!
     const fallbackTimer = setTimeout(() => {
+      const v = videoRef.current;
+      if (v && !v.paused && !v.ended && v.currentTime > 0) {
+        // Видео ещё играет — даём доиграть до конца!
+        return;
+      }
       finishSplash();
-    }, 11000);
+    }, 30000);
 
-    // Плавный прогресс синхронно с временем видео
+    // Точный прогресс синхронно с реальным временем воспроизведения видео
     const progInterval = setInterval(() => {
       const v = videoRef.current;
       if (v && v.duration && isFinite(v.duration) && v.currentTime > 0) {
         const pct = Math.min(100, Math.round((v.currentTime / v.duration) * 100));
         setProgress(pct);
-      } else {
-        setProgress((prev) => Math.min(96, prev + 2));
       }
-    }, 80);
+    }, 50);
 
     return () => {
       clearTimeout(fallbackTimer);
@@ -94,6 +112,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       className={`sp ${fading ? 'sp--fade' : ''}`}
       role="status"
       aria-label="Загрузка ZENOVA"
+      onClick={handleUnlockAudio}
+      onTouchStart={handleUnlockAudio}
     >
       {/* Амбиент-фон для широких экранов */}
       <div
@@ -103,7 +123,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       />
       <div className="sp__backdrop-vignette" aria-hidden="true" />
 
-      {/* Видео-контейнер (видео идет от начала до конца без кнопок пропуска) */}
+      {/* Видео-контейнер (видео идет от начала до самого конца со звуком без прерываний) */}
       <div className="sp__stage">
         <video
           ref={videoRef}
