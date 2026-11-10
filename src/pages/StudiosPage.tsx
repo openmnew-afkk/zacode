@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    ZENOVA — КИНО-МИРЫ & ВСЕЛЕННЫЕ (PREMIUM CINEMA EDITION)
-   Ультра-плавный 120 FPS скроллинг, роскошный визуал,
-   мгновенное переключение миров без раздражающих выпадающих стрелок.
+   Ультра-плавный 120 FPS скроллинг, роскошный кинематографический визуал,
+   живая атмосфера каждой вселенной и мгновенное переключение миров.
    ═══════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState, useMemo, useRef } from 'react';
@@ -34,6 +34,7 @@ export function StudiosPage() {
 
   const [mediaType, setMediaType] = useState<'all' | 'movie' | 'tv'>('all');
   const [collectionId, setCollectionId] = useState<string>('all');
+  const [showPortalDrawer, setShowPortalDrawer] = useState(false);
   const [heroList, setHeroList] = useState<Movie[]>([]);
   const [top10List, setTop10List] = useState<Movie[]>([]);
   const [items, setItems] = useState<Movie[]>([]);
@@ -49,6 +50,7 @@ export function StudiosPage() {
     setCollectionId('all');
     setPage(1);
     setHeroIdx(0);
+    setShowPortalDrawer(false);
   }, [studio.id, studio.defaultTab]);
 
   // Загрузка контента выбранной вселенной
@@ -140,9 +142,31 @@ export function StudiosPage() {
         } as React.CSSProperties
       }
     >
-      {/* ═════ Легковесный аппаратно-ускоренный эмбиент-фон ═════ */}
+      {/* ═════ Аппаратно-ускоренные атмосферные спецэффекты каждого Кино-Мира ═════ */}
       <div className="sw-ambient" aria-hidden="true">
         <div className="sw-ambient-glow" />
+        <div className="sw-ambient-orb sw-ambient-orb--1" />
+        <div className="sw-ambient-orb sw-ambient-orb--2" />
+        {studio.id === 'netflix' && (
+          <div className="sw-netflix-beams">
+            <span /><span /><span /><span /><span /><span />
+          </div>
+        )}
+        {studio.id === 'disney' && (
+          <div className="sw-disney-stars">
+            <span className="sw-star s1" />
+            <span className="sw-star s2" />
+            <span className="sw-star s3" />
+            <span className="sw-star s4" />
+            <span className="sw-star s5" />
+            <div className="sw-disney-arc-bg" />
+          </div>
+        )}
+        {studio.id === 'hbo' && <div className="sw-hbo-aurora" />}
+        {studio.id === 'apple' && <div className="sw-apple-sheen" />}
+        {studio.id === 'marvel' && <div className="sw-marvel-halftone" />}
+        {studio.id === 'a24' && <div className="sw-a24-filmgrain" />}
+        {studio.id === 'anime' && <div className="sw-anime-grid" />}
       </div>
 
       {/* ═════ Премиальная кино-шапка ═════ */}
@@ -160,12 +184,29 @@ export function StudiosPage() {
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
-            <span>Назад</span>
+            <span>Главная</span>
           </button>
 
-          <div className="sw-header-active-brand">
-            <StudioWordmark id={studio.id} size="md" />
-          </div>
+          {/* Центральный триггер Мультивселенной: Wordmark + стрелка вызова портала */}
+          <button
+            type="button"
+            className="sw-universe-trigger"
+            onClick={() => {
+              haptic('light');
+              setShowPortalDrawer((prev) => !prev);
+            }}
+            aria-expanded={showPortalDrawer}
+            title="Открыть список всех вселенных"
+          >
+            <div className="sw-universe-trigger__brand">
+              <StudioWordmark id={studio.id} size="sm" />
+            </div>
+            <span className={`sw-universe-trigger__caret ${showPortalDrawer ? 'is-open' : ''}`}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </span>
+          </button>
 
           <button
             type="button"
@@ -183,7 +224,7 @@ export function StudiosPage() {
           </button>
         </div>
 
-        {/* ── Горизонтальная лента мгновенного выбора вселенной (без раздражающих выпадающих стрелок) ── */}
+        {/* ── Горизонтальная лента мгновенного переключения вселенных ── */}
         <div ref={stripRef} className="sw-studios-strip" role="tablist" aria-label="Вселенные">
           {STUDIO_WORLDS.map((item) => {
             const isActive = item.id === studio.id;
@@ -210,7 +251,60 @@ export function StudiosPage() {
         </div>
       </header>
 
-      {/* ═════ Роскошный панорамный Hero-блок ═════ */}
+      {/* ═════ Интерактивный выезжающий портал всех киновселенных ═════ */}
+      {showPortalDrawer && (
+        <div className="sw-portal-overlay" onClick={() => setShowPortalDrawer(false)}>
+          <div className="sw-portal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="sw-portal-head">
+              <div>
+                <span className="sw-portal-kicker">ZENOVA MULTIVERSE</span>
+                <h3 className="sw-portal-title">Вселенные</h3>
+              </div>
+              <button
+                type="button"
+                className="sw-portal-close"
+                onClick={() => setShowPortalDrawer(false)}
+                aria-label="Закрыть"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="sw-portal-list">
+              {STUDIO_WORLDS.map((item) => {
+                const isActive = item.id === studio.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`sw-portal-card ${isActive ? 'is-active' : ''}`}
+                    style={
+                      {
+                        '--card-accent': item.accentColor,
+                        '--card-glow': item.glowColor,
+                      } as React.CSSProperties
+                    }
+                    onClick={() => {
+                      setShowPortalDrawer(false);
+                      handleSelectStudio(item.id);
+                    }}
+                  >
+                    <div className="sw-portal-card__brand">
+                      <StudioWordmark id={item.id} size="md" />
+                    </div>
+                    <div className="sw-portal-card__meta">
+                      <span className="sw-portal-card__badge">{item.badgeText}</span>
+                      <p className="sw-portal-card__tagline">{item.tagline}</p>
+                    </div>
+                    {isActive && <span className="sw-portal-card__check">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═════ Роскошный панорамный Hero-блок (IMAX Premiere) ═════ */}
       <section className="sw-hero">
         {currentHero ? (
           <div
@@ -228,10 +322,10 @@ export function StudiosPage() {
             />
             <div className="sw-hero-vignette" />
 
-            {/* Фирменный бейдж студии */}
+            {/* Фирменный бейдж студии + 4K значок */}
             <div className="sw-hero-top-badge">
               <span className="sw-studio-badge">{studio.badgeText}</span>
-              <span className="sw-studio-quality">4K ULTRA HD · HDR</span>
+              <span className="sw-studio-quality">4K ULTRA HD · DOLBY ATMOS</span>
             </div>
 
             {/* Контент Hero */}
@@ -270,6 +364,18 @@ export function StudiosPage() {
                   <span>Смотреть</span>
                 </button>
 
+                <button
+                  type="button"
+                  className="sw-hero-sub-cta"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    haptic('light');
+                    navigate(`/movie/${currentHero.id}`);
+                  }}
+                >
+                  <span>О релизе</span>
+                </button>
+
                 {heroList.length > 1 && (
                   <div className="sw-hero-dots" onClick={(e) => e.stopPropagation()}>
                     {heroList.map((h, idx) => (
@@ -293,14 +399,19 @@ export function StudiosPage() {
           <div className="sw-hero-skeleton skeleton" />
         )}
 
-        {/* Описание атмосферы мира + Фильтр Все/Фильмы/Сериалы */}
+        {/* Манифест Вселенной + Переключатель Все/Фильмы/Сериалы */}
         <div className="sw-world-manifesto">
-          <p className="sw-world-manifesto-text">{studio.description}</p>
-          <div className="sw-type-tabs">
+          <div className="sw-world-manifesto-info">
+            <span className="sw-world-manifesto-tagline">{studio.tagline}</span>
+            <p className="sw-world-manifesto-text">{studio.description}</p>
+          </div>
+          <div className="sw-type-tabs" role="tablist" aria-label="Тип релиза">
             {(['all', 'movie', 'tv'] as const).map((t) => (
               <button
                 key={t}
                 type="button"
+                role="tab"
+                aria-selected={mediaType === t}
                 className={`sw-type-tab ${mediaType === t ? 'active' : ''}`}
                 onClick={() => {
                   haptic('light');
@@ -314,13 +425,15 @@ export function StudiosPage() {
         </div>
       </section>
 
-      {/* ═════ Тематические коллекции внутри студии ═════ */}
+      {/* ═════ Тематические коллекции / Саги внутри вселенной ═════ */}
       {studio.collections && studio.collections.length > 0 && (
-        <div className="sw-collections-bar">
+        <div className="sw-collections-bar" role="tablist" aria-label="Рубрики">
           {studio.collections.map((c) => (
             <button
               key={c.id}
               type="button"
+              role="tab"
+              aria-selected={collectionId === c.id}
               className={`sw-collection-pill ${collectionId === c.id ? 'active' : ''}`}
               onClick={() => {
                 haptic('light');
@@ -381,7 +494,7 @@ export function StudiosPage() {
         <div className="sw-section-head">
           <div className="sw-section-title-group">
             <h3 className="sw-section-title">Каталог {studio.name}</h3>
-            <span className="sw-section-sub">• {items.length} тайтлов</span>
+            <span className="sw-section-sub">• {items.length} релизов</span>
           </div>
         </div>
 

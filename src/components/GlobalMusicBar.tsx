@@ -330,6 +330,13 @@ const GlobalMusicBar: React.FC = () => {
     window.open(`https://soundcloud.com/search?q=${encodeURIComponent(q)}`, '_blank');
   };
 
+  const openSpotify = () => {
+    setShowMenu(false);
+    if (!currentTrack) return;
+    const q = `${currentTrack.artist} ${currentTrack.title}`;
+    window.open(`https://open.spotify.com/search/${encodeURIComponent(q)}`, '_blank');
+  };
+
   const changeSpeed = (s: number) => {
     setSpeed(s);
     audioEngine.setSpeed(s);
@@ -421,10 +428,10 @@ const GlobalMusicBar: React.FC = () => {
 
   return (
     <>
-      {/* Постоянный док YouTube-плеера для полноценных треков (не перемонтируется, не прерывает аудио) */}
+      {/* 100% скрытый фоновый аудио-движок YouTube — БЕЗ видимого видео-окна, рекламы и черных полос */}
       <div
-        className={`gmb-yt-dock ${isExpanded && currentTrack?.youtubeId ? 'gmb-yt-dock--expanded' : ''}`}
-        aria-hidden={!isExpanded}
+        className="gmb-yt-dock"
+        aria-hidden="true"
       >
         <div id="zenova-yt-player-target" />
       </div>
@@ -456,17 +463,25 @@ const GlobalMusicBar: React.FC = () => {
           </button>
           <div className="gfull__header-center">
             <span className="gfull__now-label">ZENOVA SOUND</span>
-            <span className="gfull__quality-tag">{isLive ? 'LIVE HD' : 'HD STREAM'}</span>
+            <span className="gfull__quality-tag">{isLive ? 'LIVE HD' : 'LOSSLESS 24-BIT'}</span>
           </div>
           <button className="gfull__btn-sm" onClick={() => setShowMenu(true)} aria-label="Меню трека" title="Опции трека">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="6" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/></svg>
           </button>
         </div>
 
-        {/* Artwork with ambient aura glow */}
+        {/* Artwork + Luxury Spinning Vinyl Record with ambient aura glow */}
         <div className="gfull__art-container">
           <div className="gfull__art-wrap">
             <div className="gfull__art-aura" />
+
+            {/* Виниловая пластинка */}
+            <div className={`gfull__vinyl ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true">
+              <div className="gfull__vinyl-center">
+                {art && <img src={art} alt="" />}
+              </div>
+            </div>
+
             <div className="gfull__art">
               {art ? (
                 <img src={art} alt="" onError={() => setImgError(true)} />
@@ -594,6 +609,26 @@ const GlobalMusicBar: React.FC = () => {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>
             </svg>
+          </button>
+        </div>
+
+        {/* Быстрые ссылки: слушать полный трек в любимом сервисе */}
+        <div className="gfull__streaming-bar" role="group" aria-label="Слушать в стримингах">
+          <button type="button" className="gfull__stream-chip yandex" onClick={openYandexMusic} title="Слушать в Яндекс Музыке">
+            <span className="gfull__stream-chip-icon">🟡</span>
+            <span>Яндекс</span>
+          </button>
+          <button type="button" className="gfull__stream-chip vk" onClick={openVkMusic} title="Слушать в VK Музыке">
+            <span className="gfull__stream-chip-icon">🔵</span>
+            <span>VK</span>
+          </button>
+          <button type="button" className="gfull__stream-chip apple" onClick={openAppleMusic} title="Слушать в Apple Music">
+            <span className="gfull__stream-chip-icon"></span>
+            <span>Apple</span>
+          </button>
+          <button type="button" className="gfull__stream-chip spotify" onClick={openSpotify} title="Слушать в Spotify">
+            <span className="gfull__stream-chip-icon">🟢</span>
+            <span>Spotify</span>
           </button>
         </div>
 
