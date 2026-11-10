@@ -707,39 +707,112 @@
   color: rgba(255, 255, 255, 0.45);
 }
 
-/* ── Где посмотреть ── */
+/* ── Где посмотреть (Люксовые карточки онлайн-кинотеатров) ── */
+.dp-where-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.dp-where-chip {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
 .dp-where__hint {
   font-size: 11.5px;
-  color: rgba(255,255,255,0.35);
-  margin: -6px 0 10px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0 0 12px;
 }
-.dp-where {
+
+.dp-where-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
-.dp-where__item {
+
+@media (max-width: 360px) {
+  .dp-where-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dp-where-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dp-where-card:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dp-where-card:hover {
+  border-color: var(--brand-accent, rgba(255, 255, 255, 0.25));
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.dp-where-card__logo {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.dp-where-card__info {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  padding: 11px 4px;
-  border-radius: 13px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
-  cursor: pointer;
-  transition: all 0.15s;
+  gap: 2px;
 }
-.dp-where__item:active { transform: scale(0.93); background: rgba(255,255,255,0.08); }
-.dp-where__icon {
-  width: 38px; height: 38px; border-radius: 11px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 19px;
-}
-.dp-where__name {
-  font-size: 11px;
+
+.dp-where-card__title {
+  font-size: 13px;
   font-weight: 700;
-  color: rgba(255,255,255,0.65);
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dp-where-card__tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--brand-accent, rgba(255, 255, 255, 0.55));
+  letter-spacing: 0.02em;
+}
+
+.dp-where-card__arrow {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.35);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.dp-where-card:hover .dp-where-card__arrow {
+  color: #ffffff;
+  transform: translate(2px, -2px);
 }
 
 /* ── Трейлер (YouTube, легально) ── */

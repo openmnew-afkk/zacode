@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    ZENOVA — КИНО-МИРЫ & ВСЕЛЕННЫЕ (PREMIUM CINEMA EDITION)
-   Ультра-плавный 120 FPS скроллинг, роскошный кинематографический визуал,
-   живая индивидуальная атмосфера каждой вселенной и безупречная типографика.
+   Единый роскошный тёмный кино-дизайн для всех вселенных.
+   Неоновое свечение сосредоточено исключительно у верхней шапки.
+   ТОП-10 оформлен в культовом стиле главной страницы.
    ═══════════════════════════════════════════════════════════════════ */
 
 .sw-page {
@@ -10,48 +11,10 @@
   padding-bottom: calc(115px + var(--safe-bottom, 16px));
   overflow-x: hidden;
   color: #f8fafc;
-  background-color: #060609;
-  transition: background-color 0.4s ease;
+  background-color: #060608;
 }
 
-/* ════════════ Индивидуальные палитры и темы вселенных ════════════ */
-
-.sw-theme--netflix {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(229, 9, 20, 0.24) 0%, rgba(20, 5, 8, 0.85) 55%, #060609 100%);
-  --sw-card-radius: 12px;
-}
-
-.sw-theme--disney {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(0, 114, 210, 0.3) 0%, rgba(7, 20, 48, 0.85) 55%, #040915 100%);
-  --sw-card-radius: 18px;
-}
-
-.sw-theme--hbo {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(147, 51, 234, 0.28) 0%, rgba(22, 10, 42, 0.85) 55%, #07050d 100%);
-  --sw-card-radius: 14px;
-}
-
-.sw-theme--apple {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(24, 24, 28, 0.85) 55%, #070709 100%);
-  --sw-card-radius: 20px;
-}
-
-.sw-theme--marvel {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(237, 29, 36, 0.28) 0%, rgba(28, 8, 12, 0.85) 55%, #070506 100%);
-  --sw-card-radius: 12px;
-}
-
-.sw-theme--a24 {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(217, 119, 6, 0.22) 0%, rgba(24, 20, 15, 0.85) 55%, #080706 100%);
-  --sw-card-radius: 8px;
-}
-
-.sw-theme--anime {
-  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(255, 42, 133, 0.26) 0%, rgba(32, 10, 36, 0.85) 55%, #08040d 100%);
-  --sw-card-radius: 16px;
-}
-
-/* ════════════ Аппаратно-ускоренный атмосферный фон ════════════ */
+/* ════════════ Единый фон и локальный неон шапки ════════════ */
 
 .sw-ambient {
   position: fixed;
@@ -62,166 +25,19 @@
   transform: translateZ(0);
 }
 
-.sw-ambient-glow {
-  position: absolute;
-  inset: 0;
-  background: var(--sw-bg-radial, radial-gradient(120% 60% at 50% 0%, rgba(229, 169, 60, 0.15) 0%, transparent 60%));
-}
-
-.sw-ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(85px);
-  opacity: 0.45;
-  transition: background 0.6s ease;
-  pointer-events: none;
-}
-
-.sw-ambient-orb--1 {
-  width: 340px;
-  height: 340px;
-  top: -110px;
-  left: -80px;
-  background: var(--sw-accent);
-}
-
-.sw-ambient-orb--2 {
-  width: 290px;
-  height: 290px;
-  top: 240px;
-  right: -90px;
-  background: var(--sw-secondary);
-  opacity: 0.3;
-}
-
-/* Netflix Tudum spectrum light beams */
-.sw-netflix-beams {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 340px;
-  display: flex;
-  justify-content: space-around;
-  opacity: 0.2;
-}
-
-.sw-netflix-beams span {
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(180deg, #e50914 0%, rgba(229, 9, 20, 0.4) 55%, transparent 100%);
-  box-shadow: 0 0 18px #e50914;
-  animation: swBeamPulse 4s ease-in-out infinite alternate;
-}
-
-.sw-netflix-beams span:nth-child(2n) {
-  animation-delay: 1.2s;
-  width: 3px;
-}
-
-.sw-netflix-beams span:nth-child(3n) {
-  animation-delay: 2.1s;
-}
-
-@keyframes swBeamPulse {
-  0% { opacity: 0.35; transform: scaleY(0.85); }
-  100% { opacity: 0.95; transform: scaleY(1.1); }
-}
-
-/* Disney+ Starlight & Celestial Arc */
-.sw-disney-stars {
-  position: absolute;
-  inset: 0;
-}
-
-.sw-disney-arc-bg {
-  position: absolute;
-  top: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 520px;
-  height: 260px;
-  border-top: 2px solid rgba(56, 189, 248, 0.3);
-  border-radius: 50% 50% 0 0;
-  filter: drop-shadow(0 -6px 18px rgba(56, 189, 248, 0.4));
-}
-
-.sw-star {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #e0f2fe;
-  box-shadow: 0 0 12px 3px rgba(56, 189, 248, 0.85);
-  animation: swStarTwinkle 3.2s ease-in-out infinite alternate;
-}
-
-.sw-star.s1 { top: 85px; left: 16%; animation-delay: 0s; }
-.sw-star.s2 { top: 130px; left: 78%; animation-delay: 0.8s; }
-.sw-star.s3 { top: 55px; left: 62%; animation-delay: 1.5s; }
-.sw-star.s4 { top: 210px; left: 24%; animation-delay: 2.1s; }
-.sw-star.s5 { top: 170px; left: 88%; animation-delay: 0.4s; }
-
-@keyframes swStarTwinkle {
-  0% { opacity: 0.25; transform: scale(0.7); }
-  100% { opacity: 1; transform: scale(1.35); }
-}
-
-/* HBO Max Aurora */
-.sw-hbo-aurora {
+/* Неоновый ореол расположен ИСКЛЮЧИТЕЛЬНО у верхней шапки */
+.sw-header-halo {
   position: absolute;
   top: -60px;
-  left: 10%;
-  right: 10%;
-  height: 280px;
-  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.28), rgba(99, 102, 241, 0.14) 55%, transparent 75%);
-  filter: blur(38px);
-}
-
-/* Apple TV+ Titanium Sheen */
-.sw-apple-sheen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 250px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
-}
-
-/* Marvel Comic Halftone */
-.sw-marvel-halftone {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 340px;
-  background-image: radial-gradient(rgba(237, 29, 36, 0.18) 1.2px, transparent 1.2px);
-  background-size: 14px 14px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-}
-
-/* A24 Editorial Frame */
-.sw-a24-filmgrain {
-  position: absolute;
-  inset: 12px;
-  border: 1px solid rgba(231, 229, 228, 0.08);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  max-width: 600px;
+  height: 200px;
+  background: radial-gradient(ellipse at 50% 0%, var(--sw-glow, rgba(229, 9, 20, 0.45)) 0%, transparent 74%);
+  filter: blur(42px);
+  opacity: 0.85;
   pointer-events: none;
-}
-
-/* Anime Cyber Grid */
-.sw-anime-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 300px;
-  background-image:
-    linear-gradient(to right, rgba(255, 42, 133, 0.09) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 42, 133, 0.09) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
 }
 
 /* ════════════ Шапка и Горизонтальный Селектор Студий ════════════ */
@@ -231,7 +47,7 @@
   top: 0;
   z-index: 30;
   padding: calc(var(--header-safe-top, 10px) + 6px) 16px 10px;
-  background: rgba(6, 6, 9, 0.85);
+  background: rgba(6, 6, 8, 0.88);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -350,7 +166,7 @@
 .sw-studio-chip.is-active {
   background: rgba(255, 255, 255, 0.12);
   border-color: var(--chip-accent, #ffd56b);
-  box-shadow: 0 0 18px var(--chip-glow, rgba(229, 169, 60, 0.4));
+  box-shadow: 0 0 16px var(--chip-glow, rgba(229, 169, 60, 0.35));
 }
 
 .sw-chip-pip {
@@ -369,13 +185,13 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  animation: swFadeIn 0.25s ease-out;
+  animation: swFadeIn 0.2s ease-out;
 }
 
 .sw-portal-sheet {
@@ -413,7 +229,7 @@
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.18em;
-  color: var(--accent, #fb7185);
+  color: var(--sw-accent, #ffd56b);
   text-transform: uppercase;
 }
 
@@ -521,17 +337,17 @@
   position: relative;
   width: 100%;
   min-height: 440px;
-  border-radius: var(--sw-card-radius, 20px);
+  border-radius: 20px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 20px;
   cursor: pointer;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
   border: 1px solid rgba(255, 255, 255, 0.1);
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .sw-hero-card:active {
@@ -543,13 +359,7 @@
   inset: 0;
   background-size: cover;
   background-position: center 22%;
-  transform: scale(1.02);
-  transition: transform 6.5s ease-out;
   z-index: 1;
-}
-
-.sw-hero-card:hover .sw-hero-img-wrap {
-  transform: scale(1.06);
 }
 
 .sw-hero-vignette {
@@ -557,8 +367,8 @@
   inset: 0;
   z-index: 2;
   background:
-    linear-gradient(180deg, rgba(6, 6, 9, 0.45) 0%, transparent 35%, rgba(6, 6, 9, 0.88) 75%, #060609 100%),
-    radial-gradient(100% 70% at 50% 100%, rgba(6, 6, 9, 0.95) 0%, transparent 80%);
+    linear-gradient(180deg, rgba(6, 6, 8, 0.4) 0%, transparent 35%, rgba(6, 6, 8, 0.88) 75%, #060608 100%),
+    radial-gradient(100% 70% at 50% 100%, rgba(6, 6, 8, 0.95) 0%, transparent 80%);
 }
 
 .sw-hero-top-badge {
@@ -578,7 +388,7 @@
   align-items: center;
   padding: 4px 10px;
   border-radius: 8px;
-  background: rgba(6, 6, 9, 0.75);
+  background: rgba(6, 6, 8, 0.85);
   border: 1px solid var(--sw-accent);
   color: #fff;
   font-size: 10px;
@@ -652,7 +462,7 @@
   line-height: 1.18;
   letter-spacing: -0.02em;
   color: #fff;
-  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 4px 18px rgba(0, 0, 0, 0.85);
 }
 
 .sw-hero-overview {
@@ -743,7 +553,7 @@
 .sw-hero-skeleton {
   width: 100%;
   height: 440px;
-  border-radius: var(--sw-card-radius, 20px);
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -855,19 +665,18 @@
   box-shadow: 0 4px 18px var(--sw-glow);
 }
 
-/* ════════════ ТОП-10 Хитов Вселенной ════════════ */
+/* ════════════ ТОП-10 Хитов Вселенной (Как на главной странице) ════════════ */
 
 .sw-top10-section {
-  margin-top: 32px;
-  padding-left: 16px;
+  margin: 32px 0 18px;
 }
 
 .sw-section-head {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
-  padding-right: 16px;
-  margin-bottom: 16px;
+  padding: 0 16px;
+  margin-bottom: 14px;
 }
 
 .sw-section-title-group {
@@ -906,8 +715,7 @@
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding-bottom: 12px;
-  padding-right: 16px;
+  padding: 6px 16px 12px 28px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -916,51 +724,61 @@
   display: none;
 }
 
-.sw-top10-card {
+/* Элемент ТОП-10 с крупным номером внизу слева (1 в 1 как hp-top10) */
+.sw-top10-item {
   position: relative;
+  width: 130px;
   flex-shrink: 0;
-  width: 145px;
-  display: flex;
-  flex-direction: column;
   cursor: pointer;
+  padding-left: 18px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
-  transition: transform 0.18s ease;
 }
 
-.sw-top10-card:active {
+.sw-top10-item:hover {
+  transform: translateY(-4px) scale(1.02);
+}
+
+.sw-top10-item:active {
   transform: scale(0.96);
 }
 
-.sw-top10-rank {
+.sw-top10-num {
   position: absolute;
-  top: -10px;
-  left: -8px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 54px;
-  font-weight: 900;
-  line-height: 1;
-  color: transparent;
-  -webkit-text-stroke: 1.8px var(--sw-accent);
-  filter: drop-shadow(0 4px 12px var(--sw-glow));
-  z-index: 3;
+  left: 0px;
+  bottom: 22px;
+  font-size: 82px;
+  font-weight: 950;
+  line-height: 0.78;
+  font-family: -apple-system, BlinkMacSystemFont, 'Unbounded', sans-serif;
+  color: #060608;
+  -webkit-text-stroke: 3px #ffffff;
+  text-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.95),
+    0 0 10px rgba(255, 255, 255, 0.35);
+  z-index: 5;
   pointer-events: none;
-}
-
-.sw-top10-poster-wrap {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  user-select: none;
+  letter-spacing: -4px;
 }
 
 .sw-top10-poster {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+  background: #14131d;
+}
+
+.sw-top10-poster img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .sw-card-studio-tag {
@@ -969,9 +787,9 @@
   right: 8px;
   padding: 3px 7px;
   border-radius: 6px;
-  background: rgba(6, 6, 9, 0.8);
+  background: rgba(6, 6, 8, 0.85);
   color: rgba(255, 255, 255, 0.9);
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 800;
   backdrop-filter: blur(8px);
 }
@@ -984,8 +802,11 @@
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.85);
   color: #ffd56b;
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
 }
 
 .sw-top10-name {
@@ -1002,7 +823,7 @@
 /* ════════════ Каталог Вселенной (Сетка) ════════════ */
 
 .sw-catalog-section {
-  margin-top: 36px;
+  margin-top: 32px;
   padding: 0 16px;
 }
 
@@ -1045,6 +866,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .sw-grid-ribbon {
@@ -1053,7 +875,7 @@
   left: 6px;
   padding: 2px 6px;
   border-radius: 5px;
-  background: rgba(6, 6, 9, 0.8);
+  background: rgba(6, 6, 8, 0.82);
   color: #fff;
   font-size: 8.5px;
   font-weight: 700;

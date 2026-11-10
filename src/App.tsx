@@ -20,6 +20,7 @@ import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
 import MandatorySubModal from './components/MandatorySubModal';
 import SeasonFx from './components/SeasonFx';
+import TopGarland from './components/TopGarland';
 import { RulesModal } from './components/RulesModal';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
@@ -28,7 +29,13 @@ import { getStoredSeason, applySeason } from './services/seasons';
 const RULES_ACCEPTED_KEY = 'zenova_rules_accepted';
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return sessionStorage.getItem('zenova_splash_seen') !== '1';
+    } catch {
+      return false;
+    }
+  });
   const location = useLocation();
   const navigate = useNavigate();
   const { theme, setTelegramUsername, syncCloudState, syncTrackedCloud } = useStore();
@@ -104,8 +111,18 @@ function App() {
     <div className="app-root">
       {/* Сезонные эффекты: снегопад с сугробом, лепестки сакуры, листья, светлячки */}
       {season.id !== 'none' && <SeasonFx season={season.id} />}
+      <TopGarland season={season.id} />
 
-      {showSplash && <SplashPage onDone={() => setShowSplash(false)} />}
+      {showSplash && (
+        <SplashPage
+          onDone={() => {
+            try {
+              sessionStorage.setItem('zenova_splash_seen', '1');
+            } catch {}
+            setShowSplash(false);
+          }}
+        />
+      )}
       {/* Соглашение при первом заходе: блокирует использование до принятия */}
       <RulesModal isOpen={rulesGate} onClose={() => {}} mandatory onAccept={acceptRules} />
       <MandatorySubModal />

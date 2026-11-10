@@ -8,7 +8,6 @@ import YandexGlowInput from '../components/YandexGlowInput';
 import {
   getSoundtrack,
   getAlbumTracks,
-  resolveFullTrack,
   getHeardList,
   restoreHeardList,
   removeHeard,
@@ -178,14 +177,6 @@ const MusicPage: React.FC = () => {
     }
     setTrack(t, tracks, idx);
     setPlaying(true);
-
-    // Разрешаем полноценную версию трека (без 30-секундного ограничения)
-    resolveFullTrack(t).then((full) => {
-      const state = useMusicStore.getState();
-      if (state.currentTrack?.id === full.id && full.youtubeId) {
-        state.setTrack(full, state.queue, state.queueIndex);
-      }
-    });
   };
 
   const playAll = (tracks: Track[], shuffle = false) => {
@@ -195,14 +186,6 @@ const MusicPage: React.FC = () => {
     const first = queue[0];
     setTrack(first, queue, 0);
     setPlaying(true);
-
-    // Разрешаем полноценную версию первого трека
-    resolveFullTrack(first).then((full) => {
-      const state = useMusicStore.getState();
-      if (state.currentTrack?.id === full.id && full.youtubeId) {
-        state.setTrack(full, state.queue, 0);
-      }
-    });
   };
 
   const finishOnboard = () => {
@@ -334,6 +317,49 @@ const MusicPage: React.FC = () => {
                 >
                   🎬
                 </button>
+              </div>
+
+              {/* Ссылки: слушать альбом целиком в любимом сервисе */}
+              <div className="ost-stream-links" role="group" aria-label="Слушать альбом полностью">
+                <span className="ost-stream-links__label">Слушать альбом полностью:</span>
+                <div className="ost-stream-links__btns">
+                  <a
+                    href={`https://music.yandex.ru/search?text=${encodeURIComponent(`${selected.film.title} ${selected.album.artist}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ost-stream-chip ost-stream-chip--ya"
+                    onClick={() => haptic('light')}
+                  >
+                    🟡 Яндекс Музыка
+                  </a>
+                  <a
+                    href={`https://vk.com/audio?q=${encodeURIComponent(`${selected.film.title} ${selected.album.artist}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ost-stream-chip ost-stream-chip--vk"
+                    onClick={() => haptic('light')}
+                  >
+                    🔵 VK Музыка
+                  </a>
+                  <a
+                    href={`https://music.apple.com/search?term=${encodeURIComponent(`${selected.film.title} ${selected.album.artist}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ost-stream-chip ost-stream-chip--apple"
+                    onClick={() => haptic('light')}
+                  >
+                     Apple Music
+                  </a>
+                  <a
+                    href={`https://open.spotify.com/search/${encodeURIComponent(`${selected.film.title} ${selected.album.artist}`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="ost-stream-chip ost-stream-chip--spotify"
+                    onClick={() => haptic('light')}
+                  >
+                    🟢 Spotify
+                  </a>
+                </div>
               </div>
 
               <ol className="ost-tracks">

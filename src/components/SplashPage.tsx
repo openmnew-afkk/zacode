@@ -125,6 +125,22 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
 
       {/* Видео-контейнер (видео идет от начала до самого конца со звуком без прерываний) */}
       <div className="sp__stage">
+        {/* Кнопка быстрого пропуска заставки */}
+        <div className="sp__top-bar">
+          <div />
+          <button
+            type="button"
+            className="sp__pill-btn sp__pill-btn--skip"
+            onClick={(e) => {
+              e.stopPropagation();
+              finishSplash();
+            }}
+            aria-label="Пропустить заставку"
+          >
+            Пропустить ✕
+          </button>
+        </div>
+
         <video
           ref={videoRef}
           className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}

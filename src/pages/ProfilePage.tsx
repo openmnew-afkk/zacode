@@ -200,6 +200,7 @@ const ProfilePage: React.FC = () => {
     setGarlandOff(next);
     try { localStorage.setItem('zenova_garland_off', next ? '1' : '0'); } catch {}
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
+    window.dispatchEvent(new CustomEvent('zenova-garland-toggle'));
   };
 
   /* Кино-ранг и XP прогресс */

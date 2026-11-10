@@ -142,31 +142,9 @@ export function StudiosPage() {
         } as React.CSSProperties
       }
     >
-      {/* ═════ Аппаратно-ускоренные атмосферные спецэффекты каждого Кино-Мира ═════ */}
+      {/* ═════ Единый глубокий тёмный кино-фон + мягкий неон только у верхней шапки ═════ */}
       <div className="sw-ambient" aria-hidden="true">
-        <div className="sw-ambient-glow" />
-        <div className="sw-ambient-orb sw-ambient-orb--1" />
-        <div className="sw-ambient-orb sw-ambient-orb--2" />
-        {studio.id === 'netflix' && (
-          <div className="sw-netflix-beams">
-            <span /><span /><span /><span /><span /><span />
-          </div>
-        )}
-        {studio.id === 'disney' && (
-          <div className="sw-disney-stars">
-            <span className="sw-star s1" />
-            <span className="sw-star s2" />
-            <span className="sw-star s3" />
-            <span className="sw-star s4" />
-            <span className="sw-star s5" />
-            <div className="sw-disney-arc-bg" />
-          </div>
-        )}
-        {studio.id === 'hbo' && <div className="sw-hbo-aurora" />}
-        {studio.id === 'apple' && <div className="sw-apple-sheen" />}
-        {studio.id === 'marvel' && <div className="sw-marvel-halftone" />}
-        {studio.id === 'a24' && <div className="sw-a24-filmgrain" />}
-        {studio.id === 'anime' && <div className="sw-anime-grid" />}
+        <div className="sw-header-halo" />
       </div>
 
       {/* ═════ Премиальная кино-шапка ═════ */}
@@ -461,25 +439,29 @@ export function StudiosPage() {
             {top10List.map((movie, idx) => (
               <div
                 key={movie.id}
-                className="sw-top10-card"
+                className="sw-top10-item"
                 onClick={() => {
                   haptic('light');
                   navigate(`/movie/${movie.id}`);
                 }}
               >
-                <span className="sw-top10-rank" aria-hidden="true">
+                <span className="sw-top10-num" aria-hidden="true">
                   {idx + 1}
                 </span>
-                <div className="sw-top10-poster-wrap">
+                <div className="sw-top10-poster">
                   <img
                     src={movie.poster_path}
                     alt={movie.title}
                     loading="lazy"
-                    className="sw-top10-poster"
                   />
                   <span className="sw-card-studio-tag">{studio.shortName}</span>
                   {movie.imdb_rating > 0 && (
-                    <span className="sw-top10-rate">★ {movie.imdb_rating.toFixed(1)}</span>
+                    <span className="sw-top10-rate">
+                      <svg width="9.5" height="9.5" viewBox="0 0 24 24" fill="#fbbf24" aria-hidden="true">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <span>{movie.imdb_rating.toFixed(1)}</span>
+                    </span>
                   )}
                 </div>
                 <p className="sw-top10-name">{movie.title}</p>

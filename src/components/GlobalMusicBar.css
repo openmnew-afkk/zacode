@@ -5,28 +5,6 @@
 
 /* ═══════════ Мини-капсула (над TabBar) ═══════════ */
 
-/* YouTube Full Audio Player Dock — 100% скрытый фоновый аудио-движок (НИКАКОГО видимого видео-окна) */
-.gmb-yt-dock,
-.gmb-yt-dock.gmb-yt-dock--expanded {
-  position: absolute !important;
-  left: -9999px !important;
-  top: -9999px !important;
-  width: 1px !important;
-  height: 1px !important;
-  opacity: 0 !important;
-  pointer-events: none !important;
-  overflow: hidden !important;
-  visibility: hidden !important;
-  z-index: -9999 !important;
-}
-
-.gmb-yt-dock iframe {
-  width: 1px !important;
-  height: 1px !important;
-  border: none !important;
-  opacity: 0 !important;
-}
-
 .gbar {
   position: fixed;
   bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);

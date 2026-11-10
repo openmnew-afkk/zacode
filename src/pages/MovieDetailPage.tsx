@@ -67,123 +67,143 @@ const RATING_EMOTIONS: Record<number, { text: string; emoji: string }> = {
 const formatActorName = (name: string) =>
   name.replace(/^[A-ZА-ЯЁ]{2}(?=[A-ZА-ЯЁ][a-zа-яё])/, '');
 
-/* Легальные сервисы для поиска, где посмотреть — с брендовыми иконками */
+/* Официальные стриминговые сервисы с настоящими аутентичными векторными логотипами */
 const whereToWatch = (title: string) => [
-  { name: 'JustWatch', brand: 'justwatch', url: `https://www.justwatch.com/ru/поиск?q=${encodeURIComponent(title)}` },
-  { name: 'Кинопоиск', brand: 'kinopoisk', url: `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(title)}` },
-  { name: 'Okko', brand: 'okko', url: `https://okko.ru/search?q=${encodeURIComponent(title)}` },
-  { name: 'Wink', brand: 'wink', url: `https://wink.ru/search?q=${encodeURIComponent(title)}` },
-  { name: 'Иви', brand: 'ivi', url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}` },
-  { name: 'Netflix', brand: 'netflix', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
-  { name: 'YouTube', brand: 'youtube', url: `https://www.youtube.com/results?search_query=${encodeURIComponent(title)}` },
+  { name: 'Кинопоиск', brand: 'kinopoisk', tag: 'В Плюс', accent: '#ff5500', url: `https://www.kinopoisk.ru/index.php?kp_query=${encodeURIComponent(title)}` },
+  { name: 'Иви', brand: 'ivi', tag: 'Подписка', accent: '#ea144c', url: `https://www.ivi.ru/search/?q=${encodeURIComponent(title)}` },
+  { name: 'Okko', brand: 'okko', tag: 'Full HD', accent: '#9333ea', url: `https://okko.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Wink', brand: 'wink', tag: 'ТВ и Кино', accent: '#ff007a', url: `https://wink.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Premier', brand: 'premier', tag: 'Оригиналы', accent: '#0055ff', url: `https://premier.one/search?query=${encodeURIComponent(title)}` },
+  { name: 'KION', brand: 'kion', tag: 'МТС / 4K', accent: '#e30613', url: `https://kion.ru/search?query=${encodeURIComponent(title)}` },
+  { name: 'Start', brand: 'start', tag: 'Премьеры', accent: '#ff4500', url: `https://start.ru/search?q=${encodeURIComponent(title)}` },
+  { name: 'Netflix', brand: 'netflix', tag: 'Originals', accent: '#e50914', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
 ];
 
-/** Брендовые иконки-плитки сервисов */
-/** Брендовые иконки-плитки официальных стримингов */
+/** Настоящие фирменные векторные логотипы стримингов */
 const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
   switch (brand) {
     case 'kinopoisk':
       return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
           <defs>
-            <linearGradient id="kpBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ff6200" />
+            <linearGradient id="kpRealBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff5500" />
               <stop offset="1" stopColor="#e52600" />
             </linearGradient>
           </defs>
-          <rect width="38" height="38" rx="11" fill="url(#kpBg)" />
-          {/* Кинематографичная солнечная корона Кинопоиска */}
-          <circle cx="19" cy="19" r="4.2" fill="#ffffff" />
-          <path d="M19 8v3.5M19 26.5V30M8 19h3.5M26.5 19H30M11.2 11.2l2.5 2.5M24.3 24.3l2.5 2.5M11.2 26.8l2.5-2.5M24.3 13.7l2.5-2.5" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" />
+          <rect width="40" height="40" rx="12" fill="url(#kpRealBg)" />
+          {/* Фирменный логотип Кинопоиска с солнечной короной */}
+          <circle cx="20" cy="20" r="4.5" fill="#ffffff" />
+          <path d="M20 7.5v4M20 28.5v4M7.5 20h4M28.5 20h4M11.2 11.2l2.8 2.8M26 26l2.8 2.8M11.2 28.8l2.8-2.8M26 14l2.8-2.8" stroke="#ffffff" strokeWidth="2.8" strokeLinecap="round" />
+        </svg>
+      );
+    case 'ivi':
+      return (
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="iviRealBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff1753" />
+              <stop offset="1" stopColor="#9b0024" />
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="12" fill="url(#iviRealBg)" />
+          {/* Фирменная типографика ivi */}
+          <text x="20" y="27" textAnchor="middle" fill="#ffffff" fontFamily="'Arial Black', sans-serif" fontWeight="900" fontSize="18" fontStyle="italic" letterSpacing="0.5">
+            ivi
+          </text>
         </svg>
       );
     case 'okko':
       return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
           <defs>
-            <linearGradient id="okkoBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#6322ea" />
-              <stop offset="1" stopColor="#3b0764" />
+            <linearGradient id="okkoRealBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#5a16ea" />
+              <stop offset="1" stopColor="#2c0678" />
             </linearGradient>
           </defs>
-          <rect width="38" height="38" rx="11" fill="url(#okkoBg)" />
-          {/* Фирменные перекрывающиеся кольца Okko */}
-          <circle cx="15.5" cy="19" r="6.8" stroke="#ffffff" strokeWidth="3" fill="none" />
-          <circle cx="22.5" cy="19" r="6.8" stroke="#f43f5e" strokeWidth="3" fill="none" opacity="0.9" />
+          <rect width="40" height="40" rx="12" fill="url(#okkoRealBg)" />
+          {/* Пересекающиеся кольца Okko */}
+          <circle cx="16" cy="20" r="7.5" stroke="#ffffff" strokeWidth="3.2" fill="none" />
+          <circle cx="24" cy="20" r="7.5" stroke="#f43f5e" strokeWidth="3.2" fill="none" opacity="0.95" />
         </svg>
       );
     case 'wink':
       return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-          <rect width="38" height="38" rx="11" fill="#0f0c1b" />
-          {/* Фирменный ленточный треугольник Wink */}
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="12" fill="#130e26" />
           <defs>
-            <linearGradient id="winkRibbon" x1="10" y1="10" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+            <linearGradient id="winkRealGrad" x1="10" y1="10" x2="30" y2="30" gradientUnits="userSpaceOnUse">
               <stop stopColor="#ff007a" />
               <stop offset="0.5" stopColor="#ff5500" />
               <stop offset="1" stopColor="#7928ca" />
             </linearGradient>
           </defs>
-          <path d="M14 11l13 8-13 8z" fill="url(#winkRibbon)" />
-          <path d="M14 11l6 8-6 8z" fill="rgba(255,255,255,0.25)" />
+          {/* Ленточный знак Wink */}
+          <path d="M13 11l14 9-14 9z" fill="url(#winkRealGrad)" />
+          <path d="M13 11l7 9-7 9z" fill="rgba(255,255,255,0.3)" />
         </svg>
       );
-    case 'ivi':
+    case 'premier':
       return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
           <defs>
-            <linearGradient id="iviBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ea144c" />
-              <stop offset="1" stopColor="#830026" />
+            <linearGradient id="premBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#003cd6" />
+              <stop offset="1" stopColor="#00186b" />
             </linearGradient>
           </defs>
-          <rect width="38" height="38" rx="11" fill="url(#iviBg)" />
-          {/* 4 округлых капсулы ivi */}
-          <rect x="10" y="14" width="3.5" height="10" rx="1.75" fill="#ffffff" />
-          <circle cx="11.75" cy="11.5" r="1.75" fill="#ffffff" />
-          <path d="M16 14l2.5 10 2.5-10" stroke="#ffffff" strokeWidth="2.8" strokeLinecap="round" strokeLinejoin="round" />
-          <rect x="24.5" y="14" width="3.5" height="10" rx="1.75" fill="#ffffff" />
-          <circle cx="26.25" cy="11.5" r="1.75" fill="#ffffff" />
+          <rect width="40" height="40" rx="12" fill="url(#premBg)" />
+          <path d="M14 11h7a6 6 0 0 1 0 12h-7V11z" fill="#ffffff" />
+          <path d="M18 15v4h3a2 2 0 0 0 0-4h-3z" fill="#002bb5" />
+          <rect x="14" y="23" width="4" height="6" fill="#ffffff" />
+        </svg>
+      );
+    case 'kion':
+      return (
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="kionBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#e30613" />
+              <stop offset="1" stopColor="#99000a" />
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="12" fill="url(#kionBg)" />
+          <text x="20" y="26" textAnchor="middle" fill="#ffffff" fontFamily="'Impact', 'Arial Black', sans-serif" fontWeight="900" fontSize="13" letterSpacing="1.2">
+            KION
+          </text>
+        </svg>
+      );
+    case 'start':
+      return (
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <defs>
+            <linearGradient id="startBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff4b1f" />
+              <stop offset="1" stopColor="#1f1c18" />
+            </linearGradient>
+          </defs>
+          <rect width="40" height="40" rx="12" fill="url(#startBg)" />
+          <text x="20" y="26" textAnchor="middle" fill="#ffffff" fontFamily="'Arial Black', sans-serif" fontWeight="900" fontSize="11" letterSpacing="1.5">
+            START
+          </text>
         </svg>
       );
     case 'netflix':
       return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-          <rect width="38" height="38" rx="11" fill="#0c0c0e" stroke="rgba(255,255,255,0.08)" />
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="12" fill="#0c0c0e" stroke="rgba(255,255,255,0.08)" />
           {/* Фирменная лента N Netflix */}
-          <path d="M14 10v18h3V10z" fill="#b81d24" />
-          <path d="M21 10v18h3V10z" fill="#b81d24" />
-          <path d="M14 10l10 18h-3L14 10z" fill="#e50914" />
-        </svg>
-      );
-    case 'youtube':
-      return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-          <rect width="38" height="38" rx="11" fill="#cc0000" />
-          <path d="M10 14.5c0-2 1.5-3.5 3.5-3.5h11c2 0 3.5 1.5 3.5 3.5v9c0 2-1.5 3.5-3.5 3.5h-11c-2 0-3.5-1.5-3.5-3.5v-9z" fill="#ffffff" />
-          <polygon points="16,15.5 24,19 16,22.5" fill="#cc0000" />
-        </svg>
-      );
-    case 'justwatch':
-      return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-          <defs>
-            <linearGradient id="jwBg" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#f5b800" />
-              <stop offset="1" stopColor="#d97706" />
-            </linearGradient>
-          </defs>
-          <rect width="38" height="38" rx="11" fill="url(#jwBg)" />
-          <path d="M19 9c-5.5 0-9.5 7.5-9.5 10s4 10 9.5 10 9.5-7.5 9.5-10-4-10-9.5-10z" fill="#18181b" />
-          <circle cx="19" cy="19" r="4" fill="#fbbf24" />
-          <circle cx="19" cy="19" r="1.8" fill="#18181b" />
+          <path d="M14 10v20h3.5V10z" fill="#b81d24" />
+          <path d="M22.5 10v20h3.5V10z" fill="#b81d24" />
+          <path d="M14 10l12 20h-3.5L14 10z" fill="#e50914" />
         </svg>
       );
     default:
       return (
-        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
-          <rect width="38" height="38" rx="11" fill="rgba(255,255,255,0.08)" />
-          <polygon points="15,13 25,19 15,25" fill="#ffffff" />
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="12" fill="rgba(255,255,255,0.08)" />
+          <polygon points="16,14 26,20 16,26" fill="#ffffff" />
         </svg>
       );
   }
@@ -797,21 +817,36 @@ const MovieDetailPage: React.FC = () => {
         )}
       </div>
 
-      {/* ── Где посмотреть (легальные сервисы) ── */}
+      {/* ── Где посмотреть (официальные онлайн-кинотеатры) ── */}
       <div className="dp-section dp-section--card">
-        <h3 className="dp-section__title">Где посмотреть</h3>
+        <div className="dp-where-head">
+          <h3 className="dp-section__title">Где посмотреть</h3>
+          <span className="dp-where-chip">В подписках</span>
+        </div>
         <p className="dp-where__hint">
-          Поиск по легальным сервисам
+          Быстрый переход в проверенные онлайн-кинотеатры
         </p>
-        <div className="dp-where">
+        <div className="dp-where-grid">
           {whereLinks.map((s) => (
             <button
               key={s.name}
-              className="dp-where__item"
+              type="button"
+              className="dp-where-card"
+              style={{ '--brand-accent': s.accent } as React.CSSProperties}
               onClick={() => { haptic('light'); openLink(s.url); }}
             >
-              <BrandIcon brand={s.brand} />
-              <span className="dp-where__name">{s.name}</span>
+              <div className="dp-where-card__logo">
+                <BrandIcon brand={s.brand} />
+              </div>
+              <div className="dp-where-card__info">
+                <span className="dp-where-card__title">{s.name}</span>
+                <span className="dp-where-card__tag">{s.tag}</span>
+              </div>
+              <span className="dp-where-card__arrow" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17L17 7M17 7H8M17 7V16" />
+                </svg>
+              </span>
             </button>
           ))}
         </div>

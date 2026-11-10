@@ -173,56 +173,6 @@ export async function getAlbumTracks(album: SoundtrackAlbum, movieTitle?: string
   return tracks;
 }
 
-const FULL_CACHE_PREFIX = 'znv_yt_track_';
-
-/**
- * Разрешает трек в ПОЛНОЦЕННУЮ аудио/видео-версию (без 30-секундного ограничения)
- * Находит официальное видео/аудио полной длины
- */
-export async function resolveFullTrack(track: Track): Promise<Track> {
-  if (track.youtubeId) return track;
-  const cacheKey = `${FULL_CACHE_PREFIX}${track.id}`;
-  try {
-    const cached = localStorage.getItem(cacheKey);
-    if (cached) {
-      return { ...track, youtubeId: cached };
-    }
-  } catch {}
-
-  const q = `${track.title} ${track.artist} official soundtrack`;
-  const hosts = [
-    'https://yt.chocolatemoo53.com',
-    'https://invidious.nerdvpn.de',
-  ];
-
-  for (const host of hosts) {
-    try {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 4000);
-      const res = await fetch(`${host}/api/v1/search?q=${encodeURIComponent(q)}&type=video`, {
-        signal: ctrl.signal,
-      });
-      clearTimeout(timer);
-      if (!res.ok) continue;
-      const list = await res.json();
-      if (Array.isArray(list) && list.length > 0) {
-        const top = list[0];
-        const vid = top.videoId;
-        if (vid && typeof vid === 'string') {
-          try { localStorage.setItem(cacheKey, vid); } catch {}
-          return {
-            ...track,
-            youtubeId: vid,
-            duration: top.lengthSeconds ? Number(top.lengthSeconds) : track.duration,
-          };
-        }
-      }
-    } catch {}
-  }
-
-  return track;
-}
-
 export async function getSoundtrack(movie: Pick<Movie, 'title' | 'original_title' | 'release_date'>): Promise<Soundtrack | null> {
   const album = await findSoundtrackAlbum(movie);
   if (!album) return null;

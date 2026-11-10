@@ -16,7 +16,6 @@ export interface Track {
   isLiveRadio?: boolean;
   source?: string;
   mood?: string;
-  youtubeId?: string;
 }
 
 interface MusicState {
