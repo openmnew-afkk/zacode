@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { triggerSeasonalBurst } from './SeasonFx';
@@ -9,7 +9,7 @@ interface FlappyChristmasGameProps {
   onClose: () => void;
 }
 
-interface TreePipe {
+interface TreeObstacle {
   x: number;
   topHeight: number;
   bottomY: number;
@@ -23,6 +23,7 @@ export const FlappyChristmasGame: React.FC<FlappyChristmasGameProps> = ({ isOpen
 
   const [gameState, setGameState] = useState<'idle' | 'playing' | 'won' | 'gameover'>('idle');
   const [score, setScore] = useState(0);
+  const [lives, setLives] = useState(3);
   const [bestScore, setBestScore] = useState(() => {
     try {
       return Number(localStorage.getItem('zenova_flappy_best') || 0);
@@ -35,28 +36,31 @@ export const FlappyChristmasGame: React.FC<FlappyChristmasGameProps> = ({ isOpen
   stateRef.current = gameState;
   const scoreRef = useRef(score);
   scoreRef.current = score;
+  const livesRef = useRef(lives);
+  livesRef.current = lives;
 
-  const birdRef = useRef({ y: 150, vy: 0 });
-  const pipesRef = useRef<TreePipe[]>([]);
+  const playerRef = useRef({ y: 200, vy: 0, invulnerable: 0 });
+  const treesRef = useRef<TreeObstacle[]>([]);
   const frameRef = useRef(0);
 
-  const startGame = () => {
+  const startGame = useCallback(() => {
     haptic('medium');
-    birdRef.current = { y: 150, vy: -3 };
-    pipesRef.current = [];
+    playerRef.current = { y: 220, vy: -3, invulnerable: 0 };
+    treesRef.current = [];
     setScore(0);
+    setLives(3);
     setGameState('playing');
-  };
+  }, [haptic]);
 
-  const jump = () => {
+  const jump = useCallback(() => {
     if (stateRef.current === 'idle') {
       startGame();
       return;
     }
     if (stateRef.current !== 'playing') return;
     haptic('light');
-    birdRef.current.vy = -5.8;
-  };
+    playerRef.current.vy = -4.6;
+  }, [startGame, haptic]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -66,56 +70,78 @@ export const FlappyChristmasGame: React.FC<FlappyChristmasGameProps> = ({ isOpen
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let width = canvas.clientWidth;
-    let height = canvas.clientHeight;
-    canvas.width = width;
-    canvas.height = height;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
 
     let rafId = 0;
     let spawnTimer = 0;
-    const gap = 145; // комфортный пролет между елками
-    const speed = 2.1;
+    const gap = 175; // Широкий комфортный пролёт
+    const speed = 1.55; // Плавная спокойная скорость
 
     const loop = () => {
-      ctx.clearRect(0, 0, width, height);
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
 
-      // Фон: падающие снежинки на заднем плане
+      // Фон: зимнее ночное небо со снегопадом
       frameRef.current++;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      for (let i = 0; i < 25; i++) {
-        const sx = ((i * 47 + frameRef.current * 0.7) % width);
-        const sy = ((i * 73 + frameRef.current * 1.2) % height);
-        ctx.fillRect(sx, sy, 2, 2);
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, '#060814');
+      grad.addColorStop(0.65, '#0b112c');
+      grad.addColorStop(1, '#161c3c');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Снежинки
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      for (let i = 0; i < 35; i++) {
+        const sx = (i * 53 + frameRef.current * 0.6) % w;
+        const sy = (i * 79 + frameRef.current * 1.1) % h;
+        const r = (i % 3 === 0 ? 2 : 1.2);
+        ctx.beginPath();
+        ctx.arc(sx, sy, r, 0, Math.PI * 2);
+        ctx.fill();
       }
 
       if (stateRef.current === 'playing') {
-        // Физика птицы (оленя)
-        birdRef.current.vy += 0.32;
-        birdRef.current.y += birdRef.current.vy;
+        // Физика
+        playerRef.current.vy += 0.22; // Нежная гравитация
+        playerRef.current.y += playerRef.current.vy;
 
-        // Генерация елочек
+        if (playerRef.current.invulnerable > 0) {
+          playerRef.current.invulnerable--;
+        }
+
+        // Спавн ёлочек
         spawnTimer++;
-        if (spawnTimer > 105) {
+        if (spawnTimer > 125) {
           spawnTimer = 0;
-          const minH = 40;
-          const maxH = height - gap - minH;
+          const minH = 70;
+          const maxH = h - gap - minH;
           const topH = Math.floor(Math.random() * (maxH - minH) + minH);
-          pipesRef.current.push({
-            x: width + 10,
+          treesRef.current.push({
+            x: w + 20,
             topHeight: topH,
             bottomY: topH + gap,
             passed: false,
           });
         }
 
-        // Движение елочек
-        for (let i = pipesRef.current.length - 1; i >= 0; i--) {
-          const p = pipesRef.current[i];
-          p.x -= speed;
+        const birdX = w * 0.28;
+        const birdY = playerRef.current.y;
+
+        // Обработка ёлочек
+        for (let i = treesRef.current.length - 1; i >= 0; i--) {
+          const t = treesRef.current[i];
+          t.x -= speed;
 
           // Подсчет очков
-          if (!p.passed && p.x < width / 3) {
-            p.passed = true;
+          if (!t.passed && t.x < birdX) {
+            t.passed = true;
             const newScore = scoreRef.current + 1;
             setScore(newScore);
             haptic('light');
@@ -127,61 +153,139 @@ export const FlappyChristmasGame: React.FC<FlappyChristmasGameProps> = ({ isOpen
               } catch {}
             }
 
-            // Цель 30 елочек достигнута!
-            if (newScore >= 30) {
+            // Цель: 20 ёлочек!
+            if (newScore >= 20) {
               setGameState('won');
-              triggerSeasonalBurst(window.innerWidth / 2, window.innerHeight / 2, true, 'winter');
+              triggerSeasonalBurst(w / 2, h / 2, true, 'winter');
               haptic('heavy');
             }
           }
 
-          // Коллизия с елками (радиус 16)
-          const birdX = width / 3;
-          const birdY = birdRef.current.y;
-          if (birdX + 14 > p.x && birdX - 14 < p.x + 36) {
-            if (birdY - 14 < p.topHeight || birdY + 14 > p.bottomY) {
+          // Мягкая коллизия (радиус 9px вокруг центра персонажа)
+          if (
+            playerRef.current.invulnerable === 0 &&
+            birdX + 9 > t.x - 20 &&
+            birdX - 9 < t.x + 20
+          ) {
+            if (birdY - 9 < t.topHeight || birdY + 9 > t.bottomY) {
+              // Потеря 1 жизни
+              const nextLives = livesRef.current - 1;
+              setLives(nextLives);
+              haptic('heavy');
+
+              if (nextLives <= 0) {
+                setGameState('gameover');
+              } else {
+                // Неуязвимость на 70 кадров (~1.2 сек)
+                playerRef.current.invulnerable = 70;
+                playerRef.current.vy = -3;
+              }
+            }
+          }
+
+          if (t.x < -80) {
+            treesRef.current.splice(i, 1);
+          }
+        }
+
+        // Вылет за границы экрана
+        if (birdY > h - 20 || birdY < 20) {
+          if (playerRef.current.invulnerable === 0) {
+            const nextLives = livesRef.current - 1;
+            setLives(nextLives);
+            haptic('heavy');
+
+            if (nextLives <= 0) {
               setGameState('gameover');
-              haptic('heavy');
+            } else {
+              playerRef.current.invulnerable = 70;
+              playerRef.current.y = h / 2;
+              playerRef.current.vy = -2;
             }
           }
-
-          if (p.x < -60) {
-            pipesRef.current.splice(i, 1);
-          }
-        }
-
-        // Проверка падения / вылета
-        if (birdRef.current.y > height - 15 || birdRef.current.y < 10) {
-          setGameState('gameover');
-          haptic('heavy');
         }
       }
 
-      // Отрисовка елочек
-      for (const p of pipesRef.current) {
-        // Верхняя елка (перевернутая)
+      // ── Отрисовка красивых ёлочек ──
+      for (const t of treesRef.current) {
+        // Верхняя заснеженная ёлочка (ствол вверх, ветви вниз)
+        ctx.fillStyle = '#0f5132';
+        // Ветви верхние
+        ctx.beginPath();
+        ctx.moveTo(t.x - 24, 0);
+        ctx.lineTo(t.x + 24, 0);
+        ctx.lineTo(t.x + 18, t.topHeight - 18);
+        ctx.lineTo(t.x, t.topHeight);
+        ctx.lineTo(t.x - 18, t.topHeight - 18);
+        ctx.closePath();
+        ctx.fill();
+
+        // Снежная шапка на конце верхней ветви
+        ctx.fillStyle = '#e2e8f0';
+        ctx.beginPath();
+        ctx.arc(t.x, t.topHeight, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Нижняя красивая пышная елка
         ctx.fillStyle = '#065f46';
-        ctx.fillRect(p.x, 0, 36, p.topHeight);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(p.x - 3, p.topHeight - 5, 42, 6);
+        ctx.beginPath();
+        ctx.moveTo(t.x, t.bottomY);
+        ctx.lineTo(t.x + 22, t.bottomY + 30);
+        ctx.lineTo(t.x + 12, t.bottomY + 30);
+        ctx.lineTo(t.x + 26, t.bottomY + 65);
+        ctx.lineTo(t.x + 16, t.bottomY + 65);
+        ctx.lineTo(t.x + 30, h);
+        ctx.lineTo(t.x - 30, h);
+        ctx.lineTo(t.x - 16, t.bottomY + 65);
+        ctx.lineTo(t.x - 26, t.bottomY + 65);
+        ctx.lineTo(t.x - 12, t.bottomY + 30);
+        ctx.lineTo(t.x - 22, t.bottomY + 30);
+        ctx.closePath();
+        ctx.fill();
 
-        // Нижняя елка
-        ctx.fillStyle = '#047857';
-        ctx.fillRect(p.x, p.bottomY, 36, height - p.bottomY);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(p.x - 3, p.bottomY, 42, 6);
+        // Снежные пушистые шапки на ветвях
+        ctx.fillStyle = '#f8fafc';
+        ctx.beginPath();
+        ctx.ellipse(t.x, t.bottomY + 3, 9, 5, 0, 0, Math.PI * 2);
+        ctx.ellipse(t.x + 14, t.bottomY + 30, 8, 4, 0, 0, Math.PI * 2);
+        ctx.ellipse(t.x - 14, t.bottomY + 30, 8, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Новогодние светящиеся шарики на ёлке
+        const colors = ['#f43f5e', '#ffd56b', '#38bdf8', '#c084fc'];
+        for (let b = 0; b < 3; b++) {
+          ctx.fillStyle = colors[(b + Math.floor(frameRef.current / 25)) % colors.length];
+          ctx.beginPath();
+          ctx.arc(t.x - 8 + b * 8, t.bottomY + 20 + b * 18, 3.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
-      // Отрисовка персонажа: Олень Рудольф с красным носом
-      const bx = width / 3;
-      const by = birdRef.current.y;
-      ctx.save();
-      ctx.translate(bx, by);
-      ctx.font = '28px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('🦌', 0, 0);
-      ctx.restore();
+      // ── Отрисовка персонажа (Олень Рудольф / Сани с мягким мерцанием) ──
+      const bx = w * 0.28;
+      const by = playerRef.current.y;
+      const isInv = playerRef.current.invulnerable > 0 && Math.floor(frameRef.current / 4) % 2 === 0;
+
+      if (!isInv) {
+        ctx.save();
+        ctx.translate(bx, by);
+        // Небольшой наклон по вертикальной скорости
+        const rot = Math.max(-0.4, Math.min(0.4, playerRef.current.vy * 0.08));
+        ctx.rotate(rot);
+
+        // Золотистый шлейф за оленем
+        ctx.fillStyle = 'rgba(255, 213, 107, 0.28)';
+        ctx.beginPath();
+        ctx.arc(-16, 2, 7, 0, Math.PI * 2);
+        ctx.arc(-26, 4, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.font = '32px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🦌', 0, 0);
+        ctx.restore();
+      }
 
       rafId = requestAnimationFrame(loop);
     };
@@ -190,12 +294,12 @@ export const FlappyChristmasGame: React.FC<FlappyChristmasGameProps> = ({ isOpen
 
     return () => {
       cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', resize);
     };
   }, [isOpen, bestScore, haptic]);
 
   const claimReward = () => {
     haptic('heavy');
-    // +3 дня премиума
     activatePremiumDays(3);
     triggerSeasonalBurst(window.innerWidth / 2, window.innerHeight / 2, true, 'winter');
     onClose();
@@ -204,69 +308,89 @@ export const FlappyChristmasGame: React.FC<FlappyChristmasGameProps> = ({ isOpen
   if (!isOpen) return null;
 
   return (
-    <div className="flappy-game-modal" role="dialog" aria-modal="true">
-      <div className="flappy-game-card">
-        <div className="flappy-game-head">
-          <div className="flappy-game-title">
-            <span>🌲</span>
-            <span>Ёлочный Прыгун</span>
+    <div className="flappy-game-screen" role="dialog" aria-modal="true">
+      {/* Верхняя игровая панель */}
+      <header className="flappy-topbar">
+        <div className="flappy-topbar__left">
+          <div className="flappy-topbar__lives" aria-label={`Жизни: ${lives}`}>
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <span key={idx}>{idx < lives ? '❤️' : '🤍'}</span>
+            ))}
           </div>
-          <button type="button" className="flappy-game-close" onClick={onClose}>
-            ✕
-          </button>
+          <div className="flappy-topbar__score-pill">
+            <span>🌲 {score} / 20</span>
+          </div>
         </div>
 
-        <div className="flappy-canvas-wrap" onClick={jump}>
-          <canvas ref={canvasRef} className="flappy-canvas" />
+        <button
+          type="button"
+          className="flappy-topbar__close"
+          onClick={onClose}
+          aria-label="Закрыть игру"
+        >
+          ✕
+        </button>
+      </header>
 
-          <div className="flappy-score-badge">
-            <span>🌲 {score} / 30</span>
+      {/* Игровая сцена */}
+      <div className="flappy-stage" onClick={jump}>
+        <canvas ref={canvasRef} className="flappy-canvas" />
+
+        {gameState === 'idle' && (
+          <div className="flappy-screen-overlay">
+            <div className="flappy-overlay-mascot">🦌</div>
+            <h2 className="flappy-screen-title">Ёлочный Прыгун</h2>
+            <p className="flappy-screen-desc">
+              Тапайте по экрану — олень легко взлетает и пролетает сквозь новогодние ёлочки. У вас <b>3 жизни</b>!
+            </p>
+            <div className="flappy-screen-perks">
+              <span>🎁 Пройдите 20 ёлочек → 3 дня PRO</span>
+            </div>
+            <button
+              type="button"
+              className="flappy-action-btn"
+              onClick={startGame}
+            >
+              Начать полёт ✨
+            </button>
           </div>
+        )}
 
-          {gameState === 'idle' && (
-            <div className="flappy-overlay">
-              <div className="flappy-overlay-icon">🦌</div>
-              <h3 className="flappy-overlay-title">Зимний Челлендж</h3>
-              <p className="flappy-overlay-text">
-                Тапай по экрану, чтобы олень прыгал и пролетал между заснеженными ёлками.
-              </p>
-              <div className="flappy-overlay-goal">
-                <span>🎁 Перепрыгни 30 ёлочек → 3 дня PRO</span>
-              </div>
-              <button type="button" className="flappy-btn-play" onClick={startGame}>
-                Начать полёт
-              </button>
+        {gameState === 'won' && (
+          <div className="flappy-screen-overlay">
+            <div className="flappy-overlay-mascot">🏆</div>
+            <h2 className="flappy-screen-title">Потрясающе!</h2>
+            <div className="flappy-win-reward">
+              <strong>ВЫ ПРОШЛИ 20 ЁЛОЧЕК!</strong>
+              <span>Вам начислено +3 ДНЯ ZENOVA PRO бесплатно!</span>
             </div>
-          )}
+            <button
+              type="button"
+              className="flappy-action-btn flappy-action-btn--gold"
+              onClick={claimReward}
+            >
+              Забрать ZENOVA PRO 🎁
+            </button>
+          </div>
+        )}
 
-          {gameState === 'won' && (
-            <div className="flappy-overlay">
-              <div className="flappy-overlay-icon">🏆</div>
-              <h3 className="flappy-overlay-title">Грандиозная победа!</h3>
-              <div className="flappy-reward-box">
-                <div className="flappy-reward-title">Вам начислено +3 ДНЯ ZENOVA PRO!</div>
-                <div className="flappy-reward-sub">Вы мастерски преодолели 30 новогодних ёлок!</div>
-              </div>
-              <button type="button" className="flappy-btn-play" onClick={claimReward}>
-                Забрать награду 🎁
-              </button>
-            </div>
-          )}
-
-          {gameState === 'gameover' && (
-            <div className="flappy-overlay">
-              <div className="flappy-overlay-icon">❄️</div>
-              <h3 className="flappy-overlay-title">Зацепили ёлку!</h3>
-              <p className="flappy-overlay-text">
-                Ваш результат: <b>{score}</b> из 30 ёлок.<br />
-                Рекорд: <b>{bestScore}</b>
-              </p>
-              <button type="button" className="flappy-btn-play" onClick={startGame}>
-                Попробовать снова
-              </button>
-            </div>
-          )}
-        </div>
+        {gameState === 'gameover' && (
+          <div className="flappy-screen-overlay">
+            <div className="flappy-overlay-mascot">❄️</div>
+            <h2 className="flappy-screen-title">Зацепили ветви!</h2>
+            <p className="flappy-screen-desc">
+              Ваш результат: <b>{score}</b> из 20 ёлочек.<br />
+              Лучший рекорд: <b>{bestScore}</b>
+            </p>
+            <button
+              type="button"
+              className="flappy-action-btn"
+              onClick={startGame}
+            >
+              Сыграть ещё раз
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

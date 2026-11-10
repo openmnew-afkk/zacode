@@ -9,9 +9,6 @@ import { getStoredSeason } from '../services/seasons';
 import { SynthaxAiStudio } from '../components/SynthaxAiStudio';
 import './AiPickPage.css';
 
-/* Временный флаг техработ для Оракула */
-const ORACLE_MAINTENANCE = true;
-
 /* ═══════════════════════════════════════════════════════════════════════════
  *  ✦ ОРАКУЛ — персональный кино-подбор ZENOVA
  *  Нажал на настроение → меню уезжает → карточки выскакивают колодой.
@@ -264,42 +261,6 @@ const AiPickPage: React.FC = () => {
   const skipOpacity = Math.max(0, Math.min(1, -cardX / 90));
 
   const showMenu = stage === 'idle' || stage === 'leaving';
-
-  if (ORACLE_MAINTENANCE) {
-    return (
-      <div className="orc-maintenance-page">
-        <div className="orc-maintenance-backdrop" />
-        <div className="orc-maintenance-card">
-          <div className="orc-maintenance-orb-wrap">
-            <div className="orc-maintenance-halo" />
-            <span className="orc-maintenance-orb">🔮</span>
-          </div>
-
-          <span className="orc-maintenance-tag">ТЕХНИЧЕСКИЙ РЕМОНТ</span>
-          <h1 className="orc-maintenance-title">Оракул на техобслуживании</h1>
-          <p className="orc-maintenance-text">
-            Мы обновляем нейросеть ZENOVA AI кинематографическими паттернами и калибруем алгоритмы подбора. Скоро всё вернётся с обновленной точностью!
-          </p>
-
-          <div className="orc-maintenance-status">
-            <span className="orc-maintenance-status-dot" />
-            <span>Калибровка нейросети ZENOVA AI</span>
-          </div>
-
-          <button
-            type="button"
-            className="orc-maintenance-btn"
-            onClick={() => {
-              haptic('medium');
-              navigate('/');
-            }}
-          >
-            ‹ На главную
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="orc page" style={{ '--orc-tint': activeMood?.tint || '#fb7185' } as React.CSSProperties}>

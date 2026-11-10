@@ -28,10 +28,10 @@
   --sab: env(safe-area-inset-bottom, 0px);
   --tg-top-inset: 0px;
   --header-safe-top: max(
-    calc(env(safe-area-inset-top, 0px) + 14px),
-    calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 10px),
+    calc(env(safe-area-inset-top, 0px) + 20px),
+    calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 16px),
     var(--tg-top-inset, 0px),
-    16px
+    24px
   );
   --safe-top: var(--header-safe-top);
   --safe-bottom: var(--sab);
@@ -59,11 +59,12 @@ html {
 }
 
 html.tg-fullscreen, body.tg-fullscreen {
+  /* В полноэкранном режиме Telegram опускаем шапку ниже нативных кнопок закрытия и меню (✕ и ...) */
   --header-safe-top: max(
-    env(safe-area-inset-top, 0px),
-    var(--tg-content-safe-area-inset-top, 0px),
-    var(--tg-safe-area-inset-top, 0px),
-    16px
+    calc(env(safe-area-inset-top, 0px) + 38px),
+    calc(var(--tg-safe-area-inset-top, 0px) + 38px),
+    calc(var(--tg-content-safe-area-inset-top, 0px) + 38px),
+    54px
   );
   --safe-top: var(--header-safe-top);
 }

@@ -41,59 +41,130 @@
 
 /* ── Карточка пользователя с прогрессом ранга ── */
 .ios-user-card {
-  background: rgba(18, 16, 26, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 18px 20px;
+  position: relative;
+  background: linear-gradient(145deg, rgba(30, 24, 48, 0.88) 0%, rgba(18, 14, 28, 0.94) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  border-radius: 26px;
+  padding: 20px 22px;
   margin-bottom: 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 25px rgba(168, 85, 247, 0.15);
   cursor: pointer;
-  transition: transform 0.18s ease, background 0.18s ease;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, border-color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+
+.ios-user-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -30px;
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.22) 0%, rgba(168, 85, 247, 0.18) 50%, transparent 70%);
+  pointer-events: none;
+  filter: blur(20px);
 }
 
 .ios-user-card:active {
   transform: scale(0.985);
-  background: rgba(24, 22, 34, 0.85);
+  border-color: rgba(244, 63, 94, 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 30px rgba(244, 63, 94, 0.25);
 }
 
 .ios-user-card__top {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin-bottom: 16px;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+/* Оболочка аватара с аурой */
+.ios-user-avatar-wrap {
+  position: relative;
+  width: 62px;
+  height: 62px;
+  flex-shrink: 0;
+}
+
+.ios-user-avatar-aura {
+  position: absolute;
+  inset: -3px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f43f5e 0%, #a855f7 50%, #38bdf8 100%);
+  filter: blur(6px);
+  opacity: 0.6;
+  z-index: 0;
+  animation: auraPulse 4s ease-in-out infinite alternate;
+}
+
+@keyframes auraPulse {
+  0% { opacity: 0.45; filter: blur(5px); }
+  100% { opacity: 0.8; filter: blur(8px); }
 }
 
 .ios-user-avatar {
   position: relative;
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #f43f5e 0%, #a855f7 100%);
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #1e1b2e 0%, #13111c 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 22px;
-  font-weight: 800;
+  overflow: hidden;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.ios-user-avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ios-user-avatar__mask {
+  width: 82%;
+  height: 82%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+}
+
+.ios-user-pro-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  z-index: 2;
+  padding: 2px 7px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: #fff;
-  flex-shrink: 0;
-  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.35);
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  box-shadow: 0 4px 10px rgba(255, 65, 108, 0.5);
 }
 
 .ios-user-lvl-pill {
   position: absolute;
   bottom: -4px;
   right: -4px;
-  padding: 1px 6px;
+  z-index: 2;
+  padding: 2px 7px;
   border-radius: 999px;
-  background: #111;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: #0d0a14;
+  border: 1.2px solid #ffd56b;
   color: #ffd56b;
-  font-size: 9.5px;
+  font-size: 9px;
   font-weight: 850;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .ios-user-info {
@@ -101,22 +172,49 @@
   min-width: 0;
 }
 
+.ios-user-kicker {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: #a855f7;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
 .ios-user-name {
-  margin: 0 0 3px;
-  font-size: 16.5px;
+  margin: 0 0 4px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 17.5px;
   font-weight: 800;
   color: #fff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  letter-spacing: -0.01em;
 }
 
 .ios-user-meta {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.ios-user-handle {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+}
+
+.ios-user-rank-chip {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(168, 85, 247, 0.18);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #d8b4fe;
+  font-size: 10.5px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
 }
 
 .ios-vip-chip {

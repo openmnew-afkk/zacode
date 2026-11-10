@@ -1,80 +1,101 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- *  🎄 FlappyChristmasGame.css — Зимняя мини-игра «Ёлочный Прыгун»
+ *  🎄 FlappyChristmasGame.css — Премиальная новогодняя аркада ZENOVA
+ *  - Полноэкранный плавный мобильный режим (100dvh)
+ *  - Сказочное ночное зимнее небо со звездами и луной
+ *  - Тактильное управление и комфортная физика
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-.flappy-game-modal {
+.flappy-game-screen {
   position: fixed;
   inset: 0;
   z-index: 10000;
-  background: rgba(6, 5, 10, 0.92);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  animation: flappyFadeIn 0.25s ease;
-}
-
-@keyframes flappyFadeIn {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-.flappy-game-card {
-  position: relative;
-  width: 100%;
-  max-width: 360px;
-  background: #0f0e16;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 28px;
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.85),
-    0 0 40px rgba(16, 185, 129, 0.2);
-  overflow: hidden;
+  width: 100vw;
+  height: 100dvh;
+  background: #060814;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  animation: flappySlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.flappy-game-head {
+@keyframes flappySlideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Верхняя панель игры ── */
+.flappy-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: calc(var(--header-safe-top, 24px) + 6px) 18px 12px;
+  background: linear-gradient(180deg, rgba(6, 8, 20, 0.95) 0%, rgba(6, 8, 20, 0.6) 80%, transparent 100%);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  pointer-events: none;
 }
 
-.flappy-game-title {
+.flappy-topbar * {
+  pointer-events: auto;
+}
+
+.flappy-topbar__left {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  color: #fff;
 }
 
-.flappy-game-close {
-  width: 32px;
-  height: 32px;
+.flappy-topbar__lives {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 16px;
+  filter: drop-shadow(0 2px 6px rgba(244, 63, 94, 0.6));
+}
+
+.flappy-topbar__score-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(14, 18, 38, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  color: #ffd56b;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 13.5px;
+  font-weight: 850;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.flappy-topbar__close {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(14, 18, 38, 0.8);
   color: #fff;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(10px);
 }
 
-.flappy-canvas-wrap {
-  position: relative;
+/* ── Игровая сцена ── */
+.flappy-stage {
+  flex: 1;
   width: 100%;
-  height: 380px;
-  background: linear-gradient(180deg, #090a14 0%, #111428 60%, #1a1e38 100%);
-  overflow: hidden;
-  touch-action: manipulation;
+  height: 100%;
+  position: relative;
+  touch-action: none;
+  cursor: pointer;
 }
 
 .flappy-canvas {
@@ -83,113 +104,108 @@
   display: block;
 }
 
-.flappy-score-badge {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  border-radius: 999px;
-  background: rgba(6, 6, 12, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  color: #ffd56b;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 14px;
-  font-weight: 800;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
-  z-index: 5;
-  pointer-events: none;
-}
-
-.flappy-overlay {
+/* ── Оверлеи (Старт, Победа, Поражение) ── */
+.flappy-screen-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(8, 7, 14, 0.88);
-  backdrop-filter: blur(8px);
+  background: rgba(6, 8, 20, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 24px;
-  z-index: 10;
+  padding: 30px 24px;
+  z-index: 20;
 }
 
-.flappy-overlay-icon {
-  font-size: 48px;
+.flappy-overlay-mascot {
+  font-size: 56px;
   margin-bottom: 12px;
-  filter: drop-shadow(0 0 16px rgba(255, 213, 107, 0.6));
+  filter: drop-shadow(0 0 20px rgba(255, 213, 107, 0.7));
+  animation: flappyBounce 2s ease-in-out infinite alternate;
 }
 
-.flappy-overlay-title {
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 18px;
-  font-weight: 800;
-  color: #fff;
+@keyframes flappyBounce {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-8px); }
+}
+
+.flappy-screen-title {
   margin: 0 0 8px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+  color: #fff;
 }
 
-.flappy-overlay-text {
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
-  margin: 0 0 18px;
+.flappy-screen-desc {
+  margin: 0 auto 20px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 300px;
 }
 
-.flappy-overlay-goal {
+.flappy-screen-perks {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
+  gap: 8px;
+  padding: 6px 16px;
   border-radius: 999px;
-  background: rgba(16, 185, 129, 0.16);
-  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.4);
   color: #6ee7b7;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 750;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-.flappy-btn-play {
-  padding: 12px 28px;
-  border-radius: 14px;
+.flappy-action-btn {
+  padding: 14px 34px;
+  border-radius: 16px;
   background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
   border: none;
   color: #fff;
   font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-  transition: transform 0.15s ease;
+  box-shadow: 0 8px 26px rgba(16, 185, 129, 0.45);
+  transition: transform 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.flappy-btn-play:active {
-  transform: scale(0.95);
+.flappy-action-btn:active {
+  transform: scale(0.96);
 }
 
-.flappy-reward-box {
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(225, 29, 72, 0.2) 100%);
+.flappy-action-btn--gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  box-shadow: 0 8px 26px rgba(245, 158, 11, 0.45);
+}
+
+.flappy-win-reward {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(225, 29, 72, 0.22) 100%);
   border: 1px solid rgba(245, 158, 11, 0.45);
-  border-radius: 18px;
-  padding: 16px;
-  margin-bottom: 18px;
+  border-radius: 20px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
   width: 100%;
+  max-width: 320px;
 }
 
-.flappy-reward-title {
+.flappy-win-reward strong {
+  display: block;
   font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 850;
   color: #ffd56b;
   margin-bottom: 4px;
 }
 
-.flappy-reward-sub {
-  font-size: 12px;
+.flappy-win-reward span {
+  font-size: 12.5px;
   color: rgba(255, 255, 255, 0.85);
 }

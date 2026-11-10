@@ -578,15 +578,29 @@ export const ProfilePage: React.FC = () => {
       {/* Карточка пользователя с рангом */}
       <div className="ios-user-card" onClick={() => setSubPage('rank')}>
         <div className="ios-user-card__top">
-          <div className="ios-user-avatar">
-            <span>{displayName.slice(0, 1)}</span>
-            <span className="ios-user-lvl-pill">{cineLevel}</span>
+          <div className="ios-user-avatar-wrap">
+            <div className="ios-user-avatar-aura" />
+            <div className="ios-user-avatar">
+              {user?.photo_url ? (
+                <img src={user.photo_url} alt={displayName} className="ios-user-avatar__img" />
+              ) : (
+                <img
+                  src={seasonState.season.id === 'winter' ? '/zenova-mask-winter.png' : '/zenova-mask-default.png'}
+                  alt=""
+                  className="ios-user-avatar__mask"
+                />
+              )}
+            </div>
+            {effectivePremium && <span className="ios-user-pro-badge">PRO</span>}
+            <span className="ios-user-lvl-pill">LVL {cineLevel}</span>
           </div>
+
           <div className="ios-user-info">
+            <div className="ios-user-kicker">РЕЗИДЕНТ ZENOVA</div>
             <h2 className="ios-user-name">{displayName}</h2>
             <div className="ios-user-meta">
-              <span>{username}</span>
-              {effectivePremium && <span className="ios-vip-chip">PRO</span>}
+              <span className="ios-user-handle">{username}</span>
+              <span className="ios-user-rank-chip">{rankTitle}</span>
             </div>
           </div>
           <span className="ios-chevron">›</span>
@@ -601,7 +615,7 @@ export const ProfilePage: React.FC = () => {
             />
           </div>
           <div className="ios-user-rank-labels">
-            <span className="ios-user-rank-title">{rankTitle}</span>
+            <span className="ios-user-rank-title">Ранг: {rankTitle}</span>
             <span className="ios-user-rank-pts">{totalXp % 140} / 140 XP</span>
           </div>
         </div>
