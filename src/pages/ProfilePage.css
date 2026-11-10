@@ -1,778 +1,842 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- *  📱 ProfilePage.css — Премиальный iOS Settings дизайн ZENOVA
- *  - Чистая группировка настроек, никакого визуального хаоса
- *  - Отдельные экраны-подстраницы для Дневника, Ранга, PRO и Атмосферы
- *  - Тактильная отзывчивость и плавные анимации
+ *  📱 ProfilePage.css — Архитектурный Smoked-Obsidian дизайн ZENOVA
+ *  - Полная гармония со стилем нижнего дока TabBar
+ *  - Тонкий прецизионный верхний световой луч (beam)
+ *  - Минималистичные контурные иконки с деликатной подсветкой
+ *  - Без кричащих эмодзи-боксов и без хаоса
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-.ios-profile-page {
-  padding: calc(var(--header-safe-top, 16px) + 8px) 16px calc(var(--tabbar-h, 80px) + 24px);
-  max-width: 620px;
+.zen-profile-page {
+  padding: calc(var(--header-safe-top, 24px) + 12px) 16px calc(var(--tabbar-h, 74px) + 28px);
+  max-width: 600px;
   margin: 0 auto;
 }
 
 /* ── Шапка страницы ── */
-.ios-header {
+.zen-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
-.ios-header__title {
+.zen-header__title {
   margin: 0;
   font-family: 'Unbounded', -apple-system, sans-serif;
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: #ffffff;
 }
 
-.ios-admin-btn {
+.zen-admin-btn {
   padding: 6px 14px;
   border-radius: 999px;
-  background: rgba(168, 85, 247, 0.16);
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  background: rgba(168, 85, 247, 0.14);
+  border: 1px solid rgba(168, 85, 247, 0.32);
   color: #c084fc;
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 750;
   cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
-/* ── Карточка пользователя с прогрессом ранга ── */
-.ios-user-card {
+.zen-admin-btn:active {
+  transform: scale(0.95);
+  background: rgba(168, 85, 247, 0.22);
+}
+
+/* ── Главная карточка профиля (Smoked Obsidian Dock Capsule) ── */
+.zen-user-card {
   position: relative;
-  background: linear-gradient(145deg, rgba(30, 24, 48, 0.88) 0%, rgba(18, 14, 28, 0.94) 100%);
-  border: 1px solid rgba(168, 85, 247, 0.28);
+  background: rgba(15, 15, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 26px;
   padding: 20px 22px;
   margin-bottom: 24px;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 25px rgba(168, 85, 247, 0.15);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.11);
   cursor: pointer;
-  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
   overflow: hidden;
 }
 
-.ios-user-card::before {
-  content: '';
+/* Прецизионный световой луч на верхней грани карточки (как в TabBar) */
+.zen-user-card__beam {
   position: absolute;
-  top: -40px;
-  right: -30px;
-  width: 140px;
-  height: 140px;
-  background: radial-gradient(circle, rgba(244, 63, 94, 0.22) 0%, rgba(168, 85, 247, 0.18) 50%, transparent 70%);
-  pointer-events: none;
-  filter: blur(20px);
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+  opacity: 0.85;
 }
 
-.ios-user-card:active {
+.zen-user-card:active {
   transform: scale(0.985);
-  border-color: rgba(244, 63, 94, 0.45);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 30px rgba(244, 63, 94, 0.25);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-.ios-user-card__top {
-  position: relative;
-  z-index: 1;
+.zen-user-card__top {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 18px;
 }
 
-/* Оболочка аватара с аурой */
-.ios-user-avatar-wrap {
+/* Оболочка аватара */
+.zen-user-avatar-wrap {
   position: relative;
-  width: 62px;
-  height: 62px;
+  width: 58px;
+  height: 58px;
   flex-shrink: 0;
 }
 
-.ios-user-avatar-aura {
-  position: absolute;
-  inset: -3px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, #f43f5e 0%, #a855f7 50%, #38bdf8 100%);
-  filter: blur(6px);
-  opacity: 0.6;
-  z-index: 0;
-  animation: auraPulse 4s ease-in-out infinite alternate;
-}
-
-@keyframes auraPulse {
-  0% { opacity: 0.45; filter: blur(5px); }
-  100% { opacity: 0.8; filter: blur(8px); }
-}
-
-.ios-user-avatar {
-  position: relative;
-  z-index: 1;
+.zen-user-avatar {
   width: 100%;
   height: 100%;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #1e1b2e 0%, #13111c 100%);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #181926 0%, #101018 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 8px 20px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-.ios-user-avatar__img {
+.zen-user-avatar__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.ios-user-avatar__mask {
-  width: 82%;
-  height: 82%;
+.zen-user-avatar__mask {
+  width: 78%;
+  height: 78%;
   object-fit: contain;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.6));
 }
 
-.ios-user-pro-badge {
+.zen-user-pro-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  z-index: 2;
-  padding: 2px 7px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #ff416c, #ff4b2b);
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  top: -3px;
+  right: -3px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: #fff;
-  font-size: 8.5px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8px;
   font-weight: 900;
-  letter-spacing: 0.08em;
-  box-shadow: 0 4px 10px rgba(255, 65, 108, 0.5);
+  letter-spacing: 0.06em;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.5);
 }
 
-.ios-user-lvl-pill {
+.zen-user-lvl-pill {
   position: absolute;
   bottom: -4px;
   right: -4px;
-  z-index: 2;
-  padding: 2px 7px;
+  padding: 1px 6px;
   border-radius: 999px;
-  background: #0d0a14;
-  border: 1.2px solid #ffd56b;
+  background: #090a12;
+  border: 1px solid rgba(255, 213, 107, 0.6);
   color: #ffd56b;
-  font-size: 9px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8.5px;
   font-weight: 850;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
-.ios-user-info {
+.zen-user-info {
   flex: 1;
   min-width: 0;
 }
 
-.ios-user-kicker {
-  font-size: 10px;
+.zen-user-kicker {
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.12em;
-  color: #a855f7;
+  color: rgba(255, 255, 255, 0.4);
   text-transform: uppercase;
   margin-bottom: 2px;
 }
 
-.ios-user-name {
+.zen-user-name {
   margin: 0 0 4px;
   font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 17.5px;
+  font-size: 17px;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   letter-spacing: -0.01em;
 }
 
-.ios-user-meta {
+.zen-user-meta {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 12px;
-  flex-wrap: wrap;
 }
 
-.ios-user-handle {
-  color: rgba(255, 255, 255, 0.55);
+.zen-user-handle {
+  color: rgba(255, 255, 255, 0.45);
   font-weight: 500;
 }
 
-.ios-user-rank-chip {
+.zen-user-rank-chip {
   padding: 2px 8px;
   border-radius: 6px;
-  background: rgba(168, 85, 247, 0.18);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #d8b4fe;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 10.5px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
+  font-weight: 700;
 }
 
-.ios-vip-chip {
-  padding: 1px 6px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
-  color: #fff;
-  font-size: 9.5px;
-  font-weight: 900;
-  letter-spacing: 0.05em;
-}
-
-/* Шкала ранга */
-.ios-user-rank-bar {
+/* Шкала опыта */
+.zen-user-rank-bar {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.ios-user-rank-track {
+.zen-user-rank-track {
   width: 100%;
-  height: 6px;
+  height: 4px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
 }
 
-.ios-user-rank-fill {
+.zen-user-rank-fill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #f43f5e 0%, #fbbf24 60%, #38bdf8 100%);
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+  background: linear-gradient(90deg, #a855f7 0%, #38bdf8 50%, #34d399 100%);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
   transition: width 0.4s ease;
 }
 
-.ios-user-rank-labels {
+.zen-user-rank-labels {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 11px;
-  font-weight: 700;
-}
-
-.ios-user-rank-title {
-  color: #ffd56b;
-}
-
-.ios-user-rank-pts {
+  font-weight: 600;
   color: rgba(255, 255, 255, 0.45);
 }
 
-/* ── Заголовки секций (iOS Section Header) ── */
-.ios-section-header {
-  font-size: 11.5px;
-  font-weight: 750;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.4);
-  margin: 22px 0 8px 12px;
-  text-transform: uppercase;
+.zen-user-rank-title {
+  color: rgba(255, 255, 255, 0.75);
 }
 
-/* ── Группированные списки в стиле iOS Settings ── */
-.ios-group {
-  background: rgba(18, 16, 26, 0.72);
+/* ── Секции и группы в стиле Obsidian Dock ── */
+.zen-section-header {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.38);
+  text-transform: uppercase;
+  margin: 22px 0 8px 12px;
+}
+
+.zen-group {
+  background: rgba(15, 15, 22, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   overflow: hidden;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  margin-bottom: 8px;
+  box-shadow:
+    0 12px 32px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.ios-row {
+.zen-row {
   display: flex;
   align-items: center;
-  gap: 13px;
-  padding: 13px 16px;
+  gap: 14px;
+  padding: 15px 18px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   transition: background 0.16s ease;
-  user-select: none;
-}
-
-.ios-row:last-child {
-  border-bottom: none;
-}
-
-.ios-row.clickable {
-  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
-.ios-row.clickable:active {
-  background: rgba(255, 255, 255, 0.06);
+.zen-row:last-child {
+  border-bottom: none;
 }
 
-.ios-row__icon-box {
+.zen-row.clickable {
+  cursor: pointer;
+}
+
+.zen-row.clickable:active {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Иконки в строках: тонкий минималистичный контур */
+.zen-row__icon-wrap {
   width: 32px;
   height: 32px;
   border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  color: rgba(255, 255, 255, 0.7);
   flex-shrink: 0;
+  transition: color 0.16s ease, border-color 0.16s ease;
 }
 
-/* Цвета иконок */
-.bg-purple { background: rgba(168, 85, 247, 0.18); color: #c084fc; }
-.bg-amber  { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
-.bg-rose   { background: rgba(244, 63, 94, 0.18);  color: #fb7185; }
-.bg-gold   { background: rgba(234, 179, 8, 0.2);   color: #facc15; }
-.bg-blue   { background: rgba(59, 130, 246, 0.18); color: #60a5fa; }
-.bg-emerald{ background: rgba(16, 185, 129, 0.18); color: #34d399; }
-.bg-cyan   { background: rgba(6, 182, 212, 0.18);  color: #38bdf8; }
-.bg-indigo { background: rgba(99, 102, 241, 0.18); color: #818cf8; }
-.bg-slate  { background: rgba(148, 163, 184, 0.15);color: #cbd5e1; }
-.bg-red    { background: rgba(239, 68, 68, 0.18);  color: #f87171; }
+.zen-row.clickable:active .zen-row__icon-wrap {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
 
-.ios-row__info {
+.zen-glow-gold {
+  color: #ffd56b !important;
+  background: rgba(255, 213, 107, 0.08) !important;
+  border-color: rgba(255, 213, 107, 0.25) !important;
+}
+
+.zen-glow-cyan {
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.08) !important;
+  border-color: rgba(56, 189, 248, 0.25) !important;
+}
+
+.zen-row__info {
   flex: 1;
   min-width: 0;
 }
 
-.ios-row__title {
+.zen-row__title {
   font-size: 14.5px;
-  font-weight: 650;
-  color: #fff;
-  line-height: 1.25;
-}
-
-.ios-row__sub {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-top: 2px;
-}
-
-.ios-row__val {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.ios-chevron {
-  font-size: 16px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  margin-bottom: 2px;
 }
 
-.ios-check {
-  font-size: 15px;
-  font-weight: 850;
-  color: var(--accent, #fb7185);
+.zen-row__sub {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.42);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.text-accent { color: var(--accent, #fb7185) !important; font-weight: 750; }
-.text-green  { color: #34d399 !important; font-weight: 750; }
-.text-danger { color: #f87171 !important; }
+.zen-row__val {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+}
 
-/* ── iOS Toggle Switch ── */
-.ios-toggle {
+.zen-chevron {
+  color: rgba(255, 255, 255, 0.25);
+  flex-shrink: 0;
+}
+
+.text-gold {
+  color: #ffd56b !important;
+  font-weight: 750 !important;
+}
+
+.text-green {
+  color: #34d399 !important;
+  font-weight: 750 !important;
+}
+
+.text-accent {
+  color: #a855f7 !important;
+  font-weight: 750 !important;
+}
+
+.text-danger {
+  color: #f43f5e !important;
+}
+
+/* Точки сезонов */
+.zen-season-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.zen-check {
+  color: #34d399;
+  flex-shrink: 0;
+}
+
+/* Тумблер (минималистичный переключатель) */
+.zen-toggle {
   width: 44px;
   height: 26px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  padding: 2px;
-  cursor: pointer;
-  transition: background 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
-  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  padding: 2px;
+  transition: background 0.22s ease, border-color 0.22s ease;
+  flex-shrink: 0;
 }
 
-.ios-toggle.on {
+.zen-toggle.on {
   background: #10b981;
+  border-color: #34d399;
 }
 
-.ios-toggle__thumb {
-  display: block;
-  width: 22px;
-  height: 22px;
+.zen-toggle__thumb {
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #ffffff;
+  display: block;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.ios-toggle.on .ios-toggle__thumb {
+.zen-toggle.on .zen-toggle__thumb {
   transform: translateX(18px);
 }
 
 /* ══════════════ ПОДСТРАНИЦЫ (SUBPAGES) ══════════════ */
-.ios-subpage {
-  min-height: 85dvh;
-  padding: calc(var(--header-safe-top, 16px) + 6px) 16px calc(var(--tabbar-h, 80px) + 24px);
-  max-width: 620px;
+.zen-subpage {
+  padding: calc(var(--header-safe-top, 24px) + 12px) 16px calc(var(--tabbar-h, 74px) + 28px);
+  max-width: 600px;
   margin: 0 auto;
-  animation: iosSlideIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: zenSubpageIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes iosSlideIn {
-  from { opacity: 0; transform: translateX(20px); }
+@keyframes zenSubpageIn {
+  from { opacity: 0; transform: translateX(16px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-.ios-subpage__nav {
+.zen-subpage__nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
 }
 
-.ios-subpage__back {
-  background: transparent;
-  border: none;
-  color: var(--accent, #fb7185);
-  font-size: 15px;
+.zen-subpage__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 14px 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  padding: 6px 8px;
-  margin-left: -8px;
-  -webkit-tap-highlight-color: transparent;
+  backdrop-filter: blur(10px);
+  transition: background 0.15s ease;
 }
 
-.ios-subpage__title {
+.zen-subpage__back:active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.zen-subpage__title {
   margin: 0;
   font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 16.5px;
+  font-size: 18px;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
-.ios-subpage__action {
-  background: transparent;
-  border: none;
-  color: #f87171;
-  font-size: 13.5px;
-  font-weight: 700;
+.zen-subpage__action {
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #f43f5e;
+  font-size: 12px;
+  font-weight: 750;
   cursor: pointer;
 }
 
-.ios-subpage__action-space {
-  width: 48px;
+.zen-subpage__action-space {
+  width: 70px;
 }
 
-/* Сегментированный переключатель (iOS Segmented Control) */
-.ios-segmented {
+/* Сегментные фильтры дневника */
+.zen-segmented {
   display: flex;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 12px;
+  gap: 6px;
   padding: 4px;
-  margin-bottom: 20px;
+  border-radius: 16px;
+  background: rgba(15, 15, 22, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 18px;
 }
 
-.ios-segmented__item {
+.zen-segmented__item {
   flex: 1;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9px;
-  background: transparent;
+  padding: 8px 4px;
+  border-radius: 12px;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  -webkit-tap-highlight-color: transparent;
+  transition: background 0.16s ease, color 0.16s ease;
+  text-align: center;
 }
 
-.ios-segmented__item.active {
-  background: rgba(255, 255, 255, 0.16);
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+.zen-segmented__item.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Сетка карточек дневника */
-.ios-diary-grid {
+/* Карточки дневника */
+.zen-diary-grid {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.ios-diary-card {
+.zen-diary-card {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px;
+  padding: 10px 14px;
   border-radius: 18px;
-  background: rgba(18, 16, 26, 0.72);
+  background: rgba(15, 15, 22, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(14px);
   cursor: pointer;
-  transition: transform 0.16s ease, background 0.16s ease;
-  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.15s ease, background 0.15s ease;
 }
 
-.ios-diary-card:active {
+.zen-diary-card:active {
   transform: scale(0.985);
-  background: rgba(25, 22, 36, 0.85);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.ios-diary-card__poster {
-  width: 52px;
-  aspect-ratio: 2 / 3;
+.zen-diary-card__poster {
+  width: 44px;
+  height: 64px;
   border-radius: 10px;
   object-fit: cover;
   flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background: #111;
 }
 
-.ios-diary-card__content {
+.zen-diary-card__content {
   flex: 1;
   min-width: 0;
 }
 
-.ios-diary-card__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-
-.ios-diary-badge {
-  font-size: 9.5px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 2px 7px;
-  border-radius: 999px;
-}
-
-.ios-diary-badge.watched {
-  background: rgba(16, 185, 129, 0.2);
-  color: #34d399;
-}
-
-.ios-diary-badge.want {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-}
-
-.ios-diary-badge.watching {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fbbf24;
-}
-
-.ios-diary-rating {
-  font-size: 11.5px;
-  font-weight: 850;
-  color: #ffd56b;
-}
-
-.ios-diary-card__title {
-  font-size: 14.5px;
-  font-weight: 750;
-  color: #fff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.ios-diary-card__meta {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-top: 2px;
-}
-
-/* Пустое состояние */
-.ios-empty-state {
-  text-align: center;
-  padding: 48px 24px;
-}
-
-.ios-empty-state__icon {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 14px;
-}
-
-.ios-empty-state__title {
-  margin: 0 0 8px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 17px;
-  font-weight: 800;
-  color: #fff;
-}
-
-.ios-empty-state__text {
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.55);
-  margin: 0 auto 20px;
-  max-width: 320px;
-}
-
-.ios-empty-state__btn {
-  padding: 11px 24px;
-  border-radius: 999px;
-  background: var(--accent, #fb7185);
-  border: none;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 750;
-  cursor: pointer;
-}
-
-/* Герой экрана ранга */
-.ios-rank-hero {
-  padding: 24px;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(244, 63, 94, 0.2) 0%, rgba(168, 85, 247, 0.2) 100%);
-  border: 1px solid rgba(244, 63, 94, 0.35);
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.ios-rank-hero__badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #ffd56b;
-  font-size: 10.5px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
-}
-
-.ios-rank-hero__title {
-  margin: 0 0 16px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 24px;
-  font-weight: 800;
-  color: #fff;
-}
-
-.ios-rank-hero__bar {
-  width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.ios-rank-hero__fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #f43f5e, #fbbf24);
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
-}
-
-.ios-rank-hero__xp {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11.5px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-/* Уровни наград */
-.ios-tiers {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.ios-tier {
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(18, 16, 26, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.ios-tier.unlocked {
-  background: rgba(18, 16, 26, 0.88);
-  border-color: rgba(251, 191, 36, 0.35);
-  box-shadow: 0 4px 18px rgba(251, 191, 36, 0.1);
-}
-
-.ios-tier__head {
+.zen-diary-card__head {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
-.ios-tier__lvl {
+.zen-diary-badge {
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.zen-diary-badge.watched {
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.zen-diary-badge.want {
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+}
+
+.zen-diary-badge.watching {
+  background: rgba(251, 191, 36, 0.18);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: #fde047;
+}
+
+.zen-diary-rating {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffd56b;
+}
+
+.zen-diary-card__title {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+
+.zen-diary-card__meta {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Пустое состояние */
+.zen-empty-state {
+  padding: 44px 20px;
+  text-align: center;
+  border-radius: 22px;
+  background: rgba(15, 15, 22, 0.65);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.zen-empty-state__icon {
+  display: inline-flex;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.zen-empty-state__title {
+  margin: 0 0 6px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-empty-state__text {
+  margin: 0 auto 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.5);
+  max-width: 320px;
+}
+
+.zen-empty-state__btn {
+  padding: 10px 24px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: none;
+  color: #090a12;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Карточка ранга в подстранице */
+.zen-rank-hero {
+  position: relative;
+  background: rgba(15, 15, 22, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 22px;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+}
+
+.zen-rank-hero__beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.zen-rank-hero__badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffd56b;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 850;
+  margin-bottom: 8px;
+}
+
+.zen-rank-hero__title {
+  margin: 0 0 16px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.zen-rank-hero__bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.zen-rank-hero__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a855f7 0%, #38bdf8 60%, #34d399 100%);
+}
+
+.zen-rank-hero__xp {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+/* Уровни рангов */
+.zen-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zen-tier {
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(15, 15, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  opacity: 0.5;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.zen-tier.unlocked {
+  opacity: 1;
+  background: rgba(15, 15, 22, 0.88);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.zen-tier__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.zen-tier__lvl {
   padding: 2px 7px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.1);
-  font-size: 10px;
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9.5px;
   font-weight: 800;
-  color: #ffd56b;
 }
 
-.ios-tier__name {
+.zen-tier__name {
   font-family: 'Unbounded', -apple-system, sans-serif;
   font-size: 13.5px;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
 }
 
-.ios-tier__desc {
+.zen-tier__desc {
   margin: 0;
   font-size: 12px;
   line-height: 1.45;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.55);
 }
 
 /* Карточка PRO */
-.ios-pro-card {
-  padding: 28px 24px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, rgba(234, 179, 8, 0.18) 0%, rgba(225, 29, 72, 0.15) 100%);
-  border: 1px solid rgba(234, 179, 8, 0.38);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+.zen-pro-card {
+  position: relative;
+  background: rgba(15, 15, 22, 0.88);
+  border: 1px solid rgba(255, 213, 107, 0.28);
+  border-radius: 26px;
+  padding: 28px 22px;
   text-align: center;
+  overflow: hidden;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 213, 107, 0.08);
 }
 
-.ios-pro-card__icon {
-  font-size: 44px;
-  display: inline-block;
-  margin-bottom: 12px;
-  filter: drop-shadow(0 0 14px rgba(234, 179, 8, 0.6));
+.zen-pro-card__beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffd56b;
+  box-shadow: 0 0 12px rgba(255, 213, 107, 0.9);
 }
 
-.ios-pro-card__status {
+.zen-pro-card__icon-wrap {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 213, 107, 0.12);
+  border: 1px solid rgba(255, 213, 107, 0.35);
+  color: #ffd56b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+  box-shadow: 0 8px 20px rgba(255, 213, 107, 0.2);
+}
+
+.zen-pro-card__status {
   display: inline-block;
   padding: 3px 12px;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.45);
-  color: #ffd56b;
-  font-size: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9px;
   font-weight: 850;
   letter-spacing: 0.08em;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
-.ios-pro-card__title {
+.zen-pro-card__title {
   margin: 0 0 8px;
   font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 21px;
-  font-weight: 800;
-  color: #fff;
+  font-size: 20px;
+  font-weight: 850;
+  color: #ffffff;
 }
 
-.ios-pro-card__desc {
-  margin: 0 0 20px;
+.zen-pro-card__desc {
+  margin: 0 auto 22px;
   font-size: 13px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 320px;
 }
 
-.ios-pro-features {
+.zen-pro-features {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -780,43 +844,44 @@
   margin-bottom: 24px;
 }
 
-.ios-pro-feat {
+.zen-pro-feat {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13.5px;
-  font-weight: 650;
-  color: #fff;
-}
-
-.ios-pro-feat__check {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(16, 185, 129, 0.25);
-  color: #34d399;
-  font-size: 11px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ios-btn-primary {
-  width: 100%;
-  height: 48px;
-  border-radius: 14px;
-  background: linear-gradient(135deg, #f59e0b, #ef4444);
-  border: none;
-  color: #fff;
-  font-family: 'Unbounded', -apple-system, sans-serif;
   font-size: 13px;
-  font-weight: 800;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.zen-pro-feat__check {
+  color: #ffd56b;
+  flex-shrink: 0;
+}
+
+.zen-btn-primary {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffd56b 0%, #f59e0b 100%);
+  border: none;
+  color: #090a12;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 13.5px;
+  font-weight: 850;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
   transition: transform 0.16s ease;
 }
 
-.ios-btn-primary:active {
+.zen-btn-primary:active {
   transform: scale(0.97);
+}
+
+/* Постер в истории */
+.zen-history-poster {
+  width: 38px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #111;
 }

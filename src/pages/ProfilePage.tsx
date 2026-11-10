@@ -1,5 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  BookOpen,
+  Trophy,
+  Crown,
+  History as HistoryIcon,
+  Sparkles,
+  ShieldCheck,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  LogOut,
+  Star,
+  Flame,
+  Tv,
+} from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import RulesModal from '../components/RulesModal';
@@ -14,15 +29,14 @@ const SEASONS: Array<{
   id: SeasonId | 'auto';
   name: string;
   sub: string;
-  emoji: string;
   dotColor: string;
 }> = [
-  { id: 'winter', name: 'Зимний Кристалл', sub: 'Северное сияние и снег', emoji: '❄️', dotColor: '#7dd3fc' },
-  { id: 'spring', name: 'Сакура', sub: 'Лепестки сакуры', emoji: '🌸', dotColor: '#f472b6' },
-  { id: 'summer', name: 'Лазурь', sub: 'Летние блики', emoji: '☀️', dotColor: '#fbbf24' },
-  { id: 'autumn', name: 'Янтарь', sub: 'Бархатный листопад', emoji: '🍁', dotColor: '#fb923c' },
-  { id: 'none', name: 'Обсидиан', sub: 'Чистый темный кинозал', emoji: '🖤', dotColor: '#fb7185' },
-  { id: 'auto', name: 'Авто-сезон', sub: `По календарю (${detectSeason().label})`, emoji: '✨', dotColor: '#a78bfa' },
+  { id: 'winter', name: 'Зимний Кристалл', sub: 'Северное сияние и снег', dotColor: '#7dd3fc' },
+  { id: 'spring', name: 'Цветение Сакуры', sub: 'Весенние лепестки', dotColor: '#f472b6' },
+  { id: 'summer', name: 'Лазурный Бриз', sub: 'Теплые блики и светлячки', dotColor: '#fbbf24' },
+  { id: 'autumn', name: 'Янтарный Закат', sub: 'Бархатный листопад', dotColor: '#fb923c' },
+  { id: 'none', name: 'Глубокий Обсидиан', sub: 'Чистый кинематографичный кинозал', dotColor: '#94a3b8' },
+  { id: 'auto', name: 'Авто-сезон', sub: `По календарю (${detectSeason().label})`, dotColor: '#c084fc' },
 ];
 
 export const ProfilePage: React.FC = () => {
@@ -36,8 +50,6 @@ export const ProfilePage: React.FC = () => {
     isPremium,
     premiumExpiry,
     role,
-    theme,
-    toggleTheme,
     telegramUsername,
   } = useStore();
 
@@ -85,47 +97,43 @@ export const ProfilePage: React.FC = () => {
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
   };
 
-  const displayName = user
-    ? `${user.first_name}${user.last_name ? ` ${user.last_name}` : ''}`
-    : 'Киноман ZENOVA';
-  const username = user?.username
-    ? `@${user.username}`
-    : telegramUsername
-    ? `@${telegramUsername}`
-    : '@zenova_guest';
-
-  const effectiveUser = user?.username || telegramUsername || '';
-  const userAccess = resolveUserAccess(effectiveUser);
-  const isAdminUser =
-    userAccess.isAdmin || userAccess.isModerator || role === 'admin' || role === 'moderator' || user?.username === 'ZenovaAdmin';
-  const effectivePremium = isPremium || userAccess.isVip;
-
-  // Кино-ранг & XP
-  const trackedList = Object.values(tracked || {});
-  const trackedCount = trackedList.length;
-  const totalXp =
-    watchHistory.length * 45 + favorites.length * 30 + trackedCount * 25 + (effectivePremium ? 250 : 60);
-  const cineLevel = Math.min(30, Math.max(1, Math.floor(totalXp / 140) + 1));
-  const levelProgress = Math.min(100, Math.round(((totalXp % 140) / 140) * 100));
-
-  const rankTitle =
-    cineLevel >= 21
-      ? 'Легенда Кино'
-      : cineLevel >= 13
-      ? 'Кинокритик'
-      : cineLevel >= 6
-      ? 'Синефил'
-      : 'Кинолюбитель';
-
   const switchSeason = (id: SeasonId | 'auto') => {
     haptic('light');
     setStoredSeason(id);
-    const next = getStoredSeason();
-    applySeason(next.season);
-    setSeasonState(next);
+    const updated = getStoredSeason();
+    applySeason(updated.season);
+    setSeasonState(updated);
   };
 
-  // Список фильмов кино-дневника
+  // Данные пользователя
+  const effectiveUsername = user?.username || telegramUsername;
+  const access = resolveUserAccess(effectiveUsername || '');
+
+  const isAdminUser = access.isAdmin;
+  const effectivePremium = access.isVip || isPremium;
+
+  const displayName =
+    user?.first_name || user?.username || effectiveUsername || 'Киноман ZENOVA';
+  const username = user?.username
+    ? `@${user.username}`
+    : effectiveUsername
+    ? `@${effectiveUsername.replace(/^@/, '')}`
+    : 'ID Гостя';
+
+  // Расчет ранга и очков опыта
+  const trackedList = Object.values(tracked || {});
+  const trackedCount = trackedList.length;
+  const watchedCount = trackedList.filter((t) => t.status === 'watched').length;
+  const totalXp = watchedCount * 45 + favorites.length * 30 + trackedCount * 25 + (effectivePremium ? 250 : 0);
+  const cineLevel = Math.max(1, Math.floor(totalXp / 140) + 1);
+  const levelProgress = Math.min(100, Math.round(((totalXp % 140) / 140) * 100));
+
+  let rankTitle = 'Кинолюбитель';
+  if (cineLevel >= 21) rankTitle = 'Легенда Кино';
+  else if (cineLevel >= 13) rankTitle = 'Кинокритик';
+  else if (cineLevel >= 6) rankTitle = 'Синефил';
+
+  // Фильтрация дневника
   const filteredDiary = trackedList.filter((item) => {
     if (diaryFilter === 'all') return true;
     return item.status === diaryFilter;
@@ -134,25 +142,26 @@ export const ProfilePage: React.FC = () => {
   /* ══════════════ ПОДСТРАНИЦА: КИНО-ДНЕВНИК ══════════════ */
   if (subPage === 'diary') {
     return (
-      <div className="ios-subpage">
-        <header className="ios-subpage__nav">
+      <div className="zen-subpage">
+        <header className="zen-subpage__nav">
           <button
             type="button"
-            className="ios-subpage__back"
+            className="zen-subpage__back"
             onClick={() => {
               haptic('light');
               setSubPage(null);
             }}
           >
-            ‹ Назад
+            <ChevronLeft size={18} />
+            <span>Назад</span>
           </button>
-          <h1 className="ios-subpage__title">Кино-Дневник</h1>
-          <div className="ios-subpage__action-space" />
+          <h1 className="zen-subpage__title">Кино-Дневник</h1>
+          <div className="zen-subpage__action-space" />
         </header>
 
-        <div className="ios-subpage__body">
+        <div className="zen-subpage__body">
           {/* Фильтры статуса */}
-          <div className="ios-segmented">
+          <div className="zen-segmented">
             {[
               { id: 'all', label: `Все (${trackedList.length})` },
               { id: 'watched', label: 'Просмотрено' },
@@ -162,7 +171,7 @@ export const ProfilePage: React.FC = () => {
               <button
                 key={f.id}
                 type="button"
-                className={`ios-segmented__item ${diaryFilter === f.id ? 'active' : ''}`}
+                className={`zen-segmented__item ${diaryFilter === f.id ? 'active' : ''}`}
                 onClick={() => {
                   haptic('light');
                   setDiaryFilter(f.id as any);
@@ -174,26 +183,26 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           {filteredDiary.length === 0 ? (
-            <div className="ios-empty-state">
-              <span className="ios-empty-state__icon">📖</span>
-              <h3 className="ios-empty-state__title">Дневник пока пуст</h3>
-              <p className="ios-empty-state__text">
+            <div className="zen-empty-state">
+              <span className="zen-empty-state__icon"><BookOpen size={36} /></span>
+              <h3 className="zen-empty-state__title">Дневник пока пуст</h3>
+              <p className="zen-empty-state__text">
                 Отмечайте фильмы на странице кино («Смотрю», «Буду смотреть» или «Просмотрено»), и они появятся в вашем личном дневнике.
               </p>
               <button
                 type="button"
-                className="ios-empty-state__btn"
+                className="zen-empty-state__btn"
                 onClick={() => navigate('/')}
               >
                 Выбрать фильм
               </button>
             </div>
           ) : (
-            <div className="ios-diary-grid">
+            <div className="zen-diary-grid">
               {filteredDiary.map((item) => (
                 <div
                   key={item.movie.id}
-                  className="ios-diary-card"
+                  className="zen-diary-card"
                   onClick={() => {
                     haptic('light');
                     navigate(`/movie/${item.movie.id}`);
@@ -202,12 +211,12 @@ export const ProfilePage: React.FC = () => {
                   <img
                     src={item.movie.poster_path || ''}
                     alt={item.movie.title}
-                    className="ios-diary-card__poster"
+                    className="zen-diary-card__poster"
                     loading="lazy"
                   />
-                  <div className="ios-diary-card__content">
-                    <div className="ios-diary-card__head">
-                      <span className={`ios-diary-badge ${item.status}`}>
+                  <div className="zen-diary-card__content">
+                    <div className="zen-diary-card__head">
+                      <span className={`zen-diary-badge ${item.status}`}>
                         {item.status === 'watched'
                           ? 'Просмотрено'
                           : item.status === 'want'
@@ -215,11 +224,11 @@ export const ProfilePage: React.FC = () => {
                           : 'Смотрю'}
                       </span>
                       {item.rating && (
-                        <span className="ios-diary-rating">★ {item.rating}</span>
+                        <span className="zen-diary-rating">★ {item.rating}</span>
                       )}
                     </div>
-                    <div className="ios-diary-card__title">{item.movie.title}</div>
-                    <div className="ios-diary-card__meta">
+                    <div className="zen-diary-card__title">{item.movie.title}</div>
+                    <div className="zen-diary-card__meta">
                       {item.movie.release_date?.slice(0, 4) || '—'} ·{' '}
                       {item.movie.genres?.[0] || 'Кино'}
                     </div>
@@ -236,107 +245,109 @@ export const ProfilePage: React.FC = () => {
   /* ══════════════ ПОДСТРАНИЦА: РАНГ И ПРИВИЛЕГИИ ══════════════ */
   if (subPage === 'rank') {
     return (
-      <div className="ios-subpage">
-        <header className="ios-subpage__nav">
+      <div className="zen-subpage">
+        <header className="zen-subpage__nav">
           <button
             type="button"
-            className="ios-subpage__back"
+            className="zen-subpage__back"
             onClick={() => {
               haptic('light');
               setSubPage(null);
             }}
           >
-            ‹ Назад
+            <ChevronLeft size={18} />
+            <span>Назад</span>
           </button>
-          <h1 className="ios-subpage__title">Рейтинг & Награды</h1>
-          <div className="ios-subpage__action-space" />
+          <h1 className="zen-subpage__title">Рейтинг & Награды</h1>
+          <div className="zen-subpage__action-space" />
         </header>
 
-        <div className="ios-subpage__body">
+        <div className="zen-subpage__body">
           {/* Карточка текущего ранга */}
-          <div className="ios-rank-hero">
-            <div className="ios-rank-hero__badge">УРОВЕНЬ {cineLevel}</div>
-            <h2 className="ios-rank-hero__title">{rankTitle}</h2>
-            <div className="ios-rank-hero__bar">
+          <div className="zen-rank-hero">
+            <div className="zen-rank-hero__beam" />
+            <div className="zen-rank-hero__badge">УРОВЕНЬ {cineLevel}</div>
+            <h2 className="zen-rank-hero__title">{rankTitle}</h2>
+            <div className="zen-rank-hero__bar">
               <div
-                className="ios-rank-hero__fill"
+                className="zen-rank-hero__fill"
                 style={{ width: `${levelProgress}%` }}
               />
             </div>
-            <div className="ios-rank-hero__xp">
+            <div className="zen-rank-hero__xp">
               <span>{totalXp % 140} XP</span>
               <span>140 XP до следующего ранга</span>
             </div>
           </div>
 
-          <div className="ios-section-header">КАК ПОЛУЧАТЬ ОПЫТ (XP)</div>
-          <div className="ios-group">
-            <div className="ios-row">
-              <span className="ios-row__icon-box bg-rose">🍿</span>
-              <div className="ios-row__info">
-                <div className="ios-row__title">Просмотр фильма</div>
-                <div className="ios-row__sub">За каждый просмотр в плеере</div>
+          <div className="zen-section-header">КАК ПОЛУЧАТЬ ОПЫТ (XP)</div>
+          <div className="zen-group">
+            <div className="zen-row">
+              <span className="zen-row__icon-wrap"><Tv size={18} /></span>
+              <div className="zen-row__info">
+                <div className="zen-row__title">Просмотр фильма</div>
+                <div className="zen-row__sub">За каждый просмотр в плеере</div>
               </div>
-              <span className="ios-row__val text-accent">+45 XP</span>
+              <span className="zen-row__val text-accent">+45 XP</span>
             </div>
-            <div className="ios-row">
-              <span className="ios-row__icon-box bg-amber">⭐</span>
-              <div className="ios-row__info">
-                <div className="ios-row__title">Добавление в Избранное</div>
-                <div className="ios-row__sub">За сохранение фильма в коллекцию</div>
+            <div className="zen-row">
+              <span className="zen-row__icon-wrap"><Star size={18} /></span>
+              <div className="zen-row__info">
+                <div className="zen-row__title">Добавление в Избранное</div>
+                <div className="zen-row__sub">За сохранение фильма в коллекцию</div>
               </div>
-              <span className="ios-row__val text-accent">+30 XP</span>
+              <span className="zen-row__val text-accent">+30 XP</span>
             </div>
-            <div className="ios-row">
-              <span className="ios-row__icon-box bg-emerald">📖</span>
-              <div className="ios-row__info">
-                <div className="ios-row__title">Запись в Кино-Дневник</div>
-                <div className="ios-row__sub">За оценку и статус релиза</div>
+            <div className="zen-row">
+              <span className="zen-row__icon-wrap"><BookOpen size={18} /></span>
+              <div className="zen-row__info">
+                <div className="zen-row__title">Запись в Кино-Дневник</div>
+                <div className="zen-row__sub">За оценку и статус релиза</div>
               </div>
-              <span className="ios-row__val text-accent">+25 XP</span>
+              <span className="zen-row__val text-accent">+25 XP</span>
             </div>
-            <div className="ios-row">
-              <span className="ios-row__icon-box bg-purple">👑</span>
-              <div className="ios-row__info">
-                <div className="ios-row__title">Статус ZENOVA PRO</div>
-                <div className="ios-row__sub">Ежемесячный бонус подписчика</div>
+            <div className="zen-row">
+              <span className="zen-row__icon-wrap"><Crown size={18} /></span>
+              <div className="zen-row__info">
+                <div className="zen-row__title">Статус ZENOVA PRO</div>
+                <div className="zen-row__sub">Ежемесячный бонус подписчика</div>
               </div>
-              <span className="ios-row__val text-accent">+250 XP</span>
+              <span className="zen-row__val text-accent">+250 XP</span>
             </div>
           </div>
 
-          <div className="ios-section-header">РЕЙТИНГОВЫЕ ПРИВИЛЕГИИ</div>
-          <div className="ios-tiers">
-            <div className={`ios-tier ${cineLevel >= 1 ? 'unlocked' : ''}`}>
-              <div className="ios-tier__head">
-                <span className="ios-tier__lvl">1–5 LVL</span>
-                <span className="ios-tier__name">Кинолюбитель</span>
+          <div className="zen-section-header">РЕЙТИНГОВЫЕ ПРИВИЛЕГИИ</div>
+          <div className="zen-tiers">
+            <div className={`zen-tier ${cineLevel >= 1 ? 'unlocked' : ''}`}>
+              <div className="zen-tier__head">
+                <span className="zen-tier__lvl">1–5 LVL</span>
+                <span className="zen-tier__name">Кинолюбитель</span>
               </div>
-              <p className="ios-tier__desc">Базовый HD доступ, сохранение в облако Telegram и синхронизация.</p>
+              <p className="zen-tier__desc">Базовый HD доступ, сохранение в облако Telegram и синхронизация.</p>
             </div>
 
-            <div className={`ios-tier ${cineLevel >= 6 ? 'unlocked' : ''}`}>
-              <div className="ios-tier__head">
-                <span className="ios-tier__lvl">6–12 LVL</span>
-                <span className="ios-tier__name">Синефил</span>
+            <div className={`zen-tier ${cineLevel >= 6 ? 'unlocked' : ''}`}>
+              <div className="zen-tier__head">
+                <span className="zen-tier__lvl">6–12 LVL</span>
+                <span className="zen-tier__name">Синефил</span>
               </div>
-              <p className="ios-tier__desc">Кастомный неоновый градиент никнейма, эксклюзивные кино-темы профиля.</p>
+              <p className="zen-tier__desc">Кастомный неоновый градиент никнейма, эксклюзивные кино-темы профиля.</p>
             </div>
 
-            <div className={`ios-tier ${cineLevel >= 13 ? 'unlocked' : ''}`}>
-              <div className="ios-tier__head">
-                <span className="ios-tier__lvl">13–20 LVL</span>
-                <span className="ios-tier__name">Кинокритик</span>
+            <div className={`zen-tier ${cineLevel >= 13 ? 'unlocked' : ''}`}>
+              <div className="zen-tier__head">
+                <span className="zen-tier__lvl">13–20 LVL</span>
+                <span className="zen-tier__name">Кинокритик</span>
               </div>
-              <p className="ios-tier__desc">Золотой значок Критика в дневнике, автовыбор высшего битрейта (4K Ultra HD).</p>
+              <p className="zen-tier__desc">Золотой значок Критика в дневнике, автовыбор высшего битрейта (4K Ultra HD).</p>
             </div>
 
-            <div className={`ios-tier ${cineLevel >= 21 ? 'unlocked' : ''}`}>
-              <div className="ios-tier__head">
-                <span className="ios-tier__lvl">21–30 LVL</span>
-                <span className="ios-tier__name">Легенда Кино</span>
+            <div className={`zen-tier ${cineLevel >= 21 ? 'unlocked' : ''}`}>
+              <div className="zen-tier__head">
+                <span className="zen-tier__lvl">21–30 LVL</span>
+                <span className="zen-tier__name">Легенда Кино</span>
               </div>
-              <p className="ios-tier__desc">Перламутровая рамка аватара, бессрочный статус VIP амбассадора ZENOVA.</p>
+              <p className="zen-tier__desc">Перламутровая рамка аватара, бессрочный статус VIP амбассадора ZENOVA.</p>
             </div>
           </div>
         </div>
@@ -347,55 +358,59 @@ export const ProfilePage: React.FC = () => {
   /* ══════════════ ПОДСТРАНИЦА: ПРИВИЛЕГИИ PRO ══════════════ */
   if (subPage === 'pro') {
     return (
-      <div className="ios-subpage">
-        <header className="ios-subpage__nav">
+      <div className="zen-subpage">
+        <header className="zen-subpage__nav">
           <button
             type="button"
-            className="ios-subpage__back"
+            className="zen-subpage__back"
             onClick={() => {
               haptic('light');
               setSubPage(null);
             }}
           >
-            ‹ Назад
+            <ChevronLeft size={18} />
+            <span>Назад</span>
           </button>
-          <h1 className="ios-subpage__title">ZENOVA PRO</h1>
-          <div className="ios-subpage__action-space" />
+          <h1 className="zen-subpage__title">ZENOVA PRO</h1>
+          <div className="zen-subpage__action-space" />
         </header>
 
-        <div className="ios-subpage__body">
-          <div className="ios-pro-card">
-            <span className="ios-pro-card__icon">👑</span>
-            <div className="ios-pro-card__status">
+        <div className="zen-subpage__body">
+          <div className="zen-pro-card">
+            <div className="zen-pro-card__beam" />
+            <div className="zen-pro-card__icon-wrap">
+              <Crown size={32} />
+            </div>
+            <div className="zen-pro-card__status">
               {effectivePremium ? 'ПОДПИСКА PRO АКТИВНА' : 'БАЗОВЫЙ ДОСТУП'}
             </div>
-            <h2 className="ios-pro-card__title">Премиум возможности</h2>
-            <p className="ios-pro-card__desc">
-              Максимальное качество видео, пространственный звук и полный комфорт без ограничений.
+            <h2 className="zen-pro-card__title">Премиум возможности</h2>
+            <p className="zen-pro-card__desc">
+              Максимальное качество видео, пространственный звук и полный кинематографичный комфорт.
             </p>
 
-            <div className="ios-pro-features">
-              <div className="ios-pro-feat">
-                <span className="ios-pro-feat__check">✓</span>
+            <div className="zen-pro-features">
+              <div className="zen-pro-feat">
+                <Check size={16} className="zen-pro-feat__check" />
                 <span>4K Ultra HD & Dolby Atmos</span>
               </div>
-              <div className="ios-pro-feat">
-                <span className="ios-pro-feat__check">✓</span>
+              <div className="zen-pro-feat">
+                <Check size={16} className="zen-pro-feat__check" />
                 <span>Полное отсутствие рекламы</span>
               </div>
-              <div className="ios-pro-feat">
-                <span className="ios-pro-feat__check">✓</span>
+              <div className="zen-pro-feat">
+                <Check size={16} className="zen-pro-feat__check" />
                 <span>Стриминг полных треков в музыке</span>
               </div>
-              <div className="ios-pro-feat">
-                <span className="ios-pro-feat__check">✓</span>
-                <span>Эксклюзивные темы и атмосфера</span>
+              <div className="zen-pro-feat">
+                <Check size={16} className="zen-pro-feat__check" />
+                <span>Эксклюзивные сезонные темы и атмосфера</span>
               </div>
             </div>
 
             <button
               type="button"
-              className="ios-btn-primary"
+              className="zen-btn-primary"
               onClick={() => {
                 haptic('medium');
                 navigate('/premium');
@@ -409,79 +424,87 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  /* ══════════════ ПОДСТРАНИЦА: АТМОСФЕРА И СЕВЕРНОЕ СИЯНИЕ ══════════════ */
+  /* ══════════════ ПОДСТРАНИЦА: АТМОСФЕРА И ТЕМЫ ══════════════ */
   if (subPage === 'atmosphere') {
     return (
-      <div className="ios-subpage">
-        <header className="ios-subpage__nav">
+      <div className="zen-subpage">
+        <header className="zen-subpage__nav">
           <button
             type="button"
-            className="ios-subpage__back"
+            className="zen-subpage__back"
             onClick={() => {
               haptic('light');
               setSubPage(null);
             }}
           >
-            ‹ Назад
+            <ChevronLeft size={18} />
+            <span>Назад</span>
           </button>
-          <h1 className="ios-subpage__title">Атмосфера</h1>
-          <div className="ios-subpage__action-space" />
+          <h1 className="zen-subpage__title">Атмосфера и темы</h1>
+          <div className="zen-subpage__action-space" />
         </header>
 
-        <div className="ios-subpage__body">
-          <div className="ios-section-header">ВИЗУАЛЬНЫЕ ЭФФЕКТЫ</div>
-          <div className="ios-group">
-            <div className="ios-row">
-              <span className="ios-row__icon-box bg-emerald">🌌</span>
-              <div className="ios-row__info">
-                <div className="ios-row__title">Северное Сияние</div>
-                <div className="ios-row__sub">Мягкие переливы авроры вверху экрана</div>
+        <div className="zen-subpage__body">
+          <div className="zen-section-header">ВИЗУАЛЬНЫЕ ЭФФЕКТЫ</div>
+          <div className="zen-group">
+            <div className="zen-row">
+              <span className="zen-row__icon-wrap"><Sparkles size={18} /></span>
+              <div className="zen-row__info">
+                <div className="zen-row__title">Северное Сияние</div>
+                <div className="zen-row__sub">Плавные переливы полярной авроры вверху экрана</div>
               </div>
               <button
                 type="button"
-                className={`ios-toggle ${auroraOff ? '' : 'on'}`}
+                className={`zen-toggle ${auroraOff ? '' : 'on'}`}
                 onClick={toggleAurora}
               >
-                <span className="ios-toggle__thumb" />
+                <span className="zen-toggle__thumb" />
               </button>
             </div>
 
-            <div className="ios-row">
-              <span className="ios-row__icon-box bg-cyan">❄️</span>
-              <div className="ios-row__info">
-                <div className="ios-row__title">Сезонные частицы</div>
-                <div className="ios-row__sub">Снегопад, лепестки сакуры, листья</div>
+            <div className="zen-row">
+              <span className="zen-row__icon-wrap"><Flame size={18} /></span>
+              <div className="zen-row__info">
+                <div className="zen-row__title">Сезонные частицы</div>
+                <div className="zen-row__sub">Снегопад, лепестки сакуры, листопад</div>
               </div>
               <button
                 type="button"
-                className={`ios-toggle ${fxOff ? '' : 'on'}`}
+                className={`zen-toggle ${fxOff ? '' : 'on'}`}
                 onClick={toggleFx}
               >
-                <span className="ios-toggle__thumb" />
+                <span className="zen-toggle__thumb" />
               </button>
             </div>
           </div>
 
-          <div className="ios-section-header">СЕЗОННЫЕ ТЕМЫ</div>
-          <div className="ios-group">
-            {SEASONS.map((s) => (
-              <div
-                key={s.id}
-                className="ios-row clickable"
-                onClick={() => switchSeason(s.id)}
-              >
-                <span className="ios-row__icon-box" style={{ background: `${s.dotColor}22`, color: s.dotColor }}>
-                  {s.emoji}
-                </span>
-                <div className="ios-row__info">
-                  <div className="ios-row__title">{s.name}</div>
-                  <div className="ios-row__sub">{s.sub}</div>
+          <div className="zen-section-header">СЕЗОННЫЕ ТЕМЫ</div>
+          <div className="zen-group">
+            {SEASONS.map((s) => {
+              const isSelected =
+                (seasonState.auto && s.id === 'auto') ||
+                (!seasonState.auto && seasonState.season.id === s.id);
+              return (
+                <div
+                  key={s.id}
+                  className="zen-row clickable"
+                  onClick={() => switchSeason(s.id)}
+                >
+                  <span
+                    className="zen-season-dot"
+                    style={{
+                      background: s.dotColor,
+                      boxShadow: `0 0 10px ${s.dotColor}88`,
+                    }}
+                  />
+                  <div className="zen-row__info">
+                    <div className="zen-row__title">{s.name}</div>
+                    <div className="zen-row__sub">{s.sub}</div>
+                  </div>
+                  {isSelected && <Check size={18} className="zen-check" />}
                 </div>
-                {(seasonState.auto && s.id === 'auto') || (!seasonState.auto && seasonState.season.id === s.id) ? (
-                  <span className="ios-check">✓</span>
-                ) : null}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -491,23 +514,24 @@ export const ProfilePage: React.FC = () => {
   /* ══════════════ ПОДСТРАНИЦА: ИСТОРИЯ ══════════════ */
   if (subPage === 'history') {
     return (
-      <div className="ios-subpage">
-        <header className="ios-subpage__nav">
+      <div className="zen-subpage">
+        <header className="zen-subpage__nav">
           <button
             type="button"
-            className="ios-subpage__back"
+            className="zen-subpage__back"
             onClick={() => {
               haptic('light');
               setSubPage(null);
             }}
           >
-            ‹ Назад
+            <ChevronLeft size={18} />
+            <span>Назад</span>
           </button>
-          <h1 className="ios-subpage__title">История просмотров</h1>
+          <h1 className="zen-subpage__title">История просмотров</h1>
           {watchHistory.length > 0 && (
             <button
               type="button"
-              className="ios-subpage__action"
+              className="zen-subpage__action"
               onClick={() => {
                 haptic('heavy');
                 clearHistory();
@@ -518,21 +542,21 @@ export const ProfilePage: React.FC = () => {
           )}
         </header>
 
-        <div className="ios-subpage__body">
+        <div className="zen-subpage__body">
           {watchHistory.length === 0 ? (
-            <div className="ios-empty-state">
-              <span className="ios-empty-state__icon">🍿</span>
-              <h3 className="ios-empty-state__title">История пуста</h3>
-              <p className="ios-empty-state__text">Здесь будут отображаться фильмы, которые вы начали смотреть.</p>
+            <div className="zen-empty-state">
+              <span className="zen-empty-state__icon"><HistoryIcon size={36} /></span>
+              <h3 className="zen-empty-state__title">История пуста</h3>
+              <p className="zen-empty-state__text">Здесь будут отображаться фильмы, которые вы начали смотреть.</p>
             </div>
           ) : (
-            <div className="ios-group">
+            <div className="zen-group">
               {watchHistory.map((item) => {
                 const m = item.movie;
                 return (
                   <div
                     key={m.id}
-                    className="ios-row clickable"
+                    className="zen-row clickable"
                     onClick={() => {
                       haptic('light');
                       navigate(`/movie/${m.id}`);
@@ -541,13 +565,13 @@ export const ProfilePage: React.FC = () => {
                     <img
                       src={m.poster_path}
                       alt=""
-                      style={{ width: 36, height: 50, borderRadius: 6, objectFit: 'cover' }}
+                      className="zen-history-poster"
                     />
-                    <div className="ios-row__info">
-                      <div className="ios-row__title">{m.title}</div>
-                      <div className="ios-row__sub">{m.release_date?.slice(0, 4) || 'Кино'}</div>
+                    <div className="zen-row__info">
+                      <div className="zen-row__title">{m.title}</div>
+                      <div className="zen-row__sub">{m.release_date?.slice(0, 4) || 'Кино'}</div>
                     </div>
-                    <span className="ios-chevron">›</span>
+                    <ChevronRight size={16} className="zen-chevron" />
                   </div>
                 );
               })}
@@ -558,16 +582,16 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  /* ══════════════ ГЛАВНЫЙ ЭКРАН ПРОФИЛЯ (iOS Settings Layout) ══════════════ */
+  /* ══════════════ ГЛАВНЫЙ ЭКРАН ПРОФИЛЯ (Obsidian Dock Layout) ══════════════ */
   return (
-    <div className="ios-profile-page page">
+    <div className="zen-profile-page page">
       {/* Шапка профиля */}
-      <header className="ios-header">
-        <h1 className="ios-header__title">Профиль</h1>
+      <header className="zen-header">
+        <h1 className="zen-header__title">Профиль</h1>
         {isAdminUser && (
           <button
             type="button"
-            className="ios-admin-btn"
+            className="zen-admin-btn"
             onClick={() => navigate('/admin')}
           >
             Админка
@@ -576,207 +600,207 @@ export const ProfilePage: React.FC = () => {
       </header>
 
       {/* Карточка пользователя с рангом */}
-      <div className="ios-user-card" onClick={() => setSubPage('rank')}>
-        <div className="ios-user-card__top">
-          <div className="ios-user-avatar-wrap">
-            <div className="ios-user-avatar-aura" />
-            <div className="ios-user-avatar">
+      <div className="zen-user-card" onClick={() => setSubPage('rank')}>
+        <div className="zen-user-card__beam" />
+        <div className="zen-user-card__top">
+          <div className="zen-user-avatar-wrap">
+            <div className="zen-user-avatar">
               {user?.photo_url ? (
-                <img src={user.photo_url} alt={displayName} className="ios-user-avatar__img" />
+                <img src={user.photo_url} alt={displayName} className="zen-user-avatar__img" />
               ) : (
                 <img
                   src={seasonState.season.id === 'winter' ? '/zenova-mask-winter.png' : '/zenova-mask-default.png'}
                   alt=""
-                  className="ios-user-avatar__mask"
+                  className="zen-user-avatar__mask"
                 />
               )}
             </div>
-            {effectivePremium && <span className="ios-user-pro-badge">PRO</span>}
-            <span className="ios-user-lvl-pill">LVL {cineLevel}</span>
+            {effectivePremium && <span className="zen-user-pro-badge">PRO</span>}
+            <span className="zen-user-lvl-pill">LVL {cineLevel}</span>
           </div>
 
-          <div className="ios-user-info">
-            <div className="ios-user-kicker">РЕЗИДЕНТ ZENOVA</div>
-            <h2 className="ios-user-name">{displayName}</h2>
-            <div className="ios-user-meta">
-              <span className="ios-user-handle">{username}</span>
-              <span className="ios-user-rank-chip">{rankTitle}</span>
+          <div className="zen-user-info">
+            <div className="zen-user-kicker">РЕЗИДЕНТ ZENOVA</div>
+            <h2 className="zen-user-name">{displayName}</h2>
+            <div className="zen-user-meta">
+              <span className="zen-user-handle">{username}</span>
+              <span className="zen-user-rank-chip">{rankTitle}</span>
             </div>
           </div>
-          <span className="ios-chevron">›</span>
+          <ChevronRight size={18} className="zen-chevron" />
         </div>
 
         {/* Шкала ранга */}
-        <div className="ios-user-rank-bar">
-          <div className="ios-user-rank-track">
+        <div className="zen-user-rank-bar">
+          <div className="zen-user-rank-track">
             <div
-              className="ios-user-rank-fill"
+              className="zen-user-rank-fill"
               style={{ width: `${levelProgress}%` }}
             />
           </div>
-          <div className="ios-user-rank-labels">
-            <span className="ios-user-rank-title">Ранг: {rankTitle}</span>
-            <span className="ios-user-rank-pts">{totalXp % 140} / 140 XP</span>
+          <div className="zen-user-rank-labels">
+            <span className="zen-user-rank-title">Ранг: {rankTitle}</span>
+            <span className="zen-user-rank-pts">{totalXp % 140} / 140 XP</span>
           </div>
         </div>
       </div>
 
       {/* ── ГРУППА 1: МОЁ КИНО ── */}
-      <div className="ios-section-header">МОЁ КИНО</div>
-      <div className="ios-group">
+      <div className="zen-section-header">МОЁ КИНО</div>
+      <div className="zen-group">
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             setSubPage('diary');
           }}
         >
-          <span className="ios-row__icon-box bg-purple">📖</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">Кино-Дневник & Оценки</div>
-            <div className="ios-row__sub">Смотрю, в планах, просмотрено</div>
+          <span className="zen-row__icon-wrap">
+            <BookOpen size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">Кино-Дневник & Оценки</div>
+            <div className="zen-row__sub">Смотрю, в планах, просмотрено</div>
           </div>
-          <span className="ios-row__val">{trackedCount > 0 ? `${trackedCount} записей` : 'Пусто'}</span>
-          <span className="ios-chevron">›</span>
+          <span className="zen-row__val">{trackedCount > 0 ? `${trackedCount}` : '—'}</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
 
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             setSubPage('history');
           }}
         >
-          <span className="ios-row__icon-box bg-amber">🍿</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">История просмотров</div>
-            <div className="ios-row__sub">Недавно открытые фильмы</div>
+          <span className="zen-row__icon-wrap">
+            <HistoryIcon size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">История просмотров</div>
+            <div className="zen-row__sub">Недавно открытые фильмы</div>
           </div>
-          <span className="ios-row__val">{watchHistory.length > 0 ? `${watchHistory.length}` : '—'}</span>
-          <span className="ios-chevron">›</span>
+          <span className="zen-row__val">{watchHistory.length > 0 ? `${watchHistory.length}` : '—'}</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
 
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             navigate('/favorites');
           }}
         >
-          <span className="ios-row__icon-box bg-rose">⭐</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">Избранное & Закладки</div>
-            <div className="ios-row__sub">Сохранённые фильмы</div>
+          <span className="zen-row__icon-wrap">
+            <Star size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">Избранное & Закладки</div>
+            <div className="zen-row__sub">Сохранённые фильмы</div>
           </div>
-          <span className="ios-row__val">{favorites.length > 0 ? `${favorites.length}` : '—'}</span>
-          <span className="ios-chevron">›</span>
+          <span className="zen-row__val">{favorites.length > 0 ? `${favorites.length}` : '—'}</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
       </div>
 
-      {/* ── ГРУППА 2: ПОДПИСКА & РАНГ ── */}
-      <div className="ios-section-header">ПРИВИЛЕГИИ</div>
-      <div className="ios-group">
+      {/* ── ГРУППА 2: ПРИВИЛЕГИИ ── */}
+      <div className="zen-section-header">ПРИВИЛЕГИИ</div>
+      <div className="zen-group">
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             setSubPage('pro');
           }}
         >
-          <span className="ios-row__icon-box bg-gold">👑</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">ZENOVA PRO</div>
-            <div className="ios-row__sub">4K HDR, Dolby Atmos, без рекламы</div>
+          <span className="zen-row__icon-wrap zen-glow-gold">
+            <Crown size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">ZENOVA PRO</div>
+            <div className="zen-row__sub">4K HDR, Dolby Atmos, без рекламы</div>
           </div>
-          <span className={`ios-row__val ${effectivePremium ? 'text-green' : 'text-accent'}`}>
+          <span className={`zen-row__val ${effectivePremium ? 'text-green' : 'text-gold'}`}>
             {effectivePremium ? 'Активен' : 'Подключить'}
           </span>
-          <span className="ios-chevron">›</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
 
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             setSubPage('rank');
           }}
         >
-          <span className="ios-row__icon-box bg-blue">🏆</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">Рейтинговые Награды</div>
-            <div className="ios-row__sub">Как получать опыт и ранги</div>
+          <span className="zen-row__icon-wrap">
+            <Trophy size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">Рейтинговые Награды</div>
+            <div className="zen-row__sub">Как получать опыт и ранги</div>
           </div>
-          <span className="ios-row__val">{rankTitle}</span>
-          <span className="ios-chevron">›</span>
+          <span className="zen-row__val">{rankTitle}</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
       </div>
 
-      {/* ── ГРУППА 3: ВИЗУАЛ & АТМОСФЕРА ── */}
-      <div className="ios-section-header">ПЕРСОНАЛИЗАЦИЯ</div>
-      <div className="ios-group">
+      {/* ── ГРУППА 3: АТМОСФЕРА И ТЕМЫ (БЕЗ СВЕТЛОЙ ТЕМЫ) ── */}
+      <div className="zen-section-header">ПЕРСОНАЛИЗАЦИЯ</div>
+      <div className="zen-group">
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             setSubPage('atmosphere');
           }}
         >
-          <span className="ios-row__icon-box bg-emerald">🌌</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">Северное Сияние & Сезоны</div>
-            <div className="ios-row__sub">Атмосферные эффекты приложения</div>
+          <span className="zen-row__icon-wrap zen-glow-cyan">
+            <Sparkles size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">Атмосфера и темы</div>
+            <div className="zen-row__sub">Северное сияние, снег и сезоны</div>
           </div>
-          <span className="ios-row__val">{auroraOff ? 'Скрыто' : 'Активно'}</span>
-          <span className="ios-chevron">›</span>
-        </div>
-
-        <div
-          className="ios-row clickable"
-          onClick={() => {
-            haptic('light');
-            toggleTheme();
-          }}
-        >
-          <span className="ios-row__icon-box bg-indigo">🎨</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">Тема оформления</div>
-            <div className="ios-row__sub">Светлый / Тёмный режим</div>
-          </div>
-          <span className="ios-row__val">{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
-          <span className="ios-chevron">›</span>
+          <span className="zen-row__val">{auroraOff ? 'Сияние выкл' : 'Активно'}</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
       </div>
 
       {/* ── ГРУППА 4: ИНФОРМАЦИЯ & ВЫХОД ── */}
-      <div className="ios-section-header">ПРИЛОЖЕНИЕ</div>
-      <div className="ios-group">
+      <div className="zen-section-header">ПРИЛОЖЕНИЕ</div>
+      <div className="zen-group">
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('light');
             setShowRules(true);
           }}
         >
-          <span className="ios-row__icon-box bg-slate">📜</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title">Правила и соглашение</div>
-            <div className="ios-row__sub">Пользовательские условия</div>
+          <span className="zen-row__icon-wrap">
+            <ShieldCheck size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title">Правила и соглашение</div>
+            <div className="zen-row__sub">Пользовательские условия</div>
           </div>
-          <span className="ios-chevron">›</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
 
         <div
-          className="ios-row clickable"
+          className="zen-row clickable"
           onClick={() => {
             haptic('medium');
             closeApp();
           }}
         >
-          <span className="ios-row__icon-box bg-red">✕</span>
-          <div className="ios-row__info">
-            <div className="ios-row__title text-danger">Закрыть ZENOVA</div>
+          <span className="zen-row__icon-wrap text-danger">
+            <LogOut size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title text-danger">Закрыть ZENOVA</div>
           </div>
-          <span className="ios-chevron">›</span>
+          <ChevronRight size={16} className="zen-chevron" />
         </div>
       </div>
 
