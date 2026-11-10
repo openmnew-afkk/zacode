@@ -7,6 +7,7 @@ import type { Movie, MovieDetail, WatchStatus, WatchOption } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { getStoredSeason } from '../services/seasons';
+import { captureSoundtrackFromMovie } from '../services/soundtracks';
 import AgeGateModal, { isAgeVerified } from '../components/AgeGateModal';
 import './MovieDetailPage.css';
 
@@ -464,6 +465,12 @@ const MovieDetailPage: React.FC = () => {
     }));
     setWatchIdx(0);
     setShowWatch(true);
+    /* 🎵 Саундтрек фильма автоматически попадает в плейлист «Услышано в кино» */
+    if (movie) {
+      captureSoundtrackFromMovie(movie).then((entry) => {
+        if (entry) showTipToast(`🎵 Саундтрек «${movie.title}» сохранён в «Услышано в кино»`);
+      });
+    }
   };
 
   const handleWatchClick = () => {
