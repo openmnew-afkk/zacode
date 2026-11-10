@@ -1,0 +1,153 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  🌌 NorthernLights.css — Атмосферное Северное Сияние ZENOVA
+ *  - Мягкие эфирные изумрудные, лазурные и аметистовые световые ленты в небе
+ *  - Не наезжает на иконки и кнопки
+ *  - Нулевая нагрузка на процессор (чистый GPU-рендеринг через CSS keyframes)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.northern-lights {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 95px;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+  overflow: hidden;
+  transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.northern-lights--hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.northern-lights__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
+}
+
+/* 1-й слой: Изумрудная волна сияния */
+.northern-lights__ribbon--emerald {
+  position: absolute;
+  top: -30px;
+  left: -20%;
+  width: 140%;
+  height: 90px;
+  background: radial-gradient(ellipse 65% 45% at 45% 40%, rgba(16, 185, 129, 0.42) 0%, rgba(5, 150, 105, 0.25) 45%, transparent 75%);
+  filter: blur(24px);
+  mix-blend-mode: screen;
+  animation: auroraFlowEmerald 11s ease-in-out infinite alternate;
+}
+
+/* 2-й слой: Лазурно-бирюзовая волна */
+.northern-lights__ribbon--cyan {
+  position: absolute;
+  top: -25px;
+  left: -10%;
+  width: 130%;
+  height: 85px;
+  background: radial-gradient(ellipse 55% 40% at 60% 45%, rgba(6, 182, 212, 0.38) 0%, rgba(56, 189, 248, 0.2) 50%, transparent 80%);
+  filter: blur(28px);
+  mix-blend-mode: screen;
+  animation: auroraFlowCyan 14s ease-in-out infinite alternate;
+}
+
+/* 3-й слой: Фиолетово-аметистовый перелив */
+.northern-lights__ribbon--violet {
+  position: absolute;
+  top: -35px;
+  left: -15%;
+  width: 135%;
+  height: 95px;
+  background: radial-gradient(ellipse 60% 50% at 30% 35%, rgba(168, 85, 247, 0.32) 0%, rgba(217, 70, 239, 0.18) 50%, transparent 75%);
+  filter: blur(32px);
+  mix-blend-mode: screen;
+  animation: auroraFlowViolet 13s ease-in-out infinite alternate;
+}
+
+/* Мягкие переливающиеся лучи северного сияния */
+.northern-lights__curtain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(16, 185, 129, 0.08) 15px,
+    transparent 30px,
+    rgba(6, 182, 212, 0.07) 50px,
+    transparent 70px,
+    rgba(168, 85, 247, 0.06) 90px,
+    transparent 110px
+  );
+  filter: blur(12px);
+  mix-blend-mode: screen;
+  animation: auroraCurtainWave 16s ease-in-out infinite alternate;
+}
+
+@keyframes auroraFlowEmerald {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(-1deg);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(6%, -8px, 0) scale(1.08) rotate(1deg);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(-5%, 4px, 0) scale(0.96) rotate(-0.5deg);
+    opacity: 0.65;
+  }
+}
+
+@keyframes auroraFlowCyan {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(1deg);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate3d(-7%, 6px, 0) scale(1.1) rotate(-1deg);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate3d(5%, -5px, 0) scale(0.98) rotate(0.8deg);
+    opacity: 0.6;
+  }
+}
+
+@keyframes auroraFlowViolet {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.98);
+    opacity: 0.45;
+  }
+  50% {
+    transform: translate3d(4%, 7px, 0) scale(1.05);
+    opacity: 0.75;
+  }
+  100% {
+    transform: translate3d(-6%, -6px, 0) scale(1.02);
+    opacity: 0.5;
+  }
+}
+
+@keyframes auroraCurtainWave {
+  0% {
+    transform: translateX(0);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateX(25px);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(-20px);
+    opacity: 0.55;
+  }
+}

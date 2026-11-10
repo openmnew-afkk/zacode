@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getKeywordCollection, CURATED_WINTER_MOVIES } from '../api/catalog';
 import type { Movie } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
+import FlappyChristmasGame from '../components/FlappyChristmasGame';
 import './NewYearPage.css';
 
 interface Countdown {
@@ -50,6 +51,7 @@ const NewYearPage: React.FC = () => {
 
   const [roulettePick, setRoulettePick] = useState<Movie | null>(null);
   const [spinning, setSpinning] = useState(false);
+  const [showGame, setShowGame] = useState(false);
 
   useEffect(() => {
     const timer = window.setInterval(() => setCountdown(getCountdown()), 1000);
@@ -177,6 +179,27 @@ const NewYearPage: React.FC = () => {
               <span>{unit.label}</span>
             </div>
           ))}
+        </div>
+
+        {/* Интерактивная игра-марафон */}
+        <div
+          className="ny-game-banner"
+          onClick={() => {
+            haptic('medium');
+            setShowGame(true);
+          }}
+        >
+          <div className="ny-game-banner__icon">🌲🦌</div>
+          <div className="ny-game-banner__content">
+            <span className="ny-game-banner__badge">ЗИМНЯЯ ИГРА</span>
+            <div className="ny-game-banner__title">Ёлочный Прыгун</div>
+            <div className="ny-game-banner__desc">
+              Перепрыгни 30 ёлочек и получи <b>3 дня ZENOVA PRO</b>!
+            </div>
+          </div>
+          <button type="button" className="ny-game-banner__btn">
+            Играть ›
+          </button>
         </div>
 
         {/* Лаконичные кнопки */}
@@ -316,6 +339,9 @@ const NewYearPage: React.FC = () => {
           </>
         )}
       </section>
+
+      {/* Зимняя игра «Ёлочный Прыгун» */}
+      <FlappyChristmasGame isOpen={showGame} onClose={() => setShowGame(false)} />
     </main>
   );
 };

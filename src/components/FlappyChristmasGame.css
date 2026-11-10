@@ -1,0 +1,195 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  🎄 FlappyChristmasGame.css — Зимняя мини-игра «Ёлочный Прыгун»
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.flappy-game-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(6, 5, 10, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: flappyFadeIn 0.25s ease;
+}
+
+@keyframes flappyFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.flappy-game-card {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  background: #0f0e16;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.85),
+    0 0 40px rgba(16, 185, 129, 0.2);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.flappy-game-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.flappy-game-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.flappy-game-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flappy-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: linear-gradient(180deg, #090a14 0%, #111428 60%, #1a1e38 100%);
+  overflow: hidden;
+  touch-action: manipulation;
+}
+
+.flappy-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.flappy-score-badge {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(6, 6, 12, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  color: #ffd56b;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.flappy-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(8, 7, 14, 0.88);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  z-index: 10;
+}
+
+.flappy-overlay-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 16px rgba(255, 213, 107, 0.6));
+}
+
+.flappy-overlay-title {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.flappy-overlay-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 18px;
+}
+
+.flappy-overlay-goal {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  font-size: 11px;
+  font-weight: 750;
+  margin-bottom: 20px;
+}
+
+.flappy-btn-play {
+  padding: 12px 28px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  border: none;
+  color: #fff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.flappy-btn-play:active {
+  transform: scale(0.95);
+}
+
+.flappy-reward-box {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(225, 29, 72, 0.2) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 18px;
+  width: 100%;
+}
+
+.flappy-reward-title {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffd56b;
+  margin-bottom: 4px;
+}
+
+.flappy-reward-sub {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}

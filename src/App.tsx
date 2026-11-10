@@ -20,7 +20,7 @@ import SplashPage from './components/SplashPage';
 import GlobalMusicBar from './components/GlobalMusicBar';
 import MandatorySubModal from './components/MandatorySubModal';
 import SeasonFx from './components/SeasonFx';
-import TopGarland from './components/TopGarland';
+import NorthernLights from './components/NorthernLights';
 import { RulesModal } from './components/RulesModal';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
@@ -77,6 +77,23 @@ function App() {
     });
   }, [syncTrackedCloud]);
 
+  /* ═══ Гарантированный полноразмерный вид под телефон в Telegram WebApp ═══ */
+  useEffect(() => {
+    try {
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg) {
+        tg.ready?.();
+        tg.expand?.();
+        if (typeof tg.requestFullscreen === 'function') {
+          tg.requestFullscreen();
+        }
+        if (typeof tg.disableVerticalSwipes === 'function') {
+          tg.disableVerticalSwipes();
+        }
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.classList.remove('dark', 'light');
@@ -111,7 +128,7 @@ function App() {
     <div className="app-root">
       {/* Сезонные эффекты: снегопад с сугробом, лепестки сакуры, листья, светлячки */}
       {season.id !== 'none' && <SeasonFx season={season.id} />}
-      <TopGarland season={season.id} />
+      <NorthernLights season={season.id} />
 
       {showSplash && (
         <SplashPage

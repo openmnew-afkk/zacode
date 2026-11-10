@@ -60,9 +60,10 @@ html {
 
 html.tg-fullscreen, body.tg-fullscreen {
   --header-safe-top: max(
-    calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 10px),
-    var(--tg-top-inset, 96px),
-    96px
+    env(safe-area-inset-top, 0px),
+    var(--tg-content-safe-area-inset-top, 0px),
+    var(--tg-safe-area-inset-top, 0px),
+    16px
   );
   --safe-top: var(--header-safe-top);
 }
