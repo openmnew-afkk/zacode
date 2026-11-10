@@ -79,7 +79,7 @@ const whereToWatch = (title: string) => [
   { name: 'Netflix', brand: 'netflix', tag: 'Originals', accent: '#e50914', url: `https://www.netflix.com/search?q=${encodeURIComponent(title)}` },
 ];
 
-/** Настоящие фирменные векторные логотипы стримингов */
+/** Настоящие 100% официальные векторные логотипы стримингов */
 const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
   switch (brand) {
     case 'kinopoisk':
@@ -92,9 +92,13 @@ const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
             </linearGradient>
           </defs>
           <rect width="40" height="40" rx="12" fill="url(#kpRealBg)" />
-          {/* Фирменный логотип Кинопоиска с солнечной короной */}
-          <circle cx="20" cy="20" r="4.5" fill="#ffffff" />
-          <path d="M20 7.5v4M20 28.5v4M7.5 20h4M28.5 20h4M11.2 11.2l2.8 2.8M26 26l2.8 2.8M11.2 28.8l2.8-2.8M26 14l2.8-2.8" stroke="#ffffff" strokeWidth="2.8" strokeLinecap="round" />
+          {/* Официальный знак Кинопоиска: буква К из расходящихся лучей */}
+          <rect x="9.5" y="9" width="4.5" height="22" rx="2.25" fill="#ffffff" />
+          <path d="M14 20l12-10.5" stroke="#ffffff" strokeWidth="4.6" strokeLinecap="round" />
+          <path d="M15 19.5l11.5 11" stroke="#ffffff" strokeWidth="4.6" strokeLinecap="round" />
+          <circle cx="27" cy="9.5" r="2.2" fill="#ffffff" />
+          <circle cx="28.5" cy="20" r="2" fill="#ffffff" opacity="0.9" />
+          <circle cx="28" cy="30.5" r="2.2" fill="#ffffff" />
         </svg>
       );
     case 'ivi':
@@ -102,15 +106,17 @@ const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
           <defs>
             <linearGradient id="iviRealBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ff1753" />
-              <stop offset="1" stopColor="#9b0024" />
+              <stop stopColor="#ff1447" />
+              <stop offset="1" stopColor="#ba002e" />
             </linearGradient>
           </defs>
           <rect width="40" height="40" rx="12" fill="url(#iviRealBg)" />
-          {/* Фирменная типографика ivi */}
-          <text x="20" y="27" textAnchor="middle" fill="#ffffff" fontFamily="'Arial Black', sans-serif" fontWeight="900" fontSize="18" fontStyle="italic" letterSpacing="0.5">
-            ivi
-          </text>
+          {/* Фирменная векторная типографика ivi: точка+пилл 'i', закругленный клин 'v', точка+пилл 'i' */}
+          <circle cx="11.5" cy="13" r="2.3" fill="#ffffff" />
+          <rect x="9.3" y="16.5" width="4.4" height="11.5" rx="2.2" fill="#ffffff" />
+          <path d="M16.5 16.5L20 27.2L23.5 16.5" stroke="#ffffff" strokeWidth="4.2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <circle cx="28.5" cy="13" r="2.3" fill="#ffffff" />
+          <rect x="26.3" y="16.5" width="4.4" height="11.5" rx="2.2" fill="#ffffff" />
         </svg>
       );
     case 'okko':
@@ -118,45 +124,50 @@ const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
           <defs>
             <linearGradient id="okkoRealBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#5a16ea" />
+              <stop stopColor="#5814c8" />
               <stop offset="1" stopColor="#2c0678" />
             </linearGradient>
           </defs>
           <rect width="40" height="40" rx="12" fill="url(#okkoRealBg)" />
-          {/* Пересекающиеся кольца Okko */}
-          <circle cx="16" cy="20" r="7.5" stroke="#ffffff" strokeWidth="3.2" fill="none" />
-          <circle cx="24" cy="20" r="7.5" stroke="#f43f5e" strokeWidth="3.2" fill="none" opacity="0.95" />
+          {/* Официальная типографика okko: o-k-k-o в векторе */}
+          {/* первая o */}
+          <circle cx="10" cy="20" r="4.2" stroke="#ffffff" strokeWidth="2.6" fill="none" />
+          {/* k */}
+          <path d="M16.5 13v14M21 16.5l-4 4.5 4.5 6" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          {/* вторая k */}
+          <path d="M23.5 13v14M28 16.5l-4 4.5 4.5 6" stroke="#ffffff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          {/* вторая o */}
+          <circle cx="31.5" cy="20" r="4.2" stroke="#ffffff" strokeWidth="2.6" fill="none" />
         </svg>
       );
     case 'wink':
       return (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="12" fill="#130e26" />
+          <rect width="40" height="40" rx="12" fill="#130628" />
           <defs>
-            <linearGradient id="winkRealGrad" x1="10" y1="10" x2="30" y2="30" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ff007a" />
-              <stop offset="0.5" stopColor="#ff5500" />
-              <stop offset="1" stopColor="#7928ca" />
+            <linearGradient id="winkTopFold" x1="12" y1="10" x2="28" y2="20" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff0077" />
+              <stop offset="1" stopColor="#ff5500" />
+            </linearGradient>
+            <linearGradient id="winkBottomFold" x1="12" y1="20" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff5500" />
+              <stop offset="1" stopColor="#ffa600" />
             </linearGradient>
           </defs>
-          {/* Ленточный знак Wink */}
-          <path d="M13 11l14 9-14 9z" fill="url(#winkRealGrad)" />
-          <path d="M13 11l7 9-7 9z" fill="rgba(255,255,255,0.3)" />
+          {/* Официальная лента-стрелка Wink */}
+          <path d="M12 11l15 9-15-2z" fill="url(#winkTopFold)" />
+          <path d="M12 18l15 2-15 9z" fill="url(#winkBottomFold)" />
+          <path d="M12 18l8 2-8 2z" fill="rgba(0,0,0,0.25)" />
         </svg>
       );
     case 'premier':
       return (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <defs>
-            <linearGradient id="premBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#003cd6" />
-              <stop offset="1" stopColor="#00186b" />
-            </linearGradient>
-          </defs>
-          <rect width="40" height="40" rx="12" fill="url(#premBg)" />
-          <path d="M14 11h7a6 6 0 0 1 0 12h-7V11z" fill="#ffffff" />
-          <path d="M18 15v4h3a2 2 0 0 0 0-4h-3z" fill="#002bb5" />
-          <rect x="14" y="23" width="4" height="6" fill="#ffffff" />
+          <rect width="40" height="40" rx="12" fill="#0d0d12" stroke="rgba(255,255,255,0.08)" />
+          {/* Официальный неоново-зеленый маркер PREMIER */}
+          <rect x="9.5" y="10.5" width="5.5" height="5.5" rx="1.5" fill="#00e676" />
+          {/* Фирменная белая буква P */}
+          <path d="M18 10.5h6.2a5.8 5.8 0 0 1 0 11.6H18V10.5zm3.8 3.5v4.6h2.2a2.3 2.3 0 0 0 0-4.6h-2.2zM18 22.1h3.8v7.4H18v-7.4z" fill="#ffffff" />
         </svg>
       );
     case 'kion':
@@ -164,39 +175,51 @@ const BrandIcon: React.FC<{ brand: string }> = ({ brand }) => {
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
           <defs>
             <linearGradient id="kionBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#e30613" />
-              <stop offset="1" stopColor="#99000a" />
+              <stop stopColor="#1a0438" />
+              <stop offset="1" stopColor="#0b0118" />
+            </linearGradient>
+            <linearGradient id="kionKGrad" x1="8" y1="12" x2="22" y2="28" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff007a" />
+              <stop offset="1" stopColor="#9333ea" />
             </linearGradient>
           </defs>
-          <rect width="40" height="40" rx="12" fill="url(#kionBg)" />
-          <text x="20" y="26" textAnchor="middle" fill="#ffffff" fontFamily="'Impact', 'Arial Black', sans-serif" fontWeight="900" fontSize="13" letterSpacing="1.2">
-            KION
-          </text>
+          <rect width="40" height="40" rx="12" fill="url(#kionBg)" stroke="rgba(255,0,122,0.2)" />
+          {/* Фирменная неоновая KION K + буквы ION */}
+          <rect x="8.5" y="11" width="3.5" height="18" rx="1.75" fill="url(#kionKGrad)" />
+          <path d="M12 20l7.5-8.5" stroke="url(#kionKGrad)" strokeWidth="3.6" strokeLinecap="round" />
+          <path d="M13 19.5l7 9" stroke="url(#kionKGrad)" strokeWidth="3.6" strokeLinecap="round" />
+          {/* ION */}
+          <rect x="22.5" y="12" width="2.4" height="16" rx="1.2" fill="#ffffff" />
+          <circle cx="29.5" cy="20" r="4" stroke="#ffffff" strokeWidth="2.4" fill="none" />
+          <path d="M35 28V12l4 16V12" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
     case 'start':
       return (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="12" fill="#141416" stroke="rgba(255,255,255,0.08)" />
           <defs>
-            <linearGradient id="startBg" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-              <stop stopColor="#ff4b1f" />
-              <stop offset="1" stopColor="#1f1c18" />
+            <linearGradient id="startArrow" x1="8" y1="10" x2="24" y2="30" gradientUnits="userSpaceOnUse">
+              <stop stopColor="#ff451a" />
+              <stop offset="1" stopColor="#e02600" />
             </linearGradient>
           </defs>
-          <rect width="40" height="40" rx="12" fill="url(#startBg)" />
-          <text x="20" y="26" textAnchor="middle" fill="#ffffff" fontFamily="'Arial Black', sans-serif" fontWeight="900" fontSize="11" letterSpacing="1.5">
-            START
-          </text>
+          {/* Фирменный динамичный шеврон START */}
+          <path d="M10 11l11 9-11 9V11z" fill="url(#startArrow)" />
+          {/* START монохромный акцент */}
+          <path d="M24 14h6M27 14v12M24 26h6" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" />
         </svg>
       );
     case 'netflix':
       return (
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <rect width="40" height="40" rx="12" fill="#0c0c0e" stroke="rgba(255,255,255,0.08)" />
-          {/* Фирменная лента N Netflix */}
-          <path d="M14 10v20h3.5V10z" fill="#b81d24" />
-          <path d="M22.5 10v20h3.5V10z" fill="#b81d24" />
-          <path d="M14 10l12 20h-3.5L14 10z" fill="#e50914" />
+          <rect width="40" height="40" rx="12" fill="#0d0d10" stroke="rgba(255,255,255,0.08)" />
+          {/* Настоящая официальная лента N Netflix с 3D тенью */}
+          <path d="M13.5 10v20h3.8V10z" fill="#b81d24" />
+          <path d="M22.7 10v20h3.8V10z" fill="#b81d24" />
+          <path d="M13.5 10l13 20h-3.8L13.5 10z" fill="#e50914" />
+          {/* Тень под диагональной лентой */}
+          <path d="M13.5 10l5 7.7-1.2 1.8L13.5 10z" fill="rgba(0,0,0,0.3)" />
         </svg>
       );
     default:

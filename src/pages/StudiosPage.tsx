@@ -139,6 +139,8 @@ export function StudiosPage() {
           '--sw-accent': studio.accentColor,
           '--sw-secondary': studio.secondaryColor,
           '--sw-glow': studio.glowColor,
+          '--sw-cta-text':
+            studio.id === 'apple' || studio.id === 'a24' ? '#07060a' : '#ffffff',
         } as React.CSSProperties
       }
     >

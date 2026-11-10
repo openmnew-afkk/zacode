@@ -450,8 +450,8 @@
 
 .sw-hero-chip--accent {
   background: var(--sw-accent);
-  color: #fff;
-  font-weight: 700;
+  color: var(--sw-cta-text, #fff);
+  font-weight: 800;
 }
 
 .sw-hero-title {
@@ -480,8 +480,8 @@
 .sw-hero-actions {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .sw-hero-cta {
@@ -492,7 +492,7 @@
   padding: 0 20px;
   border-radius: 12px;
   background: var(--sw-accent);
-  color: #fff;
+  color: var(--sw-cta-text, #fff);
   border: none;
   font-size: 13.5px;
   font-weight: 800;
@@ -500,6 +500,10 @@
   box-shadow: 0 8px 24px var(--sw-glow);
   transition: transform 0.16s ease, filter 0.16s ease;
   -webkit-tap-highlight-color: transparent;
+}
+
+.sw-hero-cta svg {
+  fill: currentColor;
 }
 
 .sw-hero-cta:active {
@@ -513,13 +517,15 @@
   height: 42px;
   padding: 0 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(14, 13, 20, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.22);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
   transition: background 0.18s ease;
 }
 
@@ -563,8 +569,9 @@
   margin-top: 18px;
   padding: 16px 18px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 13, 20, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -572,28 +579,29 @@
 
 .sw-world-manifesto-tagline {
   display: block;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 800;
   letter-spacing: 0.12em;
   color: var(--sw-accent);
+  text-shadow: 0 0 12px var(--sw-glow);
   margin-bottom: 5px;
 }
 
 .sw-world-manifesto-text {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .sw-type-tabs {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.55);
   padding: 4px;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sw-type-tab {
@@ -605,7 +613,7 @@
   border-radius: 9px;
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -618,9 +626,9 @@
 }
 
 .sw-type-tab.active {
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  background: var(--sw-accent);
+  color: var(--sw-cta-text, #fff);
+  box-shadow: 0 3px 14px var(--sw-glow);
 }
 
 /* ════════════ Тематические коллекции Вселенной ════════════ */
@@ -660,7 +668,7 @@
 
 .sw-collection-pill.active {
   background: var(--sw-accent);
-  color: #fff;
+  color: var(--sw-cta-text, #fff);
   border-color: var(--sw-accent);
   box-shadow: 0 4px 18px var(--sw-glow);
 }

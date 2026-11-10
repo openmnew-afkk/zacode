@@ -44,7 +44,7 @@ export const TopGarland: React.FC<TopGarlandProps> = ({ season = 'winter' }) => 
   const width = 1200;
   const step = width / segments;
 
-  let pathD = `M 0,0`;
+  let pathD = `M 0,4`;
   const bulbs: Array<{
     cx: number;
     cy: number;
@@ -56,10 +56,11 @@ export const TopGarland: React.FC<TopGarlandProps> = ({ season = 'winter' }) => 
     const x0 = i * step;
     const x1 = (i + 1) * step;
     const midX = x0 + step / 2;
-    const sagY = 16 + (i % 2 === 0 ? 3 : 0); // небольшая естественная асимметрия
+    // На iPhone гирлянда опускается ниже Dynamic Island (24-28px)
+    const sagY = 24 + (i % 2 === 0 ? 5 : 0);
 
     // Провис провода
-    pathD += ` Q ${midX},${sagY} ${x1},${(i + 1 === segments ? 0 : 4)}`;
+    pathD += ` Q ${midX},${sagY} ${x1},${(i + 1 === segments ? 4 : 6)}`;
 
     // Лампочка в нижней точке провиса
     const color = BULB_COLORS[i % BULB_COLORS.length];
@@ -71,7 +72,7 @@ export const TopGarland: React.FC<TopGarlandProps> = ({ season = 'winter' }) => 
     <aside className="top-garland" aria-hidden="true">
       <svg
         className="top-garland__svg"
-        viewBox={`0 0 ${width} 44`}
+        viewBox={`0 0 ${width} 58`}
         preserveAspectRatio="none"
       >
         {/* Провод */}
@@ -82,29 +83,29 @@ export const TopGarland: React.FC<TopGarlandProps> = ({ season = 'winter' }) => 
           <g key={idx} transform={`translate(${b.cx}, ${b.cy})`}>
             {/* Тёмный цоколь */}
             <rect
-              x="-2.5"
+              x="-3"
               y="-1"
-              width="5"
-              height="3.5"
-              rx="0.8"
+              width="6"
+              height="4.5"
+              rx="1"
               className="top-garland__cap"
             />
             {/* Стеклянная светящаяся колба лампы */}
             <ellipse
               cx="0"
-              cy="7.5"
-              rx="4"
-              ry="5.5"
+              cy="9.5"
+              rx="5"
+              ry="7"
               className={`top-garland__bulb top-garland__bulb--${b.color}`}
               style={{ animationDelay: b.delay }}
             />
             {/* Внутренний яркий блик нити накаливания */}
             <circle
-              cx="-0.8"
-              cy="6"
-              r="1.2"
+              cx="-1.2"
+              cy="8"
+              r="1.6"
               fill="#ffffff"
-              opacity="0.85"
+              opacity="0.9"
             />
           </g>
         ))}

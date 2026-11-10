@@ -7,10 +7,11 @@
 
 .top-garland {
   position: fixed;
-  top: 0;
+  /* На iPhone с Dynamic Island / чёлкой опускаем гирлянду точно под статус-бар */
+  top: max(env(safe-area-inset-top, 0px) - 4px, 4px);
   left: 0;
   right: 0;
-  height: 42px;
+  height: 54px;
   z-index: 9998;
   pointer-events: none;
   user-select: none;
@@ -31,19 +32,19 @@
   overflow: visible;
 }
 
-/* Провод */
+/* Провод — более плотный и видимый */
 .top-garland__wire {
   fill: none;
-  stroke: rgba(40, 36, 48, 0.75);
-  stroke-width: 1.5;
+  stroke: rgba(22, 18, 30, 0.88);
+  stroke-width: 2;
   stroke-linecap: round;
 }
 
 /* Цоколь лампочки */
 .top-garland__cap {
-  fill: #22202a;
-  stroke: #444054;
-  stroke-width: 0.8;
+  fill: #1e1b26;
+  stroke: #524e63;
+  stroke-width: 1;
 }
 
 /* Колбы ламп */
@@ -55,40 +56,40 @@
   animation-direction: alternate;
 }
 
-/* Цвета лампочек */
+/* Сочные яркие цвета лампочек с праздничным неоновым сиянием */
 .top-garland__bulb--ruby {
-  fill: #ff3344;
-  filter: drop-shadow(0 2px 7px rgba(255, 51, 68, 0.85));
+  fill: #ff2a4b;
+  filter: drop-shadow(0 3px 9px rgba(255, 42, 75, 0.95));
   animation-duration: 1.8s;
 }
 
 .top-garland__bulb--gold {
   fill: #ffb703;
-  filter: drop-shadow(0 2px 7px rgba(255, 183, 3, 0.9));
+  filter: drop-shadow(0 3px 9px rgba(255, 183, 3, 0.95));
   animation-duration: 2.1s;
 }
 
 .top-garland__bulb--emerald {
   fill: #10b981;
-  filter: drop-shadow(0 2px 7px rgba(16, 185, 129, 0.85));
+  filter: drop-shadow(0 3px 9px rgba(16, 185, 129, 0.95));
   animation-duration: 1.6s;
 }
 
 .top-garland__bulb--blue {
   fill: #38bdf8;
-  filter: drop-shadow(0 2px 7px rgba(56, 189, 248, 0.85));
+  filter: drop-shadow(0 3px 9px rgba(56, 189, 248, 0.95));
   animation-duration: 2.4s;
 }
 
 .top-garland__bulb--violet {
   fill: #c084fc;
-  filter: drop-shadow(0 2px 7px rgba(192, 132, 252, 0.85));
+  filter: drop-shadow(0 3px 9px rgba(192, 132, 252, 0.95));
   animation-duration: 1.9s;
 }
 
 .top-garland__bulb--amber {
   fill: #fb923c;
-  filter: drop-shadow(0 2px 7px rgba(251, 146, 60, 0.85));
+  filter: drop-shadow(0 3px 9px rgba(251, 146, 60, 0.95));
   animation-duration: 2.2s;
 }
 

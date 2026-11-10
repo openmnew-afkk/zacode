@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useMusicStore } from '../store/musicStore';
 import { audioEngine } from '../services/audioEngine';
+import { resolveFullAudioTrack } from '../services/soundtracks';
 import './GlobalMusicBar.css';
 
 const GlobalMusicBar: React.FC = () => {
@@ -112,6 +113,29 @@ const GlobalMusicBar: React.FC = () => {
         },
         currentTrack.fallbackUrl
       ).catch(() => {});
+
+      // Обходной путь на ПОЛНЫЕ треки через Audius (без видео/iframe/YouTube)
+      if (currentTrack.source !== 'audius' && !currentTrack.isLiveRadio) {
+        resolveFullAudioTrack(currentTrack).then((full) => {
+          if (
+            full.streamUrl &&
+            full.streamUrl !== currentTrack.streamUrl &&
+            currentTrackIdRef.current === currentTrack.id
+          ) {
+            audioEngine.playTrack(
+              full.streamUrl,
+              speed,
+              {
+                title: full.title,
+                artist: full.artist,
+                album: full.album || 'ZENOVA Sound',
+                artwork: full.artwork,
+              },
+              currentTrack.streamUrl
+            ).catch(() => {});
+          }
+        });
+      }
     }
   }, [currentTrack?.id, currentTrack?.streamUrl, speed]);
 
@@ -317,17 +341,10 @@ const GlobalMusicBar: React.FC = () => {
           </button>
         </div>
 
-        {/* Artwork + Luxury Spinning Vinyl Record with ambient aura glow */}
+        {/* Премиальная обложка трека с динамической аурой и живым спектром звука */}
         <div className="gfull__art-container">
           <div className="gfull__art-wrap">
-            <div className="gfull__art-aura" />
-
-            {/* Виниловая пластинка */}
-            <div className={`gfull__vinyl ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true">
-              <div className="gfull__vinyl-center">
-                {art && <img src={art} alt="" />}
-              </div>
-            </div>
+            <div className={`gfull__art-aura ${isPlaying ? 'is-playing' : ''}`} />
 
             <div className="gfull__art">
               {art ? (
@@ -338,6 +355,33 @@ const GlobalMusicBar: React.FC = () => {
                 </div>
               )}
               <div className="gfull__art-gradient" />
+
+              {/* Бейдж типа трека */}
+              <div className="gfull__art-badge">
+                {currentTrack.source === 'audius' ? (
+                  <span className="gfull__art-badge-chip audius">
+                    <span className="gfull__art-badge-dot" />
+                    ПОЛНЫЙ ТРЕК
+                  </span>
+                ) : isLive ? (
+                  <span className="gfull__art-badge-chip live">
+                    <span className="gfull__art-badge-dot" />
+                    LIVE 24/7
+                  </span>
+                ) : (
+                  <span className="gfull__art-badge-chip preview">
+                    <span className="gfull__art-badge-dot" />
+                    LOSSLESS HD
+                  </span>
+                )}
+              </div>
+
+              {/* Живой звуковой спектр частот прямо на обложке */}
+              <div className={`gfull__spectrum ${isPlaying ? 'is-playing' : ''}`} aria-hidden="true">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <span key={i} style={{ '--bar-i': i } as React.CSSProperties} />
+                ))}
+              </div>
             </div>
           </div>
         </div>
