@@ -4,9 +4,11 @@ import { useTelegram } from '../hooks/useTelegram';
 import { useMusicStore, type Track } from '../store/musicStore';
 import { searchMovies, getTrendingMovies } from '../api/catalog';
 import type { Movie } from '../types';
+import YandexGlowInput from '../components/YandexGlowInput';
 import {
   getSoundtrack,
   getAlbumTracks,
+  resolveFullTrack,
   getHeardList,
   restoreHeardList,
   removeHeard,
@@ -176,14 +178,31 @@ const MusicPage: React.FC = () => {
     }
     setTrack(t, tracks, idx);
     setPlaying(true);
+
+    // Разрешаем полноценную версию трека (без 30-секундного ограничения)
+    resolveFullTrack(t).then((full) => {
+      const state = useMusicStore.getState();
+      if (state.currentTrack?.id === full.id && full.youtubeId) {
+        state.setTrack(full, state.queue, state.queueIndex);
+      }
+    });
   };
 
   const playAll = (tracks: Track[], shuffle = false) => {
     if (!tracks.length) return;
     haptic('heavy');
     const queue = shuffle ? [...tracks].sort(() => Math.random() - 0.5) : tracks;
-    setTrack(queue[0], queue, 0);
+    const first = queue[0];
+    setTrack(first, queue, 0);
     setPlaying(true);
+
+    // Разрешаем полноценную версию первого трека
+    resolveFullTrack(first).then((full) => {
+      const state = useMusicStore.getState();
+      if (state.currentTrack?.id === full.id && full.youtubeId) {
+        state.setTrack(full, state.queue, 0);
+      }
+    });
   };
 
   const finishOnboard = () => {
@@ -224,20 +243,18 @@ const MusicPage: React.FC = () => {
         </button>
       </header>
 
-      {/* ── Поиск фильма ── */}
-      <div className="ost-search">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-          <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
-        </svg>
-        <input
+      {/* ── Поиск фильма с подсветкой последней буквы (стиль Яндекс Музыки) ── */}
+      <div className="ost-search-wrap">
+        <YandexGlowInput
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={setQuery}
           placeholder="Введите фильм — получите его музыку"
-          enterKeyHint="search"
+          icon={
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
+              <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
+            </svg>
+          }
         />
-        {query && (
-          <button type="button" className="ost-search__clear" onClick={() => setQuery('')} aria-label="Очистить">✕</button>
-        )}
       </div>
 
       {/* Результаты поиска */}

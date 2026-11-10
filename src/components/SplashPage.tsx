@@ -128,7 +128,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         <video
           ref={videoRef}
           className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}
-          src="/zenova-splash.mp4"
+          src="/zenova-splash.mp4?v=holiday"
           poster="/zenova-splash-poster.jpg"
           autoPlay
           muted={false}

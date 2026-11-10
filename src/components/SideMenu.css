@@ -21,31 +21,35 @@
 @keyframes mvIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes mvOut { to { opacity: 0; transform: scale(0.98); } }
 
-/* Живой фон */
+/* Живой фон — один ускоренный слой без лагов */
 .mv-bg {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  overflow: hidden;
 }
-.mv-bg__layer {
+.mv-bg__single {
   position: absolute;
-  inset: -20px;
+  inset: -15px;
   background-size: cover;
   background-position: center;
-  filter: blur(40px) brightness(0.35) saturate(1.4);
-  opacity: 0;
-  transform: scale(1.05);
-  transition: opacity 0.45s ease;
+  filter: blur(26px) brightness(0.38) saturate(1.25);
+  transform: translateZ(0);
+  animation: mvBgFade 0.35s ease both;
+  will-change: opacity;
 }
-.mv-bg__layer.on { opacity: 1; }
+@keyframes mvBgFade {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
 .mv-bg__veil {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(circle at 50% 45%, var(--mv-glow) 0%, transparent 65%),
     linear-gradient(180deg, rgba(5, 5, 8, 0.6) 0%, rgba(5, 5, 8, 0.2) 30%, rgba(5, 5, 8, 0.85) 75%, #050508 100%);
-  transition: background 0.4s ease;
+  transition: background 0.35s ease;
 }
 
 /* Шапка */
@@ -96,35 +100,6 @@
   align-items: center;
   padding: 10px 0;
 }
-
-/* Навигационные стрелки для ноутов */
-.mv-nav-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 10;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #ffffff;
-  font-size: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition: opacity 0.2s ease, transform 0.15s ease;
-}
-.mv-nav-arrow:active { transform: translateY(-50%) scale(0.9); }
-.mv-nav-arrow:disabled {
-  opacity: 0;
-  pointer-events: none;
-}
-.mv-nav-arrow--left { left: 16px; }
-.mv-nav-arrow--right { right: 16px; }
 
 /* Трек со скролл-снэпом */
 .mv-track {

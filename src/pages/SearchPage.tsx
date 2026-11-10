@@ -4,6 +4,7 @@ import { getMoviesByActor, searchActors, searchMovies, getTrendingMovies } from 
 import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Actor, Movie } from '../types';
+import YandexGlowInput from '../components/YandexGlowInput';
 import './SearchPage.css';
 
 const QUICK_SEARCHES = [
@@ -204,50 +205,31 @@ const SearchPage: React.FC = () => {
         <h1 className="search-header__title">Поиск</h1>
       </div>
 
-      {/* ── Минималистичная матовая поисковая строка ── */}
+      {/* ── Поисковая строка с неоновой подсветкой символов как в Яндекс Музыке ── */}
       <div className="search-input-shell">
-        <div className="search-input-wrap">
-          <span className="search-input-icon" aria-hidden="true">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <YandexGlowInput
+          value={query}
+          onChange={(val) => {
+            setSelectedActor(null);
+            setQuery(val);
+          }}
+          placeholder={
+            searchType === 'actors'
+              ? 'Имя актёра или режиссёра…'
+              : 'Название фильма, сериала или жанр…'
+          }
+          icon={
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="7" />
               <line x1="16.5" y1="16.5" x2="21" y2="21" />
             </svg>
-          </span>
-
-          <input
-            ref={inputRef}
-            className="search-input"
-            type="text"
-            placeholder={
-              searchType === 'actors'
-                ? 'Имя актёра или режиссёра…'
-                : 'Название фильма, сериала или жанр…'
-            }
-            value={query}
-            onChange={(e) => {
-              setSelectedActor(null);
-              setQuery(e.target.value);
-            }}
-            autoComplete="off"
-            spellCheck={false}
-          />
-
-          {query && (
-            <button
-              type="button"
-              className="search-clear"
-              onClick={() => {
-                haptic('light');
-                setSelectedActor(null);
-                setQuery('');
-                inputRef.current?.focus();
-              }}
-              aria-label="Очистить"
-            >
-              ✕
-            </button>
-          )}
-        </div>
+          }
+          onClear={() => {
+            haptic('light');
+            setSelectedActor(null);
+            setQuery('');
+          }}
+        />
       </div>
 
       {/* ── Сегментированный переключатель разделов ── */}

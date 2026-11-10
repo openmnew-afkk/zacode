@@ -1,77 +1,49 @@
 /* ═══════════════════════════════════════════════════════════════════
-   ZENOVA — КИНО-МИРЫ (STUDIOS PAGE)
-   Индивидуальная дизайн-система для каждой студии:
-   • Netflix (Obsidian & Tudum Crimson)
-   • Disney+ (Starlight Royal Blue & Cyan Magic)
-   • HBO Max (Prestige Deep Violet & Amethyst)
-   • Apple TV+ (Cupertino Titanium & Frosted Monochrome)
-   • Marvel Studios (Comic Crimson & Avengers Gold)
-   • A24 (35mm Editorial Monochrome & Warm Amber)
-   • Anime Hub (Cyber-Sakura Neon)
+   ZENOVA — КИНО-МИРЫ & ВСЕЛЕННЫЕ (PREMIUM CINEMA EDITION)
+   120 FPS плавность, аппаратное ускорение, никакой дерготни и лагов.
    ═══════════════════════════════════════════════════════════════════ */
 
 .sw-page {
   position: relative;
   min-height: 100dvh;
-  padding-bottom: calc(110px + var(--safe-bottom));
+  padding-bottom: calc(115px + var(--safe-bottom, 16px));
   overflow-x: hidden;
   color: #f8fafc;
-  transition: background-color 0.45s ease, color 0.35s ease;
+  background-color: #060609;
+  transition: background-color 0.4s ease;
 }
 
-/* ════════════ Индивидуальные фоны каждого Кино-Мира ════════════ */
+/* ════════════ Индивидуальные палитры вселенных ════════════ */
 
 .sw-theme--netflix {
-  background:
-    radial-gradient(120% 55% at 50% 0%, rgba(229, 9, 20, 0.24) 0%, rgba(18, 4, 6, 0.88) 55%, #070709 100%),
-    #070709;
-  --sw-card-radius: 10px;
-  --sw-font-display: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(229, 9, 20, 0.22) 0%, rgba(20, 5, 8, 0.8) 55%, #060609 100%);
 }
 
 .sw-theme--disney {
-  background:
-    radial-gradient(130% 65% at 50% -5%, rgba(0, 114, 210, 0.38) 0%, rgba(10, 25, 58, 0.92) 52%, #040b1a 100%),
-    #040b1a;
-  --sw-card-radius: 18px;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(0, 114, 210, 0.26) 0%, rgba(7, 20, 48, 0.8) 55%, #040915 100%);
 }
 
 .sw-theme--hbo {
-  background:
-    radial-gradient(120% 60% at 50% 0%, rgba(147, 51, 234, 0.32) 0%, rgba(22, 10, 42, 0.92) 55%, #080510 100%),
-    #080510;
-  --sw-card-radius: 14px;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(147, 51, 234, 0.26) 0%, rgba(22, 10, 42, 0.8) 55%, #07050d 100%);
 }
 
 .sw-theme--apple {
-  background:
-    radial-gradient(110% 55% at 50% 0%, rgba(255, 255, 255, 0.14) 0%, rgba(20, 20, 24, 0.95) 55%, #0a0a0c 100%),
-    #0a0a0c;
-  --sw-card-radius: 20px;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(255, 255, 255, 0.12) 0%, rgba(24, 24, 28, 0.8) 55%, #070709 100%);
 }
 
 .sw-theme--marvel {
-  background:
-    radial-gradient(120% 55% at 50% 0%, rgba(237, 29, 36, 0.32) 0%, rgba(25, 8, 10, 0.92) 55%, #090607 100%),
-    #090607;
-  --sw-card-radius: 12px;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(237, 29, 36, 0.26) 0%, rgba(28, 8, 12, 0.8) 55%, #070506 100%);
 }
 
 .sw-theme--a24 {
-  background:
-    radial-gradient(120% 60% at 50% 0%, rgba(217, 119, 6, 0.16) 0%, rgba(20, 19, 17, 0.95) 58%, #0b0a09 100%),
-    #0b0a09;
-  --sw-card-radius: 6px;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(217, 119, 6, 0.2) 0%, rgba(24, 20, 15, 0.8) 55%, #080706 100%);
 }
 
 .sw-theme--anime {
-  background:
-    radial-gradient(125% 60% at 50% 0%, rgba(255, 42, 133, 0.28) 0%, rgba(34, 10, 38, 0.92) 55%, #0b0510 100%),
-    #0b0510;
-  --sw-card-radius: 16px;
+  --sw-bg-radial: radial-gradient(130% 60% at 50% 0%, rgba(255, 42, 133, 0.24) 0%, rgba(32, 10, 36, 0.8) 55%, #08040d 100%);
 }
 
-/* ════════════ Атмосферные спецэффекты миров ════════════ */
+/* ════════════ Легковесный эмбиент без лагов ════════════ */
 
 .sw-ambient {
   position: fixed;
@@ -81,167 +53,24 @@
   overflow: hidden;
 }
 
-.sw-ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(85px);
-  opacity: 0.45;
-  transition: background 0.6s ease;
-}
-
-.sw-ambient-orb--1 {
-  width: 340px;
-  height: 340px;
-  top: -110px;
-  left: -80px;
-  background: var(--sw-accent);
-}
-
-.sw-ambient-orb--2 {
-  width: 290px;
-  height: 290px;
-  top: 220px;
-  right: -90px;
-  background: var(--sw-secondary);
-  opacity: 0.28;
-}
-
-/* Netflix Tudum spectrum beams */
-.sw-netflix-beams {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 320px;
-  display: flex;
-  justify-content: space-around;
-  opacity: 0.16;
-}
-.sw-netflix-beams span {
-  width: 2px;
-  height: 100%;
-  background: linear-gradient(180deg, #e50914 0%, rgba(229, 9, 20, 0.4) 55%, transparent 100%);
-  box-shadow: 0 0 18px #e50914;
-  animation: swBeamPulse 4s ease-in-out infinite alternate;
-}
-.sw-netflix-beams span:nth-child(2n) {
-  animation-delay: 1.2s;
-  width: 3px;
-}
-.sw-netflix-beams span:nth-child(3n) {
-  animation-delay: 2.1s;
-}
-
-@keyframes swBeamPulse {
-  0% { opacity: 0.35; transform: scaleY(0.85); }
-  100% { opacity: 0.95; transform: scaleY(1.1); }
-}
-
-/* Disney+ Starlight & Magic Arc */
-.sw-disney-stars {
+.sw-ambient-glow {
   position: absolute;
   inset: 0;
-}
-.sw-disney-arc-bg {
-  position: absolute;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 520px;
-  height: 260px;
-  border-top: 2px solid rgba(56, 189, 248, 0.25);
-  border-radius: 50% 50% 0 0;
-  filter: drop-shadow(0 -6px 18px rgba(56, 189, 248, 0.35));
-}
-.sw-star {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: #e0f2fe;
-  box-shadow: 0 0 12px 3px rgba(56, 189, 248, 0.85);
-  animation: swStarTwinkle 3.2s ease-in-out infinite alternate;
-}
-.sw-star.s1 { top: 85px; left: 16%; animation-delay: 0s; }
-.sw-star.s2 { top: 130px; left: 78%; animation-delay: 0.8s; }
-.sw-star.s3 { top: 55px; left: 62%; animation-delay: 1.5s; }
-.sw-star.s4 { top: 210px; left: 24%; animation-delay: 2.1s; }
-.sw-star.s5 { top: 170px; left: 88%; animation-delay: 0.4s; }
-
-@keyframes swStarTwinkle {
-  0% { opacity: 0.25; transform: scale(0.7); }
-  100% { opacity: 1; transform: scale(1.35); }
+  background: var(--sw-bg-radial, radial-gradient(120% 60% at 50% 0%, rgba(229, 169, 60, 0.15) 0%, transparent 60%));
+  transform: translateZ(0);
 }
 
-/* HBO Max Aurora */
-.sw-hbo-aurora {
-  position: absolute;
-  top: -60px;
-  left: 10%;
-  right: 10%;
-  height: 260px;
-  background: radial-gradient(ellipse at center, rgba(168, 85, 247, 0.26), rgba(99, 102, 241, 0.12) 55%, transparent 75%);
-  filter: blur(36px);
-}
-
-/* Apple TV+ Titanium Sheen */
-.sw-apple-sheen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 240px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 100%);
-}
-
-/* Marvel Comic Halftone */
-.sw-marvel-halftone {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 340px;
-  background-image: radial-gradient(rgba(237, 29, 36, 0.18) 1.2px, transparent 1.2px);
-  background-size: 14px 14px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
-}
-
-/* A24 Editorial Frame */
-.sw-a24-filmgrain {
-  position: absolute;
-  inset: 12px;
-  border: 1px solid rgba(231, 229, 228, 0.08);
-  pointer-events: none;
-}
-
-/* Anime Cyber Grid */
-.sw-anime-grid {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 300px;
-  background-image:
-    linear-gradient(to right, rgba(255, 42, 133, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 42, 133, 0.08) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.9) 0%, transparent 100%);
-}
-
-/* ════════════ Шапка и Док Студий ════════════ */
+/* ════════════ Шапка и Горизонтальный Селектор Студий ════════════ */
 
 .sw-header {
   position: sticky;
   top: 0;
   z-index: 30;
-  padding: 10px 16px 12px;
-  padding-top: var(--header-safe-top);
-  background: rgba(8, 8, 12, 0.84);
-  backdrop-filter: blur(24px) saturate(175%);
-  -webkit-backdrop-filter: blur(24px) saturate(175%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding: calc(var(--header-safe-top, 10px) + 6px) 16px 12px;
+  background: rgba(6, 6, 9, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .sw-header-top {
@@ -256,357 +85,223 @@
 .sw-search-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 11px;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   color: #f8fafc;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.16s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.15s ease, background 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sw-search-btn {
-  width: 36px;
+  width: 38px;
   padding: 0;
   justify-content: center;
 }
 
 .sw-back-btn:active,
 .sw-search-btn:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
 }
 
-/* Центральная кнопка с настоящим логотипом-надписью студии */
-.sw-header-brand-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 5px 12px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  cursor: pointer;
-  transition: background 0.18s ease, border-color 0.18s ease;
-}
-
-.sw-header-brand-trigger:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--sw-accent);
-}
-
-.sw-header-brand-caret {
-  display: inline-flex;
-  color: rgba(255, 255, 255, 0.55);
-  transition: transform 0.2s ease;
-}
-
-.sw-header-brand-caret.open {
-  transform: rotate(180deg);
-}
-
-/* Выпадающий вертикальный список студий с настоящими надписями */
-.sw-studios-dropdown {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
-  padding: 10px;
-  border-radius: 16px;
-  background: rgba(12, 11, 18, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.78);
-}
-
-.sw-studio-list-row {
+.sw-header-active-brand {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 13px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.18s ease;
+  justify-content: center;
+  filter: drop-shadow(0 2px 8px var(--sw-glow));
 }
 
-.sw-studio-list-row:hover,
-.sw-studio-list-row.active {
-  background: radial-gradient(120% 120% at 0% 50%, var(--row-glow), rgba(255, 255, 255, 0.04) 72%);
-  border-color: var(--row-accent);
-}
-
-.sw-studio-list-row__wordmark {
-  display: flex;
-  align-items: center;
-  min-width: 105px;
-}
-
-.sw-studio-list-row__meta {
-  flex: 1;
-  min-width: 0;
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.sw-studio-list-row__badge {
-  font-size: 8.5px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  color: var(--row-accent);
-  text-transform: uppercase;
-}
-
-.sw-studio-list-row__sub {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.52);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.sw-studio-list-row__check {
-  font-size: 13px;
-  font-weight: 900;
-  color: var(--row-accent);
-}
-
-/* Док выбора Кино-Мира (с настоящими логотипами-надписями) */
-.sw-dock {
+/* ── Горизонтальная лента мгновенного переключения вселенных ── */
+.sw-studios-strip {
   display: flex;
   align-items: center;
   gap: 8px;
   overflow-x: auto;
-  padding: 2px 2px 4px;
+  padding: 4px 0;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
-.sw-dock::-webkit-scrollbar {
+
+.sw-studios-strip::-webkit-scrollbar {
   display: none;
 }
 
-.sw-dock-item {
+.sw-studio-chip {
   position: relative;
-  display: inline-flex;
+  flex-shrink: 0;
+  display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
-  padding: 0 13px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.78);
   cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.sw-dock-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+.sw-studio-chip:active {
+  transform: scale(0.94);
 }
 
-.sw-dock-item--active {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04));
-  border-color: var(--sw-accent);
-  color: #fff;
-  box-shadow: 0 6px 18px -4px var(--sw-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+.sw-studio-chip.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--chip-accent, #ffd56b);
+  box-shadow: 0 0 16px var(--chip-glow, rgba(229, 169, 60, 0.4));
 }
 
-/* ════════════ Hero-баннер Студии ════════════ */
+.sw-chip-pip {
+  position: absolute;
+  bottom: 2px;
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--chip-accent, #ffd56b);
+  box-shadow: 0 0 6px var(--chip-accent, #ffd56b);
+}
+
+/* ════════════ Кинематографичный Hero-блок ════════════ */
 
 .sw-hero {
   position: relative;
-  z-index: 2;
-  padding: 16px 16px 8px;
-  max-width: 1180px;
-  margin: 0 auto;
+  z-index: 1;
+  padding: 16px 16px 0;
 }
 
 .sw-hero-card {
   position: relative;
   width: 100%;
-  min-height: 360px;
-  border-radius: calc(var(--sw-card-radius, 16px) + 6px);
+  height: 420px;
+  border-radius: 24px;
   overflow: hidden;
-  cursor: pointer;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow:
-    0 22px 50px -12px rgba(0, 0, 0, 0.78),
-    0 0 40px -10px var(--sw-glow);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 18px;
+    0 16px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateZ(0);
 }
 
-@media (min-width: 768px) {
-  .sw-hero-card {
-    min-height: 430px;
-    padding: 28px 32px;
-  }
-}
-
-.sw-hero-img {
+.sw-hero-img-wrap {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.02);
-  transition: transform 0.8s ease;
+  background-size: cover;
+  background-position: center top;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sw-hero-card:hover .sw-hero-img {
-  transform: scale(1.06);
+.sw-hero-card:active .sw-hero-img-wrap {
+  transform: scale(1.02);
 }
 
 .sw-hero-vignette {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(6, 6, 10, 0.55) 0%, rgba(6, 6, 10, 0.15) 38%, rgba(6, 6, 10, 0.88) 78%, rgba(6, 6, 10, 0.98) 100%),
-    radial-gradient(circle at 15% 85%, var(--sw-glow) 0%, transparent 55%);
+    linear-gradient(180deg, rgba(6, 6, 9, 0.4) 0%, transparent 35%, rgba(6, 6, 9, 0.85) 70%, #060609 100%),
+    radial-gradient(circle at 50% 90%, color-mix(in srgb, var(--sw-accent) 25%, transparent) 0%, transparent 60%);
 }
 
-.sw-hero-top {
-  position: relative;
-  z-index: 2;
+.sw-hero-top-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.sw-studio-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 14px 6px 7px;
-  border-radius: 14px;
-  background: rgba(10, 10, 14, 0.76);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-}
-
-.sw-studio-pill .sw-brand-svg {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-}
-
-.sw-studio-pill-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.sw-studio-pill-badge {
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-  color: var(--sw-accent);
-}
-
-.sw-studio-pill-sub {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.72);
-  font-weight: 600;
-}
-
-.sw-jp-stamp,
-.sw-a24-stamp {
-  padding: 5px 10px;
-  border-radius: 8px;
-  font-size: 10.5px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  background: rgba(0, 0, 0, 0.65);
+.sw-studio-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(6, 6, 9, 0.7);
   border: 1px solid var(--sw-accent);
   color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(10px);
+}
+
+.sw-studio-quality {
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  backdrop-filter: blur(8px);
 }
 
 .sw-hero-body {
-  position: relative;
-  z-index: 2;
-  max-width: 680px;
-  margin-top: auto;
-  padding-top: 90px;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .sw-hero-meta {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
   gap: 8px;
-  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .sw-hero-rating {
-  padding: 4px 9px;
-  border-radius: 8px;
-  background: rgba(250, 204, 21, 0.18);
-  border: 1px solid rgba(250, 204, 21, 0.45);
-  color: #fde047;
-  font-size: 12px;
   font-weight: 800;
+  font-size: 13px;
+  color: #ffd56b;
+  text-shadow: 0 0 10px rgba(255, 213, 107, 0.6);
 }
 
 .sw-hero-chip {
-  padding: 4px 9px;
-  border-radius: 8px;
+  padding: 3px 8px;
+  border-radius: 6px;
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 11.5px;
+  font-size: 11px;
   font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .sw-hero-chip--accent {
-  background: var(--sw-accent);
-  border-color: var(--sw-accent);
+  background: color-mix(in srgb, var(--sw-accent) 30%, transparent);
+  border: 1px solid color-mix(in srgb, var(--sw-accent) 60%, transparent);
   color: #fff;
-  font-weight: 800;
-}
-
-.sw-theme--apple .sw-hero-chip--accent,
-.sw-theme--a24 .sw-hero-chip--accent {
-  color: #09090b;
 }
 
 .sw-hero-title {
-  font-size: clamp(22px, 4vw, 36px);
-  font-weight: 900;
-  line-height: 1.1;
+  margin: 0;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   color: #fff;
-  margin: 0 0 8px;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
-}
-
-.sw-theme--a24 .sw-hero-title {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-}
-
-.sw-theme--marvel .sw-hero-title {
-  text-transform: uppercase;
-  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .sw-hero-overview {
-  font-size: 13px;
-  line-height: 1.48;
-  color: rgba(255, 255, 255, 0.82);
-  margin: 0 0 16px;
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.7);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -617,38 +312,28 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .sw-hero-cta {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 12px 22px;
+  gap: 8px;
+  padding: 10px 22px;
   border-radius: 14px;
-  border: none;
-  background: var(--sw-accent);
-  color: #fff;
-  font-size: 14px;
+  background: #ffffff;
+  color: #060609;
+  font-size: 13px;
   font-weight: 800;
+  border: none;
   cursor: pointer;
-  box-shadow: 0 10px 26px -4px var(--sw-glow);
-  transition: transform 0.2s ease, filter 0.2s ease;
-}
-
-.sw-theme--apple .sw-hero-cta,
-.sw-theme--a24 .sw-hero-cta {
-  color: #09090b;
-}
-
-.sw-hero-cta:hover {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.25);
+  transition: transform 0.15s ease;
 }
 
 .sw-hero-cta:active {
-  transform: scale(0.97);
+  transform: scale(0.94);
 }
 
 .sw-hero-dots {
@@ -658,140 +343,115 @@
 }
 
 .sw-hero-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 99px;
-  border: none;
-  background: rgba(255, 255, 255, 0.3);
-  padding: 0;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.sw-hero-dot.active {
-  width: 24px;
-  background: var(--sw-accent);
-}
-
-.sw-hero-skeleton {
-  height: 360px;
-  border-radius: 20px;
-}
-
-/* Манифест студии + переключатель Все/Фильмы/Сериалы */
-.sw-world-manifesto {
-  margin-top: 12px;
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.sw-world-manifesto-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 210px;
-}
-
-.sw-world-manifesto-dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--sw-accent);
-  box-shadow: 0 0 12px var(--sw-accent);
-  flex-shrink: 0;
-}
-
-.sw-world-manifesto-text {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.74);
-}
-
-.sw-type-tabs {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 12px;
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.sw-type-tab {
-  padding: 6px 12px;
-  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.3);
   border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 12px;
-  font-weight: 700;
+  padding: 0;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
+.sw-hero-dot.active {
+  width: 18px;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+}
+
+.sw-hero-skeleton {
+  width: 100%;
+  height: 420px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ════════════ Манифест + Вкладки фильтра ════════════ */
+
+.sw-world-manifesto {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sw-world-manifesto-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.sw-type-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.sw-type-tab {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
 .sw-type-tab.active {
-  background: var(--sw-accent);
-  color: #fff;
-  box-shadow: 0 4px 12px var(--sw-glow);
+  background: #ffffff;
+  color: #060609;
+  font-weight: 700;
+  border-color: #ffffff;
+  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.2);
 }
 
-.sw-theme--apple .sw-type-tab.active,
-.sw-theme--a24 .sw-type-tab.active {
-  color: #09090b;
-}
-
-/* ════════════ Подборки внутри студии ════════════ */
+/* ════════════ Коллекции студии ════════════ */
 
 .sw-collections-bar {
-  position: relative;
-  z-index: 2;
-  max-width: 1180px;
-  margin: 6px auto 12px;
-  padding: 0 16px;
   display: flex;
-  align-items: center;
   gap: 8px;
   overflow-x: auto;
+  padding: 16px 16px 0;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+
 .sw-collections-bar::-webkit-scrollbar {
   display: none;
 }
 
 .sw-collection-pill {
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.78);
-  font-size: 12.5px;
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 12px;
   font-weight: 600;
-  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
 .sw-collection-pill.active {
-  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--sw-accent) 35%, transparent);
   border-color: var(--sw-accent);
   color: #fff;
-  box-shadow: 0 0 16px -4px var(--sw-glow);
+  box-shadow: 0 0 12px var(--sw-glow);
 }
 
-/* ════════════ ТОП-10 Студии (Фирменный ряд с большими номерами) ════════════ */
+/* ════════════ ТОП-10 Студии ════════════ */
 
 .sw-top10-section {
-  position: relative;
-  z-index: 2;
-  max-width: 1180px;
-  margin: 14px auto 22px;
+  margin-top: 28px;
   padding: 0 16px;
 }
 
@@ -799,455 +459,245 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .sw-section-title-group {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
 }
 
 .sw-top10-badge {
-  padding: 3px 8px;
+  padding: 2px 7px;
   border-radius: 6px;
-  background: var(--sw-accent);
-  color: #fff;
+  background: #ffd56b;
+  color: #060609;
   font-size: 10px;
   font-weight: 900;
-  letter-spacing: 0.08em;
-}
-
-.sw-theme--apple .sw-top10-badge,
-.sw-theme--a24 .sw-top10-badge {
-  color: #09090b;
+  letter-spacing: 0.05em;
 }
 
 .sw-section-title {
-  font-size: 17px;
-  font-weight: 800;
-  color: #fff;
   margin: 0;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
   letter-spacing: -0.01em;
 }
 
 .sw-section-sub {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 600;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .sw-top10-track {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 6px 4px 12px 22px;
+  padding-bottom: 8px;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
+
 .sw-top10-track::-webkit-scrollbar {
   display: none;
 }
 
 .sw-top10-card {
   position: relative;
-  width: 142px;
   flex-shrink: 0;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
-  transition: transform 0.24s ease;
-}
-
-.sw-top10-card:hover {
-  transform: translateY(-4px);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sw-top10-rank {
   position: absolute;
-  left: -22px;
-  bottom: 24px;
-  font-size: 76px;
+  top: -12px;
+  left: -8px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 52px;
   font-weight: 900;
-  line-height: 0.8;
-  color: rgba(10, 10, 14, 0.85);
-  -webkit-text-stroke: 2.2px var(--sw-accent);
-  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
-  z-index: 1;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1.8px var(--sw-accent);
+  filter: drop-shadow(0 2px 8px var(--sw-glow));
+  z-index: 3;
   pointer-events: none;
-  user-select: none;
-  font-family: 'Inter', system-ui, sans-serif;
 }
 
 .sw-top10-poster-wrap {
   position: relative;
-  z-index: 2;
+  width: 100%;
   aspect-ratio: 2 / 3;
-  border-radius: var(--sw-card-radius, 14px);
+  border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.6);
-  background: #141418;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sw-top10-poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
 }
 
 .sw-card-studio-tag {
   position: absolute;
-  top: 7px;
-  left: 7px;
-  padding: 2px 7px;
+  top: 8px;
+  right: 8px;
+  padding: 2px 6px;
   border-radius: 5px;
-  background: rgba(8, 8, 12, 0.82);
-  border: 1px solid var(--sw-accent);
-  color: #fff;
+  background: rgba(6, 6, 9, 0.75);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
 }
 
 .sw-top10-rate {
   position: absolute;
-  bottom: 7px;
-  right: 7px;
+  bottom: 8px;
+  left: 8px;
   padding: 2px 6px;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #fde047;
-  font-size: 10.5px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd56b;
+  font-size: 10px;
   font-weight: 800;
 }
 
 .sw-top10-name {
-  margin: 7px 0 0;
+  margin: 8px 0 0;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1.3;
   color: rgba(255, 255, 255, 0.9);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* ════════════ Основной каталог Студии (СПИСКОМ и ПЛИТКОЙ) ════════════ */
+/* ════════════ Каталог Вселенной (Сетка) ════════════ */
 
 .sw-catalog-section {
-  position: relative;
-  z-index: 2;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 4px 16px 24px;
-}
-
-.sw-view-toggle {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 11px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  gap: 2px;
-}
-
-.sw-view-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 8px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.18s ease;
-}
-
-.sw-view-btn.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-}
-
-/* Вертикальный список фильмов и сериалов студии */
-.sw-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sw-list-card {
-  display: flex;
-  align-items: stretch;
-  gap: 14px;
-  padding: 11px;
-  border-radius: calc(var(--sw-card-radius, 14px) + 2px);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018));
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  cursor: pointer;
-  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sw-list-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--sw-accent);
-  box-shadow: 0 12px 28px -10px var(--sw-glow);
-}
-
-.sw-list-card:active {
-  transform: scale(0.985);
-}
-
-.sw-list-card__poster-wrap {
-  position: relative;
-  width: 78px;
-  height: 114px;
-  border-radius: calc(var(--sw-card-radius, 12px) - 2px);
-  overflow: hidden;
-  flex-shrink: 0;
-  background: #14131c;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.sw-list-card__poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.sw-list-card__idx {
-  position: absolute;
-  top: 5px;
-  left: 5px;
-  padding: 1.5px 5px;
-  border-radius: 5px;
-  background: rgba(8, 8, 12, 0.84);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: rgba(255, 255, 255, 0.86);
-  font-size: 9px;
-  font-weight: 800;
-}
-
-.sw-list-card__body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 5px;
-}
-
-.sw-list-card__top {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.sw-list-card__brand {
-  padding: 2px 6px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid var(--sw-accent);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.sw-list-card__rate {
-  color: #fde047;
-  font-size: 11.5px;
-  font-weight: 800;
-}
-
-.sw-list-card__meta {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 11px;
-  font-weight: 600;
-}
-
-.sw-list-card__title {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-  line-height: 1.22;
-}
-
-.sw-list-card__desc {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.42;
-  color: rgba(255, 255, 255, 0.62);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.sw-list-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin-top: 2px;
-}
-
-.sw-list-card__play {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
-  border-radius: 9px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  font-size: 11.5px;
-  font-weight: 700;
-  transition: background 0.18s ease, border-color 0.18s ease;
-}
-
-.sw-list-card:hover .sw-list-card__play {
-  background: var(--sw-accent);
-  border-color: var(--sw-accent);
-}
-
-.sw-theme--apple .sw-list-card:hover .sw-list-card__play,
-.sw-theme--a24 .sw-list-card:hover .sw-list-card__play {
-  color: #09090b;
-}
-
-.sw-list-skeleton {
-  height: 136px;
-  border-radius: 16px;
+  margin-top: 32px;
+  padding: 0 16px;
 }
 
 .sw-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 
-@media (min-width: 640px) {
+@media (max-width: 360px) {
   .sw-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
-  }
-}
-
-@media (min-width: 960px) {
-  .sw-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 .sw-grid-item {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   cursor: pointer;
-  transition: transform 0.22s ease;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.16s ease;
 }
 
-.sw-grid-item:hover {
-  transform: translateY(-4px);
+.sw-grid-item:active {
+  transform: scale(0.96);
 }
 
 .sw-movie-card__poster-wrap {
   position: relative;
+  width: 100%;
   aspect-ratio: 2 / 3;
-  border-radius: var(--sw-card-radius, 14px);
+  border-radius: 14px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #14131c;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
 .sw-movie-card__poster {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+}
+
+.sw-grid-ribbon {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(6, 6, 9, 0.75);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  backdrop-filter: blur(8px);
 }
 
 .sw-movie-card__rating {
   position: absolute;
-  bottom: 7px;
-  right: 7px;
+  bottom: 6px;
+  left: 6px;
   padding: 2px 6px;
   border-radius: 5px;
-  background: rgba(0, 0, 0, 0.78);
-  color: #fde047;
-  font-size: 10.5px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #ffd56b;
+  font-size: 9.5px;
   font-weight: 800;
 }
 
 .sw-movie-card__serial {
   position: absolute;
-  bottom: 7px;
-  left: 7px;
+  bottom: 6px;
+  right: 6px;
   padding: 2px 6px;
   border-radius: 5px;
-  background: rgba(8, 8, 12, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
-  font-size: 9.5px;
+  font-size: 8.5px;
   font-weight: 700;
+  backdrop-filter: blur(6px);
 }
 
 .sw-movie-card__title {
-  margin: 7px 0 1px;
-  font-size: 12.5px;
-  font-weight: 700;
-  color: #fff;
-  white-space: nowrap;
+  margin: 6px 0 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.9);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .sw-movie-card__year {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 600;
-}
-
-.sw-grid-ribbon {
-  position: absolute;
-  top: 7px;
-  right: 7px;
-  z-index: 5;
-  padding: 2px 6px;
-  border-radius: 5px;
-  background: rgba(8, 8, 12, 0.82);
-  border: 1px solid var(--sw-accent);
-  color: #fff;
-  font-size: 8.5px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  pointer-events: none;
-}
-
-/* Кастомизация карточек под каждый мир */
-.sw-theme--disney .sw-movie-card__poster-wrap {
-  border-radius: 18px;
-  box-shadow: 0 8px 24px -6px rgba(56, 189, 248, 0.25);
-}
-
-.sw-theme--a24 .sw-movie-card__poster-wrap {
-  border-radius: 6px;
-  border: 1px solid rgba(231, 229, 228, 0.2);
-}
-
-.sw-theme--netflix .sw-movie-card__poster-wrap {
-  border-radius: 10px;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .sw-grid-skeleton {
+  width: 100%;
   aspect-ratio: 2 / 3;
   border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sw-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
 }
 
 .sw-load-more-wrap {
@@ -1257,31 +707,18 @@
 }
 
 .sw-load-more-btn {
-  padding: 12px 26px;
+  padding: 12px 28px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid var(--sw-accent);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #fff;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 8px 24px -6px var(--sw-glow);
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
-.sw-load-more-btn:hover {
-  background: var(--sw-accent);
-  color: #fff;
-}
-
-.sw-theme--apple .sw-load-more-btn:hover,
-.sw-theme--a24 .sw-load-more-btn:hover {
-  color: #09090b;
-}
-
-.sw-empty {
-  padding: 40px 20px;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 14px;
+.sw-load-more-btn:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.15);
 }

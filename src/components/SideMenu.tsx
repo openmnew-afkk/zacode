@@ -100,33 +100,23 @@ export const SideMenu: React.FC = () => {
     }
   }, [open]);
 
-  /* Быстрый и плавный расчёт активной карточки через scroll listener */
+  /* Быстрый и плавный расчёт активной карточки БЕЗ принудительного reflow */
   const handleScroll = () => {
     const track = trackRef.current;
     if (!track) return;
 
-    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    if (scrollTimeout.current) cancelAnimationFrame(scrollTimeout.current);
 
-    scrollTimeout.current = setTimeout(() => {
-      const trackCenter = track.scrollLeft + track.clientWidth / 2;
-      let closestIdx = 0;
-      let minDiff = Infinity;
-
-      cardsRef.current.forEach((card, idx) => {
-        if (!card) return;
-        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
-        const diff = Math.abs(trackCenter - cardCenter);
-        if (diff < minDiff) {
-          minDiff = diff;
-          closestIdx = idx;
-        }
-      });
+    scrollTimeout.current = requestAnimationFrame(() => {
+      // 260px ширина карточки + 16px gap
+      const stride = 276;
+      const closestIdx = Math.max(0, Math.min(total - 1, Math.round(track.scrollLeft / stride)));
 
       if (closestIdx !== active) {
         setActive(closestIdx);
         haptic('light');
       }
-    }, 45);
+    });
   };
 
   /* Поддержка клавиатуры (ноутбук / ПК / TG Web) */
@@ -154,15 +144,13 @@ export const SideMenu: React.FC = () => {
       aria-modal="true"
       aria-label="Кино-вселенные"
     >
-      {/* Живой фон активной вселенной без тяжелых фильтров на мобильных */}
+      {/* Живой фон активной вселенной: один аппаратно-ускоренный слой без лагов */}
       <div className="mv-bg" aria-hidden="true">
-        {STUDIO_WORLDS.map((s, i) => (
-          <div
-            key={s.id}
-            className={`mv-bg__layer ${i === active ? 'on' : ''}`}
-            style={covers[s.id] ? { backgroundImage: `url(${covers[s.id]})` } : undefined}
-          />
-        ))}
+        <div
+          key={current.id}
+          className="mv-bg__single"
+          style={covers[current.id] ? { backgroundImage: `url(${covers[current.id]})` } : undefined}
+        />
         <div className="mv-bg__veil" />
       </div>
 
@@ -183,19 +171,8 @@ export const SideMenu: React.FC = () => {
         </button>
       </header>
 
-      {/* ── Нативная карусель 120 FPS со скролл-снэпом — нулевой лаг, постоянные круглые углы ── */}
+      {/* ── Нативная карусель 120 FPS со скролл-снэпом — чистый свайп без раздражающих стрелок поверх карточек ── */}
       <div className="mv-carousel-container">
-        {/* Стрелки для ноутов и TG Web */}
-        <button
-          type="button"
-          className="mv-nav-arrow mv-nav-arrow--left"
-          onClick={() => scrollToIdx(active - 1)}
-          aria-label="Предыдущая вселенная"
-          disabled={active === 0}
-        >
-          ‹
-        </button>
-
         <div
           ref={trackRef}
           className="mv-track"
@@ -231,16 +208,6 @@ export const SideMenu: React.FC = () => {
             );
           })}
         </div>
-
-        <button
-          type="button"
-          className="mv-nav-arrow mv-nav-arrow--right"
-          onClick={() => scrollToIdx(active + 1)}
-          aria-label="Следующая вселенная"
-          disabled={active === total - 1}
-        >
-          ›
-        </button>
       </div>
 
       {/* Инфо активной вселенной */}

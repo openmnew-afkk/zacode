@@ -1,11 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   ZENOVA — КИНО-МИРЫ (СТУДИИ И СТРИМИНГИ)
-   Уникальный кастомный дизайн для каждого мира + настоящие логотипы-надписи
-   и отображение каталога и студий списком:
-   NETFLIX • Disney+ • HBO max • tv+ • MARVEL STUDIOS • A24 • ANIME
+   ZENOVA — КИНО-МИРЫ & ВСЕЛЕННЫЕ (PREMIUM CINEMA EDITION)
+   Ультра-плавный 120 FPS скроллинг, роскошный визуал,
+   мгновенное переключение миров без раздражающих выпадающих стрелок.
    ═══════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   STUDIO_WORLDS,
@@ -35,7 +34,6 @@ export function StudiosPage() {
 
   const [mediaType, setMediaType] = useState<'all' | 'movie' | 'tv'>('all');
   const [collectionId, setCollectionId] = useState<string>('all');
-  const [showStudioList, setShowStudioList] = useState(false);
   const [heroList, setHeroList] = useState<Movie[]>([]);
   const [top10List, setTop10List] = useState<Movie[]>([]);
   const [items, setItems] = useState<Movie[]>([]);
@@ -43,17 +41,17 @@ export function StudiosPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const stripRef = useRef<HTMLDivElement | null>(null);
 
-  // Сброс фильтров при переключении студии
+  // Сброс фильтров при переключении вселенной
   useEffect(() => {
     setMediaType(studio.defaultTab);
     setCollectionId('all');
     setPage(1);
     setHeroIdx(0);
-    setShowStudioList(false);
   }, [studio.id, studio.defaultTab]);
 
-  // Загрузка контента выбранного Кино-Мира
+  // Загрузка контента выбранной вселенной
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -76,7 +74,7 @@ export function StudiosPage() {
     };
   }, [studio.id, mediaType, collectionId]);
 
-  // Авто-слайдер Hero
+  // Плавный авто-слайдер Hero (6.5s)
   useEffect(() => {
     if (heroList.length <= 1) return;
     const timer = setInterval(() => {
@@ -85,9 +83,19 @@ export function StudiosPage() {
     return () => clearInterval(timer);
   }, [heroList.length]);
 
+  // Центрируем активную плашку студии в горизонтальной ленте
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+    const activeChip = strip.querySelector<HTMLElement>('.sw-studio-chip.is-active');
+    if (activeChip) {
+      activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [studio.id]);
+
   const handleSelectStudio = (id: StudioId) => {
-    haptic('light');
-    setShowStudioList(false);
+    if (id === studio.id) return;
+    haptic('medium');
     navigate(`/studios/${id}`, { replace: true });
   };
 
@@ -132,36 +140,16 @@ export function StudiosPage() {
         } as React.CSSProperties
       }
     >
-      {/* ═════ Уникальные атмосферные спецэффекты каждого Кино-Мира ═════ */}
+      {/* ═════ Легковесный аппаратно-ускоренный эмбиент-фон ═════ */}
       <div className="sw-ambient" aria-hidden="true">
-        <div className="sw-ambient-orb sw-ambient-orb--1" />
-        <div className="sw-ambient-orb sw-ambient-orb--2" />
-        {studio.id === 'netflix' && (
-          <div className="sw-netflix-beams">
-            <span /><span /><span /><span /><span /><span />
-          </div>
-        )}
-        {studio.id === 'disney' && (
-          <div className="sw-disney-stars">
-            <span className="sw-star s1" />
-            <span className="sw-star s2" />
-            <span className="sw-star s3" />
-            <span className="sw-star s4" />
-            <span className="sw-star s5" />
-            <div className="sw-disney-arc-bg" />
-          </div>
-        )}
-        {studio.id === 'hbo' && <div className="sw-hbo-aurora" />}
-        {studio.id === 'apple' && <div className="sw-apple-sheen" />}
-        {studio.id === 'marvel' && <div className="sw-marvel-halftone" />}
-        {studio.id === 'a24' && <div className="sw-a24-filmgrain" />}
-        {studio.id === 'anime' && <div className="sw-anime-grid" />}
+        <div className="sw-ambient-glow" />
       </div>
 
-      {/* ═════ Шапка с возвратом и настоящим логотипом-надписью студии ═════ */}
+      {/* ═════ Премиальная кино-шапка ═════ */}
       <header className="sw-header">
         <div className="sw-header-top">
           <button
+            type="button"
             className="sw-back-btn"
             onClick={() => {
               haptic('light');
@@ -169,31 +157,18 @@ export function StudiosPage() {
             }}
             aria-label="На главную"
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
               <path d="M15 18l-6-6 6-6" />
             </svg>
             <span>Назад</span>
           </button>
 
-          <button
-            type="button"
-            className="sw-header-brand-trigger"
-            onClick={() => {
-              haptic('light');
-              setShowStudioList((v) => !v);
-            }}
-            aria-expanded={showStudioList}
-            title="Выбрать другую студию из списка"
-          >
+          <div className="sw-header-active-brand">
             <StudioWordmark id={studio.id} size="md" />
-            <span className={`sw-header-brand-caret ${showStudioList ? 'open' : ''}`}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
-                <path d="M6 9l6 6 6-6" />
-              </svg>
-            </span>
-          </button>
+          </div>
 
           <button
+            type="button"
             className="sw-search-btn"
             onClick={() => {
               haptic('light');
@@ -201,50 +176,41 @@ export function StudiosPage() {
             }}
             aria-label="Поиск"
           >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
               <circle cx="11" cy="11" r="7" />
               <path d="M20 20l-3.5-3.5" />
             </svg>
           </button>
         </div>
 
-        {/* Выезжающий сверху вниз вертикальный список студий с настоящими надписями */}
-        {showStudioList && (
-          <div className="sw-studios-dropdown" role="listbox" aria-label="Список студий">
-            {STUDIO_WORLDS.map((item, idx) => {
-              const active = item.id === studio.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  role="option"
-                  aria-selected={active}
-                  className={`sw-studio-list-row ${active ? 'active' : ''}`}
-                  style={
-                    {
-                      '--row-accent': item.accentColor,
-                      '--row-glow': item.glowColor,
-                      '--row-idx': idx,
-                    } as React.CSSProperties
-                  }
-                  onClick={() => handleSelectStudio(item.id)}
-                >
-                  <div className="sw-studio-list-row__wordmark">
-                    <StudioWordmark id={item.id} size="sm" />
-                  </div>
-                  <div className="sw-studio-list-row__meta">
-                    <span className="sw-studio-list-row__badge">{item.badgeText}</span>
-                    <span className="sw-studio-list-row__sub">{item.tagline}</span>
-                  </div>
-                  {active && <span className="sw-studio-list-row__check">✓</span>}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* ── Горизонтальная лента мгновенного выбора вселенной (без раздражающих выпадающих стрелок) ── */}
+        <div ref={stripRef} className="sw-studios-strip" role="tablist" aria-label="Вселенные">
+          {STUDIO_WORLDS.map((item) => {
+            const isActive = item.id === studio.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className={`sw-studio-chip ${isActive ? 'is-active' : ''}`}
+                style={
+                  {
+                    '--chip-accent': item.accentColor,
+                    '--chip-glow': item.glowColor,
+                  } as React.CSSProperties
+                }
+                onClick={() => handleSelectStudio(item.id)}
+              >
+                <StudioWordmark id={item.id} size="sm" />
+                {isActive && <span className="sw-chip-pip" aria-hidden="true" />}
+              </button>
+            );
+          })}
+        </div>
       </header>
 
-      {/* ═════ Фирменный Hero-блок выбранной студии ═════ */}
+      {/* ═════ Роскошный панорамный Hero-блок ═════ */}
       <section className="sw-hero">
         {currentHero ? (
           <div
@@ -254,29 +220,18 @@ export function StudiosPage() {
               navigate(`/movie/${currentHero.id}`);
             }}
           >
-            <img
-              key={currentHero.id}
-              src={currentHero.backdrop_path || currentHero.poster_path}
-              alt={currentHero.title}
-              className="sw-hero-img"
+            <div
+              className="sw-hero-img-wrap"
+              style={{
+                backgroundImage: `url(${currentHero.backdrop_path || currentHero.poster_path})`,
+              }}
             />
             <div className="sw-hero-vignette" />
 
-            {/* Верхний бейдж студии с настоящим логотипом-надписью */}
-            <div className="sw-hero-top">
-              <div className="sw-studio-pill">
-                <StudioWordmark id={studio.id} size="sm" />
-                <div className="sw-studio-pill-text">
-                  <span className="sw-studio-pill-badge">{studio.badgeText}</span>
-                  <span className="sw-studio-pill-sub">{studio.tagline}</span>
-                </div>
-              </div>
-              {studio.id === 'anime' && (
-                <span className="sw-jp-stamp">アニメ • 4K</span>
-              )}
-              {studio.id === 'a24' && (
-                <span className="sw-a24-stamp">35MM ARCHIVE • CURATED</span>
-              )}
+            {/* Фирменный бейдж студии */}
+            <div className="sw-hero-top-badge">
+              <span className="sw-studio-badge">{studio.badgeText}</span>
+              <span className="sw-studio-quality">4K ULTRA HD · HDR</span>
             </div>
 
             {/* Контент Hero */}
@@ -291,7 +246,7 @@ export function StudiosPage() {
                 <span className="sw-hero-chip">
                   {currentHero.is_serial ? 'Сериал' : 'Фильм'}
                 </span>
-                <span className="sw-hero-chip sw-hero-chip--accent">Ultra HD</span>
+                <span className="sw-hero-chip sw-hero-chip--accent">{studio.shortName}</span>
               </div>
 
               <h2 className="sw-hero-title">{currentHero.title}</h2>
@@ -301,6 +256,7 @@ export function StudiosPage() {
 
               <div className="sw-hero-actions">
                 <button
+                  type="button"
                   className="sw-hero-cta"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -308,7 +264,7 @@ export function StudiosPage() {
                     navigate(`/movie/${currentHero.id}`);
                   }}
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M8 5.14v14l11-7-11-7z" />
                   </svg>
                   <span>Смотреть</span>
@@ -319,6 +275,7 @@ export function StudiosPage() {
                     {heroList.map((h, idx) => (
                       <button
                         key={h.id}
+                        type="button"
                         className={`sw-hero-dot ${idx === heroIdx ? 'active' : ''}`}
                         onClick={() => {
                           haptic('light');
@@ -338,14 +295,12 @@ export function StudiosPage() {
 
         {/* Описание атмосферы мира + Фильтр Все/Фильмы/Сериалы */}
         <div className="sw-world-manifesto">
-          <div className="sw-world-manifesto-left">
-            <span className="sw-world-manifesto-dot" />
-            <p className="sw-world-manifesto-text">{studio.description}</p>
-          </div>
+          <p className="sw-world-manifesto-text">{studio.description}</p>
           <div className="sw-type-tabs">
             {(['all', 'movie', 'tv'] as const).map((t) => (
               <button
                 key={t}
+                type="button"
                 className={`sw-type-tab ${mediaType === t ? 'active' : ''}`}
                 onClick={() => {
                   haptic('light');
@@ -359,23 +314,26 @@ export function StudiosPage() {
         </div>
       </section>
 
-      {/* ═════ Подборки внутри студии ═════ */}
-      <div className="sw-collections-bar">
-        {studio.collections.map((c) => (
-          <button
-            key={c.id}
-            className={`sw-collection-pill ${collectionId === c.id ? 'active' : ''}`}
-            onClick={() => {
-              haptic('light');
-              setCollectionId(c.id);
-            }}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
+      {/* ═════ Тематические коллекции внутри студии ═════ */}
+      {studio.collections && studio.collections.length > 0 && (
+        <div className="sw-collections-bar">
+          {studio.collections.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              className={`sw-collection-pill ${collectionId === c.id ? 'active' : ''}`}
+              onClick={() => {
+                haptic('light');
+                setCollectionId(c.id);
+              }}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      )}
 
-      {/* ═════ ТОП-10 Студии ═════ */}
+      {/* ═════ ТОП-10 Вселенной ═════ */}
       {!loading && top10List.length > 0 && collectionId === 'all' && (
         <section className="sw-top10-section">
           <div className="sw-section-head">
@@ -383,7 +341,7 @@ export function StudiosPage() {
               <span className="sw-top10-badge">ТОП 10</span>
               <h3 className="sw-section-title">Главные хиты {studio.shortName}</h3>
             </div>
-            <span className="sw-section-sub">По популярности в мире</span>
+            <span className="sw-section-sub">Популярно сейчас</span>
           </div>
 
           <div className="sw-top10-track">
@@ -418,7 +376,7 @@ export function StudiosPage() {
         </section>
       )}
 
-      {/* ═════ Каталог студии (ТОЛЬКО ПЛИТКАМИ без выбора вида) ═════ */}
+      {/* ═════ Каталог вселенной (премиум сетка) ═════ */}
       <section className="sw-catalog-section">
         <div className="sw-section-head">
           <div className="sw-section-title-group">
@@ -474,6 +432,7 @@ export function StudiosPage() {
 
             <div className="sw-load-more-wrap">
               <button
+                type="button"
                 className="sw-load-more-btn"
                 onClick={handleLoadMore}
                 disabled={loadingMore}
@@ -487,3 +446,4 @@ export function StudiosPage() {
     </div>
   );
 }
+export default StudiosPage;

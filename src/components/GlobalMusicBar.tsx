@@ -3,6 +3,13 @@ import { useMusicStore } from '../store/musicStore';
 import { audioEngine } from '../services/audioEngine';
 import './GlobalMusicBar.css';
 
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
+
 const GlobalMusicBar: React.FC = () => {
   const {
     currentTrack, isPlaying, progress, duration,
@@ -15,21 +22,123 @@ const GlobalMusicBar: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [toast, setToast] = useState('');
   const [speed, setSpeed] = useState<number>(1.0);
+  const [ytReady, setYtReady] = useState(false);
 
   const currentTrackIdRef = useRef<string | null>(null);
   const consecutiveErrorsRef = useRef(0);
+  const ytPlayerRef = useRef<any>(null);
 
   const showToastMsg = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(''), 2500);
   };
 
+  /* ═══ Динамическая загрузка YouTube IFrame API для полноценных треков ═══ */
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.YT && window.YT.Player) {
+      setYtReady(true);
+      return;
+    }
+    const prevCb = window.onYouTubeIframeAPIReady;
+    window.onYouTubeIframeAPIReady = () => {
+      prevCb?.();
+      setYtReady(true);
+    };
+    if (!document.getElementById('zenova-yt-api-script')) {
+      const tag = document.createElement('script');
+      tag.id = 'zenova-yt-api-script';
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.body.appendChild(tag);
+    }
+  }, []);
+
+  /* ═══ Инициализация экземпляра YouTube Player ═══ */
+  useEffect(() => {
+    if (!ytReady || ytPlayerRef.current || typeof window === 'undefined') return;
+    const target = document.getElementById('zenova-yt-player-target');
+    if (!target || !window.YT?.Player) return;
+
+    try {
+      ytPlayerRef.current = new window.YT.Player('zenova-yt-player-target', {
+        height: '100%',
+        width: '100%',
+        videoId: '',
+        playerVars: {
+          autoplay: 1,
+          controls: 1,
+          playsinline: 1,
+          rel: 0,
+          modestbranding: 1,
+          disablekb: 0,
+        },
+        events: {
+          onReady: () => {
+            const cur = useMusicStore.getState().currentTrack;
+            if (cur?.youtubeId) {
+              ytPlayerRef.current.loadVideoById(cur.youtubeId);
+              if (useMusicStore.getState().isPlaying) {
+                ytPlayerRef.current.playVideo();
+              }
+            }
+          },
+          onStateChange: (event: any) => {
+            const st = event.data;
+            if (st === 1) { // PLAYING
+              setPlaying(true);
+              const dur = ytPlayerRef.current?.getDuration?.();
+              if (dur && isFinite(dur) && dur > 0) setDuration(dur);
+            } else if (st === 2) { // PAUSED
+              setPlaying(false);
+            } else if (st === 0) { // ENDED
+              const store = useMusicStore.getState();
+              if (store.repeatOn && store.currentTrack) {
+                ytPlayerRef.current?.seekTo?.(0, true);
+                ytPlayerRef.current?.playVideo?.();
+                store.setPlaying(true);
+                return;
+              }
+              nextTrack();
+            }
+          },
+          onError: () => {
+            // Фолбэк на превью-аудиопоток при сбое
+            const cur = useMusicStore.getState().currentTrack;
+            if (cur?.streamUrl) {
+              audioEngine.playTrack(cur.streamUrl).catch(() => {});
+            }
+          },
+        },
+      });
+    } catch (e) {
+      console.warn('YouTube init error', e);
+    }
+  }, [ytReady, nextTrack, setPlaying, setDuration]);
+
+  /* ═══ Опрос прогресса воспроизведения YouTube ═══ */
+  useEffect(() => {
+    if (!currentTrack?.youtubeId) return;
+    const timer = setInterval(() => {
+      if (isPlaying && ytPlayerRef.current?.getCurrentTime && !isDraggingRef.current) {
+        const t = ytPlayerRef.current.getCurrentTime();
+        if (typeof t === 'number' && isFinite(t)) {
+          setProgress(t);
+        }
+      }
+    }, 250);
+    return () => clearInterval(timer);
+  }, [currentTrack?.youtubeId, isPlaying, setProgress]);
+
   /* Реагируем на внешний сигнал перемотки (seekTo) */
   useEffect(() => {
     if (seekSignal) {
-      audioEngine.seek(seekSignal.value);
+      if (currentTrack?.youtubeId && ytPlayerRef.current?.seekTo) {
+        ytPlayerRef.current.seekTo(seekSignal.value, true);
+      } else {
+        audioEngine.seek(seekSignal.value);
+      }
     }
-  }, [seekSignal]);
+  }, [seekSignal, currentTrack?.youtubeId]);
 
   /* Подключаем слушатели одиночного аудио-движка */
   useEffect(() => {
@@ -93,12 +202,29 @@ const GlobalMusicBar: React.FC = () => {
     if (!currentTrack) {
       currentTrackIdRef.current = null;
       audioEngine.stop();
+      ytPlayerRef.current?.stopVideo?.();
       return;
     }
 
-    if (currentTrackIdRef.current !== currentTrack.id) {
-      currentTrackIdRef.current = currentTrack.id;
+    const isNewTrack = currentTrackIdRef.current !== currentTrack.id;
+    currentTrackIdRef.current = currentTrack.id;
+
+    if (isNewTrack) {
       setImgError(false);
+    }
+
+    if (currentTrack.youtubeId) {
+      // Полноценный трек через YouTube
+      audioEngine.stop();
+      if (ytPlayerRef.current?.loadVideoById) {
+        ytPlayerRef.current.loadVideoById(currentTrack.youtubeId);
+        if (isPlaying) {
+          ytPlayerRef.current.playVideo?.();
+        }
+      }
+    } else if (isNewTrack) {
+      // Обычный аудиопоток (радио, превью, audius)
+      ytPlayerRef.current?.stopVideo?.();
       audioEngine.playTrack(
         currentTrack.streamUrl,
         speed,
@@ -111,21 +237,30 @@ const GlobalMusicBar: React.FC = () => {
         currentTrack.fallbackUrl
       ).catch(() => {});
     }
-  }, [currentTrack?.id, speed]);
+  }, [currentTrack?.id, currentTrack?.youtubeId, speed]);
 
   /* Пауза / возобновление для текущего трека */
   useEffect(() => {
     if (!currentTrack || currentTrackIdRef.current !== currentTrack.id) return;
-    if (isPlaying) {
-      audioEngine.resume().catch(() => {});
+    if (currentTrack.youtubeId && ytPlayerRef.current) {
+      if (isPlaying) {
+        ytPlayerRef.current.playVideo?.();
+      } else {
+        ytPlayerRef.current.pauseVideo?.();
+      }
     } else {
-      audioEngine.pause();
+      if (isPlaying) {
+        audioEngine.resume().catch(() => {});
+      } else {
+        audioEngine.pause();
+      }
     }
-  }, [isPlaying]);
+  }, [isPlaying, currentTrack?.youtubeId]);
 
   /* Закрытие плеера с гарантированной остановкой звука */
   const handleClosePlayer = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+    ytPlayerRef.current?.stopVideo?.();
     audioEngine.stop();
     setPlaying(false);
     closeTrack();
@@ -227,7 +362,11 @@ const GlobalMusicBar: React.FC = () => {
     setIsDraggingSeek(true);
     const pos = posFromEvent(e);
     setProgress(pos);
-    audioEngine.seek(pos);
+    if (currentTrack?.youtubeId && ytPlayerRef.current?.seekTo) {
+      ytPlayerRef.current.seekTo(pos, true);
+    } else {
+      audioEngine.seek(pos);
+    }
   };
 
   const handleSeekPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -242,7 +381,11 @@ const GlobalMusicBar: React.FC = () => {
     setIsDraggingSeek(false);
     const pos = posFromEvent(e);
     setProgress(pos);
-    audioEngine.seek(pos);
+    if (currentTrack?.youtubeId && ytPlayerRef.current?.seekTo) {
+      ytPlayerRef.current.seekTo(pos, true);
+    } else {
+      audioEngine.seek(pos);
+    }
   };
 
   const handleSeekKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -267,15 +410,28 @@ const GlobalMusicBar: React.FC = () => {
     e.preventDefault();
     next = Math.max(0, Math.min(duration, next));
     setProgress(next);
-    audioEngine.seek(next);
+    if (currentTrack?.youtubeId && ytPlayerRef.current?.seekTo) {
+      ytPlayerRef.current.seekTo(next, true);
+    } else {
+      audioEngine.seek(next);
+    }
   };
 
   const art = currentTrack.artwork && !imgError ? currentTrack.artwork : '';
 
-  /* ══ Развёрнутый полноэкранный плеер ══ */
-  if (isExpanded) {
-    return (
-      <div className="gfull">
+  return (
+    <>
+      {/* Постоянный док YouTube-плеера для полноценных треков (не перемонтируется, не прерывает аудио) */}
+      <div
+        className={`gmb-yt-dock ${isExpanded && currentTrack?.youtubeId ? 'gmb-yt-dock--expanded' : ''}`}
+        aria-hidden={!isExpanded}
+      >
+        <div id="zenova-yt-player-target" />
+      </div>
+
+      {/* ══ Развёрнутый полноэкранный плеер ══ */}
+      {isExpanded ? (
+        <div className="gfull">
         {/* Dynamic backdrop blur */}
         {art && <div className="gfull__bg" style={{ backgroundImage: `url(${art})` }} />}
         <div className="gfull__overlay" />
@@ -507,12 +663,9 @@ const GlobalMusicBar: React.FC = () => {
           </div>
         )}
       </div>
-    );
-  }
-
-  /* ══ Мини-капсула (над нижним меню TabBar) ══ */
-  return (
-    <div className="gbar" role="group" aria-label="Музыкальный плеер">
+      ) : (
+      /* ══ Мини-капсула (над нижним меню TabBar) ══ */
+      <div className="gbar" role="group" aria-label="Музыкальный плеер">
       <div className="gbar__progress" style={{ width: `${pct}%` }} />
       <div className="gbar__inner">
         <button
@@ -571,6 +724,8 @@ const GlobalMusicBar: React.FC = () => {
         </div>
       </div>
     </div>
+    )}
+    </>
   );
 };
 
