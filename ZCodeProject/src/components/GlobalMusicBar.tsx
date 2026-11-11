@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useMusicStore } from '../store/musicStore';
 import { audioEngine } from '../services/audioEngine';
 import { resolveFullAudioTrack } from '../services/soundtracks';
+import { isFullTrack } from '../services/fullMusic';
 import './GlobalMusicBar.css';
 
 const GlobalMusicBar: React.FC = () => {
@@ -16,6 +17,7 @@ const GlobalMusicBar: React.FC = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [toast, setToast] = useState('');
   const [speed, setSpeed] = useState<number>(1.0);
+  const [playingFull, setPlayingFull] = useState(false);
 
   const currentTrackIdRef = useRef<string | null>(null);
   const consecutiveErrorsRef = useRef(0);
@@ -102,6 +104,8 @@ const GlobalMusicBar: React.FC = () => {
 
     if (isNewTrack) {
       setImgError(false);
+      const alreadyFull = isFullTrack(currentTrack);
+      setPlayingFull(alreadyFull);
       audioEngine.playTrack(
         currentTrack.streamUrl,
         speed,
@@ -114,14 +118,15 @@ const GlobalMusicBar: React.FC = () => {
         currentTrack.fallbackUrl
       ).catch(() => {});
 
-      // Обходной путь на ПОЛНЫЕ треки через Audius (без видео/iframe/YouTube)
-      if (currentTrack.source !== 'audius' && !currentTrack.isLiveRadio) {
+      // Поиск ПОЛНОЙ версии (Internet Archive → Audius), если трек ещё превью
+      if (!alreadyFull && !currentTrack.isLiveRadio) {
         resolveFullAudioTrack(currentTrack).then((full) => {
           if (
             full.streamUrl &&
             full.streamUrl !== currentTrack.streamUrl &&
             currentTrackIdRef.current === currentTrack.id
           ) {
+            setPlayingFull(true);
             audioEngine.playTrack(
               full.streamUrl,
               speed,
@@ -334,7 +339,7 @@ const GlobalMusicBar: React.FC = () => {
           </button>
           <div className="gfull__header-center">
             <span className="gfull__now-label">ZENOVA SOUND</span>
-            <span className="gfull__quality-tag">{isLive ? 'LIVE HD' : 'LOSSLESS 24-BIT'}</span>
+            <span className="gfull__quality-tag">{isLive ? 'LIVE HD' : playingFull ? 'FULL TRACK' : 'PREVIEW 0:30'}</span>
           </div>
           <button className="gfull__btn-sm" onClick={() => setShowMenu(true)} aria-label="Меню трека" title="Опции трека">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="6" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="18" r="1.5" fill="currentColor"/></svg>
@@ -358,7 +363,7 @@ const GlobalMusicBar: React.FC = () => {
 
               {/* Бейдж типа трека */}
               <div className="gfull__art-badge">
-                {currentTrack.source === 'audius' ? (
+                {playingFull && !isLive ? (
                   <span className="gfull__art-badge-chip audius">
                     <span className="gfull__art-badge-dot" />
                     ПОЛНЫЙ ТРЕК
@@ -371,7 +376,7 @@ const GlobalMusicBar: React.FC = () => {
                 ) : (
                   <span className="gfull__art-badge-chip preview">
                     <span className="gfull__art-badge-dot" />
-                    LOSSLESS HD
+                    ПРЕВЬЮ 30 СЕК
                   </span>
                 )}
               </div>
