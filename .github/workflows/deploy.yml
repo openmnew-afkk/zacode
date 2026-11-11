@@ -26,12 +26,15 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
+          cache-dependency-path: ZCodeProject/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+        working-directory: ZCodeProject
 
       - name: Build
         run: npm run build
+        working-directory: ZCodeProject
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -39,7 +42,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'
+          path: './ZCodeProject/dist'
 
   deploy:
     environment:
