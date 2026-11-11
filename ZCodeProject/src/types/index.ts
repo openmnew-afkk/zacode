@@ -1,97 +1,101 @@
-/* ===== Типы данных приложения (источник: VideoCDN) ===== */
+/* ===== TeleCinema — Все типы приложения ===== */
 
-/** Жанр */
-export interface Genre {
-  id: number;
-  name: string;
-}
-
-/** Карточка фильма/сериала (нормализованный формат VideoCDN) */
 export interface Movie {
-  id: number;
+  id: string;
+  imdbID: string;
   title: string;
   original_title: string;
   overview: string;
-  poster_path: string | null;
-  backdrop_path: string | null;
+  poster_path: string;
+  backdrop_path: string;
   release_date: string;
   vote_average: number;
-  kinopoisk_rating: number;
   imdb_rating: number;
   runtime: number | null;
+  type: 'movie' | 'series';
   genre_ids: number[];
-  genres: Genre[];
-  type: string; // movie | serial | tvshow | anime
+  genres: string[];
   is_serial: boolean;
-  imdb_id: string;
-  kinopoisk_id: string;
-  quality: string;
-  translator: string;
-  iframe_url: string;
-  countries: string[];
-  actors: string[];
   directors: string[];
+  actors: string[];
+  countries: string[];
   popularity: number;
   adult: boolean;
-  media_type?: string;
+  quality?: string;
+  kinopoisk_id?: number | string;
 }
 
-/** Серия сериала */
-export interface Episode {
-  id: string | number;
-  episode: number;
-  season: number;
-  title: string;
-  iframe_url: string;
-  preview: string;
+export interface MovieDetail extends Movie {
+  plot: string;
+  cast?: CastMember[];
+  seasons?: Season[];
+  episodes?: number;
 }
 
-/** Сезон сериала */
+export interface CastMember {
+  id: number;
+  name: string;
+  character: string;
+  profile_path: string | null;
+}
+
+export interface Actor {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for: string[];
+}
+
 export interface Season {
-  id: string | number;
+  id: number;
   season_number: number;
   episodes_count: number;
   episodes: Episode[];
 }
 
-/** Детальная информация о фильме/сериале */
-export interface MovieDetail extends Movie {
-  seasons: Season[];
-  similar?: Movie[];
-}
-
-/** Ответ API со списком */
-export interface CatalogResponse {
-  ok: boolean;
-  page: number;
-  results: Movie[];
-  total_pages: number;
-  total_results: number;
-}
-
-/** Ответ API деталей фильма */
-export interface MovieDetailResponse {
-  ok: boolean;
-  movie: MovieDetail;
-  similar: Movie[];
-}
-
-/** Ответ API плеера */
-export interface PlayerResponse {
-  ok: boolean;
-  url: string;
+export interface Episode {
   id: number;
-  quality: string;
-  translator: string;
+  episode: number;
+  title: string;
+  season: number;
 }
 
-/** Ответ API мета (жанры/категории) */
-export interface MetaResponse {
-  ok: boolean;
-  genres: Genre[];
+export interface WatchOption {
+  id: string;
+  label: string;
+  sublabel: string;
+  url: string;
+  type: 'iframe' | 'direct' | 'external' | 'telegram';
+  lang: 'en' | 'ru' | 'multi';
+  provider: string;
+  flag: string;
+  quality?: string;
 }
 
-/** Пользователь Telegram */
+export interface Genre {
+  id: number;
+  name: string;
+}
+
+export interface WatchHistoryItem {
+  movie: Movie;
+  watchedAt: number;
+}
+
+export type AppTheme = 'dark' | 'light';
+
+/* Статусы просмотра (дневник киномана) */
+export type WatchStatus = 'want' | 'watching' | 'watched' | 'dropped';
+
+export interface TrackedItem {
+  movie: Movie;
+  status: WatchStatus;
+  rating: number | null; // личная оценка 1-10
+  addedAt: number;
+  updatedAt?: number;
+  progress?: number; // 0..1 — доля просмотра (для «Продолжить просмотр»)
+}
+
 export interface TelegramUser {
   id: number;
   first_name: string;
@@ -101,17 +105,10 @@ export interface TelegramUser {
   photo_url?: string;
 }
 
-/** Элемент истории просмотров */
-export interface WatchHistoryItem {
-  movie: Movie;
-  watchedAt: number; // timestamp
-}
-
-/** Тема приложения */
-export type AppTheme = 'dark' | 'light';
-
-/** Источник видео (для настроек) */
-export interface VideoSourceConfig {
-  token: string;
-  enabled: boolean;
+export interface CatalogResponse {
+  ok: boolean;
+  page: number;
+  results: Movie[];
+  total_pages: number;
+  total_results: number;
 }

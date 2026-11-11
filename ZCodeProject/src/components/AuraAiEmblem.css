@@ -1,0 +1,179 @@
+/* ===== Aura AI Holographic Neural Emblem ===== */
+
+.aura-ai-emblem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* Размеры */
+.aura-ai-emblem--sm {
+  width: 32px;
+  height: 32px;
+}
+.aura-ai-emblem--md {
+  width: 44px;
+  height: 44px;
+}
+.aura-ai-emblem--lg {
+  width: 68px;
+  height: 68px;
+}
+
+/* 1. Внешний неоновый ореол нейросети */
+.aura-ai-emblem__halo {
+  position: absolute;
+  inset: -25%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(236, 72, 153, 0.45) 0%,
+    rgba(168, 85, 247, 0.35) 40%,
+    rgba(6, 182, 212, 0.25) 70%,
+    transparent 85%
+  );
+  filter: blur(8px);
+  animation: aiHaloPulse 3.2s ease-in-out infinite alternate;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+
+/* 2. Быстро вращающаяся хроматическая орбита */
+.aura-ai-emblem__chroma-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(
+    from 0deg,
+    #ec4899 0deg,
+    #a855f7 90deg,
+    #06b6d4 180deg,
+    #fbbf24 270deg,
+    #ec4899 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: aiChromaSpin 5s linear infinite;
+  box-shadow: 0 0 16px rgba(236, 72, 153, 0.45);
+  transform: translateZ(0);
+}
+
+/* 3. Нейронное кольцо с орбитальными узлами */
+.aura-ai-emblem__neural-ring {
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  border: 1px dotted rgba(255, 255, 255, 0.35);
+  animation: aiNeuralSpin 8s linear infinite reverse;
+  transform: translateZ(0);
+}
+
+.aura-ai-emblem__node {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #38bdf8, 0 0 12px #ec4899;
+}
+
+.aura-ai-emblem--lg .aura-ai-emblem__node {
+  width: 7px;
+  height: 7px;
+}
+
+.aura-ai-emblem__node--1 {
+  top: -2.5px;
+  left: calc(50% - 2.5px);
+}
+.aura-ai-emblem__node--2 {
+  bottom: 10%;
+  left: 6%;
+}
+.aura-ai-emblem__node--3 {
+  bottom: 10%;
+  right: 6%;
+}
+
+/* 4. Квантовое ядро интеллекта */
+.aura-ai-emblem__core {
+  position: relative;
+  width: 58%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f472b6 35%, #9333ea 70%, #0d091e 100%);
+  box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.8),
+              0 0 18px rgba(236, 72, 153, 0.55),
+              0 0 30px rgba(168, 85, 247, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: aiCoreBreathe 2.6s ease-in-out infinite alternate;
+  transform: translateZ(0);
+}
+
+.aura-ai-emblem__core-pulse {
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(244, 114, 182, 0.4) 60%, transparent 100%);
+  filter: blur(1px);
+}
+
+.aura-ai-emblem__sparkle {
+  position: relative;
+  z-index: 2;
+  font-size: 11px;
+  line-height: 1;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 14px #ec4899;
+  animation: aiSparkleFloat 2s ease-in-out infinite alternate;
+}
+
+.aura-ai-emblem--sm .aura-ai-emblem__sparkle {
+  font-size: 9px;
+}
+.aura-ai-emblem--lg .aura-ai-emblem__sparkle {
+  font-size: 16px;
+}
+
+/* Анимации */
+@keyframes aiChromaSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes aiNeuralSpin {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes aiHaloPulse {
+  0% { opacity: 0.5; transform: scale(0.92); }
+  100% { opacity: 0.9; transform: scale(1.12); }
+}
+
+@keyframes aiCoreBreathe {
+  0% {
+    transform: scale(0.94);
+    box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.7),
+                0 0 14px rgba(236, 72, 153, 0.5),
+                0 0 24px rgba(168, 85, 247, 0.3);
+  }
+  100% {
+    transform: scale(1.06);
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.95),
+                0 0 24px rgba(236, 72, 153, 0.8),
+                0 0 38px rgba(6, 182, 212, 0.5);
+  }
+}
+
+@keyframes aiSparkleFloat {
+  0% { transform: scale(0.85) rotate(-5deg); opacity: 0.8; }
+  100% { transform: scale(1.15) rotate(15deg); opacity: 1; }
+}

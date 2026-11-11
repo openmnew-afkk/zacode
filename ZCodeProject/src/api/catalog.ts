@@ -1,300 +1,1373 @@
-/* ===== Каталог — OMDb напрямую из браузера (CORS разрешён) =====
- * Ключ 'trilogy' — бесплатный demo-ключ, работает без регистрации.
- * Видеоплеер — vidsrc.me.
- * Для популярных фильмов — русские названия (150+).
+/* ===== КиноЗал — TMDB API ===== */
+
+import type { Actor, Movie, MovieDetail, CatalogResponse, Season, Genre } from '../types';
+
+/* ════════════ TMDB Config ════════════ */
+const TMDB_KEY = 'dc003aabe0e60ef32360bfdf70deac32';
+const TMDB_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkYzAwM2FhYmUwZTYwZWYzMjM2MGJmZGY3MGRlYWMzMiIsIm5iZiI6MTc4MjI0OTkzNC4zODcsInN1YiI6IjZhM2FmOWNlMDg0YjFmMTVkMmU4YWQ2NiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.l7xTD-__fJ9o-gXPURwqUBfwIuWTDeYRolDBxPYAk8s';
+const TMDB_BASE = 'https://api.themoviedb.org/3';
+const IMG_BASE = 'https://image.tmdb.org/t/p';
+
+const FALLBACK_POSTER = 'https://via.placeholder.com/300x450/1a1612/e8b84a?text=%D0%9D%D0%B5%D1%82+%D0%BF%D0%BE%D1%81%D1%82%D0%B5%D1%80%D0%B0';
+
+/* ════════════ Cache ════════════ */
+const cache = new Map<string, { data: any; time: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 минут
+
+function getCached<T>(key: string): T | null {
+  const item = cache.get(key);
+  if (item && Date.now() - item.time < CACHE_TTL) return item.data;
+  return null;
+}
+
+function setCache(key: string, data: any) {
+  cache.set(key, { data, time: Date.now() });
+}
+
+/* ════════════ TMDB Request — гонка прокси параллельно ════════════
+ * TMDB заблокирован у части провайдеров РФ, поэтому запрашиваем
+ * НАПРЯЖУЮ и через несколько CORS-прокси ОДНОВРЕМЕННО — кто первый
+ * ответит, тот и победил. Плюс localStorage-кэш на 24 часа: если
+ * сеть совсем не работает, показываем последний загруженный каталог.
  */
-
-import type { Movie, CatalogResponse, MovieDetail, Genre } from '../types';
-
-const OMDB_KEY = 'trilogy';
-const OMDB_BASE = 'https://www.omdbapi.com';
-const PLAYER_BASE = 'https://vidsrc.me/embed';
-
-/* ===== 150+ русских названий ===== */
-const RU: Record<string, string> = {
-  'tt0133093':'Матрица','tt1375666':'Начало','tt0816692':'Интерстеллар',
-  'tt0468569':'Тёмный рыцарь','tt0109830':'Форрест Гамп','tt0111161':'Побег из Шоушенка',
-  'tt0068646':'Крёстный отец','tt0120737':'Властелин колец: Братство кольца',
-  'tt0167260':'Властелин колец: Две крепости','tt0167261':'Властелин колец: Возвращение короля',
-  'tt0910970':'ВАЛЛ-И','tt0317248':'Город грехов','tt0253474':'Пианист',
-  'tt0108052':'Список Шиндлера','tt4154756':'Мстители: Война бесконечности',
-  'tt4154796':'Мстители: Финал','tt0848228':'Мстители','tt0499549':'Аватар',
-  'tt0110357':'Король Лев','tt0103064':'Терминатор 2','tt0088247':'Терминатор',
-  'tt1345836':'Тёмный рыцарь: Возрождение легенды','tt0372784':'Бэтмен: Начало',
-  'tt7286456':'Джокер','tt6751668':'Паразиты','tt0120338':'Титаник',
-  'tt0110912':'Криминальное чтиво','tt0137523':'Бойцовский клуб','tt0120689':'Зелёная миля',
-  'tt0107048':'День сурка','tt0088763':'Назад в будущее','tt0114709':'История игрушек',
-  'tt0076759':'Звёздные войны','tt0107290':'Парк Юрского периода','tt0245429':'Унесённые призраками',
-  'tt0407887':'Отступники','tt0993846':'Волк с Уолл-стрит','tt0172495':'Гладиатор',
-  'tt0211915':'Амели','tt0317705':'Суперсемейка','tt0338013':'Вечное сияние чистого разума',
-  'tt0441773':'Кунг-фу панда','tt0477348':'Старикам тут не место','tt0482571':'Престиж',
-  'tt0903747':'Во все тяжкие','tt0944947':'Игра престолов','tt4555426':'Дюна',
-  'tt6723592':'Довод','tt5113040':'Дюна: Часть вторая','tt9362722':'Человек-паук: Через вселенные 2',
-  'tt15398776':'Оппенгеймер','tt1745960':'Лучший стрелок: Маверик',
-  'tt13238346':'Барби','tt1464335':'Стражи Галактики 3','tt5433142':'Флэш',
-  'tt1517268':'Тор: Любовь и гром','tt9114286':'Чёрная Пантера: Ваканда навеки',
-  'tt6443346':'Падение империи','tt1489887':'Похищенная','tt1790864':'Баллада о змеях и голубях',
-  'tt1642628':'Чёрный Адам','tt10731256':'Дюна: Пророчество',
-};
-
-/* ===== Плеер ===== */
-const PATTERN_KEY = 'tc_player_pattern';
-export const getPlayerPattern = (): string => {
-  try { return localStorage.getItem(PATTERN_KEY) || ''; } catch { return ''; }
-};
-export const setPlayerPattern = (pattern: string) => {
-  try { localStorage.setItem(PATTERN_KEY, pattern); } catch { /* ignore */ }
-};
-
-/* ===== Изображения ===== */
-const poster = (p: string | null) => {
-  if (!p || p === 'N/A') return '/no-poster.svg';
-  if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('//')) return p;
-  return `/no-poster.svg`;
-};
-export const posterUrl = poster;
-export const backdropUrl = (p: string | null) => p && p !== 'N/A' ? poster(p) : '';
-
-/* ===== OMDb ===== */
-interface OMDBItem {
-  Title: string; Year: string; imdbID: string; Type: string; Poster: string;
-}
-interface OMDBDetail extends OMDBItem {
-  Plot: string; imdbRating: string; Genre: string; Director: string; Actors: string;
-  Runtime: string; Country: string; Ratings: { Source: string; Value: string }[];
-}
-
-async function omdb(p: Record<string, any>): Promise<any> {
-  const u = new URL(OMDB_BASE);
-  u.searchParams.set('apikey', OMDB_KEY);
-  for (const [k, v] of Object.entries(p))
-    if (v != null && v !== '') u.searchParams.set(k, String(v));
-  const r = await fetch(u.toString());
-  const d = await r.json();
-  if (d.Response === 'False') throw new Error(d.Error || 'NOT_FOUND');
-  return d;
-}
-
-function imdbHash(id: string): number {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-
-function toMovie(i: OMDBItem): Movie {
-  const id = i.imdbID || '';
-  const ruTitle = RU[id];
-  return {
-    id: imdbHash(id), title: ruTitle || i.Title || 'Без названия',
-    original_title: i.Title || '',
-    overview: '', poster_path: poster(i.Poster), backdrop_path: poster(i.Poster),
-    release_date: i.Year || '', vote_average: 0,
-    kinopoisk_rating: 0, imdb_rating: 0, runtime: null,
-    genre_ids: [], genres: [],
-    type: i.Type === 'series' ? 'serial' : 'movie',
-    is_serial: i.Type === 'series',
-    imdb_id: id, kinopoisk_id: id,
-    quality: '', translator: '', iframe_url: '',
-    countries: [], actors: [], directors: [],
-    popularity: 0, adult: false,
-  };
-}
-
-function toDetail(i: OMDBDetail): MovieDetail {
-  const m = toMovie(i);
-  const gn = i.Genre?.split(', ')?.filter(Boolean) || [];
-  const rt = i.Runtime?.match(/(\d+)/);
-  const rating = parseFloat(i.imdbRating) || 0;
-  return {
-    ...m,
-    overview: i.Plot && i.Plot !== 'N/A' ? i.Plot : m.overview,
-    vote_average: rating, imdb_rating: rating,
-    runtime: rt ? parseInt(rt[1]) : null,
-    genre_ids: gn.map((_: string, i: number) => i + 1),
-    genres: gn.map((n: string, i: number) => ({ id: i + 1, name: n })),
-    actors: i.Actors?.split(', ')?.filter(Boolean) || [],
-    directors: i.Director?.split(', ')?.filter(Boolean) || [],
-    countries: i.Country?.split(', ')?.filter(Boolean) || [],
-    poster_path: poster(i.Poster), backdrop_path: poster(i.Poster),
-    seasons: [], similar: [],
-  };
-}
-
-/* ===== Быстрая загрузка с OMDb =====
- * Параллельные запросы + localStorage кэш.
- * Первая загрузка — 20 фильмов, показываются сразу из кэша при повторных.
- */
-
-
-/* ===== 90 фильмов + 40 сериалов (ID для загрузки) ===== */
-const ALL_IDS = [
-  // Топ-20 для быстрого показа (самые популярные)
-  'tt15398776','tt13238346','tt1745960','tt5113040','tt9362722','tt4555426','tt1464335',
-  'tt1375666','tt0816692','tt0133093','tt0468569','tt0109830','tt0111161','tt0120737',
-  'tt4154756','tt0499549','tt7286456','tt6751668','tt0120338','tt0903747',
-  // Ещё фильмы
-  'tt5433142','tt1517268','tt9114286','tt1642628','tt10731256','tt1790864','tt6443346',
-  'tt6723592','tt1489887','tt21254950','tt0068646','tt0167260','tt0167261','tt0910970',
-  'tt4154796','tt0103064','tt1345836','tt0110912','tt0137523','tt0120689','tt0088763',
-  'tt0108052','tt0172495','tt0407887','tt0993846','tt0317705','tt0338013','tt0441773',
-  'tt0482571','tt1856101','tt1392190','tt0816711','tt1454468','tt3315342','tt2582802',
-  'tt3659388','tt5027774','tt5580390','tt5726616','tt5109280','tt6139732','tt7139936',
-  'tt7323606','tt7639528','tt7734218','tt8178634','tt8367814','tt24616872','tt27721048',
-  'tt26722974','tt19682634','tt21965076','tt24613980','tt11304740','tt14539740','tt22332140',
-  'tt14885894','tt23286798',
-  // Сериалы
-  'tt0903747','tt0944947','tt5491994','tt7366338','tt0108778','tt0898266','tt0411008',
-  'tt1475582','tt1520211','tt3032476','tt2861424','tt2571774','tt5180504','tt7658402',
-  'tt2306299','tt3526078','tt4574334','tt8111088','tt9174558','tt10048342','tt10541088',
-  'tt1119644','tt1196946','tt1213641','tt1300854','tt1327773','tt1825683','tt2310332',
-  'tt2467372','tt2802850','tt3322312','tt3397884','tt35211234','tt3748528','tt3890160',
-  'tt4034228','tt4287320','tt4459900','tt4633694','tt4698684',
+const PROXY_MAKERS: Array<(u: string) => { u: string; h: Record<string, string> }> = [
+  // Напрямую: Bearer-токен (работает без блокировок)
+  (u) => ({ u, h: { 'Authorization': `Bearer ${TMDB_TOKEN}`, 'Content-Type': 'application/json' } }),
+  // CORS-прокси (api_key в URL, без Bearer)
+  (u) => ({ u: `https://corsproxy.io/?url=${encodeURIComponent(u)}`, h: {} }),
+  (u) => ({ u: `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, h: {} }),
+  (u) => ({ u: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`, h: {} }),
+  (u) => ({ u: `https://cors.eu.org/${u}`, h: {} }),
 ];
 
-/* ===== Публичный API ===== */
-
-/* ===== Параллельная загрузка с кэшем ===== */
-let _cache: Record<string, any> | null = null;
-let _cacheLoaded = false;
-
-function getCache(): Record<string, any> {
-  if (_cacheLoaded) return _cache || {};
+function lsCacheGet<T>(key: string, maxAge: number): T | null {
   try {
-    const raw = localStorage.getItem('tc_cache');
-    if (raw) {
-      const { data, time } = JSON.parse(raw);
-      if (Date.now() - time < 30 * 60 * 1000) _cache = data;
-    }
+    const raw = localStorage.getItem('tc_tmdb_' + key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.d && Date.now() - parsed.t < maxAge) return parsed.d as T;
   } catch {}
-  _cacheLoaded = true;
-  return _cache || {};
+  return null;
+}
+function lsCacheSet(key: string, data: unknown) {
+  try { localStorage.setItem('tc_tmdb_' + key, JSON.stringify({ t: Date.now(), d: data })); } catch {}
 }
 
-function saveCache(data: Record<string, any>) {
-  _cache = data;
-  try { localStorage.setItem('tc_cache', JSON.stringify({ data, time: Date.now() })); } catch {}
-}
-
-async function loadBatch(ids: string[], limit = 30): Promise<Movie[]> {
-  const cache = getCache();
-  const results: Movie[] = [];
-  const toFetch: string[] = [];
-
-  for (const id of ids) {
-    if (cache[id]) results.push(cache[id]);
-    else toFetch.push(id);
-    if (results.length + toFetch.length >= limit * 2) break;
+async function tmdb<T = any>(path: string, params: Record<string, any> = {}): Promise<T> {
+  const url = new URL(`${TMDB_BASE}${path}`);
+  url.searchParams.set('language', 'ru-RU');
+  for (const [k, v] of Object.entries(params)) {
+    if (v != null && v !== '') url.searchParams.set(k, String(v));
   }
 
-  if (results.length >= limit) {
-    if (toFetch.length > 0) refreshCache(toFetch);
-    return results.slice(0, limit);
+  const cacheKey = url.toString();
+  const cached = getCached<T>(cacheKey);
+  if (cached) return cached;
+
+  /* Офлайн-кэш на 24 часа — отдаём сразу, пока сеть не ответила */
+  const stale = lsCacheGet<T>(cacheKey, 24 * 60 * 60 * 1000);
+  if (stale) {
+    setCache(cacheKey, stale);
+    return stale;
   }
 
-  const needed = toFetch.slice(0, limit);
-  for (let i = 0; i < needed.length; i += 5) {
-    const batch = needed.slice(i, i + 5);
-    const responses = await Promise.allSettled(
-      batch.map((id) => omdb({ i: id, plot: 'short' }))
+  const urlWithKey = new URL(url.toString());
+  urlWithKey.searchParams.set('api_key', TMDB_KEY);
+
+  try {
+    const data = await Promise.any(
+      PROXY_MAKERS.map((make) =>
+        fetch(make(urlWithKey.toString()).u, {
+          headers: make(urlWithKey.toString()).h,
+          signal: AbortSignal.timeout(7000),
+        }).then((r) => {
+          if (!r.ok) throw new Error(`HTTP ${r.status}`);
+          return r.json();
+        })
+      )
     );
-    for (const r of responses) {
-      if (r.status === 'fulfilled' && r.value?.imdbID) {
-        const m = toDetail(r.value);
-        results.push(m);
-        cache[r.value.imdbID] = m;
-      }
+    setCache(cacheKey, data);
+    lsCacheSet(cacheKey, data);
+    return data as T;
+  } catch {
+    /* Всё недоступно — последний шанс: устаревший кэш (7 дней) */
+    const older = lsCacheGet<T>(cacheKey, 7 * 24 * 60 * 60 * 1000);
+    if (older) {
+      setCache(cacheKey, older);
+      return older;
     }
-    if (results.length >= limit) break;
+    throw new Error('TMDB unavailable');
   }
-  saveCache(cache);
-  const remaining = toFetch.slice(limit);
-  if (remaining.length > 0) setTimeout(() => refreshCache(remaining), 500);
-  return results.slice(0, limit);
 }
 
-function refreshCache(ids: string[]) {
-  const cache = getCache();
-  const toFetch = ids.filter((id) => !cache[id]);
-  if (toFetch.length === 0) return;
-  (async () => {
-    for (let i = 0; i < toFetch.length; i += 5) {
-      const responses = await Promise.allSettled(
-        toFetch.slice(i, i + 5).map((id) => omdb({ i: id, plot: 'short' }))
-      );
-      for (const r of responses) {
-        if (r.status === 'fulfilled' && r.value?.imdbID) cache[r.value.imdbID] = toDetail(r.value);
-      }
-      if (i % 15 === 0) saveCache(cache);
+/* ════════════ Трейлеры (официальные YouTube-ролики) ════════════ */
+export async function getTrailer(tmdbId: string, isSerial: boolean): Promise<string | null> {
+  const type = isSerial ? 'tv' : 'movie';
+  const pickKey = (data: any): string | null => {
+    const vids: any[] = data?.results || [];
+    const yt = vids.filter((v) => v.site === 'YouTube');
+    const pick =
+      yt.find((v) => v.type === 'Trailer' && v.official) ||
+      yt.find((v) => v.type === 'Trailer') ||
+      yt.find((v) => v.type === 'Teaser') ||
+      yt[0];
+    return pick ? `https://www.youtube.com/embed/${pick.key}?rel=0` : null;
+  };
+  try {
+    const ru = await tmdb<any>(`/${type}/${tmdbId}/videos`, { language: 'ru-RU' });
+    const key = pickKey(ru);
+    if (key) return key;
+  } catch {}
+  try {
+    const en = await tmdb<any>(`/${type}/${tmdbId}/videos`, { language: 'en-US' });
+    return pickKey(en);
+  } catch {}
+  return null;
+}
+
+/* ════════════ Converter ════════════ */
+function toMovie(item: any, mediaType?: string): Movie {
+  const isSerial = mediaType === 'tv' || item.media_type === 'tv' || !!item.first_air_date;
+  const title = isSerial ? (item.name || item.original_name || 'Без названия') : (item.title || item.original_title || 'Без названия');
+  const origTitle = isSerial ? (item.original_name || '') : (item.original_title || '');
+  const date = isSerial ? (item.first_air_date || '') : (item.release_date || '');
+
+  const typePrefix = isSerial ? 'tv' : 'movie';
+  return {
+    id: `${typePrefix}-${item.id}`,   // tv-1396 или movie-278
+    imdbID: item.imdb_id || item.external_ids?.imdb_id || '',
+    title,
+    original_title: origTitle,
+    overview: item.overview || '',
+    poster_path: item.poster_path ? `${IMG_BASE}/w500${item.poster_path}` : FALLBACK_POSTER,
+    backdrop_path: item.backdrop_path ? `${IMG_BASE}/w1280${item.backdrop_path}` : FALLBACK_POSTER,
+    release_date: date,
+    vote_average: item.vote_average || 0,
+    imdb_rating: item.vote_average || 0,
+    runtime: null,
+    type: isSerial ? 'series' : 'movie',
+    genre_ids: item.genre_ids || [],
+    genres: [],
+    is_serial: isSerial,
+    directors: [],
+    actors: [],
+    countries: [],
+    popularity: item.popularity || 0,
+    adult: item.adult || false,
+    quality: 'Full HD',
+  };
+}
+
+async function getDetail(id: string, isSerial: boolean): Promise<any> {
+  const type = isSerial ? 'tv' : 'movie';
+  const data = await tmdb<any>(`/${type}/${id}`, {
+    append_to_response: 'credits,seasons,external_ids,similar,videos,recommendations',
+  });
+  return data;
+}
+
+function toMovieDetail(item: any, isSerial: boolean): MovieDetail {
+  const movie = toMovie(item, isSerial ? 'tv' : 'movie');
+  const credits = item.credits || {};
+  const seasons: Season[] = (item.seasons || []).filter((s: any) => s.season_number > 0).map((s: any) => ({
+    id: s.id,
+    season_number: s.season_number,
+    episodes_count: s.episode_count || 0,
+    episodes: [],
+  }));
+
+  // Реальный IMDB ID из external_ids
+  const realImdbId = item.external_ids?.imdb_id || movie.imdbID || '';
+
+  return {
+    ...movie,
+    imdbID: realImdbId,          // ← реальный tt0468569 и т.д.
+    plot: item.overview || '',
+    overview: item.overview || '',
+    runtime: item.runtime || null,
+    genres: (item.genres || []).map((g: any) => g.name),
+    genre_ids: (item.genres || []).map((g: any) => g.id),
+    directors: (credits.crew || []).filter((c: any) => c.job === 'Director').map((c: any) => c.name),
+    actors: (credits.cast || []).slice(0, 10).map((c: any) => c.name),
+    cast: (credits.cast || []).slice(0, 10).map((person: any) => ({
+      id: person.id,
+      name: person.name,
+      character: person.character || '',
+      profile_path: person.profile_path ? `${IMG_BASE}/w185${person.profile_path}` : null,
+    })),
+    countries: item.production_countries?.map((c: any) => c.name) || [],
+    seasons: isSerial ? seasons : undefined,
+    episodes: isSerial ? seasons.reduce((acc, s) => acc + s.episodes_count, 0) : undefined,
+    imdb_rating: item.vote_average || 0,
+    vote_average: item.vote_average || 0,
+  };
+}
+
+/* ════════════ EXPORTS ════════════ */
+
+export async function getAllTrending(): Promise<Movie[]> {
+  try {
+    const [movies, series] = await Promise.all([
+      tmdb<any>('/trending/movie/week', {}),
+      tmdb<any>('/trending/tv/week', {}),
+    ]);
+    const m = (movies.results || []).slice(0, 15).map((i: any) => toMovie(i, 'movie'));
+    const s = (series.results || []).slice(0, 15).map((i: any) => toMovie(i, 'tv'));
+    // Чередуем
+    const result: Movie[] = [];
+    const maxLen = Math.max(m.length, s.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (m[i]) result.push(m[i]);
+      if (s[i]) result.push(s[i]);
     }
-    saveCache(cache);
-  })();
+    return result;
+  } catch {
+    return [];
+  }
 }
 
-export const getCatalog = async (p?: any): Promise<CatalogResponse> => {
-  const movies = await loadBatch(ALL_IDS, 24);
-  return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
+/* ═══════════ Хештег и жанровый маппинг TMDB ═══════════ */
+interface HashtagParsed {
+  genreIdsMovie: number[];
+  genreIdsTv: number[];
+  year?: number;
+  sortBy?: string;
+  minVotes?: number;
+  origLang?: string;
+  forceType?: 'movie' | 'series';
+  keyword: string;
+}
+
+const HASHTAG_GENRE_MAP: Record<string, { movie: number[]; tv: number[] }> = {
+  'боевик': { movie: [28], tv: [10759] },
+  'боевики': { movie: [28], tv: [10759] },
+  'action': { movie: [28], tv: [10759] },
+  'экшн': { movie: [28], tv: [10759] },
+  'комедия': { movie: [35], tv: [35] },
+  'комедии': { movie: [35], tv: [35] },
+  'comedy': { movie: [35], tv: [35] },
+  'драма': { movie: [18], tv: [18] },
+  'драмы': { movie: [18], tv: [18] },
+  'drama': { movie: [18], tv: [18] },
+  'ужасы': { movie: [27], tv: [9648] },
+  'хоррор': { movie: [27], tv: [9648] },
+  'хорроры': { movie: [27], tv: [9648] },
+  'ужастик': { movie: [27], tv: [9648] },
+  'horror': { movie: [27], tv: [9648] },
+  'фантастика': { movie: [878], tv: [10765] },
+  'scifi': { movie: [878], tv: [10765] },
+  'sci-fi': { movie: [878], tv: [10765] },
+  'фэнтези': { movie: [14], tv: [10765] },
+  'фентези': { movie: [14], tv: [10765] },
+  'fantasy': { movie: [14], tv: [10765] },
+  'триллер': { movie: [53], tv: [9648] },
+  'триллеры': { movie: [53], tv: [9648] },
+  'thriller': { movie: [53], tv: [9648] },
+  'криминал': { movie: [80], tv: [80] },
+  'crime': { movie: [80], tv: [80] },
+  'мультфильм': { movie: [16], tv: [16] },
+  'мультфильмы': { movie: [16], tv: [16] },
+  'мультики': { movie: [16], tv: [16] },
+  'анимация': { movie: [16], tv: [16] },
+  'animation': { movie: [16], tv: [16] },
+  'аниме': { movie: [16], tv: [16] },
+  'anime': { movie: [16], tv: [16] },
+  'приключения': { movie: [12], tv: [10759] },
+  'приключение': { movie: [12], tv: [10759] },
+  'adventure': { movie: [12], tv: [10759] },
+  'детектив': { movie: [9648], tv: [9648] },
+  'детективы': { movie: [9648], tv: [9648] },
+  'mystery': { movie: [9648], tv: [9648] },
+  'мелодрама': { movie: [10749], tv: [10749] },
+  'романтика': { movie: [10749], tv: [10749] },
+  'romance': { movie: [10749], tv: [10749] },
+  'семейный': { movie: [10751], tv: [10751] },
+  'семья': { movie: [10751], tv: [10751] },
+  'family': { movie: [10751], tv: [10751] },
+  'история': { movie: [36], tv: [36] },
+  'исторический': { movie: [36], tv: [36] },
+  'history': { movie: [36], tv: [36] },
+  'военный': { movie: [10752], tv: [10768] },
+  'война': { movie: [10752], tv: [10768] },
+  'war': { movie: [10752], tv: [10768] },
+  'вестерн': { movie: [37], tv: [37] },
+  'western': { movie: [37], tv: [37] },
+  'документальный': { movie: [99], tv: [99] },
+  'документалка': { movie: [99], tv: [99] },
+  'доку': { movie: [99], tv: [99] },
+  'doc': { movie: [99], tv: [99] },
 };
 
-export const searchCatalog = async (q: string, page = 1, type?: string): Promise<CatalogResponse> => {
+function parseSearchHashtags(rawQuery: string): HashtagParsed {
+  const result: HashtagParsed = {
+    genreIdsMovie: [],
+    genreIdsTv: [],
+    sortBy: 'popularity.desc',
+    keyword: '',
+  };
+
+  const tags = (rawQuery.match(/#([a-zA-Zа-яА-ЯёЁ0-9_-]+)/g) || []).map((t) =>
+    t.replace(/^#/, '').toLowerCase().trim()
+  );
+
+  const residual = rawQuery.replace(/#([a-zA-Zа-яА-ЯёЁ0-9_-]+)/g, '').trim();
+  result.keyword = residual;
+
+  // Если нет явных символов #, проверим, не ввёл ли пользователь название жанра целиком
+  if (tags.length === 0 && rawQuery.trim()) {
+    const single = rawQuery.trim().toLowerCase();
+    if (HASHTAG_GENRE_MAP[single]) {
+      tags.push(single);
+      result.keyword = '';
+    }
+  }
+
+  for (const tag of tags) {
+    if (/^\d{4}$/.test(tag)) {
+      result.year = parseInt(tag, 10);
+      continue;
+    }
+    if (tag.includes('2026') || tag.includes('новинк') || tag.includes('премьер')) {
+      result.year = 2026;
+      result.sortBy = 'popularity.desc';
+    } else if (tag.includes('2025')) {
+      result.year = 2025;
+    } else if (tag.includes('2024')) {
+      result.year = 2024;
+    } else if (tag.includes('2023')) {
+      result.year = 2023;
+    }
+
+    if (tag === 'топ' || tag === 'топ100' || tag === 'лучшее') {
+      result.sortBy = 'vote_average.desc';
+      result.minVotes = 300;
+    }
+
+    if (tag === 'сериал' || tag === 'сериалы' || tag === 'series') {
+      result.forceType = 'series';
+    } else if (tag === 'фильм' || tag === 'фильмы' || tag === 'movie') {
+      result.forceType = 'movie';
+    }
+
+    if (tag === 'аниме' || tag === 'anime') {
+      result.genreIdsMovie.push(16);
+      result.genreIdsTv.push(16);
+      result.origLang = 'ja';
+    }
+
+    const matched = HASHTAG_GENRE_MAP[tag];
+    if (matched) {
+      result.genreIdsMovie.push(...matched.movie);
+      result.genreIdsTv.push(...matched.tv);
+    }
+  }
+
+  result.genreIdsMovie = Array.from(new Set(result.genreIdsMovie));
+  result.genreIdsTv = Array.from(new Set(result.genreIdsTv));
+  return result;
+}
+
+export async function searchMovies(query: string, page = 1, type?: 'movie' | 'series'): Promise<CatalogResponse> {
   try {
-    const params: Record<string, any> = { s: q, page };
-    if (type === 'series') params.type = 'series';
-    const data = await omdb(params);
-    if (!data.Search) return { ok: true, page, results: [], total_pages: 0, total_results: 0 };
-    const items = data.Search.map(toMovie);
-    const enriched = await Promise.all(
-      items.slice(0, 6).map(async (m: Movie) => {
-        try { const d = await omdb({ i: m.imdb_id, plot: 'short' }); return toDetail(d); }
-        catch { return m; }
-      })
-    );
+    const trimmed = query.trim();
+    const hasHashtag = trimmed.includes('#');
+    const parsed = parseSearchHashtags(trimmed);
+    const effectiveType = parsed.forceType || type;
+
+    /* ── Сценарий 1: Чистый поиск по хештегу(ам) через TMDB Discover ── */
+    if ((hasHashtag || parsed.genreIdsMovie.length > 0 || parsed.year) && !parsed.keyword) {
+      if (effectiveType === 'movie') {
+        const params: Record<string, any> = {
+          page,
+          sort_by: parsed.sortBy || 'popularity.desc',
+          include_adult: false,
+          'vote_count.gte': parsed.minVotes || 40,
+        };
+        if (parsed.genreIdsMovie.length > 0) params.with_genres = parsed.genreIdsMovie.join(',');
+        if (parsed.year) params.primary_release_year = parsed.year;
+        if (parsed.origLang) params.with_original_language = parsed.origLang;
+
+        const data = await tmdb<any>('/discover/movie', params);
+        return {
+          ok: true,
+          page: data.page || page,
+          results: (data.results || []).map((i: any) => toMovie(i, 'movie')),
+          total_pages: Math.min(data.total_pages || 1, 500),
+          total_results: data.total_results || 0,
+        };
+      }
+
+      if (effectiveType === 'series') {
+        const params: Record<string, any> = {
+          page,
+          sort_by: parsed.sortBy || 'popularity.desc',
+          include_adult: false,
+          'vote_count.gte': parsed.minVotes || 30,
+        };
+        if (parsed.genreIdsTv.length > 0) params.with_genres = parsed.genreIdsTv.join(',');
+        if (parsed.year) params.first_air_date_year = parsed.year;
+        if (parsed.origLang) params.with_original_language = parsed.origLang;
+
+        const data = await tmdb<any>('/discover/tv', params);
+        return {
+          ok: true,
+          page: data.page || page,
+          results: (data.results || []).map((i: any) => toMovie(i, 'tv')),
+          total_pages: Math.min(data.total_pages || 1, 500),
+          total_results: data.total_results || 0,
+        };
+      }
+
+      /* Мульти-поиск по хештегу (фильмы + сериалы) */
+      const movieParams: Record<string, any> = {
+        page,
+        sort_by: parsed.sortBy || 'popularity.desc',
+        include_adult: false,
+        'vote_count.gte': parsed.minVotes || 40,
+      };
+      if (parsed.genreIdsMovie.length > 0) movieParams.with_genres = parsed.genreIdsMovie.join(',');
+      if (parsed.year) movieParams.primary_release_year = parsed.year;
+      if (parsed.origLang) movieParams.with_original_language = parsed.origLang;
+
+      const tvParams: Record<string, any> = {
+        page,
+        sort_by: parsed.sortBy || 'popularity.desc',
+        include_adult: false,
+        'vote_count.gte': parsed.minVotes || 30,
+      };
+      if (parsed.genreIdsTv.length > 0) tvParams.with_genres = parsed.genreIdsTv.join(',');
+      if (parsed.year) tvParams.first_air_date_year = parsed.year;
+      if (parsed.origLang) tvParams.with_original_language = parsed.origLang;
+
+      const [movieData, tvData] = await Promise.all([
+        tmdb<any>('/discover/movie', movieParams).catch(() => ({ results: [] })),
+        tmdb<any>('/discover/tv', tvParams).catch(() => ({ results: [] })),
+      ]);
+
+      const m = (movieData.results || []).map((i: any) => toMovie(i, 'movie'));
+      const s = (tvData.results || []).map((i: any) => toMovie(i, 'tv'));
+      const merged: Movie[] = [];
+      const maxL = Math.max(m.length, s.length);
+      for (let i = 0; i < maxL; i++) {
+        if (m[i]) merged.push(m[i]);
+        if (s[i]) merged.push(s[i]);
+      }
+
+      return {
+        ok: true,
+        page,
+        results: merged,
+        total_pages: Math.min(Math.max(movieData.total_pages || 1, tvData.total_pages || 1), 500),
+        total_results: (movieData.total_results || 0) + (tvData.total_results || 0),
+      };
+    }
+
+    /* ── Сценарий 2: Поиск по ключевому слову (с фильтрацией по хештегам если указаны) ── */
+    const searchQuery = parsed.keyword || trimmed;
+    const mediaType = effectiveType === 'series' ? 'tv' : effectiveType === 'movie' ? 'movie' : 'multi';
+    const data = await tmdb<any>(`/search/${mediaType}`, { query: searchQuery, page, include_adult: false });
+
+    let results = (data.results || []).map((item: any) => toMovie(item));
+
+    // Если был указан хештег вместе со словом (напр. "Бэтмен #боевик")
+    if (parsed.genreIdsMovie.length > 0 || parsed.genreIdsTv.length > 0) {
+      results = results.filter((m: Movie) =>
+        m.genre_ids?.some((g) => parsed.genreIdsMovie.includes(g) || parsed.genreIdsTv.includes(g))
+      );
+    }
+    if (parsed.year) {
+      results = results.filter((m: Movie) => m.release_date?.startsWith(String(parsed.year)));
+    }
+
+    // Фильтруем по типу если нужно
+    if (effectiveType === 'movie') results = results.filter((m: Movie) => !m.is_serial);
+    if (effectiveType === 'series') results = results.filter((m: Movie) => m.is_serial);
+
+    // Если текстовый поиск ничего не дал, но есть жанр — попробуем discover
+    if (results.length === 0 && (parsed.genreIdsMovie.length > 0 || parsed.genreIdsTv.length > 0)) {
+      const disc = await smartDiscover({
+        mediaType: effectiveType === 'series' ? 'tv' : 'movie',
+        genres: effectiveType === 'series' ? parsed.genreIdsTv : parsed.genreIdsMovie,
+        page,
+      });
+      if (disc.length > 0) {
+        return {
+          ok: true,
+          page,
+          results: disc,
+          total_pages: 10,
+          total_results: disc.length,
+        };
+      }
+    }
+
     return {
-      ok: true, page,
-      results: [...enriched, ...items.slice(6)],
-      total_pages: Math.ceil(Math.min(parseInt(data.totalResults || '0'), 100) / 10),
-      total_results: parseInt(data.totalResults || '0') || 0,
+      ok: true,
+      page: data.page || page,
+      results,
+      total_pages: Math.min(data.total_pages || 1, 500),
+      total_results: data.total_results || 0,
+    };
+  } catch (error) {
+    console.error('Search error:', error);
+    return { ok: false, page, results: [], total_pages: 0, total_results: 0 };
+  }
+}
+
+export async function searchActors(query: string): Promise<Actor[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const data = await tmdb<any>('/search/person', {
+    query: trimmed,
+    page: 1,
+    include_adult: false,
+  });
+
+  return (data.results || []).slice(0, 12).map((person: any) => ({
+    id: person.id,
+    name: person.name || 'Без имени',
+    profile_path: person.profile_path ? `${IMG_BASE}/w185${person.profile_path}` : null,
+    known_for: (person.known_for || [])
+      .map((item: any) => item.title || item.name)
+      .filter(Boolean)
+      .slice(0, 3),
+  }));
+}
+
+export async function getMoviesByActor(personId: number): Promise<Movie[]> {
+  const data = await tmdb<any>(`/person/${personId}/combined_credits`);
+  const currentYear = new Date().getFullYear();
+  return (data.cast || [])
+    .filter((item: any) => {
+      const year = Number.parseInt((item.release_date || item.first_air_date || '').slice(0, 4), 10);
+      return (item.media_type === 'movie' || item.media_type === 'tv')
+        && item.adult !== true
+        && item.vote_average >= 5.8
+        && item.vote_count >= 35
+        && !item.genre_ids?.includes(99)
+        && year > 0
+        && year <= currentYear;
+    })
+    .map((item: any) => {
+      const movie = toMovie(item);
+      const voteCount = Math.log10((item.vote_count || 0) + 1);
+      const popularity = Math.log10((item.popularity || 0) + 1);
+      const year = Number.parseInt(movie.release_date.slice(0, 4), 10);
+      const qualityScore = movie.vote_average * 10 + voteCount * 5 + popularity * 3 + year * 0.08;
+      return { movie, qualityScore };
+    })
+    .sort((a: { movie: Movie; qualityScore: number }, b: { movie: Movie; qualityScore: number }) =>
+      b.qualityScore - a.qualityScore
+    )
+    .map((item: { movie: Movie }) => item.movie)
+    .slice(0, 40);
+}
+
+export async function getMovieDetail(compositeId: string): Promise<MovieDetail | null> {
+  try {
+    // ID формат: "tv-1396" или "movie-278" или просто "278"
+    let type: 'movie' | 'tv' = 'movie';
+    let numId = compositeId;
+
+    if (compositeId.startsWith('tv-')) {
+      type = 'tv';
+      numId = compositeId.slice(3);
+    } else if (compositeId.startsWith('movie-')) {
+      type = 'movie';
+      numId = compositeId.slice(6);
+    } else {
+      numId = compositeId.replace('tt', '');
+    }
+
+    const isSerial = type === 'tv';
+
+    try {
+      const data = await getDetail(numId, isSerial);
+      return toMovieDetail(data, isSerial);
+    } catch {
+      // Если не нашли — пробуем другой тип
+      const data = await getDetail(numId, !isSerial);
+      return toMovieDetail(data, !isSerial);
+    }
+  } catch (error) {
+    console.error('Detail error:', error);
+    return null;
+  }
+}
+
+export async function getGenres(type: 'movie' | 'series' = 'movie'): Promise<Genre[]> {
+  try {
+    const mediaType = type === 'series' ? 'tv' : 'movie';
+    const data = await tmdb<any>(`/genre/${mediaType}/list`, {});
+    return (data.genres || []).map((g: any) => ({ id: g.id, name: g.name }));
+  } catch {
+    return [];
+  }
+}
+
+export async function getTrendingMovies(): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>('/trending/movie/week', {});
+    return (data.results || []).slice(0, 20).map((i: any) => toMovie(i, 'movie'));
+  } catch { return []; }
+}
+
+export async function getTrendingSeries(): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>('/trending/tv/week', {});
+    return (data.results || []).slice(0, 20).map((i: any) => toMovie(i, 'tv'));
+  } catch { return []; }
+}
+
+export async function getTopRated(type: 'movie' | 'series' = 'movie'): Promise<Movie[]> {
+  try {
+    const mediaType = type === 'series' ? 'tv' : 'movie';
+    const data = await tmdb<any>(`/${mediaType}/top_rated`, {});
+    return (data.results || []).slice(0, 20).map((i: any) => toMovie(i, mediaType));
+  } catch { return []; }
+}
+
+export async function getNowPlaying(): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>('/movie/now_playing', { region: 'RU' });
+    return (data.results || []).slice(0, 20).map((i: any) => toMovie(i, 'movie'));
+  } catch { return []; }
+}
+
+export async function getPopularByGenre(genreId: number, page = 1): Promise<CatalogResponse> {
+  try {
+    const data = await tmdb<any>('/discover/movie', {
+      with_genres: genreId,
+      page,
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 100,
+    });
+    return {
+      ok: true,
+      page,
+      results: (data.results || []).map((i: any) => toMovie(i, 'movie')),
+      total_pages: data.total_pages || 1,
+      total_results: data.total_results || 0,
     };
   } catch {
-    return { ok: true, page, results: [], total_pages: 0, total_results: 0 };
+    return { ok: false, page, results: [], total_pages: 0, total_results: 0 };
   }
-};
+}
+/* Discover: пейджинг фильмов */
+export async function discoverMovies(opts: {
+  page?: number;
+  sort_by?: string;
+  with_genres?: string;
+  year?: string;
+  /** Только релизы не новее этой даты (YYYY-MM-DD) — для честных «новинок» */
+  releaseLte?: string;
+} = {}): Promise<CatalogResponse> {
+  try {
+    const data = await tmdb<any>('/discover/movie', {
+      page: opts.page || 1,
+      sort_by: opts.sort_by || 'popularity.desc',
+      with_genres: opts.with_genres || '',
+      primary_release_year: opts.year || '',
+      'primary_release_date.lte': opts.releaseLte || '',
+      'vote_count.gte': 50,
+      include_adult: false,
+    });
+    return {
+      ok: true,
+      page: data.page || 1,
+      results: (data.results || []).map((i: any) => toMovie(i, 'movie')),
+      total_pages: Math.min(data.total_pages || 1, 500),
+      total_results: data.total_results || 0,
+    };
+  } catch {
+    return { ok: false, page: 1, results: [], total_pages: 0, total_results: 0 };
+  }
+}
 
-export const getNovelty = async (page = 1): Promise<CatalogResponse> => {
-  const movies = await loadBatch(ALL_IDS, 24);
-  return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
-};
+/* ════════════ Сезонные подборки (по ключевому слову TMDB: christmas и т.п.) ════════════ */
 
-export const getTop = async (page = 1): Promise<CatalogResponse> => {
-  const movies = await loadBatch(ALL_IDS, 24);
-  return { ok: true, page: 1, results: movies, total_pages: 1, total_results: movies.length };
-};
+/**
+ * Эталонная подборка настоящих зимних, новогодних и рождественских фильмов.
+ * Гарантирует, что в Зимнем киномарафоне и сезонной ленте всегда 100% зимнее и праздничное кино.
+ */
+function makeWinterMovie(raw: {
+  id: string;
+  title: string;
+  original_title: string;
+  overview: string;
+  poster_path: string;
+  backdrop_path: string;
+  release_date: string;
+  vote_average: number;
+  genre_ids: number[];
+}): Movie {
+  return {
+    ...raw,
+    imdbID: '',
+    imdb_rating: raw.vote_average,
+    runtime: null,
+    type: 'movie',
+    genres: [],
+    is_serial: false,
+    directors: [],
+    actors: [],
+    countries: [],
+    popularity: 100,
+    adult: false,
+    quality: 'Full HD',
+  };
+}
 
-export const getMovieDetail = async (id: string | number): Promise<MovieDetail> => {
-  const d = await omdb({ i: id, plot: 'full' });
-  return toDetail(d);
-};
+export const CURATED_WINTER_MOVIES: Movie[] = [
+  {
+    id: 'movie-771',
+    title: 'Один дома',
+    original_title: 'Home Alone',
+    overview: 'Восьмилетний Кевин Маккаллистер случайно остаётся один в огромном доме накануне Рождества и даёт изобретательный отпор двум грабителям.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/9wSbe4CwObACCQvaUVhWQyLR5Vz.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/va6a30f2P3J4bl4bM7t2I4dJ2oP.jpg',
+    release_date: '1990-11-16',
+    vote_average: 7.4,
+    genre_ids: [35, 10751],
+  },
+  {
+    id: 'movie-772',
+    title: 'Один дома 2: Затерянный в Нью-Йорке',
+    original_title: 'Home Alone 2: Lost in New York',
+    overview: 'Кевин снова отбивается от семьи в аэропорту и оказывается один в рождественском Нью-Йорке с кредиткой отца и старыми знакомыми бандитами.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/uuitWHpJwxD1wruFl2nZHIb4UGN.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/1uHTuwx5h9T3XzsXijMMKybDFvZ.jpg',
+    release_date: '1992-11-19',
+    vote_average: 6.7,
+    genre_ids: [35, 10751, 12],
+  },
+  {
+    id: 'movie-508965',
+    title: 'Клаус',
+    original_title: 'Klaus',
+    overview: 'Эгоистичный почтальон Джаспер попадает на заснеженный северный остров Смиренсбург, где знакомится с угрюмым лесным плотником Клаусом.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/q125RHUDgR4gjwh1QkfYuJLYkL.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/mlxKite1x1PgmIhJgAxNS9eHmH8.jpg',
+    release_date: '2019-11-08',
+    vote_average: 8.2,
+    genre_ids: [16, 10751, 12, 35],
+  },
+  {
+    id: 'movie-1581',
+    title: 'Отпуск по обмену',
+    original_title: 'The Holiday',
+    overview: 'В преддверии Рождества две девушки из солнечной Калифорнии и заснеженной английской провинции меняются домами на две недели.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/6fbqG49Q7IWBWdyJ7asNTcNbnG6.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/s9Bn7Mx4U9cWOR1WdFZjU1DTAkh.jpg',
+    release_date: '2006-12-08',
+    vote_average: 7.1,
+    genre_ids: [35, 10749],
+  },
+  {
+    id: 'movie-8871',
+    title: 'Гринч — похититель Рождества',
+    original_title: 'How the Grinch Stole Christmas',
+    overview: 'Зелёный отшельник Гринч, живущий на вершине снежной горы, решает украсть у жителей Ктограда их любимый зимний праздник.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/1WZbbPApEivA421gCOluuzMMKCk.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/ab0j8C23M7qC9baC0tE12fDbl2F.jpg',
+    release_date: '1900-11-17'.replace('1900', '2000'),
+    vote_average: 6.8,
+    genre_ids: [10751, 35, 14],
+  },
+  {
+    id: 'movie-360920',
+    title: 'Гринч',
+    original_title: 'The Grinch',
+    overview: 'Анимационная зимняя сказка о ворчливом Гринче и его верном псе Максе, задумавших грандиозное похищение Рождества.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/stAu0oF6dYDhV5ssbmFUYkQPtCP.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/juc9wt7Eh2IarLL5S1yQ1a21O1A.jpg',
+    release_date: '2018-11-08',
+    vote_average: 6.9,
+    genre_ids: [16, 10751, 35, 14],
+  },
+  {
+    id: 'movie-5255',
+    title: 'Полярный экспресс',
+    original_title: 'The Polar Express',
+    overview: 'В канун Рождества у дома мальчика, перестающего верить в чудо, останавливается волшебный поезд, идущий на Северный полюс.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/eOoCzH0MqeGr2taUZO4SwG416PF.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/f2t4JbUvQIj15X3K2m28a6jQp9x.jpg',
+    release_date: '2004-11-10',
+    vote_average: 6.7,
+    genre_ids: [16, 12, 10751, 14],
+  },
+  {
+    id: 'movie-508',
+    title: 'Реальная любовь',
+    original_title: 'Love Actually',
+    overview: 'Девять трогательных и забавных историй любви разворачиваются в предновогоднем Лондоне за пять недель до Рождества.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/7QPeVsr9rcFU9Gl90yg0gTOTpVv.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/pW1s4c2vE6f8O0T1L9K3rU1mP0z.jpg',
+    release_date: '2003-09-07',
+    vote_average: 7.1,
+    genre_ids: [35, 10749, 18],
+  },
+  {
+    id: 'movie-109445',
+    title: 'Холодное сердце',
+    original_title: 'Frozen',
+    overview: 'Принцесса Анна и отважный Кристофф отправляются в путешествие сквозь снежные вершины, чтобы снять ледяное заклятие королевы Эльзы.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kgwjIb2JDHRhNk13lmSxiClFjVk.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/fydUcbkqLyESCFa9U5XKqi8dIVj.jpg',
+    release_date: '2013-11-20',
+    vote_average: 7.2,
+    genre_ids: [16, 10751, 12, 14],
+  },
+  {
+    id: 'movie-17979',
+    title: 'Рождественская история',
+    original_title: 'A Christmas Carol',
+    overview: 'В морозную рождественскую ночь старого скрягу Эбенезера Скруджа посещают три Духа Рождества.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/t4P2jC34h7tZ768oB65qJ4xL5qI.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/m9p23n1i76L73W2j3A9j6t8L4dC.jpg',
+    release_date: '2009-11-04',
+    vote_average: 6.9,
+    genre_ids: [16, 18, 10751, 14],
+  },
+  {
+    id: 'movie-81188',
+    title: 'Хранители снов',
+    original_title: 'Rise of the Guardians',
+    overview: 'Ледяной Джек, Северянин и Хранители объединяются, чтобы защитить детские сны и зимнее чудо от коварного Кромешника.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kW21B8X8A79k9T2R27q0y3fL7aW.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/sF9cQ2zK1z2d8G7j1x6E2P5y4tR.jpg',
+    release_date: '2012-11-21',
+    vote_average: 7.4,
+    genre_ids: [16, 10751, 14, 28, 12],
+  },
+  {
+    id: 'movie-546554',
+    title: 'Рождество на двоих',
+    original_title: 'Last Christmas',
+    overview: 'Кейт работает в магазине рождественских подарков в центре зимнего Лондона, и её жизнь меняется после встречи с загадочным Томом.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/kDEj4N2F9B2W1h0L3g0O6q2J1hT.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/b8O0A3pX6M3y7P4k5q1R2z8T9vW.jpg',
+    release_date: '2019-11-07',
+    vote_average: 7.2,
+    genre_ids: [35, 10749, 18],
+  },
+  {
+    id: 'movie-10719',
+    title: 'Эльф',
+    original_title: 'Elf',
+    overview: 'Выросший среди эльфов Санта-Клауса на Северном полюсе Бадди отправляется в предпраздничный Нью-Йорк на поиски своего настоящего отца.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/oOleziEempUPu96jkGs0Pj6tKxj.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/v1QEIuBM1vvpvfqalahhIyXY0Cm.jpg',
+    release_date: '2003-10-09',
+    vote_average: 6.7,
+    genre_ids: [35, 10751, 14],
+  },
+  {
+    id: 'movie-411',
+    title: 'Хроники Нарнии: Лев, колдунья и волшебный шкаф',
+    original_title: 'The Chronicles of Narnia: The Lion, the Witch and the Wardrobe',
+    overview: 'Четверо детей находят за дверцей платяного шкафа волшебную страну Нарнию, скованную вечной зимой Белой Колдуньи.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/iREd0rNCjYdf5Ar0vfaW32yrkm.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/tuDhEdza074bA497bO9WFEPs6O6.jpg',
+    release_date: '2005-12-07',
+    vote_average: 7.1,
+    genre_ids: [12, 10751, 14],
+  },
+  {
+    id: 'movie-671',
+    title: 'Гарри Поттер и философский камень',
+    original_title: "Harry Potter and the Philosopher's Stone",
+    overview: 'Первая зима и Рождество Гарри Поттера в заснеженном замке Хогвартс, где начинаются главные чудеса его жизни.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/hziiv14OpD73u9gAak4XDDfBKa2.jpg',
+    release_date: '2001-11-16',
+    vote_average: 7.9,
+    genre_ids: [12, 14, 10751],
+  },
+  {
+    id: 'movie-9479',
+    title: 'Кошмар перед Рождеством',
+    original_title: 'The Nightmare Before Christmas',
+    overview: 'Царь тыкв Джек Скеллингтон случайно попадает в Город Рождества и очаровывается сверкающим зимним праздником.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/oQffRNjK8e19rF7xVYEN8ew0j7b.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/1imXh8sE2Y62mF0b7pG2y0mB1cT.jpg',
+    release_date: '1993-10-09',
+    vote_average: 7.8,
+    genre_ids: [14, 16, 10751],
+  },
+  {
+    id: 'movie-5994',
+    title: 'Семьянин',
+    original_title: 'The Family Man',
+    overview: 'В рождественское утро успешный финансист с Уолл-стрит просыпается в заснеженном пригороде в роли многодетного семьянина.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/m47UeI8t2l1dM16V0kG0s7b2O9F.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/9y5cO0V8d4q1s2t3w7p9R8m1k2J.jpg',
+    release_date: '2000-12-12',
+    vote_average: 6.9,
+    genre_ids: [35, 18, 10749, 14],
+  },
+  {
+    id: 'movie-840430',
+    title: 'Оставленные',
+    original_title: 'The Holdovers',
+    overview: 'Ворчливый преподаватель истории, повариха и своенравный ученик остаются на рождественские каникулы в пустом заснеженном кампусе 1970 года.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/VHSzNBTwxV8vh7wylo7O9CLdac.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/bWIIWhnaoWx3FTVXv6GkYDv3djL.jpg',
+    release_date: '2023-10-27',
+    vote_average: 7.8,
+    genre_ids: [35, 18],
+  },
+  {
+    id: 'movie-845781',
+    title: 'Миссия: Красный',
+    original_title: 'Red One',
+    overview: 'Накануне Рождества с Северного полюса похищают Санта-Клауса, и начальник службы безопасности объединяется с охотником за головами.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/cdqLnri3NEGcmfnqwk2TSIYtddg.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/rOmUuQEZfPXglwFs5ELLLUDKodL.jpg',
+    release_date: '2024-10-31',
+    vote_average: 7.0,
+    genre_ids: [28, 35, 14, 10751],
+  },
+  {
+    id: 'movie-11395',
+    title: 'Санта-Клаус',
+    original_title: 'The Santa Clause',
+    overview: 'В рождественскую ночь Скотт Кэлвин случайно пугает Санту на крыше своего дома и сам становится новым главным волшебником зимы.',
+    poster_path: 'https://image.tmdb.org/t/p/w500/t55p6yA2k4v0W2hF6H7m8Z5k1cE.jpg',
+    backdrop_path: 'https://image.tmdb.org/t/p/w780/x7p4g6L5t2W9s1d3k5R8y0V2m4N.jpg',
+    release_date: '1994-11-11',
+    vote_average: 6.5,
+    genre_ids: [14, 18, 35, 10751],
+  },
+].map(makeWinterMovie);
 
-export interface PlayerSource { label: string; url: string; type: string; }
+export async function getKeywordCollection(keyword: string, page = 1): Promise<Movie[]> {
+  const norm = keyword.trim().toLowerCase();
+  const isWinterQuery =
+    norm === 'christmas' ||
+    norm === 'winter' ||
+    norm === 'new year' ||
+    norm.includes('207317');
 
-export const getPlayerUrl = async (id: string | number, title: string): Promise<PlayerSource[]> => {
-  const s: PlayerSource[] = [];
-  const sid = String(id);
-  const pattern = getPlayerPattern();
-  if (pattern) s.push({ label: 'Мой плеер', url: pattern.replace(/\{ID\}/g, sid), type: 'embed' });
-  s.push({ label: 'VidSrc', url: `${PLAYER_BASE}/${sid}`, type: 'embed' });
-  s.push({ label: 'YouTube', url: `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(title+' фильм')}`, type: 'youtube' });
-  return s;
-};
+  try {
+    let withKeywords = keyword.trim();
 
-export const getGenres = async (): Promise<Genre[]> => [
-  { id: 1, name: 'Боевик' }, { id: 2, name: 'Триллер' }, { id: 3, name: 'Комедия' },
-  { id: 4, name: 'Драма' }, { id: 5, name: 'Фантастика' }, { id: 6, name: 'Ужасы' },
-  { id: 7, name: 'Приключения' }, { id: 8, name: 'Мелодрама' }, { id: 9, name: 'Детектив' },
-  { id: 10, name: 'Военный' }, { id: 11, name: 'Исторический' }, { id: 12, name: 'Семейный' },
-  { id: 13, name: 'Мультфильм' }, { id: 14, name: 'Фэнтези' }, { id: 15, name: 'Криминал' },
+    if (isWinterQuery) {
+      // Строго зимние и рождественские TMDB keyword IDs:
+      // 207317 (christmas), 4391 (santa claus), 260365 (christmas eve), 293198 (new year's eve)
+      withKeywords = '207317|4391|260365|293198';
+    } else if (!/^\d+(\|\d+)*$/.test(withKeywords)) {
+      const kw = await tmdb<any>('/search/keyword', { query: withKeywords });
+      const id = kw?.results?.[0]?.id;
+      if (!id) return [];
+      withKeywords = String(id);
+    }
+
+    const data = await tmdb<any>('/discover/movie', {
+      with_keywords: withKeywords,
+      sort_by: 'popularity.desc',
+      'vote_count.gte': 120,
+      include_adult: false,
+      page,
+    });
+
+    const apiMovies = (data.results || [])
+      .map((i: any) => toMovie(i, 'movie'))
+      .filter((m: Movie) => Boolean(m.poster_path));
+
+    if (isWinterQuery) {
+      const merged = page === 1 ? [...CURATED_WINTER_MOVIES, ...apiMovies] : [...apiMovies, ...CURATED_WINTER_MOVIES];
+      const seen = new Set<string>();
+      return merged.filter((m) => {
+        if (!m.poster_path || seen.has(m.id)) return false;
+        seen.add(m.id);
+        return true;
+      });
+    }
+
+    return apiMovies;
+  } catch {
+    return isWinterQuery ? CURATED_WINTER_MOVIES : [];
+  }
+}
+
+/* ════════════ КиноИИ: умный подбор ════════════ */
+
+export interface SmartDiscoverOpts {
+  mediaType: 'movie' | 'tv';
+  /** TMDB жанры */
+  genres?: number[];
+  minRuntime?: number;
+  maxRuntime?: number;
+  yearFrom?: number;
+  yearTo?: number;
+  /** Если не задан — случайная страница 1..3 для разнообразия подборок */
+  page?: number;
+}
+
+export async function smartDiscover(opts: SmartDiscoverOpts): Promise<Movie[]> {
+  try {
+    const dateKey = opts.mediaType === 'movie' ? 'primary_release_date' : 'first_air_date';
+    const data = await tmdb<any>(`/discover/${opts.mediaType}`, {
+      with_genres: (opts.genres || []).join(','),
+      'vote_count.gte': opts.mediaType === 'movie' ? 300 : 200,
+      'with_runtime.lte': opts.maxRuntime,
+      'with_runtime.gte': opts.minRuntime,
+      [`${dateKey}.gte`]: opts.yearFrom ? `${opts.yearFrom}-01-01` : '',
+      [`${dateKey}.lte`]: opts.yearTo ? `${opts.yearTo}-12-31` : '',
+      sort_by: 'popularity.desc',
+      include_adult: false,
+      page: opts.page ?? 1 + Math.floor(Math.random() * 3),
+    });
+    return (data.results || []).map((i: any) => toMovie(i, opts.mediaType));
+  } catch { return []; }
+}
+
+/** Рекомендации TMDB по конкретному фильму/сериалу (для персонализации) */
+export async function getRecommendations(id: string, mediaType: 'movie' | 'tv'): Promise<Movie[]> {
+  try {
+    const data = await tmdb<any>(`/${mediaType}/${id}/recommendations`, { page: 1 });
+    return (data.results || []).map((i: any) => toMovie(i, mediaType));
+  } catch { return []; }
+}
+export async function discoverSeries(opts: {
+  page?: number;
+  sort_by?: string;
+  with_genres?: string;
+} = {}): Promise<CatalogResponse> {
+  try {
+    const data = await tmdb<any>('/discover/tv', {
+      page: opts.page || 1,
+      sort_by: opts.sort_by || 'popularity.desc',
+      with_genres: opts.with_genres || '',
+      'vote_count.gte': 50,
+    });
+    return {
+      ok: true,
+      page: data.page || 1,
+      results: (data.results || []).map((i: any) => toMovie(i, 'tv')),
+      total_pages: Math.min(data.total_pages || 1, 500),
+      total_results: data.total_results || 0,
+    };
+  } catch {
+    return { ok: false, page: 1, results: [], total_pages: 0, total_results: 0 };
+  }
+}
+/* ════════════ Мировое кино (100% International Catalog) ════════════ */
+
+export const CURATED_RUSSIAN_HITS: Movie[] = [];
+
+export async function getRussianMovies(): Promise<Movie[]> {
+  return [];
+}
+
+export async function getRussianSeries(): Promise<Movie[]> {
+  return [];
+}
+
+export async function getRussianCinema(): Promise<Movie[]> {
+  return [];
+}
+
+/* ════════════ Кино-Миры и Студии (Netflix, Disney+, HBO, Apple TV+, Marvel, A24, Anime) ════════════ */
+
+export type StudioId = 'netflix' | 'disney' | 'hbo' | 'apple' | 'marvel' | 'a24' | 'anime';
+
+export interface StudioWorldConfig {
+  id: StudioId;
+  name: string;
+  shortName: string;
+  tagline: string;
+  description: string;
+  badgeText: string;
+  accentColor: string;
+  secondaryColor: string;
+  glowColor: string;
+  /** TMDB TV Network IDs (separated by | for OR) */
+  tvNetworks?: string;
+  /** TMDB Movie Production Company IDs (separated by | for OR) */
+  movieCompanies?: string;
+  /** Optional watch provider ID */
+  watchProviderId?: string;
+  /** Optional genre filter */
+  withGenresMovie?: string;
+  withGenresTv?: string;
+  /** Optional original language filter */
+  origLang?: string;
+  /** Default media tab for this studio */
+  defaultTab: 'all' | 'movie' | 'tv';
+  /** Curated sub-collections / filter pills specific to this studio */
+  collections: Array<{
+    id: string;
+    label: string;
+    genreMovie?: string;
+    genreTv?: string;
+    sortBy?: string;
+  }>;
+}
+
+export const STUDIO_WORLDS: StudioWorldConfig[] = [
+  {
+    id: 'netflix',
+    name: 'Netflix Originals',
+    shortName: 'Netflix',
+    tagline: 'TUDUM • ГЛАВНЫЕ МИРОВЫЕ ПРЕМЬЕРЫ И СЕРИАЛЫ',
+    description: 'Эксклюзивные блокбастеры, культовые сериалы N-Series, триллеры и документальные хиты в фирменном стиле Netflix.',
+    badgeText: 'N SERIES',
+    accentColor: '#e50914',
+    secondaryColor: '#b20710',
+    glowColor: 'rgba(229, 9, 20, 0.45)',
+    tvNetworks: '213',
+    movieCompanies: '178464',
+    watchProviderId: '8',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Топ-хиты Netflix' },
+      { id: 'thriller', label: 'Остросюжетные', genreMovie: '53|80', genreTv: '80|9648' },
+      { id: 'scifi', label: 'Фантастика и мистика', genreMovie: '878|14', genreTv: '10765' },
+      { id: 'action', label: 'Экшн-блокбастеры', genreMovie: '28', genreTv: '10759' },
+      { id: 'top', label: 'Высший рейтинг', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'disney',
+    name: 'Disney+ & Pixar',
+    shortName: 'Disney+',
+    tagline: 'ВОЛШЕБНЫЕ МИРЫ DISNEY • PIXAR • ЗАМКИ И ЗВЁЗДЫ',
+    description: 'Легендарная анимация Walt Disney и Pixar, семейные сказки, фэнтези-приключения и галактические саги.',
+    badgeText: 'DISNEY+ ORIGINAL',
+    accentColor: '#0072d2',
+    secondaryColor: '#38bdf8',
+    glowColor: 'rgba(56, 189, 248, 0.45)',
+    tvNetworks: '2739',
+    movieCompanies: '2|3|6125',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Волшебная коллекция' },
+      { id: 'pixar', label: 'Шедевры анимации', genreMovie: '16', genreTv: '16' },
+      { id: 'family', label: 'Семейное кино', genreMovie: '10751|14', genreTv: '10751|10765' },
+      { id: 'adventure', label: 'Приключения', genreMovie: '12', genreTv: '10759' },
+      { id: 'top', label: 'Золотая классика', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'hbo',
+    name: 'HBO Max & Warner',
+    shortName: 'HBO Max',
+    tagline: 'ПРЕСТИЖНОЕ КИНО • КУЛЬТОВЫЕ ДРАМЫ И БЛОКБАСТЕРЫ',
+    description: 'Золотой стандарт сериалов HBO, эпические драмы, мрачные детективы и масштабные киноленты Warner Bros.',
+    badgeText: 'HBO ORIGINAL',
+    accentColor: '#9333ea',
+    secondaryColor: '#c084fc',
+    glowColor: 'rgba(147, 51, 234, 0.48)',
+    tvNetworks: '49|3186',
+    movieCompanies: '174',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Выбор HBO & WB' },
+      { id: 'drama', label: 'Престижные драмы', genreMovie: '18', genreTv: '18' },
+      { id: 'fantasy', label: 'Эпическое фэнтези', genreMovie: '14|878', genreTv: '10765' },
+      { id: 'crime', label: 'Детективы и нуар', genreMovie: '80|9648', genreTv: '80|9648' },
+      { id: 'top', label: 'Шедевры по рейтингу', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'apple',
+    name: 'Apple TV+',
+    shortName: 'Apple TV+',
+    tagline: 'APPLE ORIGINALS • ЭСТЕТИКА И ВИЗУАЛЬНОЕ СОВЕРШЕНСТВО',
+    description: 'Интеллектуальная научная фантастика, авторские триллеры и лауреаты премий с эталонным звуком и картинкой.',
+    badgeText: 'APPLE ORIGINAL',
+    accentColor: '#f5f5f7',
+    secondaryColor: '#94a3b8',
+    glowColor: 'rgba(245, 245, 247, 0.32)',
+    tvNetworks: '2552',
+    movieCompanies: '194232',
+    watchProviderId: '350',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Все Apple Originals' },
+      { id: 'scifi', label: 'Sci-Fi будущего', genreMovie: '878', genreTv: '10765' },
+      { id: 'thriller', label: 'Психологические триллеры', genreMovie: '53|9648', genreTv: '9648' },
+      { id: 'comedy', label: 'Драмеди и тепло', genreMovie: '35|18', genreTv: '35' },
+      { id: 'top', label: 'Фавориты критиков', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'marvel',
+    name: 'Marvel Studios',
+    shortName: 'Marvel',
+    tagline: 'КИНОВСЕЛЕННАЯ MARVEL • САГА МУЛЬТИВСЕЛЕННОЙ',
+    description: 'Все фазы КВМ, блокбастеры о Мстителях, сольные фильмы супергероев и сериалы вселенной Marvel.',
+    badgeText: 'MARVEL STUDIOS',
+    accentColor: '#f0131e',
+    secondaryColor: '#fbbf24',
+    glowColor: 'rgba(240, 19, 30, 0.48)',
+    tvNetworks: '2739',
+    movieCompanies: '420|7505',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Хроника Marvel' },
+      { id: 'action', label: 'Блокбастеры', genreMovie: '28|12', genreTv: '10759' },
+      { id: 'scifi', label: 'Космос и мультивселенная', genreMovie: '878', genreTv: '10765' },
+      { id: 'top', label: 'Легенды по рейтингу', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'a24',
+    name: 'A24 Arthouse',
+    shortName: 'A24',
+    tagline: 'АВТОРСКОЕ КИНО • НЕОНОВЫЙ ЭСТЕТИЗМ И ФЕСТИВАЛЬНЫЕ ХИТЫ',
+    description: 'Культовая независимая студия современности: гипнотические хорроры, визионерские драмы и обладатели «Оскара».',
+    badgeText: 'A24 FILM',
+    accentColor: '#e7e5e4',
+    secondaryColor: '#d97706',
+    glowColor: 'rgba(217, 119, 6, 0.36)',
+    tvNetworks: '49|213',
+    movieCompanies: '41077',
+    defaultTab: 'movie',
+    collections: [
+      { id: 'all', label: 'Коллекция A24' },
+      { id: 'horror', label: 'Интеллектуальный хоррор', genreMovie: '27|9648', genreTv: '9648' },
+      { id: 'drama', label: 'Авторская драма', genreMovie: '18', genreTv: '18' },
+      { id: 'scifi', label: 'Сюрреализм и Sci-Fi', genreMovie: '878|14', genreTv: '10765' },
+      { id: 'top', label: 'Культовая классика', sortBy: 'vote_average.desc' },
+    ],
+  },
+  {
+    id: 'anime',
+    name: 'Anime & Ghibli',
+    shortName: 'Аниме',
+    tagline: 'ЯПОНСКАЯ АНИМАЦИЯ • CRUNCHYROLL ХИТЫ И STUDIO GHIBLI',
+    description: 'От полнометражных шедевров Хаяо Миядзаки и Макото Синкая до самых громких сёнэн-сериалов сезона.',
+    badgeText: 'ANIME HUB',
+    accentColor: '#ff2a85',
+    secondaryColor: '#fb923c',
+    glowColor: 'rgba(255, 42, 133, 0.45)',
+    movieCompanies: '10342',
+    withGenresMovie: '16',
+    withGenresTv: '16',
+    origLang: 'ja',
+    defaultTab: 'all',
+    collections: [
+      { id: 'all', label: 'Главные хиты' },
+      { id: 'shonen', label: 'Экшн и Фэнтези', genreMovie: '16,28,14', genreTv: '16,10759,10765' },
+      { id: 'romance', label: 'Драма и Романтика', genreMovie: '16,18,10749', genreTv: '16,18' },
+      { id: 'top', label: 'Зал славы Аниме', sortBy: 'vote_average.desc' },
+    ],
+  },
 ];
 
-export const getTmdbKey = () => '';
-export const setTmdbKey = (_: string) => {};
-export const hasTmdbKey = () => false;
-export const checkTmdb = async () => ({ ok: false, message: '' });
+export async function discoverByStudio(
+  studioId: StudioId,
+  opts: {
+    page?: number;
+    mediaType?: 'all' | 'movie' | 'tv';
+    collectionId?: string;
+  } = {}
+): Promise<{ hero: Movie[]; items: Movie[]; top10: Movie[] }> {
+  const studio = STUDIO_WORLDS.find((s) => s.id === studioId) || STUDIO_WORLDS[0];
+  const page = opts.page || 1;
+  const mediaType = opts.mediaType || studio.defaultTab;
+  const collection = studio.collections.find((c) => c.id === opts.collectionId) || studio.collections[0];
+  const sortBy = collection?.sortBy || 'popularity.desc';
+  const minVotes = sortBy === 'vote_average.desc' ? 250 : 45;
+
+  const buildMovieParams = (p: number): Record<string, any> => {
+    const params: Record<string, any> = {
+      page: p,
+      sort_by: sortBy,
+      include_adult: false,
+      'vote_count.gte': minVotes,
+    };
+    if (studio.id === 'anime') {
+      params.with_genres = collection?.genreMovie || studio.withGenresMovie || '16';
+      params.with_original_language = 'ja';
+    } else if (studio.id === 'netflix' || studio.id === 'apple') {
+      if (studio.movieCompanies) params.with_companies = studio.movieCompanies;
+      if (collection?.genreMovie) params.with_genres = collection.genreMovie;
+    } else {
+      if (studio.movieCompanies) params.with_companies = studio.movieCompanies;
+      if (collection?.genreMovie) params.with_genres = collection.genreMovie;
+    }
+    return params;
+  };
+
+  const buildTvParams = (p: number): Record<string, any> => {
+    const params: Record<string, any> = {
+      page: p,
+      sort_by: sortBy,
+      include_adult: false,
+      'vote_count.gte': minVotes,
+    };
+    if (studio.id === 'anime') {
+      params.with_genres = collection?.genreTv || studio.withGenresTv || '16';
+      params.with_original_language = 'ja';
+    } else if (studio.id === 'marvel') {
+      params.with_companies = '420';
+      if (collection?.genreTv) params.with_genres = collection.genreTv;
+    } else if (studio.id === 'a24') {
+      params.with_companies = '41077';
+      if (collection?.genreTv) params.with_genres = collection.genreTv;
+    } else {
+      if (studio.tvNetworks) params.with_networks = studio.tvNetworks;
+      if (collection?.genreTv) params.with_genres = collection.genreTv;
+    }
+    return params;
+  };
+
+  try {
+    let movies: Movie[] = [];
+    let series: Movie[] = [];
+
+    if (mediaType === 'movie' || mediaType === 'all') {
+      const mData = await tmdb<any>('/discover/movie', buildMovieParams(page)).catch(() => ({ results: [] }));
+      movies = (mData.results || []).map((i: any) => toMovie(i, 'movie'));
+      // Для Netflix или Apple подгрузим также фильмы по watch provider, если компания вернула мало результатов
+      if (movies.length < 8 && studio.watchProviderId) {
+        const wpData = await tmdb<any>('/discover/movie', {
+          page,
+          sort_by: sortBy,
+          with_watch_providers: studio.watchProviderId,
+          watch_region: 'US',
+          'vote_count.gte': minVotes,
+          ...(collection?.genreMovie ? { with_genres: collection.genreMovie } : {}),
+        }).catch(() => ({ results: [] }));
+        const extra = (wpData.results || []).map((i: any) => toMovie(i, 'movie'));
+        const seen = new Set(movies.map((m) => m.id));
+        for (const item of extra) {
+          if (!seen.has(item.id)) {
+            seen.add(item.id);
+            movies.push(item);
+          }
+        }
+      }
+    }
+
+    if (mediaType === 'tv' || mediaType === 'all') {
+      const tData = await tmdb<any>('/discover/tv', buildTvParams(page)).catch(() => ({ results: [] }));
+      series = (tData.results || []).map((i: any) => toMovie(i, 'tv'));
+    }
+
+    let combined: Movie[] = [];
+    if (mediaType === 'movie') {
+      combined = movies;
+    } else if (mediaType === 'tv') {
+      combined = series;
+    } else {
+      const maxLen = Math.max(series.length, movies.length);
+      for (let i = 0; i < maxLen; i++) {
+        if (series[i]) combined.push(series[i]);
+        if (movies[i]) combined.push(movies[i]);
+      }
+    }
+
+    const hero = combined.filter((m) => m.backdrop_path && !m.backdrop_path.includes('placeholder')).slice(0, 6);
+    const top10 = combined.slice(0, 10);
+    return { hero, items: combined, top10 };
+  } catch {
+    return { hero: [], items: [], top10: [] };
+  }
+}
+

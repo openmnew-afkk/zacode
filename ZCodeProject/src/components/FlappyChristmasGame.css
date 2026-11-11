@@ -1,0 +1,260 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  🎄 FlappyChristmasGame.css — Премиальная новогодняя аркада ZENOVA
+ *  - Полноэкранный плавный мобильный режим (100dvh)
+ *  - Сказочное ночное зимнее небо со звездами и снегопадом
+ *  - Тактильное управление и комфортная физика
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.flappy-game-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  width: 100vw;
+  height: 100dvh;
+  background: #04060f;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+  animation: flappySlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes flappySlideUp {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.flappy-game-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: pointer;
+}
+
+/* ── Верхний HUD игры ── */
+.flappy-game-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: calc(var(--header-safe-top, 24px) + 8px) 18px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(4, 6, 15, 0.9) 0%, rgba(4, 6, 15, 0.4) 75%, transparent 100%);
+}
+
+.flappy-game-hud * {
+  pointer-events: auto;
+}
+
+.flappy-close-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(15, 20, 36, 0.85);
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.flappy-close-btn:active {
+  transform: scale(0.92);
+}
+
+.flappy-lives-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(15, 20, 36, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.flappy-heart {
+  font-size: 14px;
+  transition: transform 0.2s ease, opacity 0.2s ease, filter 0.2s ease;
+}
+
+.flappy-heart.active {
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.8));
+}
+
+.flappy-heart.lost {
+  opacity: 0.25;
+  filter: grayscale(1);
+  transform: scale(0.85);
+}
+
+.flappy-score-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(15, 20, 36, 0.88);
+  border: 1px solid rgba(255, 213, 107, 0.35);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 16px rgba(255, 213, 107, 0.15);
+}
+
+.flappy-score-num {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 16px;
+  font-weight: 850;
+  color: #ffd56b;
+}
+
+.flappy-score-target {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Модальные экраны игры ── */
+.flappy-start-modal,
+.flappy-end-modal {
+  position: absolute;
+  inset: 0;
+  background: rgba(4, 6, 15, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 20;
+}
+
+.flappy-modal-card {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(22, 28, 52, 0.95) 0%, rgba(12, 16, 32, 0.98) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 28px 24px;
+  text-align: center;
+  animation: flappyCardPop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes flappyCardPop {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.flappy-start-icon,
+.flappy-gameover-icon,
+.flappy-won-icon {
+  font-size: 52px;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 20px rgba(255, 213, 107, 0.6));
+}
+
+.flappy-modal-title {
+  margin: 0 0 10px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 20px;
+  font-weight: 850;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.flappy-modal-desc {
+  margin: 0 0 22px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.flappy-modal-desc strong {
+  color: #ffd56b;
+  font-weight: 700;
+}
+
+.flappy-tap-hint {
+  padding: 12px 20px;
+  border-radius: 16px;
+  background: rgba(255, 213, 107, 0.14);
+  border: 1px solid rgba(255, 213, 107, 0.35);
+  color: #ffd56b;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  animation: flappyPulse 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes flappyPulse {
+  0% { transform: scale(0.98); opacity: 0.85; }
+  100% { transform: scale(1.02); opacity: 1; }
+}
+
+.flappy-btn-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.flappy-action-btn {
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 16px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.16s ease, filter 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.flappy-action-btn:active {
+  transform: scale(0.96);
+}
+
+.flappy-btn--accent {
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.flappy-btn--gold {
+  background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45);
+  margin-bottom: 10px;
+}
+
+.flappy-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.flappy-claimed-badge {
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgba(16, 185, 129, 0.18);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #6ee7b7;
+  font-weight: 800;
+  font-size: 12.5px;
+  margin-bottom: 12px;
+}

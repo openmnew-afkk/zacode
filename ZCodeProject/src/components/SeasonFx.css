@@ -1,0 +1,59 @@
+/* ═══════════════════════════════════════════════
+   ✨ Сезонная атмосфера ZENOVA (Авторские эффекты)
+   Каждый сезон имеет собственную фирменную ауру:
+   - Зима: ледяной кристаллический градиент + северное сияние
+   - Весна: нежный рассветный лепестковый ореол
+   - Лето: тёплое золотое вечернее мерцание
+   - Осень: уютный багряно-янтарный закатный свет
+   ═══════════════════════════════════════════════ */
+
+.season-fx-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 78;
+}
+
+/* Мягкое атмосферное сияние без нагрузки на GPU */
+.season-fx-aurora {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  transition: opacity 0.6s ease;
+}
+
+/* ❄️ Зима: Иней, ледяное северное сияние и морозные углы */
+.season-fx-aurora--winter {
+  background:
+    radial-gradient(ellipse 95% 30% at 50% -6%, rgba(56, 189, 248, 0.16) 0%, transparent 68%),
+    radial-gradient(ellipse 55% 22% at 88% 4%, rgba(186, 230, 253, 0.1) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 22% at 12% 4%, rgba(147, 197, 253, 0.09) 0%, transparent 65%);
+}
+
+/* 🌸 Весна: Нежное розовое цветение сакуры */
+.season-fx-aurora--spring {
+  background:
+    radial-gradient(ellipse 92% 28% at 50% -6%, rgba(244, 114, 182, 0.15) 0%, transparent 68%),
+    radial-gradient(ellipse 50% 20% at 84% 6%, rgba(251, 207, 232, 0.09) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 20% at 16% 6%, rgba(167, 243, 208, 0.07) 0%, transparent 65%);
+}
+
+/* ✨ Лето: Тёплое золотистое сияние светлячков и южной ночи */
+.season-fx-aurora--summer {
+  background:
+    radial-gradient(ellipse 92% 28% at 50% -6%, rgba(251, 191, 36, 0.13) 0%, transparent 68%),
+    radial-gradient(ellipse 55% 22% at 82% 4%, rgba(163, 230, 53, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 22% at 18% 4%, rgba(56, 189, 248, 0.08) 0%, transparent 65%);
+}
+
+/* 🍁 Осень: Уютный янтарно-багряный закат */
+.season-fx-aurora--autumn {
+  background:
+    radial-gradient(ellipse 92% 28% at 50% -6%, rgba(251, 146, 60, 0.15) 0%, transparent 68%),
+    radial-gradient(ellipse 55% 22% at 85% 4%, rgba(245, 158, 11, 0.1) 0%, transparent 65%),
+    radial-gradient(ellipse 55% 22% at 15% 5%, rgba(220, 38, 38, 0.09) 0%, transparent 65%);
+}

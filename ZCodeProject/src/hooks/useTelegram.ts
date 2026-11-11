@@ -4,11 +4,33 @@ import type { TelegramUser } from '../types';
 /* ===== Хук для работы с Telegram WebApp ===== */
 
 /** Глобальный объект Telegram WebApp */
-const getTg = () => {
+export const getTg = () => {
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     return window.Telegram.WebApp;
   }
   return null;
+};
+
+/**
+ * Принудительное удержание полного экрана под телефон:
+ * - tg.expand() (раскрывает шторку на 100%)
+ * - tg.requestFullscreen() (полноэкранный режим без зазоров)
+ * - tg.disableVerticalSwipes() (блокирует свайп закрытия/сворачивания вниз)
+ */
+export const enforceTelegramFullscreen = () => {
+  try {
+    const tg = getTg();
+    if (!tg) return;
+    if (typeof tg.expand === 'function') {
+      tg.expand();
+    }
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      try { tg.disableVerticalSwipes(); } catch {}
+    }
+    if (typeof (tg as any).requestFullscreen === 'function' && !(tg as any).isFullscreen) {
+      try { (tg as any).requestFullscreen(); } catch {}
+    }
+  } catch {}
 };
 
 /** Расширяем Window для TypeScript */
@@ -58,6 +80,7 @@ declare global {
           onClick: (cb: () => void) => void;
           offClick: (cb: () => void) => void;
         };
+        openLink?: (url: string, options?: { try_instant_view?: boolean }) => void;
         HapticFeedback: {
           impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
           notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
@@ -81,10 +104,11 @@ export const useTelegram = () => {
   useEffect(() => {
     if (tg) {
       tg.ready();
-      tg.expand();
-      // Отключаем свайп закрытия (iOS Telegram)
-      if (typeof tg.disableVerticalSwipes === 'function') {
-        try { tg.disableVerticalSwipes(); } catch {}
+      enforceTelegramFullscreen();
+
+      // Подтверждение закрытия
+      if (typeof (tg as any).enableClosingConfirmation === 'function') {
+        try { (tg as any).enableClosingConfirmation(); } catch {}
       }
       // Цвет хедера под фон приложения
       if (typeof tg.setHeaderColor === 'function') {
@@ -93,6 +117,62 @@ export const useTelegram = () => {
       if (typeof tg.setBottomBarColor === 'function') {
         try { tg.setBottomBarColor('#08080f'); } catch {}
       }
+
+      const onFocusOrVisible = () => {
+        enforceTelegramFullscreen();
+      };
+
+      window.addEventListener('focus', onFocusOrVisible);
+      window.addEventListener('pageshow', onFocusOrVisible);
+      document.addEventListener('visibilitychange', onFocusOrVisible);
+
+      const updateSafeArea = () => {
+        const isFs = Boolean((tg as any)?.isFullscreen);
+        const csTop = Number((tg as any)?.contentSafeAreaInset?.top || 0);
+        const saTop = Number((tg as any)?.safeAreaInset?.top || 0);
+        const platform = (tg as any)?.platform || '';
+        const isMobileTg = platform === 'ios' || platform === 'android';
+        const combinedTop = saTop + csTop;
+
+        if (isFs || csTop > 0 || (isMobileTg && saTop > 20)) {
+          document.documentElement.classList.add('tg-fullscreen');
+          const minSafe = isFs ? 98 : isMobileTg ? 56 : 24;
+          const offset = Math.max(combinedTop + 8, saTop + 44, minSafe);
+          document.documentElement.style.setProperty('--tg-top-inset', `${offset}px`);
+        } else {
+          document.documentElement.classList.remove('tg-fullscreen');
+          document.documentElement.style.setProperty('--tg-top-inset', `${Math.max(combinedTop, 14)}px`);
+        }
+      };
+
+      updateSafeArea();
+      const t1 = setTimeout(updateSafeArea, 160);
+      const t2 = setTimeout(updateSafeArea, 520);
+
+      if (typeof (tg as any)?.onEvent === 'function') {
+        try {
+          (tg as any).onEvent('fullscreenChanged', updateSafeArea);
+          (tg as any).onEvent('contentSafeAreaChanged', updateSafeArea);
+          (tg as any).onEvent('safeAreaChanged', updateSafeArea);
+          (tg as any).onEvent('viewportChanged', updateSafeArea);
+        } catch {}
+      }
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        window.removeEventListener('focus', onFocusOrVisible);
+        window.removeEventListener('pageshow', onFocusOrVisible);
+        document.removeEventListener('visibilitychange', onFocusOrVisible);
+        if (typeof (tg as any)?.offEvent === 'function') {
+          try {
+            (tg as any).offEvent('fullscreenChanged', updateSafeArea);
+            (tg as any).offEvent('contentSafeAreaChanged', updateSafeArea);
+            (tg as any).offEvent('safeAreaChanged', updateSafeArea);
+            (tg as any).offEvent('viewportChanged', updateSafeArea);
+          } catch {}
+        }
+      };
     }
   }, []);
 
@@ -146,6 +226,14 @@ export const useTelegram = () => {
     tg?.close();
   }, []);
 
+  /** Открыть ссылку во внешнем браузере */
+  const openLink = useCallback((url: string) => {
+    if (tg?.openLink) {
+      try { tg.openLink(url); return; } catch {}
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }, []);
+
   return {
     tg,
     user,
@@ -155,5 +243,6 @@ export const useTelegram = () => {
     hideMainButton,
     haptic,
     closeApp,
+    openLink,
   };
 };

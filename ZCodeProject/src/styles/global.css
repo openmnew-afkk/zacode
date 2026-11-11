@@ -1,227 +1,834 @@
-/* ===== TeleCinema — ULTRA PREMIUM DARK ===== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+/* ===== ZENOVA — Design System ===== */
+/* Темы оформления:
+ * 1. Тёмная (Obsidian & Rose Gold) — глубокий тёмный премиум фон
+ * 2. Светлая (Rose Blush) — нежная фарфоровая тема с тёплыми розовыми нотками
+ */
 
 :root {
-  /* ── Cinematic Color Palette ── */
-  --bg:             #050508;
-  --bg-2:           #09090f;
-  --bg-3:           #0f0f1a;
-
-  /* Surfaces */
-  --surface:        rgba(255,255,255,0.032);
-  --surface-2:      rgba(255,255,255,0.055);
-  --surface-3:      rgba(255,255,255,0.085);
-  --surface-4:      rgba(255,255,255,0.12);
-
-  /* Borders */
-  --border:         rgba(255,255,255,0.05);
-  --border-light:   rgba(255,255,255,0.10);
-  --border-bright:  rgba(255,255,255,0.18);
-
-  /* Text */
+  --bg:             #09080b;
+  --bg-2:           #100e13;
+  --bg-3:           #17141b;
+  --surface:        rgba(255,255,255,0.05);
+  --surface-2:      rgba(255,255,255,0.08);
+  --surface-3:      rgba(255,255,255,0.12);
+  --surface-4:      rgba(255,255,255,0.16);
+  --border:         rgba(255,255,255,0.08);
+  --border-light:   rgba(255,255,255,0.13);
   --text:           #ffffff;
-  --text-2:         rgba(255,255,255,0.75);
-  --text-3:         rgba(255,255,255,0.45);
-  --text-4:         rgba(255,255,255,0.25);
-
-  /* ── Brand accents ── */
-  --accent:         #8b5cf6;      /* Vivid violet */
-  --accent-2:       #06b6d4;      /* Cyan */
-  --accent-3:       #f472b6;      /* Pink */
-  --accent-gold:    #fbbf24;      /* Gold stars */
-
-  /* Glow */
-  --accent-glow:    rgba(139,92,246,0.40);
-  --accent-2-glow:  rgba(6,182,212,0.35);
-  --accent-3-glow:  rgba(244,114,182,0.35);
-  --gold-glow:      rgba(251,191,36,0.50);
-
-  /* Legacy compat */
-  --accent-gold-raw:#fbbf24;
-  --bg-primary:     var(--bg);
-  --text-primary:   var(--text);
-  --text-secondary: var(--text-2);
-
-  /* Shadow */
-  --shadow:         rgba(0,0,0,0.65);
-  --shadow-lg:      rgba(0,0,0,0.85);
-
-  /* Glass */
-  --glass-bg:       rgba(255,255,255,0.04);
-  --glass-bg-strong:rgba(255,255,255,0.08);
-  --glass-border:   rgba(255,255,255,0.08);
-  --glass-blur:     24px;
-
-  /* Safe-area */
+  --text-2:         rgba(255,255,255,0.74);
+  --text-3:         rgba(255,255,255,0.48);
+  --accent:         #fb7185;
+  --accent-2:       #f43f5e;
+  --accent-3:       #fda4af;
+  --accent-glow:    rgba(251,113,133,0.32);
+  --glass-bg:       rgba(255,255,255,0.05);
+  --glass-border:   rgba(255,255,255,0.09);
+  --glass-blur:     20px;
   --sat: env(safe-area-inset-top, 0px);
-  --sar: env(safe-area-inset-right, 0px);
   --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-
-  /* Radius tokens */
-  --r-xs:  6px;
+  --tg-top-inset: 0px;
+  --header-safe-top: max(
+    calc(env(safe-area-inset-top, 0px) + 20px),
+    calc(var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px) + 16px),
+    var(--tg-top-inset, 0px),
+    24px
+  );
+  --safe-top: var(--header-safe-top);
+  --safe-bottom: var(--sab);
   --r-sm:  10px;
-  --r-md:  16px;
-  --r-lg:  22px;
-  --r-xl:  30px;
-  --r-full:9999px;
-
-  /* Easing */
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-full: 9999px;
   --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
   --ease-smooth: cubic-bezier(0.4,0,0.2,1);
-  --ease-out:    cubic-bezier(0,0,0.2,1);
+  --tabbar-h: calc(64px + max(env(safe-area-inset-bottom), 10px) + 10px);
+  --font-cinema: 'Unbounded', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  --font-display: 'Unbounded', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* ── Light mode ── */
-[data-theme='light'] {
-  --bg:             #f0f0f8;
-  --bg-2:           #e8e8f2;
-  --bg-3:           #deddf0;
-  --surface:        rgba(0,0,0,0.025);
-  --surface-2:      rgba(0,0,0,0.045);
-  --surface-3:      rgba(0,0,0,0.07);
-  --surface-4:      rgba(0,0,0,0.10);
-  --border:         rgba(0,0,0,0.06);
-  --border-light:   rgba(0,0,0,0.10);
-  --border-bright:  rgba(0,0,0,0.16);
-  --text:           #0a0a14;
-  --text-2:         rgba(10,10,20,0.65);
-  --text-3:         rgba(10,10,20,0.38);
-  --text-4:         rgba(10,10,20,0.20);
-  --accent-glow:    rgba(139,92,246,0.18);
-  --shadow:         rgba(0,0,0,0.12);
-  --shadow-lg:      rgba(0,0,0,0.22);
-  --glass-bg:       rgba(255,255,255,0.55);
-  --glass-bg-strong:rgba(255,255,255,0.80);
-  --glass-border:   rgba(0,0,0,0.06);
-}
-
-/* ── Reset ── */
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
 
 html {
-  height:100%;
-  overflow:hidden;
-  overscroll-behavior:none;
-  font-size:16px;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  text-rendering:optimizeLegibility;
+  height: 100%;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--bg);
+  overscroll-behavior: none;
+}
+
+html.tg-fullscreen, body.tg-fullscreen {
+  /* В полноэкранном режиме Telegram опускаем шапку ниже нативных кнопок закрытия и меню (✕ и ...) */
+  --header-safe-top: max(
+    calc(env(safe-area-inset-top, 0px) + 38px),
+    calc(var(--tg-safe-area-inset-top, 0px) + 38px),
+    calc(var(--tg-content-safe-area-inset-top, 0px) + 38px),
+    54px
+  );
+  --safe-top: var(--header-safe-top);
 }
 
 body {
-  font-family:'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
-  height:100%;
-  overflow:hidden;
-  transition: background 0.35s var(--ease-smooth), color 0.35s var(--ease-smooth);
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
+  overscroll-behavior-y: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 #root {
-  height:100%;
-  overflow-y:auto;
-  overflow-x:hidden;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
-  scroll-behavior:smooth;
-  /* Отступ: safe-area (notch) + Telegram header + небольшой зазор */
-  padding-top: calc(var(--sat) + 48px);
+  min-height: 100vh;
+  padding-bottom: var(--tabbar-h);
 }
 
-/* ── Центрированный заголовок между кнопками Telegram ── */
-.app-topbar {
-  position: fixed;
-  top: calc(var(--sat) + 8px);
-  left: 0;
-  right: 0;
-  z-index: 999;
-  text-align: center;
-  pointer-events: none;
-  padding: 0 80px; /* Не перекрывать кнопки Telegram по бокам */
-}
-.app-topbar__title {
-  font-family: 'Outfit', 'Inter', sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text-2);
-  opacity: 0.9;
-  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
-}
-
-/* Page enter animation */
 .page {
-  animation: page-in 0.35s var(--ease-smooth) both;
+  animation: page-in 0.28s var(--ease-smooth) both;
 }
+
 @keyframes page-in {
-  from { opacity:0; transform:translateY(12px); }
-  to   { opacity:1; transform:translateY(0); }
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-a { color:inherit; text-decoration:none; }
-img { max-width:100%; display:block; }
-button { font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button {
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+  background: none;
+  color: inherit;
+}
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width:2px; height:2px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--surface-3); border-radius:2px; }
+button:focus-visible,
+a:focus-visible,
+[role='slider']:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 
-/* ── Selection ── */
-::selection { background:var(--accent-glow); color:#fff; }
+::-webkit-scrollbar { width: 0; height: 0; }
+::selection { background: var(--accent-glow); color: #fff; }
 
-/* ── Skeleton shimmer ── */
+/* ═══════════════════════════════════════════════
+   🎄 СЕЗОННЫЕ ТЕМЫ (data-season на <html>)
+   Зимой — новогодняя снежная, весной — сакура,
+   летом — лазурь, осенью — янтарь. Меняю акценты.
+   ═══════════════════════════════════════════════ */
+
+:root[data-season='winter'] {
+  --accent: #93c5fd;
+  --accent-2: #60a5fa;
+  --accent-3: #bfdbfe;
+  --accent-glow: rgba(147, 197, 253, 0.32);
+}
+
+:root[data-season='spring'] {
+  --accent: #f9a8d4;
+  --accent-2: #f472b6;
+  --accent-3: #fbcfe8;
+  --accent-glow: rgba(249, 168, 212, 0.32);
+}
+
+:root[data-season='summer'] {
+  --accent: #fbbf24;
+  --accent-2: #f59e0b;
+  --accent-3: #fde68a;
+  --accent-glow: rgba(251, 191, 36, 0.3);
+}
+
+:root[data-season='autumn'] {
+  --accent: #fdba74;
+  --accent-2: #fb923c;
+  --accent-3: #fed7aa;
+  --accent-glow: rgba(253, 186, 116, 0.3);
+}
+
+/* Сезонное свечение фона страниц */
+html[data-season='winter'] .page,
+html[data-season='spring'] .page,
+html[data-season='summer'] .page,
+html[data-season='autumn'] .page {
+  background-image: var(--season-glow-bg, none) !important;
+}
+
 .skeleton-pulse {
-  background: linear-gradient(
-    105deg,
-    var(--surface-2) 0%,
-    var(--surface-3) 40%,
-    var(--surface-4) 50%,
-    var(--surface-3) 60%,
-    var(--surface-2) 100%
-  );
-  background-size:300% 100%;
-  animation:shimmer 1.6s ease-in-out infinite;
+  background: linear-gradient(105deg, var(--surface-2) 0%, var(--surface-3) 40%, var(--surface-4, rgba(255,255,255,0.13)) 50%, var(--surface-3) 60%, var(--surface-2) 100%);
+  background-size: 300% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }
+
 @keyframes shimmer {
-  0%   { background-position:100% 0; }
-  100% { background-position:-100% 0; }
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
-/* ── Page loader ── */
-.page-loader {
-  position:fixed; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  background:var(--bg); z-index:9998;
-}
-.page-loader::after {
-  content:''; width:28px; height:28px;
-  border-radius:50%;
-  border:2.5px solid var(--border-light);
-  border-top-color:var(--accent);
-  animation:spin 0.65s linear infinite;
-}
-@keyframes spin { to { transform:rotate(360deg); } }
-
-/* ── Utility classes ── */
 .gradient-text {
-  background:linear-gradient(135deg, var(--accent), var(--accent-2));
-  -webkit-background-clip:text;
-  background-clip:text;
-  -webkit-text-fill-color:transparent;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .glass-card {
-  background:var(--glass-bg);
-  backdrop-filter:blur(var(--glass-blur)) saturate(180%);
-  -webkit-backdrop-filter:blur(var(--glass-blur)) saturate(180%);
-  border:1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+  border: 1px solid var(--glass-border);
 }
 
-/* ── Focus ring ── */
 :focus-visible {
-  outline:2px solid var(--accent);
-  outline-offset:2px;
-  border-radius:var(--r-sm);
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
 }
+
+/* ═══════════════════════════════════════════════
+   🌸 СВЕТЛАЯ ТЕМА С РОЗОВЫМИ НОТКАМИ (Rose Blush)
+   ═══════════════════════════════════════════════ */
+[data-theme='light'],
+html.light,
+body.light {
+  --bg:             #fff5f7;
+  --bg-2:           #fef0f3;
+  --bg-3:           #fce7ec;
+  --surface:        rgba(255, 255, 255, 0.95);
+  --surface-2:      rgba(255, 240, 245, 0.95);
+  --surface-3:      rgba(253, 226, 236, 0.9);
+  --surface-4:      rgba(244, 114, 182, 0.15);
+  --border:         rgba(244, 114, 182, 0.2);
+  --border-light:   rgba(244, 114, 182, 0.28);
+  --text:           #1f1a24;
+  --text-2:         #4a4453;
+  --text-3:         #8a8194;
+  --accent:         #f43f5e;
+  --accent-2:       #fb7185;
+  --accent-3:       #fda4af;
+  --accent-glow:    rgba(244, 63, 94, 0.25);
+  --glass-bg:       rgba(255, 255, 255, 0.88);
+  --glass-border:   rgba(244, 114, 182, 0.22);
+  --glass-blur:     24px;
+  --btn-r:          16px;
+  --btn-grad:       linear-gradient(135deg, #f43f5e, #fb7185);
+  --btn-glow:       0 8px 24px rgba(244, 63, 94, 0.28);
+}
+
+[data-theme='light'] body,
+body.light {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Все страницы в светлой теме */
+[data-theme='light'] .hp,
+[data-theme='light'] .pm,
+[data-theme='light'] .dp,
+[data-theme='light'] .pf,
+[data-theme='light'] .profile-page,
+[data-theme='light'] .fav-page,
+[data-theme='light'] .search-page,
+[data-theme='light'] .admin,
+[data-theme='light'] .feed-page,
+[data-theme='light'] .music-page,
+[data-theme='light'] .rules-page,
+[data-theme='light'] .aip {
+  background: var(--bg) !important;
+  color: var(--text);
+}
+
+/* ── Шапки и навигация ── */
+[data-theme='light'] .hp-header,
+[data-theme='light'] .feed-header,
+[data-theme='light'] .search-header,
+[data-theme='light'] .profile-header,
+[data-theme='light'] .mu-header,
+[data-theme='light'] .aip-header {
+  background: rgba(255, 245, 247, 0.9) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(244, 114, 182, 0.18) !important;
+}
+
+[data-theme='light'] .hp-header__title,
+[data-theme='light'] .feed-header__title,
+[data-theme='light'] .search-header__title,
+[data-theme='light'] .mu-header__title,
+[data-theme='light'] .aip-header__title,
+[data-theme='light'] .fav-header__title {
+  color: #1f1a24 !important;
+}
+
+[data-theme='light'] .hp-header__sub,
+[data-theme='light'] .feed-header__tag,
+[data-theme='light'] .mu-header__sub,
+[data-theme='light'] .search-header__sub,
+[data-theme='light'] .fav-header__sub {
+  color: #fb7185 !important;
+}
+
+/* ── Кнопки основных действий ── */
+[data-theme='light'] .dp-watch,
+[data-theme='light'] .pm-subscribe,
+[data-theme='light'] .pm-pay__btn,
+[data-theme='light'] .feed-card__btn--watch,
+[data-theme='light'] .hp-hero__btn {
+  background: linear-gradient(135deg, #f43f5e, #fb7185) !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 20px rgba(244, 63, 94, 0.32);
+}
+
+[data-theme='light'] .hp-header__btn,
+[data-theme='light'] .hp-header__feed-btn,
+[data-theme='light'] .dp-back,
+[data-theme='light'] .mu-header__reload,
+[data-theme='light'] .feed-header__channel-btn,
+[data-theme='light'] .feed-reaction {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.08);
+}
+
+/* ── Главная страница (HomePage) ── */
+[data-theme='light'] .hp-tab {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #6b6375 !important;
+}
+[data-theme='light'] .hp-tab.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 16px rgba(244, 63, 94, 0.35);
+}
+[data-theme='light'] .hp-row__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-card__year {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .hp-searchbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-searchbar__input {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .hp-searchbar__input::placeholder {
+  color: rgba(31, 26, 36, 0.4) !important;
+}
+
+/* ── Страница фильма (MovieDetailPage) ── */
+[data-theme='light'] .dp-player-slot {
+  background: var(--bg-2) !important;
+}
+[data-theme='light'] .dp-bg__grad {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 245, 247, 0.15) 0%,
+    rgba(255, 245, 247, 0.75) 50%,
+    rgba(255, 245, 247, 1) 100%
+  ) !important;
+}
+[data-theme='light'] .dp-hero__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-hero__orig {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .dp-meta span {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-section__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-desc {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-genre {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-fav {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-season-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-season-btn.active {
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-ep {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-ep__num {
+  background: rgba(244, 114, 182, 0.14) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-ep__label {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-row {
+  border-bottom-color: rgba(244, 114, 182, 0.14) !important;
+}
+[data-theme='light'] .dp-row__label {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .dp-row__val {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-status {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .dp-status__label {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .dp-where__item {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .dp-where__name {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-bar__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-bar__sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .dp-watch-bar__close {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-bar__btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-watch-src {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .dp-watch-src.active {
+  background: rgba(244, 63, 94, 0.14) !important;
+  border-color: #f43f5e !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-watch-hint {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-color: rgba(244, 63, 94, 0.2) !important;
+}
+[data-theme='light'] .dp-watch-hint__badge {
+  color: #f43f5e !important;
+}
+[data-theme='light'] .dp-watch-hint__text {
+  color: #4a4453 !important;
+}
+
+/* ── Поиск (SearchPage) ── */
+[data-theme='light'] .search-input-wrap {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.25) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-input {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-input::placeholder {
+  color: rgba(31, 26, 36, 0.4) !important;
+}
+[data-theme='light'] .search-type {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .search-type.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35) !important;
+}
+[data-theme='light'] .search-tag-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.22) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .search-tag-chip.active {
+  background: linear-gradient(135deg, #f43f5e, #fb7185) !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .search-active-tag {
+  background: rgba(244, 63, 94, 0.08) !important;
+  border-color: rgba(244, 63, 94, 0.22) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .search-active-tag__badge {
+  color: #f43f5e !important;
+}
+[data-theme='light'] .search-active-tag__text {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-quick__title {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .search-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .search-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-card__year {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .search-empty__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .search-empty__sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .search-empty__icon-wrap {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+}
+
+/* ── Избранное (FavoritesPage) ── */
+[data-theme='light'] .fav-stats {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .fav-stat__val {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .fav-stat__label {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .fav-tab {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .fav-tab.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .fav-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .fav-card__year {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .fav-empty__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .fav-empty__sub {
+  color: #8a8194 !important;
+}
+
+/* ── Профиль (ProfilePage) ── */
+[data-theme='light'] .pf__bg {
+  background: var(--bg) !important;
+}
+[data-theme='light'] .pf__card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  box-shadow: 0 8px 30px rgba(244, 114, 182, 0.12) !important;
+}
+[data-theme='light'] .pf__name {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .pf__handle {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__avatar {
+  border-color: #ffffff !important;
+  background: #fff0f3 !important;
+}
+[data-theme='light'] .pf__stats {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .pf__stat-val {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .pf__stat-lbl {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__stat-div {
+  background: rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .pf__group-title {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__group-box {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  box-shadow: 0 4px 20px rgba(244, 114, 182, 0.07) !important;
+}
+[data-theme='light'] .pf__row {
+  color: #1f1a24 !important;
+  border-bottom: 1px solid rgba(244, 114, 182, 0.12) !important;
+}
+[data-theme='light'] .pf__row-label {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .pf__row-val {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__row-sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .pf__row-icon {
+  background: rgba(244, 114, 182, 0.12) !important;
+  color: #f43f5e !important;
+}
+
+/* ── КиноИИ (AiPickPage) ── */
+[data-theme='light'] .aip {
+  background-image: radial-gradient(ellipse at 50% 0%, rgba(244, 63, 94, 0.12) 0%, transparent 60%) !important;
+}
+[data-theme='light'] .aip-surprise {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.3) !important;
+  color: #f43f5e !important;
+}
+[data-theme='light'] .aip-bubble--ai {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+  color: #1f1a24 !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .aip-chip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #1f1a24 !important;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .aip-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  box-shadow: 0 6px 24px rgba(244, 114, 182, 0.1) !important;
+}
+[data-theme='light'] .aip-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .aip-card__reason {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .aip-dots i {
+  background: #f43f5e !important;
+}
+
+/* ── Музыка (MusicPage) и Плеер ── */
+[data-theme='light'] .mu-mood-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .mu-mood-chip.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 12px rgba(244, 63, 94, 0.35) !important;
+}
+[data-theme='light'] .mu-search {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.25) !important;
+}
+[data-theme='light'] .mu-search__input {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .mu-search__input::placeholder {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .mu-tabs {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(244, 114, 182, 0.18) !important;
+}
+[data-theme='light'] .mu-tab {
+  color: #6b6375 !important;
+}
+[data-theme='light'] .mu-tab.active {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .mu-track {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.16) !important;
+  box-shadow: 0 2px 10px rgba(244, 114, 182, 0.06) !important;
+}
+[data-theme='light'] .mu-track__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .mu-track__artist {
+  color: #6b6375 !important;
+}
+[data-theme='light'] .mu-card {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.16) !important;
+  box-shadow: 0 4px 16px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .mu-card__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .mu-card__sub {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .global-music-bar {
+  background: rgba(255, 245, 247, 0.94) !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(244, 114, 182, 0.15) !important;
+}
+[data-theme='light'] .gmb-info__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .gmb-info__artist {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .gmb-btn {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .gmb-btn--play {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .gfull {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .gfull__overlay {
+  background: linear-gradient(180deg, rgba(255, 245, 247, 0.5) 0%, rgba(255, 245, 247, 0.98) 100%) !important;
+}
+[data-theme='light'] .gfull__title {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .gfull__artist {
+  color: #6b6375 !important;
+}
+[data-theme='light'] .gfull__btn--main {
+  background: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .gfull__btn {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .gfull__handle-bar {
+  background: rgba(244, 114, 182, 0.4) !important;
+}
+
+/* ── Кинолента новостей (FeedPage) ── */
+[data-theme='light'] .feed-card {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  box-shadow: 0 4px 20px rgba(244, 114, 182, 0.08) !important;
+}
+[data-theme='light'] .feed-card__channel-name span {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-card__time {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .feed-card__views {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .feed-card__headline {
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-card__desc {
+  color: #4a4453 !important;
+}
+[data-theme='light'] .feed-card__tag-pill {
+  background: rgba(244, 114, 182, 0.12) !important;
+  color: #f43f5e !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .feed-card__source-pill {
+  background: rgba(255, 255, 255, 0.9) !important;
+  color: #1f1a24 !important;
+  border: 1px solid rgba(244, 114, 182, 0.25) !important;
+}
+[data-theme='light'] .feed-card__release-pill {
+  background: rgba(254, 240, 243, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-card__specs {
+  color: #8a8194 !important;
+}
+[data-theme='light'] .feed-chip {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #4a4453 !important;
+}
+[data-theme='light'] .feed-chip.active {
+  background: #f43f5e !important;
+  border-color: #f43f5e !important;
+  color: #ffffff !important;
+}
+[data-theme='light'] .feed-card__btn--copy,
+[data-theme='light'] .feed-card__btn--share,
+[data-theme='light'] .feed-card__btn--read {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(244, 114, 182, 0.22) !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-modal {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+}
+[data-theme='light'] .feed-modal__fact {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(244, 114, 182, 0.2) !important;
+}
+[data-theme='light'] .feed-modal__quote {
+  background: rgba(254, 240, 243, 0.95) !important;
+  border-left-color: #f43f5e !important;
+}
+
+/* ── Шторка превью (MoviePreview) ── */
+[data-theme='light'] .mp-sheet {
+  background: #fff5f7 !important;
+  color: #1f1a24 !important;
+  border-top: 1px solid rgba(244, 114, 182, 0.25) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   ✨ ПОЛИРОВКА (обе темы)
+   ═══════════════════════════════════════════════ */
+
+/* Карточки тарифов — плавный выбор */
+.pm-plan {
+  transition: transform 0.2s var(--ease-smooth), border-color 0.2s ease, box-shadow 0.25s ease;
+}
+
+/* Скролл-ряды без прыжков */
+.hp-row__scroll { scroll-behavior: smooth; }
+
+/* Компактный музыкальный плеер: добавляем место снизу, чтобы бар ничего не перекрывал */
+.app-main--with-player { padding-bottom: 64px; }

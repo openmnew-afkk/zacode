@@ -1,0 +1,138 @@
+/* ===== Velora AI Holographic Neural Emblem ===== */
+
+.velora-ai-emblem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.velora-ai-emblem--sm {
+  width: 32px;
+  height: 32px;
+}
+.velora-ai-emblem--md {
+  width: 44px;
+  height: 44px;
+}
+.velora-ai-emblem--lg {
+  width: 60px;
+  height: 60px;
+}
+
+/* Рассеянный неоновый ореол */
+.velora-ai-emblem__halo {
+  position: absolute;
+  inset: -25%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.45) 0%, rgba(236, 72, 153, 0.3) 50%, transparent 75%);
+  filter: blur(10px);
+  animation: veloraAiHalo 3.5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+/* Внешнее кольцо */
+.velora-ai-emblem__chroma-orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2px;
+  background: conic-gradient(
+    from 180deg,
+    #ec4899 0deg,
+    #8b5cf6 90deg,
+    #06b6d4 180deg,
+    #a855f7 270deg,
+    #ec4899 360deg
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: veloraAiRotate 5s linear infinite;
+  box-shadow: 0 0 14px rgba(236, 72, 153, 0.4);
+}
+
+/* Нейронная орбита */
+.velora-ai-emblem__neural-ring {
+  position: absolute;
+  inset: 14%;
+  border-radius: 50%;
+  border: 1px dotted rgba(255, 255, 255, 0.35);
+  animation: veloraAiReverse 7s linear infinite;
+}
+
+.velora-ai-emblem__node {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 6px #ec4899, 0 0 10px #c084fc;
+}
+.velora-ai-emblem--lg .velora-ai-emblem__node {
+  width: 7px;
+  height: 7px;
+}
+.velora-ai-emblem__node--1 { top: -2.5px; left: calc(50% - 2.5px); }
+.velora-ai-emblem__node--2 { bottom: 15%; right: 0; }
+.velora-ai-emblem__node--3 { bottom: 15%; left: 0; }
+
+/* Пульсирующее ядро */
+.velora-ai-emblem__core {
+  position: relative;
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #fff 0%, #d946ef 40%, #7c3aed 75%, #180d38 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.7);
+  animation: veloraAiCorePulse 2.8s ease-in-out infinite alternate;
+}
+
+.velora-ai-emblem__core-pulse {
+  position: absolute;
+  inset: 15%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 80%);
+  filter: blur(2px);
+  animation: veloraAiBlink 2s ease-in-out infinite;
+}
+
+.velora-ai-emblem__sparkle {
+  position: relative;
+  z-index: 2;
+  font-size: 13px;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 14px #f43f5e;
+  animation: veloraAiSparkle 2s ease-in-out infinite alternate;
+  line-height: 1;
+}
+.velora-ai-emblem--sm .velora-ai-emblem__sparkle { font-size: 10px; }
+.velora-ai-emblem--lg .velora-ai-emblem__sparkle { font-size: 17px; }
+
+@keyframes veloraAiRotate {
+  to { transform: rotate(360deg); }
+}
+@keyframes veloraAiReverse {
+  to { transform: rotate(-360deg); }
+}
+@keyframes veloraAiHalo {
+  0%   { opacity: 0.4; transform: scale(0.92); }
+  100% { opacity: 0.85; transform: scale(1.12); }
+}
+@keyframes veloraAiCorePulse {
+  0%   { transform: scale(0.95); box-shadow: 0 0 12px rgba(168, 85, 247, 0.5); }
+  100% { transform: scale(1.05); box-shadow: 0 0 24px rgba(236, 72, 153, 0.85); }
+}
+@keyframes veloraAiBlink {
+  0%, 100% { opacity: 0.4; transform: scale(0.85); }
+  50%      { opacity: 1; transform: scale(1.15); }
+}
+@keyframes veloraAiSparkle {
+  0%   { transform: scale(0.9) rotate(-10deg); opacity: 0.85; }
+  100% { transform: scale(1.2) rotate(10deg); opacity: 1; }
+}

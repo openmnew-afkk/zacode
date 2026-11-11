@@ -1,196 +1,191 @@
-/* ===== ULTRA PREMIUM TabBar ===== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ZENOVA OBSIDIAN PILL DOCK — ARCHITECTURAL DARK-LUXURY NAVIGATION
+   Ultra-clean smoked-obsidian capsule with hardware-accelerated (translate3d)
+   monochrome glass glider & precision top light beam
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .tab-bar {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
-  display: flex;
-  justify-content: center;
-  padding: 8px 12px max(env(safe-area-inset-bottom, 12px), 12px);
-  z-index: 100;
+  z-index: 800;
+  bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  left: 50%;
+  width: min(416px, calc(100% - 24px));
+  transform: translate3d(-50%, 0, 0);
   pointer-events: none;
 }
 
-/* Floating pill */
-.tab-bar__inner {
-  pointer-events: auto;
-  width: 100%;
-  max-width: 420px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 8px 6px;
-  border-radius: 26px;
+.tab-bar__dock {
   position: relative;
-  overflow: hidden;
-
-  /* Glass */
-  background: rgba(10, 10, 18, 0.75);
-  backdrop-filter: blur(32px) saturate(200%);
-  -webkit-backdrop-filter: blur(32px) saturate(200%);
-
-  /* Premium border with gradient */
-  border: 1px solid rgba(255,255,255,0.10);
-
-  /* Multi-layer shadow */
+  height: 60px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgba(15, 15, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   box-shadow:
-    0 2px 0 rgba(255,255,255,0.04) inset,
-    0 -1px 0 rgba(0,0,0,0.3) inset,
-    0 8px 32px rgba(0,0,0,0.55),
-    0 24px 48px rgba(0,0,0,0.35),
-    0 0 0 0.5px rgba(255,255,255,0.06);
+    0 18px 40px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.11);
+  pointer-events: auto;
+  overflow: hidden;
 }
 
-/* Animated gradient top shine */
-.tab-bar__inner::before {
-  content: '';
+/* ── Hardware-Accelerated Sliding Glass Glider ── */
+.tab-bar__glider-track {
   position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(139,92,246,0.5) 30%,
-    rgba(6,182,212,0.5) 70%,
-    transparent 100%
-  );
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  inset: 5px;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.tab-bar__inner:has(.tab-bar__item--active)::before {
-  opacity: 1;
+.tab-bar__glider {
+  position: relative;
+  width: 20%;
+  height: 100%;
+  border-radius: 999px;
+  background:
+    radial-gradient(85% 95% at 50% 0%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  transform: translate3d(calc(var(--active-idx, 0) * 100%), 0, 0);
+  transition: transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
 }
 
-/* ── Each Tab Item ── */
+/* Precision top luminous bar inside the active glider */
+.tab-bar__glider-beam {
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: 18px;
+  height: 2px;
+  transform: translateX(-50%);
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(255, 255, 255, 0.85);
+}
+
+/* ── 5 Interactive Tab Columns ── */
+.tab-bar__inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+}
+
 .tab-bar__item {
   position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 3px;
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 8px 4px 6px;
-  border-radius: 18px;
-  color: rgba(255,255,255,0.35);
-  transition:
-    color 0.25s var(--ease-smooth),
-    background 0.25s var(--ease-smooth);
+  padding: 2px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.44);
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  min-height: 52px;
+  transition: color 0.22s ease, transform 0.16s ease;
 }
 
-/* Active pill background */
+.tab-bar__item:hover {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.tab-bar__item:active {
+  transform: scale(0.92);
+}
+
 .tab-bar__item--active {
-  color: #fff;
+  color: #ffffff;
 }
 
-/* Glowing pill indicator for active */
-.tab-bar__item--active::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 14px;
-  background: linear-gradient(
-    145deg,
-    rgba(139,92,246,0.22),
-    rgba(6,182,212,0.12)
-  );
-  border: 1px solid rgba(139,92,246,0.25);
-  box-shadow:
-    0 0 12px rgba(139,92,246,0.15),
-    inset 0 1px 0 rgba(255,255,255,0.08);
-  animation: tab-pill-in 0.3s var(--ease-spring) both;
-}
-
-@keyframes tab-pill-in {
-  from { opacity: 0; transform: scale(0.7); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-/* Tap ripple */
-.tab-bar__item:active::after {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 14px;
-  background: rgba(255,255,255,0.08);
-  animation: tab-ripple 0.3s ease forwards;
-}
-
-@keyframes tab-ripple {
-  from { opacity: 1; transform: scale(0.9); }
-  to   { opacity: 0; transform: scale(1.05); }
-}
-
-/* ── Icon ── */
 .tab-bar__icon {
-  position: relative;
-  z-index: 1;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
-  transition: transform 0.3s var(--ease-spring);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .tab-bar__item--active .tab-bar__icon {
-  transform: scale(1.18) translateY(-1px);
+  transform: translateY(-1px);
 }
 
-/* Icon glow for active state */
+.tab-bar__icon svg {
+  width: 18.5px;
+  height: 18.5px;
+  stroke: currentColor;
+  stroke-width: 1.85;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .tab-bar__item--active .tab-bar__icon svg {
-  filter: drop-shadow(0 0 6px rgba(139,92,246,0.7));
+  stroke-width: 2.15;
 }
 
-/* ── Label ── */
+/* Специальный стиль кнопки Оракула в доке — мини-маска */
+.tab-bar__item--ai .tab-bar__icon {
+  filter: none;
+}
+
+.tab-bar__mask {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  opacity: 0.72;
+  filter: grayscale(0.35) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+  transition: transform 0.25s cubic-bezier(0.2, 1.4, 0.4, 1), opacity 0.2s ease, filter 0.2s ease;
+}
+
+.tab-bar__item--ai.tab-bar__item--active .tab-bar__mask {
+  opacity: 1;
+  transform: scale(1.12) translateY(-1px);
+  filter: drop-shadow(0 0 8px rgba(251, 113, 133, 0.55));
+}
+
+.tab-bar__item--ai.tab-bar__item--active .tab-bar__label {
+  font-weight: 800;
+}
+
 .tab-bar__label {
-  position: relative;
-  z-index: 1;
   font-size: 9.5px;
   font-weight: 600;
-  letter-spacing: 0.02em;
-  transition:
-    color 0.25s ease,
-    opacity 0.25s ease;
-  opacity: 0.5;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  color: inherit;
+  transition: font-weight 0.2s ease;
 }
 
 .tab-bar__item--active .tab-bar__label {
-  opacity: 1;
   font-weight: 700;
-  background: linear-gradient(90deg, #a78bfa, #38bdf8);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
-/* ── Badge ── */
 .tab-bar__badge {
   position: absolute;
   top: 5px;
-  right: calc(50% - 20px);
-  min-width: 16px;
-  height: 16px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f472b6, #ec4899);
-  color: #fff;
-  font-size: 8.5px;
+  right: max(12px, calc(50% - 17px));
+  z-index: 4;
+  display: flex;
+  min-width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3.5px;
+  border-radius: 999px;
+  background: #f8fafc;
+  border: 1.5px solid #0f0f16;
+  color: #09090d;
+  font-size: 8px;
   font-weight: 800;
-  line-height: 16px;
-  text-align: center;
-  padding: 0 4px;
-  z-index: 2;
-  box-shadow:
-    0 0 0 2px rgba(10,10,18,0.8),
-    0 2px 8px rgba(244,114,182,0.6);
-  animation: badge-pop 0.4s var(--ease-spring);
-}
-
-@keyframes badge-pop {
-  from { transform: scale(0); }
-  to   { transform: scale(1); }
 }

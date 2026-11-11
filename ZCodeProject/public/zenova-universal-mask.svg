@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="100%" height="100%">
+  <defs>
+    <linearGradient id="base" x1="38" y1="12" x2="80" y2="114" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset=".48" stop-color="#f6eef6"/>
+      <stop offset="1" stop-color="#d8c9d2"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="28" y1="30" x2="94" y2="104" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fb7185"/>
+      <stop offset="0.45" stop-color="#f43f5e"/>
+      <stop offset="1" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="halo" x1="64" y1="18" x2="64" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fef3c7" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="soft-glow" x="-30" y="-20" width="160" height="160" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="64" cy="72" rx="82" ry="90" fill="url(#halo)"/>
+
+  <ellipse cx="42" cy="94" rx="13" ry="9" fill="rgba(255,240,225,0.18)" filter="url(#soft-glow)"/>
+  <ellipse cx="86" cy="94" rx="13" ry="9" fill="rgba(255,240,225,0.18)" filter="url(#soft-glow)"/>
+
+  <path d="M64 15C45 15 28 27 28 50c0 26 5 49 21 64 7 6.5 14 9.8 20 9.8s13-3.3 20-9.8c16-15 21-38 21-64C100 27 83 15 64 15Z" fill="url(#base)" opacity="0.92"/>
+
+  <circle cx="64" cy="57" r="2.2" fill="rgba(255,255,255,0.55)"/>
+
+  <circle cx="49" cy="86" r="10" fill="rgba(255,255,255,0.08)"/>
+  <circle cx="79" cy="86" r="10" fill="rgba(255,255,255,0.08)"/>
+
+  <path d="M39 56c4-8 12-12 20-9 4 2 5 6 3 10-3 7-10 14-18 15-6 0-9-7-5-16Z" fill="#1b1316" opacity="0.85"/>
+  <path d="M89 56c-4-8-12-12-20-9-4 2-5 6-3 10 3 7 10 14 18 15 6 0 9-7 5-16Z" fill="#1b1316" opacity="0.85"/>
+
+  <path d="M64 18l7 14-4 8-8-5 9 8-4 7 6 6-5 7-9 5 4 8-3 8 8 6 4-6-6-6 6-5 5 7 4-7Z" fill="url(#accent)"/>
+
+  <path d="M60 78 64 73 68 78" fill="none" stroke="#ffd166" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.8"/>
+
+  <circle cx="64" cy="72" r="1.4" fill="#fff0e0"/>
+</svg>

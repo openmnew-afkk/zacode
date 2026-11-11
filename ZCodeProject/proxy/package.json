@@ -1,0 +1,11 @@
+{
+  "name": "ru-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RU-Proxy — обход гео-блока российских видеоплееров",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

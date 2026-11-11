@@ -1,0 +1,207 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+ *  ✦ Yandex Music Style Glow Input
+ *  Подсвечивает последнюю напечатанную букву неоновым импульсом
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.ygi-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: rgba(22, 20, 26, 0.72);
+  border: 1px solid rgba(229, 169, 60, 0.22);
+  border-radius: 16px;
+  padding: 0 14px;
+  height: 48px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+
+.ygi-wrapper:focus-within {
+  border-color: rgba(255, 213, 107, 0.7);
+  background: rgba(28, 24, 34, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 0 3px rgba(229, 169, 60, 0.18),
+    0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.ygi-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd56b;
+  margin-right: 10px;
+  flex-shrink: 0;
+  opacity: 0.9;
+}
+
+.ygi-field {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+
+/* Слой рендеринга текста с посимвольной анимацией */
+.ygi-display {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  white-space: pre;
+  overflow-x: hidden;
+  pointer-events: none;
+  font-family: 'Unbounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #f8fafc;
+  line-height: 48px;
+  user-select: none;
+}
+
+.ygi-placeholder {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+/* Обычный символ */
+.ygi-char {
+  position: relative;
+  display: inline-block;
+  color: #ffffff;
+  transition: color 0.3s ease;
+}
+
+.ygi-char--space {
+  width: 0.32em;
+}
+
+/* Последняя напечатанная буква — фирменный импульс Яндекс Музыки */
+.ygi-char--glow {
+  color: #fff6d6;
+  font-weight: 700;
+  animation: yandexLetterPulse 0.48s cubic-bezier(0.18, 0.89, 0.32, 1.28) both;
+  z-index: 2;
+}
+
+@keyframes yandexLetterPulse {
+  0% {
+    transform: scale(1.4) translateY(-2px);
+    color: #ffffff;
+    text-shadow:
+      0 0 8px #fff,
+      0 0 16px #ffd56b,
+      0 0 28px #e5a93c,
+      0 0 42px #f59e0b,
+      0 0 60px rgba(245, 158, 11, 0.8);
+    filter: brightness(2.2);
+  }
+  35% {
+    transform: scale(1.22) translateY(-1px);
+    color: #ffe699;
+    text-shadow:
+      0 0 12px #ffd56b,
+      0 0 24px #e5a93c,
+      0 0 36px rgba(245, 158, 11, 0.65);
+    filter: brightness(1.6);
+  }
+  70% {
+    transform: scale(1.06) translateY(0);
+    color: #ffd56b;
+    text-shadow:
+      0 0 8px #ffd56b,
+      0 0 14px rgba(229, 169, 60, 0.4);
+    filter: brightness(1.2);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    color: #ffffff;
+    text-shadow: 0 0 4px rgba(255, 213, 107, 0.3);
+    filter: brightness(1);
+  }
+}
+
+/* Неоновая микро-искра под последней буквой */
+.ygi-spark {
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 2px;
+  background: radial-gradient(circle, #ffe699 0%, #e5a93c 60%, transparent 100%);
+  border-radius: 999px;
+  box-shadow: 0 0 10px 2px #ffd56b;
+  animation: ygiSparkFade 0.45s ease-out forwards;
+  pointer-events: none;
+}
+
+@keyframes ygiSparkFade {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1.8);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.4);
+  }
+}
+
+/* Прозрачный input поверх слоя отображения */
+.ygi-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  font-family: 'Unbounded', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 48px;
+  color: transparent;
+  caret-color: #ffd56b;
+  -webkit-text-fill-color: transparent;
+  cursor: text;
+  z-index: 3;
+}
+
+/* Кнопка очистки */
+.ygi-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  margin-left: 8px;
+  flex-shrink: 0;
+  transition: background 0.18s ease, transform 0.15s ease, color 0.18s ease;
+  z-index: 4;
+}
+
+.ygi-clear-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.ygi-clear-btn:active {
+  transform: scale(0.88);
+}

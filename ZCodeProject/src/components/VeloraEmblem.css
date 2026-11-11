@@ -1,0 +1,76 @@
+.velora-emblem {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overflow: visible;
+}
+
+.velora-emblem--sm { width: 36px; height: 36px; }
+.velora-emblem--md { width: 42px; height: 42px; }
+.velora-emblem--lg { width: 64px; height: 64px; }
+.velora-emblem--hero { width: 112px; height: 112px; }
+
+.velora-emblem__halo {
+  position: absolute;
+  inset: -12%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--season-glow, rgba(244, 63, 94, 0.42)) 0%,
+    rgba(251, 191, 36, 0.16) 52%,
+    transparent 74%
+  );
+  filter: blur(8px);
+  opacity: 0.85;
+  pointer-events: none;
+  animation: veloraHalo 3.4s ease-in-out infinite alternate;
+}
+
+.velora-emblem--winter .velora-emblem__halo {
+  background: radial-gradient(
+    circle,
+    rgba(56, 189, 248, 0.45) 0%,
+    rgba(244, 63, 94, 0.28) 48%,
+    transparent 74%
+  );
+}
+
+.velora-emblem__img {
+  position: relative;
+  z-index: 1;
+  width: 114%;
+  height: 114%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.72)) drop-shadow(0 0 10px rgba(244, 63, 94, 0.22));
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), filter 0.28s ease;
+}
+
+.velora-emblem--winter .velora-emblem__img {
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.75)) drop-shadow(0 0 12px rgba(125, 211, 252, 0.32));
+}
+
+.velora-emblem--hero .velora-emblem__img {
+  animation: veloraFloat 4.2s ease-in-out infinite;
+}
+
+@keyframes veloraFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-4px) scale(1.03); }
+}
+
+@keyframes veloraHalo {
+  from { opacity: 0.55; transform: scale(0.94); }
+  to { opacity: 0.95; transform: scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .velora-emblem__halo,
+  .velora-emblem--hero .velora-emblem__img {
+    animation: none;
+  }
+}

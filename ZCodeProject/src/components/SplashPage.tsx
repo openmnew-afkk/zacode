@@ -1,61 +1,172 @@
-import React from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './SplashPage.css';
 
-/* ===== ULTRA PREMIUM Загрузочная страница ===== */
-const SplashPage: React.FC = () => {
+interface SplashPageProps {
+  onDone?: () => void;
+}
+
+const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
+  const [progress, setProgress] = useState(0);
+  const [visible, setVisible] = useState(true);
+  const [fading, setFading] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const finishedRef = useRef(false);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
+  const finishSplash = useCallback(() => {
+    if (finishedRef.current) return;
+    finishedRef.current = true;
+    setProgress(100);
+    setFading(true);
+    setTimeout(() => {
+      setVisible(false);
+      onDoneRef.current?.();
+    }, 450);
+  }, []);
+
+  const handleUnlockAudio = useCallback(() => {
+    const v = videoRef.current;
+    if (v) {
+      v.muted = false;
+      v.volume = 1.0;
+      if (v.paused) {
+        v.play().catch(() => {});
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const vid = videoRef.current;
+    let removeUnlockListeners: (() => void) | null = null;
+
+    if (vid) {
+      vid.volume = 1.0;
+      vid.muted = false;
+
+      // Пытаемся воспроизвести сразу со звуком на полную громкость
+      const p = vid.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          // Если строгая политика браузера временно заблокировала звук:
+          // Запускаем видео и моментально разблокируем звук при первом касании экрана
+          vid.muted = true;
+          vid.play().catch(() => {});
+
+          const unlockAudio = () => {
+            const v = videoRef.current;
+            if (!v) return;
+            v.muted = false;
+            v.volume = 1.0;
+            cleanup();
+          };
+
+          const cleanup = () => {
+            window.removeEventListener('pointerdown', unlockAudio);
+            window.removeEventListener('touchstart', unlockAudio);
+            window.removeEventListener('click', unlockAudio);
+            window.removeEventListener('keydown', unlockAudio);
+          };
+
+          window.addEventListener('pointerdown', unlockAudio, { passive: true });
+          window.addEventListener('touchstart', unlockAudio, { passive: true });
+          window.addEventListener('click', unlockAudio, { passive: true });
+          window.addEventListener('keydown', unlockAudio, { passive: true });
+          removeUnlockListeners = cleanup;
+        });
+      }
+    }
+
+    // Страховочный таймер (30 сек) ТОЛЬКО на случай критического сбоя сети
+    // Ни при каких обстоятельствах не прерывает проигрываемое видео!
+    const fallbackTimer = setTimeout(() => {
+      const v = videoRef.current;
+      if (v && !v.paused && !v.ended && v.currentTime > 0) {
+        // Видео ещё играет — даём доиграть до конца!
+        return;
+      }
+      finishSplash();
+    }, 30000);
+
+    // Точный прогресс синхронно с реальным временем воспроизведения видео
+    const progInterval = setInterval(() => {
+      const v = videoRef.current;
+      if (v && v.duration && isFinite(v.duration) && v.currentTime > 0) {
+        const pct = Math.min(100, Math.round((v.currentTime / v.duration) * 100));
+        setProgress(pct);
+      }
+    }, 50);
+
+    return () => {
+      clearTimeout(fallbackTimer);
+      clearInterval(progInterval);
+      removeUnlockListeners?.();
+    };
+  }, [finishSplash]);
+
+  if (!visible) return null;
+
   return (
-    <div className="splash">
-      {/* Aurora background is handled by CSS ::before */}
+    <div
+      className={`sp ${fading ? 'sp--fade' : ''}`}
+      role="status"
+      aria-label="Загрузка ZENOVA"
+      onClick={handleUnlockAudio}
+      onTouchStart={handleUnlockAudio}
+    >
+      {/* Амбиент-фон для широких экранов */}
+      <div
+        className="sp__backdrop-blur"
+        style={{ backgroundImage: 'url(/zenova-splash-poster.jpg)' }}
+        aria-hidden="true"
+      />
+      <div className="sp__backdrop-vignette" aria-hidden="true" />
 
-      {/* Floating particles */}
-      <div className="splash__particles">
-        <div className="splash__particle" />
-        <div className="splash__particle" />
-        <div className="splash__particle" />
-        <div className="splash__particle" />
-        <div className="splash__particle" />
-      </div>
-
-      <div className="splash__content">
-        {/* Logo with spinning ring */}
-        <div className="splash__logo-wrap">
-          <div className="splash__logo-glow" />
-          <div className="splash__logo-ring" />
-          <div className="splash__logo">
-            <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Film frame */}
-              <rect x="6" y="12" width="44" height="32" rx="6"
-                stroke="rgba(255,255,255,0.9)" strokeWidth="2" fill="none" />
-              {/* Sprocket holes */}
-              <rect x="2" y="16" width="4" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
-              <rect x="2" y="26" width="4" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
-              <rect x="2" y="36" width="4" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
-              <rect x="50" y="16" width="4" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
-              <rect x="50" y="26" width="4" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
-              <rect x="50" y="36" width="4" height="4" rx="1" fill="rgba(255,255,255,0.5)" />
-              {/* Play triangle */}
-              <path d="M23 21l14 7-14 7V21z" fill="url(#pg)" />
-              <defs>
-                <linearGradient id="pg" x1="23" y1="21" x2="37" y2="35" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="#a78bfa" />
-                  <stop offset="1" stopColor="#06b6d4" />
-                </linearGradient>
-              </defs>
-            </svg>
-          </div>
+      {/* Видео-контейнер (видео идет от начала до самого конца со звуком без прерываний) */}
+      <div className="sp__stage">
+        {/* Кнопка быстрого пропуска заставки */}
+        <div className="sp__top-bar">
+          <div />
+          <button
+            type="button"
+            className="sp__pill-btn sp__pill-btn--skip"
+            onClick={(e) => {
+              e.stopPropagation();
+              finishSplash();
+            }}
+            aria-label="Пропустить заставку"
+          >
+            Пропустить ✕
+          </button>
         </div>
 
-        {/* Title */}
-        <h1 className="splash__title">
-          <span className="splash__title-tele">Tele</span><span className="splash__title-cinema">Cinema</span>
-        </h1>
+        <video
+          ref={videoRef}
+          className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}
+          src="/zenova-splash.mp4?v=holiday"
+          poster="/zenova-splash-poster.jpg"
+          autoPlay
+          muted={false}
+          playsInline
+          preload="auto"
+          onLoadedData={() => setVideoReady(true)}
+          onEnded={finishSplash}
+          onError={finishSplash}
+        />
 
-        {/* Tagline */}
-        <p className="splash__tagline">Кино и сериалы онлайн</p>
-
-        {/* Progress bar */}
-        <div className="splash__progress-wrap">
-          <div className="splash__progress-bar" />
+        {/* Тонкий минималистичный индикатор загрузки в самом низу */}
+        <div className="sp__bottom-hud">
+          <div
+            className="sp__track"
+            role="progressbar"
+            aria-label="Загрузка"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={progress}
+          >
+            <div className="sp__bar" style={{ width: `${progress}%` }} />
+          </div>
         </div>
       </div>
     </div>
