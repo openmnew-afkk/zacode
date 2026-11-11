@@ -4,7 +4,7 @@ import { getMovieDetail, getTrailer, getRecommendations } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';
 import { createStarsInvoice } from '../api/backend';
 import type { Movie, MovieDetail, WatchStatus, WatchOption } from '../types';
-import { useTelegram } from '../hooks/useTelegram';
+import { useTelegram, enforceTelegramFullscreen } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { getStoredSeason } from '../services/seasons';
 import { captureSoundtrackFromMovie } from '../services/soundtracks';
@@ -269,13 +269,10 @@ const MovieDetailPage: React.FC = () => {
       if (document.fullscreenElement) {
         document.exitFullscreen?.().catch?.(() => {});
       }
-      const tg = (window as any).Telegram?.WebApp;
-      if (typeof tg?.exitFullscreen === 'function') {
-        tg.exitFullscreen();
-      }
     } catch {}
     setShowWatch(false);
     setSheetMode('normal');
+    enforceTelegramFullscreen();
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     navigate('/', { replace: true });
   };
@@ -286,15 +283,7 @@ const MovieDetailPage: React.FC = () => {
     const nextFullscreen = sheetMode !== 'fullscreen';
     setSheetMode(nextFullscreen ? 'fullscreen' : 'normal');
 
-    try {
-      const tg = (window as any).Telegram?.WebApp;
-      if (nextFullscreen) {
-        if (typeof tg?.expand === 'function') tg.expand();
-        if (typeof tg?.requestFullscreen === 'function') tg.requestFullscreen();
-      } else {
-        if (typeof tg?.exitFullscreen === 'function') tg.exitFullscreen();
-      }
-    } catch {}
+    enforceTelegramFullscreen();
 
     try {
       const el = playerModalRef.current as any;

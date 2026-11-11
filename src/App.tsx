@@ -25,6 +25,7 @@ import { RulesModal } from './components/RulesModal';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
 import { getStoredSeason, applySeason } from './services/seasons';
+import { enforceTelegramFullscreen } from './hooks/useTelegram';
 
 const RULES_ACCEPTED_KEY = 'zenova_rules_accepted';
 
@@ -79,20 +80,8 @@ function App() {
 
   /* ═══ Гарантированный полноразмерный вид под телефон в Telegram WebApp ═══ */
   useEffect(() => {
-    try {
-      const tg = (window as any).Telegram?.WebApp;
-      if (tg) {
-        tg.ready?.();
-        tg.expand?.();
-        if (typeof tg.requestFullscreen === 'function') {
-          tg.requestFullscreen();
-        }
-        if (typeof tg.disableVerticalSwipes === 'function') {
-          tg.disableVerticalSwipes();
-        }
-      }
-    } catch {}
-  }, []);
+    enforceTelegramFullscreen();
+  }, [location.pathname]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);

@@ -4,11 +4,33 @@ import type { TelegramUser } from '../types';
 /* ===== Хук для работы с Telegram WebApp ===== */
 
 /** Глобальный объект Telegram WebApp */
-const getTg = () => {
+export const getTg = () => {
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     return window.Telegram.WebApp;
   }
   return null;
+};
+
+/**
+ * Принудительное удержание полного экрана под телефон:
+ * - tg.expand() (раскрывает шторку на 100%)
+ * - tg.requestFullscreen() (полноэкранный режим без зазоров)
+ * - tg.disableVerticalSwipes() (блокирует свайп закрытия/сворачивания вниз)
+ */
+export const enforceTelegramFullscreen = () => {
+  try {
+    const tg = getTg();
+    if (!tg) return;
+    if (typeof tg.expand === 'function') {
+      tg.expand();
+    }
+    if (typeof tg.disableVerticalSwipes === 'function') {
+      try { tg.disableVerticalSwipes(); } catch {}
+    }
+    if (typeof (tg as any).requestFullscreen === 'function' && !(tg as any).isFullscreen) {
+      try { (tg as any).requestFullscreen(); } catch {}
+    }
+  } catch {}
 };
 
 /** Расширяем Window для TypeScript */
@@ -82,11 +104,8 @@ export const useTelegram = () => {
   useEffect(() => {
     if (tg) {
       tg.ready();
-      tg.expand();
-      // Отключаем свайп закрытия (iOS Telegram)
-      if (typeof tg.disableVerticalSwipes === 'function') {
-        try { tg.disableVerticalSwipes(); } catch {}
-      }
+      enforceTelegramFullscreen();
+
       // Подтверждение закрытия
       if (typeof (tg as any).enableClosingConfirmation === 'function') {
         try { (tg as any).enableClosingConfirmation(); } catch {}
@@ -98,6 +117,14 @@ export const useTelegram = () => {
       if (typeof tg.setBottomBarColor === 'function') {
         try { tg.setBottomBarColor('#08080f'); } catch {}
       }
+
+      const onFocusOrVisible = () => {
+        enforceTelegramFullscreen();
+      };
+
+      window.addEventListener('focus', onFocusOrVisible);
+      window.addEventListener('pageshow', onFocusOrVisible);
+      document.addEventListener('visibilitychange', onFocusOrVisible);
 
       const updateSafeArea = () => {
         const isFs = Boolean((tg as any)?.isFullscreen);
@@ -134,6 +161,9 @@ export const useTelegram = () => {
       return () => {
         clearTimeout(t1);
         clearTimeout(t2);
+        window.removeEventListener('focus', onFocusOrVisible);
+        window.removeEventListener('pageshow', onFocusOrVisible);
+        document.removeEventListener('visibilitychange', onFocusOrVisible);
         if (typeof (tg as any)?.offEvent === 'function') {
           try {
             (tg as any).offEvent('fullscreenChanged', updateSafeArea);

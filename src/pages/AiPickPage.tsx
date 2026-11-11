@@ -7,6 +7,7 @@ import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
 import { getStoredSeason } from '../services/seasons';
 import { SynthaxAiStudio } from '../components/SynthaxAiStudio';
+import YandexGlowInput from '../components/YandexGlowInput';
 import './AiPickPage.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -327,21 +328,37 @@ const AiPickPage: React.FC = () => {
           <p className="orc-lead">Скажите, что хочется — Оракул покажет фильм за секунды.</p>
 
           <form
-            className="orc-ask"
+            className="orc-search-shell"
             onSubmit={(e) => {
               e.preventDefault();
               if (prompt.trim()) run(null, prompt);
             }}
           >
-            <input
-              className="orc-ask__input"
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Например: как «Интерстеллар», но короче"
-            />
-            <button type="submit" className="orc-ask__go" disabled={!prompt.trim()} aria-label="Подобрать">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </button>
+            <div className="orc-search-box">
+              <YandexGlowInput
+                value={prompt}
+                onChange={(val) => setPrompt(val)}
+                placeholder="Что найти? Например: «как Интерстеллар, но короче»"
+                icon={
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                  </svg>
+                }
+                onClear={() => {
+                  haptic('light');
+                  setPrompt('');
+                }}
+              />
+            </div>
+            {prompt.trim() && (
+              <button type="submit" className="orc-search-btn" aria-label="Подобрать фильм">
+                <span>Подобрать</span>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round">
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </button>
+            )}
           </form>
 
           {/* Контекст просмотра — то, чего нет у других кинотеатров */}

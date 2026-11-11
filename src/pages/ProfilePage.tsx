@@ -14,6 +14,10 @@ import {
   Star,
   Flame,
   Tv,
+  CheckCircle2,
+  Wrench,
+  Radio,
+  Copy,
 } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -23,7 +27,101 @@ import { getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../
 import type { SeasonId } from '../services/seasons';
 import './ProfilePage.css';
 
-type SubPage = 'diary' | 'rank' | 'pro' | 'atmosphere' | 'history' | null;
+type SubPage = 'diary' | 'rank' | 'pro' | 'atmosphere' | 'history' | 'news' | null;
+
+interface ChangeEntry {
+  type: 'fixed' | 'improved' | 'new';
+  title: string;
+  desc: string;
+}
+
+interface ReleaseNote {
+  version: string;
+  date: string;
+  badge?: string;
+  headline: string;
+  changes: ChangeEntry[];
+}
+
+const CHANGELOG: ReleaseNote[] = [
+  {
+    version: '3.3.2',
+    date: '11 ноября 2026',
+    badge: 'СВЕЖЕЕ ОБНОВЛЕНИЕ',
+    headline: 'Стабильный полный экран, поиск в Оракуле, видео-презентация Synthax и лента новостей',
+    changes: [
+      {
+        type: 'fixed',
+        title: 'Устранены вылеты в оконный режим',
+        desc: 'Приложение теперь непрерывно держит полноразмерный экран под телефон при выходе из фильма, навигации по вкладкам и переключении приложений в Telegram.',
+      },
+      {
+        type: 'new',
+        title: 'Умный поисковик в Кино-Оракуле',
+        desc: 'В Оракул встроен фирменный поиск с неоновой посимвольной подсветкой ввода в стиле Яндекс Музыки для мгновенного подбора фильмов по названию или описанию.',
+      },
+      {
+        type: 'new',
+        title: 'Видео-презентация Synthax AI',
+        desc: 'Раздел нейросети закрыт на время обучения собственного ядра. Добавлен кибернетический демо-плеер с демонстрацией кино-кинетики и технологий будущего рендеринга.',
+      },
+      {
+        type: 'improved',
+        title: 'Детализированный дизайн Настроек & Доступность',
+        desc: 'Улучшена контрастность и читаемость шрифтов, увеличены сенсорные зоны, добавлена карточка быстрой статистики пользователя и раздел истории обновлений.',
+      },
+      {
+        type: 'improved',
+        title: 'Сезонная чистота и оптимизация',
+        desc: 'Убрана неиспользуемая светлая тема, оптимизированы сезонные эффекты и видимость полярного сияния, удалены тестовые игры.',
+      },
+    ],
+  },
+  {
+    version: '3.3.1',
+    date: '10 ноября 2026',
+    headline: 'Архитектурный Smoked-Obsidian стиль и безопасные зоны Telegram',
+    changes: [
+      {
+        type: 'improved',
+        title: 'Гармония с доком TabBar',
+        desc: 'Настройки переведены на архитектурный обсидиановый стиль с верхним световым лучом и минималистичными контурными иконками.',
+      },
+      {
+        type: 'fixed',
+        title: 'Отступы под нативные кнопки Telegram',
+        desc: 'Шапка опущена ниже системных кнопок закрытия и меню в полноэкранном режиме iOS и Android.',
+      },
+      {
+        type: 'new',
+        title: 'Сезонные темы и Северное Сияние',
+        desc: 'Добавлены атмосферные темы (Зимний Кристалл, Сакура, Лазурный Бриз, Янтарь, Обсидиан) с деликатными микро-частицами.',
+      },
+    ],
+  },
+  {
+    version: '3.3.0',
+    date: '8 ноября 2026',
+    headline: 'Кино-Оракул, Музыкальный хаб и Кино-Дневник',
+    changes: [
+      {
+        type: 'new',
+        title: 'Кино-Оракул под настроение',
+        desc: 'Интерактивные карточки со свайп-механикой для быстрого выбора фильма за пару касаний.',
+      },
+      {
+        type: 'new',
+        title: 'Стриминг музыки из фильмов',
+        desc: 'Аудиоплеер с саундтреками, плейлистами и быстрым поиском треков.',
+      },
+      {
+        type: 'new',
+        title: 'Личный Кино-Дневник и ранги',
+        desc: 'Отметки «Смотрю», «В планах», «Просмотрено», рейтинговые привилегии и синхронизация через Telegram CloudStorage.',
+      },
+    ],
+  },
+];
 
 const SEASONS: Array<{
   id: SeasonId | 'auto';
@@ -48,7 +146,6 @@ export const ProfilePage: React.FC = () => {
     tracked,
     clearHistory,
     isPremium,
-    premiumExpiry,
     role,
     telegramUsername,
   } = useStore();
@@ -56,6 +153,7 @@ export const ProfilePage: React.FC = () => {
   const [subPage, setSubPage] = useState<SubPage>(null);
   const [diaryFilter, setDiaryFilter] = useState<'all' | 'watched' | 'want' | 'watching'>('all');
   const [showRules, setShowRules] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
   const [seasonState, setSeasonState] = useState(() => getStoredSeason());
 
   // Тумблер северного сияния
@@ -118,12 +216,24 @@ export const ProfilePage: React.FC = () => {
     ? `@${user.username}`
     : effectiveUsername
     ? `@${effectiveUsername.replace(/^@/, '')}`
-    : 'ID Гостя';
+    : `ID: ${user?.id || 'Гость'}`;
+
+  // Копирование ID пользователя
+  const handleCopyHandle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    haptic('light');
+    try {
+      navigator.clipboard?.writeText(username);
+      setCopiedId(true);
+      setTimeout(() => setCopiedId(false), 2000);
+    } catch {}
+  };
 
   // Расчет ранга и очков опыта
   const trackedList = Object.values(tracked || {});
   const trackedCount = trackedList.length;
   const watchedCount = trackedList.filter((t) => t.status === 'watched').length;
+  const wantCount = trackedList.filter((t) => t.status === 'want').length;
   const totalXp = watchedCount * 45 + favorites.length * 30 + trackedCount * 25 + (effectivePremium ? 250 : 0);
   const cineLevel = Math.max(1, Math.floor(totalXp / 140) + 1);
   const levelProgress = Math.min(100, Math.round(((totalXp % 140) / 140) * 100));
@@ -138,6 +248,77 @@ export const ProfilePage: React.FC = () => {
     if (diaryFilter === 'all') return true;
     return item.status === diaryFilter;
   });
+
+  /* ══════════════ ПОДСТРАНИЦА: ЧТО НОВОГО & ОБНОВЛЕНИЯ ══════════════ */
+  if (subPage === 'news') {
+    return (
+      <div className="zen-subpage">
+        <header className="zen-subpage__nav">
+          <button
+            type="button"
+            className="zen-subpage__back"
+            onClick={() => {
+              haptic('light');
+              setSubPage(null);
+            }}
+          >
+            <ChevronLeft size={18} />
+            <span>Назад</span>
+          </button>
+          <h1 className="zen-subpage__title">Что нового</h1>
+          <div className="zen-subpage__action-space" />
+        </header>
+
+        <div className="zen-subpage__body">
+          <div className="zen-news-lead">
+            <div className="zen-news-lead__badge">
+              <Sparkles size={13} />
+              <span>ZENOVA UPDATES</span>
+            </div>
+            <h2 className="zen-news-lead__title">История обновлений и улучшений</h2>
+            <p className="zen-news-lead__desc">
+              Мы постоянно улучшаем стабильность, скорость работы и добавляем новые возможности для комфортного кино-просмотра.
+            </p>
+          </div>
+
+          <div className="zen-changelog-feed">
+            {CHANGELOG.map((item) => (
+              <article key={item.version} className="zen-release-card">
+                <div className="zen-release-card__top">
+                  <div className="zen-release-badge-wrap">
+                    <span className="zen-release-ver">v{item.version}</span>
+                    {item.badge && <span className="zen-release-tag-hot">{item.badge}</span>}
+                  </div>
+                  <span className="zen-release-date">{item.date}</span>
+                </div>
+
+                <h3 className="zen-release-headline">{item.headline}</h3>
+
+                <div className="zen-change-items">
+                  {item.changes.map((change, idx) => (
+                    <div key={idx} className="zen-change-row">
+                      <span className={`zen-change-pill zen-change-pill--${change.type}`}>
+                        {change.type === 'fixed' && <CheckCircle2 size={12} />}
+                        {change.type === 'new' && <Sparkles size={12} />}
+                        {change.type === 'improved' && <Wrench size={12} />}
+                        <span>
+                          {change.type === 'fixed' ? 'Исправлено' : change.type === 'new' ? 'Новинка' : 'Улучшено'}
+                        </span>
+                      </span>
+                      <div className="zen-change-body">
+                        <strong className="zen-change-title">{change.title}</strong>
+                        <p className="zen-change-desc">{change.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   /* ══════════════ ПОДСТРАНИЦА: КИНО-ДНЕВНИК ══════════════ */
   if (subPage === 'diary') {
@@ -164,8 +345,8 @@ export const ProfilePage: React.FC = () => {
           <div className="zen-segmented">
             {[
               { id: 'all', label: `Все (${trackedList.length})` },
-              { id: 'watched', label: 'Просмотрено' },
-              { id: 'want', label: 'В планах' },
+              { id: 'watched', label: `Просмотрено (${watchedCount})` },
+              { id: 'want', label: `В планах (${wantCount})` },
               { id: 'watching', label: 'Смотрю' },
             ].map((f) => (
               <button
@@ -194,7 +375,7 @@ export const ProfilePage: React.FC = () => {
                 className="zen-empty-state__btn"
                 onClick={() => navigate('/')}
               >
-                Выбрать фильм
+                Выбрать фильм в каталоге
               </button>
             </div>
           ) : (
@@ -587,7 +768,10 @@ export const ProfilePage: React.FC = () => {
     <div className="zen-profile-page page">
       {/* Шапка профиля */}
       <header className="zen-header">
-        <h1 className="zen-header__title">Профиль</h1>
+        <div className="zen-header__left">
+          <h1 className="zen-header__title">Настройки</h1>
+          <span className="zen-header__subtitle">Аккаунт и персонализация</span>
+        </div>
         {isAdminUser && (
           <button
             type="button"
@@ -599,7 +783,7 @@ export const ProfilePage: React.FC = () => {
         )}
       </header>
 
-      {/* Карточка пользователя с рангом */}
+      {/* Карточка пользователя с рангом и быстрой статистикой */}
       <div className="zen-user-card" onClick={() => setSubPage('rank')}>
         <div className="zen-user-card__beam" />
         <div className="zen-user-card__top">
@@ -620,11 +804,17 @@ export const ProfilePage: React.FC = () => {
           </div>
 
           <div className="zen-user-info">
-            <div className="zen-user-kicker">РЕЗИДЕНТ ZENOVA</div>
-            <h2 className="zen-user-name">{displayName}</h2>
-            <div className="zen-user-meta">
-              <span className="zen-user-handle">{username}</span>
+            <div className="zen-user-kicker-row">
+              <span className="zen-user-kicker">РЕЗИДЕНТ ZENOVA</span>
               <span className="zen-user-rank-chip">{rankTitle}</span>
+            </div>
+            <h2 className="zen-user-name">{displayName}</h2>
+            <div className="zen-user-meta" onClick={handleCopyHandle}>
+              <span className="zen-user-handle">{username}</span>
+              <button type="button" className="zen-copy-btn" aria-label="Скопировать">
+                <Copy size={11} />
+                <span>{copiedId ? 'Скопировано!' : 'Копировать'}</span>
+              </button>
             </div>
           </div>
           <ChevronRight size={18} className="zen-chevron" />
@@ -643,9 +833,56 @@ export const ProfilePage: React.FC = () => {
             <span className="zen-user-rank-pts">{totalXp % 140} / 140 XP</span>
           </div>
         </div>
+
+        {/* Быстрая статистика пользователя */}
+        <div className="zen-user-stats-strip">
+          <div className="zen-user-stat-chip">
+            <span className="zen-user-stat-val">{watchedCount}</span>
+            <span className="zen-user-stat-lbl">Просмотрено</span>
+          </div>
+          <div className="zen-user-stat-div" />
+          <div className="zen-user-stat-chip">
+            <span className="zen-user-stat-val">{wantCount}</span>
+            <span className="zen-user-stat-lbl">В планах</span>
+          </div>
+          <div className="zen-user-stat-div" />
+          <div className="zen-user-stat-chip">
+            <span className="zen-user-stat-val">{favorites.length}</span>
+            <span className="zen-user-stat-lbl">Избранное</span>
+          </div>
+          <div className="zen-user-stat-div" />
+          <div className="zen-user-stat-chip">
+            <span className="zen-user-stat-val">{totalXp}</span>
+            <span className="zen-user-stat-lbl">Опыт XP</span>
+          </div>
+        </div>
       </div>
 
-      {/* ── ГРУППА 1: МОЁ КИНО ── */}
+      {/* ── ГРУППА 1: НОВОВВЕДЕНИЯ & ИСПРАВЛЕНИЯ ── */}
+      <div className="zen-section-header">НОВОВВЕДЕНИЯ & ИСПРАВЛЕНИЯ</div>
+      <div className="zen-group">
+        <div
+          className="zen-row clickable zen-row--highlight"
+          onClick={() => {
+            haptic('light');
+            setSubPage('news');
+          }}
+        >
+          <span className="zen-row__icon-wrap zen-glow-purple">
+            <Sparkles size={18} />
+          </span>
+          <div className="zen-row__info">
+            <div className="zen-row__title-row">
+              <span className="zen-row__title">Что нового в ZENOVA</span>
+              <span className="zen-news-pill">v3.3.2 NEW</span>
+            </div>
+            <div className="zen-row__sub">Стабильный полный экран, Оракул-поиск, видео Synthax</div>
+          </div>
+          <ChevronRight size={16} className="zen-chevron" />
+        </div>
+      </div>
+
+      {/* ── ГРУППА 2: МОЁ КИНО ── */}
       <div className="zen-section-header">МОЁ КИНО</div>
       <div className="zen-group">
         <div
@@ -703,7 +940,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── ГРУППА 2: ПРИВИЛЕГИИ ── */}
+      {/* ── ГРУППА 3: ПРИВИЛЕГИИ ── */}
       <div className="zen-section-header">ПРИВИЛЕГИИ</div>
       <div className="zen-group">
         <div
@@ -745,7 +982,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── ГРУППА 3: АТМОСФЕРА И ТЕМЫ (БЕЗ СВЕТЛОЙ ТЕМЫ) ── */}
+      {/* ── ГРУППА 4: АТМОСФЕРА И ТЕМЫ ── */}
       <div className="zen-section-header">ПЕРСОНАЛИЗАЦИЯ</div>
       <div className="zen-group">
         <div
@@ -767,7 +1004,7 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── ГРУППА 4: ИНФОРМАЦИЯ & ВЫХОД ── */}
+      {/* ── ГРУППА 5: ИНФОРМАЦИЯ & ВЫХОД ── */}
       <div className="zen-section-header">ПРИЛОЖЕНИЕ</div>
       <div className="zen-group">
         <div
@@ -782,7 +1019,7 @@ export const ProfilePage: React.FC = () => {
           </span>
           <div className="zen-row__info">
             <div className="zen-row__title">Правила и соглашение</div>
-            <div className="zen-row__sub">Пользовательские условия</div>
+            <div className="zen-row__sub">Пользовательские условия и безопасность</div>
           </div>
           <ChevronRight size={16} className="zen-chevron" />
         </div>
