@@ -156,7 +156,7 @@ const NewYearPage: React.FC = () => {
 
           <div className="ny-mascot-minimal">
             <img
-              src="/zenova-mask-winter.png"
+              src="./zenova-mask-winter.png"
               alt=""
               className="ny-mascot-img"
               draggable={false}

@@ -118,7 +118,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       {/* Амбиент-фон для широких экранов */}
       <div
         className="sp__backdrop-blur"
-        style={{ backgroundImage: 'url(/zenova-splash-poster.jpg)' }}
+        style={{ backgroundImage: 'url(./zenova-splash-poster.jpg)' }}
         aria-hidden="true"
       />
       <div className="sp__backdrop-vignette" aria-hidden="true" />
@@ -144,8 +144,8 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         <video
           ref={videoRef}
           className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}
-          src="/zenova-splash.mp4?v=holiday"
-          poster="/zenova-splash-poster.jpg"
+          src="./zenova-splash.mp4?v=holiday"
+          poster="./zenova-splash-poster.jpg"
           autoPlay
           muted={false}
           playsInline

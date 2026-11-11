@@ -984,7 +984,7 @@ const MovieDetailPage: React.FC = () => {
                 <div className="dp-cinema-hud__brand">
                   <div className="dp-cinema-hud__mask-wrap">
                     <img
-                      src={getStoredSeason().season.id === 'winter' ? '/zenova-mask-mini-winter.png' : '/zenova-mask-mini.png'}
+                      src={getStoredSeason().season.id === 'winter' ? './zenova-mask-mini-winter.png' : './zenova-mask-mini.png'}
                       alt="ZENOVA"
                       className="dp-cinema-hud__mask"
                     />

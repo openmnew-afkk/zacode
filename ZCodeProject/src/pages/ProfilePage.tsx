@@ -1264,7 +1264,7 @@ export const ProfilePage: React.FC = () => {
                 <img src={user.photo_url} alt={displayName} className="zen-user-avatar__img" />
               ) : (
                 <img
-                  src={seasonState.season.id === 'winter' ? '/zenova-mask-winter.png' : '/zenova-mask-default.png'}
+                  src={seasonState.season.id === 'winter' ? './zenova-mask-winter.png' : './zenova-mask-default.png'}
                   alt=""
                   className="zen-user-avatar__mask"
                 />

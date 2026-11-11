@@ -38,7 +38,7 @@ const tabs: TabDef[] = [
     path: '/ai',
     label: 'Оракул',
     accent: true,
-    icon: <img className="tab-bar__mask" src="/zenova-mask-mini.png" alt="" draggable={false} />,
+    icon: <img className="tab-bar__mask" src="./zenova-mask-mini.png" alt="" draggable={false} />,
   },
   {
     path: '/music',
