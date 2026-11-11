@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
  *  📱 ProfilePage.css — Архитектурный Smoked-Obsidian дизайн ZENOVA
- *  - Детализированный интерфейс с быстрой статистикой и доступностью
- *  - Полная гармония со стилем нижнего дока TabBar
- *  - Лента новостей и истории релизов (Changelog)
- *  - Прецизионный верхний световой луч (beam)
+ *  - Единая Кинотека & Дневник (объединены избранное, история и статусы)
+ *  - Роскошный ZENOVA PRO VIP-лаундж с 8 элитными возможностями
+ *  - Коллекция визуальных атмосфер и полярное сияние
+ *  - Топовый дизайн правил и безопасности
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 .zen-profile-page {
@@ -79,7 +79,6 @@
   overflow: hidden;
 }
 
-/* Прецизионный световой луч на верхней грани карточки */
 .zen-user-card__beam {
   position: absolute;
   top: 0;
@@ -423,6 +422,18 @@
   line-height: 1.25;
 }
 
+.zen-counter-badge {
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(255, 213, 107, 0.14);
+  border: 1px solid rgba(255, 213, 107, 0.35);
+  color: #ffd56b;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
 .zen-news-pill {
   padding: 1px 7px;
   border-radius: 999px;
@@ -454,31 +465,20 @@
   flex-shrink: 0;
 }
 
-.text-gold {
-  color: #ffd56b !important;
-  font-weight: 750 !important;
-}
-
-.text-green {
-  color: #34d399 !important;
-  font-weight: 750 !important;
-}
-
-.text-accent {
-  color: #c084fc !important;
-  font-weight: 750 !important;
-}
-
-.text-danger {
-  color: #f43f5e !important;
-}
+.text-gold { color: #ffd56b !important; }
+.text-green { color: #34d399 !important; }
+.text-cyan { color: #38bdf8 !important; }
+.text-amber { color: #fbbf24 !important; }
+.text-purple { color: #c084fc !important; }
+.text-rose { color: #f43f5e !important; }
+.text-danger { color: #f43f5e !important; }
 
 /* Точки сезонов */
-.zen-season-dot {
-  width: 14px;
-  height: 14px;
+.zen-palette-dot {
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  flex-shrink: 0;
+  display: inline-block;
 }
 
 .zen-check {
@@ -583,7 +583,971 @@
   width: 70px;
 }
 
-/* ══════════════ ПОДСТРАНИЦА: ЧТО НОВОГО (CHANGELOG) ══════════════ */
+/* ══════════════ 1. ЕДИНАЯ КИНОТЕКА (LIBRARY) ══════════════ */
+.zen-lib-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(20px);
+  margin-bottom: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.zen-lib-hero__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.zen-lib-hero__num {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 15px;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.zen-lib-hero__lbl {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+.zen-lib-hero__divider {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.zen-lib-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.zen-lib-search__icon {
+  position: absolute;
+  left: 14px;
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.zen-lib-search__input {
+  width: 100%;
+  height: 44px;
+  padding: 0 38px 0 38px;
+  border-radius: 14px;
+  background: rgba(18, 16, 26, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.18s ease;
+}
+
+.zen-lib-search__input:focus {
+  border-color: rgba(255, 213, 107, 0.5);
+}
+
+.zen-lib-search__clear {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.zen-lib-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.zen-lib-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.zen-lib-tab {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  white-space: nowrap;
+}
+
+.zen-lib-tab.active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.zen-lib-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zen-lib-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 18px;
+  background: rgba(15, 15, 22, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.zen-lib-card:active {
+  transform: scale(0.985);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.zen-lib-card__poster-wrap {
+  position: relative;
+  width: 48px;
+  height: 68px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: #111;
+}
+
+.zen-lib-card__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.zen-lib-card__rating {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.75);
+  color: #ffd56b;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.zen-lib-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.zen-lib-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 4px;
+}
+
+.zen-tag-fav {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(251, 191, 36, 0.15);
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: #fbbf24;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.zen-tag-watched {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.zen-tag-want {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.zen-tag-watching {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fde047;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.zen-tag-hist {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.zen-lib-card__title {
+  margin: 0 0 3px;
+  font-size: 14.5px;
+  font-weight: 750;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zen-lib-card__meta {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ══════════════ 2. ZENOVA PRO (КОНФЕТКА) ══════════════ */
+.zen-pro-hero {
+  position: relative;
+  border-radius: 26px;
+  padding: 24px;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(245, 158, 11, 0.22) 0%, transparent 80%),
+    linear-gradient(145deg, rgba(28, 20, 14, 0.95) 0%, rgba(15, 12, 10, 0.98) 100%);
+  border: 1px solid rgba(255, 213, 107, 0.35);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.75),
+    0 0 35px rgba(245, 158, 11, 0.15);
+  overflow: hidden;
+  margin-bottom: 22px;
+}
+
+.zen-pro-hero.is-active {
+  border-color: rgba(255, 213, 107, 0.6);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.8),
+    0 0 45px rgba(255, 213, 107, 0.25);
+}
+
+.zen-pro-hero__beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2.5px;
+  border-radius: 999px;
+  background: #ffd56b;
+  box-shadow: 0 0 16px rgba(255, 213, 107, 0.95);
+}
+
+.zen-pro-hero__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.zen-pro-crown-pod {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: radial-gradient(circle, rgba(255, 213, 107, 0.25) 0%, rgba(30, 20, 10, 0.8) 100%);
+  border: 1.5px solid rgba(255, 213, 107, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
+}
+
+.zen-pro-crown-icon {
+  color: #ffd56b;
+  filter: drop-shadow(0 0 10px rgba(255, 213, 107, 0.7));
+}
+
+.zen-pro-hero__badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.zen-pro-status-badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(255, 213, 107, 0.16);
+  border: 1px solid rgba(255, 213, 107, 0.4);
+  color: #ffd56b;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8.5px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+}
+
+.zen-pro-days-badge {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #6ee7b7;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8.5px;
+  font-weight: 850;
+}
+
+.zen-pro-hero__title {
+  margin: 0 0 6px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 19px;
+  font-weight: 850;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.zen-pro-hero__lead {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.zen-pro-xp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 213, 107, 0.12);
+  border: 1px solid rgba(255, 213, 107, 0.3);
+  font-size: 11.5px;
+  color: #ffffff;
+}
+
+.zen-pro-perks-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.zen-perk-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zen-perk-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.zen-perk-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.zen-perk-card__info strong {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 3px;
+}
+
+.zen-perk-card__info p {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.zen-pro-action-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.zen-btn-gold {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 15px 22px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffd56b 0%, #f59e0b 100%);
+  border: none;
+  color: #090a12;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 13.5px;
+  font-weight: 850;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+  transition: transform 0.16s ease;
+}
+
+.zen-btn-gold:active {
+  transform: scale(0.98);
+}
+
+.zen-btn-trial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.zen-btn-trial:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.zen-pro-active-banner {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.zen-pro-active-text strong {
+  display: block;
+  color: #6ee7b7;
+  font-size: 14px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+.zen-pro-active-text span {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.zen-btn-outline {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+/* ══════════════ 3. АТМОСФЕРА И ТЕМЫ (КРУТОЙ ДИЗАЙН) ══════════════ */
+.zen-aurora-card,
+.zen-fx-card {
+  position: relative;
+  border-radius: 20px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 18px;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.zen-aurora-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.zen-aurora-ribbon {
+  position: absolute;
+  top: -20px;
+  left: -20%;
+  width: 140%;
+  height: 50px;
+  filter: blur(14px);
+}
+
+.zen-aurora-ribbon--1 {
+  background: radial-gradient(ellipse at 40% 50%, rgba(16, 185, 129, 0.6), transparent 70%);
+}
+
+.zen-aurora-ribbon--2 {
+  background: radial-gradient(ellipse at 70% 50%, rgba(6, 182, 212, 0.5), transparent 70%);
+}
+
+.zen-aurora-card__body,
+.zen-fx-card__body {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.zen-aurora-badge,
+.zen-fx-badge {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8px;
+  font-weight: 850;
+  margin-bottom: 4px;
+}
+
+.zen-aurora-title,
+.zen-fx-title {
+  margin: 0 0 3px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-aurora-desc,
+.zen-fx-desc {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.4;
+}
+
+.zen-themes-catalog {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.zen-theme-card {
+  padding: 16px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.zen-theme-card:active {
+  transform: scale(0.985);
+}
+
+.zen-theme-card.is-selected {
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.zen-theme-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.zen-theme-badge {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.zen-theme-check-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8.5px;
+  font-weight: 850;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.5);
+}
+
+.zen-theme-title {
+  margin: 0 0 3px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-theme-sub {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.zen-theme-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zen-theme-palette {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.zen-theme-fx-tag {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+
+/* ══════════════ 4. ПРАВИЛА И СОГЛАШЕНИЯ (ТОПОВЫЙ ДИЗАЙН) ══════════════ */
+.zen-rules-hero {
+  padding: 22px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, rgba(30, 24, 45, 0.9) 0%, rgba(15, 12, 22, 0.95) 100%);
+  border: 1px solid rgba(168, 85, 247, 0.28);
+  margin-bottom: 18px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+}
+
+.zen-rules-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.16);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #d8b4fe;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.zen-rules-hero__title {
+  margin: 0 0 6px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 18px;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.zen-rules-hero__desc {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.zen-rules-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.zen-rule-hl {
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.zen-rule-hl__icon {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.zen-rule-hl strong {
+  font-size: 11px;
+  font-weight: 750;
+  color: #ffffff;
+}
+
+.zen-rule-hl small {
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.3;
+}
+
+.zen-rules-cat-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+  scrollbar-width: none;
+}
+
+.zen-rules-cat-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.zen-rules-cat-btn {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.16s ease;
+}
+
+.zen-rules-cat-btn.active {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #ffffff;
+}
+
+.zen-rules-content-card {
+  padding: 20px;
+  border-radius: 20px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  margin-bottom: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.zen-rules-block h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-rules-block p {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.zen-rules-block p:last-child {
+  margin-bottom: 0;
+}
+
+.zen-rules-contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.zen-rules-contact-text strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 750;
+  color: #ffffff;
+  margin-bottom: 2px;
+}
+
+.zen-rules-contact-text span {
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.zen-rules-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 750;
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: background 0.15s ease;
+}
+
+.zen-rules-contact-btn:active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ══════════════ 5. РАНГ И НАГРАДЫ ══════════════ */
+.zen-rank-hero {
+  position: relative;
+  background: rgba(15, 15, 22, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 24px;
+  margin-bottom: 22px;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+}
+
+.zen-rank-hero__beam {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+}
+
+.zen-rank-hero__badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #ffd56b;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 850;
+  margin-bottom: 8px;
+}
+
+.zen-rank-hero__title {
+  margin: 0 0 16px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 22px;
+  font-weight: 850;
+  color: #ffffff;
+}
+
+.zen-rank-hero__bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.zen-rank-hero__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #a855f7 0%, #38bdf8 60%, #34d399 100%);
+}
+
+.zen-rank-hero__xp {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+
+.zen-tiers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.zen-tier {
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: rgba(15, 15, 22, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  opacity: 0.5;
+  transition: opacity 0.2s ease, border-color 0.2s ease;
+}
+
+.zen-tier.unlocked {
+  opacity: 1;
+  background: rgba(15, 15, 22, 0.88);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.zen-tier__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.zen-tier__lvl {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.zen-tier__name {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-tier__desc {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ══════════════ 6. ЧТО НОВОГО (CHANGELOG) ══════════════ */
 .zen-news-lead {
   padding: 20px;
   border-radius: 22px;
@@ -747,130 +1711,6 @@
   color: rgba(255, 255, 255, 0.65);
 }
 
-/* Сегментные фильтры дневника */
-.zen-segmented {
-  display: flex;
-  gap: 6px;
-  padding: 4px;
-  border-radius: 16px;
-  background: rgba(15, 15, 22, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 18px;
-}
-
-.zen-segmented__item {
-  flex: 1;
-  padding: 8px 4px;
-  border-radius: 12px;
-  border: none;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.16s ease, color 0.16s ease;
-  text-align: center;
-}
-
-.zen-segmented__item.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Карточки дневника */
-.zen-diary-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.zen-diary-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
-  border-radius: 18px;
-  background: rgba(15, 15, 22, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.zen-diary-card:active {
-  transform: scale(0.985);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.zen-diary-card__poster {
-  width: 44px;
-  height: 64px;
-  border-radius: 10px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: #111;
-}
-
-.zen-diary-card__content {
-  flex: 1;
-  min-width: 0;
-}
-
-.zen-diary-card__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 4px;
-}
-
-.zen-diary-badge {
-  padding: 2px 7px;
-  border-radius: 6px;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.zen-diary-badge.watched {
-  background: rgba(16, 185, 129, 0.18);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #6ee7b7;
-}
-
-.zen-diary-badge.want {
-  background: rgba(56, 189, 248, 0.18);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #7dd3fc;
-}
-
-.zen-diary-badge.watching {
-  background: rgba(251, 191, 36, 0.18);
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  color: #fde047;
-}
-
-.zen-diary-rating {
-  font-size: 11px;
-  font-weight: 800;
-  color: #ffd56b;
-}
-
-.zen-diary-card__title {
-  font-size: 14.5px;
-  font-weight: 750;
-  color: #ffffff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 3px;
-}
-
-.zen-diary-card__meta {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
 /* Пустое состояние */
 .zen-empty-state {
   padding: 44px 20px;
@@ -912,243 +1752,4 @@
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-}
-
-/* Карточка ранга в подстранице */
-.zen-rank-hero {
-  position: relative;
-  background: rgba(15, 15, 22, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 24px;
-  margin-bottom: 22px;
-  overflow: hidden;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
-}
-
-.zen-rank-hero__beam {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 44px;
-  height: 2px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
-}
-
-.zen-rank-hero__badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #ffd56b;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 10.5px;
-  font-weight: 850;
-  margin-bottom: 8px;
-}
-
-.zen-rank-hero__title {
-  margin: 0 0 16px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 22px;
-  font-weight: 850;
-  color: #ffffff;
-}
-
-.zen-rank-hero__bar {
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  margin-bottom: 8px;
-  overflow: hidden;
-}
-
-.zen-rank-hero__fill {
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #a855f7 0%, #38bdf8 60%, #34d399 100%);
-}
-
-.zen-rank-hero__xp {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.6);
-  font-weight: 600;
-}
-
-/* Уровни рангов */
-.zen-tiers {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.zen-tier {
-  padding: 14px 18px;
-  border-radius: 18px;
-  background: rgba(15, 15, 22, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  opacity: 0.5;
-  transition: opacity 0.2s ease, border-color 0.2s ease;
-}
-
-.zen-tier.unlocked {
-  opacity: 1;
-  background: rgba(15, 15, 22, 0.88);
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-}
-
-.zen-tier__head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 4px;
-}
-
-.zen-tier__lvl {
-  padding: 2px 7px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 9.5px;
-  font-weight: 800;
-}
-
-.zen-tier__name {
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 13.5px;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.zen-tier__desc {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.65);
-}
-
-/* Карточка PRO */
-.zen-pro-card {
-  position: relative;
-  background: rgba(15, 15, 22, 0.88);
-  border: 1px solid rgba(255, 213, 107, 0.28);
-  border-radius: 26px;
-  padding: 28px 22px;
-  text-align: center;
-  overflow: hidden;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(255, 213, 107, 0.08);
-}
-
-.zen-pro-card__beam {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 2px;
-  border-radius: 999px;
-  background: #ffd56b;
-  box-shadow: 0 0 12px rgba(255, 213, 107, 0.9);
-}
-
-.zen-pro-card__icon-wrap {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: rgba(255, 213, 107, 0.12);
-  border: 1px solid rgba(255, 213, 107, 0.35);
-  color: #ffd56b;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 14px;
-  box-shadow: 0 8px 20px rgba(255, 213, 107, 0.2);
-}
-
-.zen-pro-card__status {
-  display: inline-block;
-  padding: 3px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.75);
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 9px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
-}
-
-.zen-pro-card__title {
-  margin: 0 0 8px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 20px;
-  font-weight: 850;
-  color: #ffffff;
-}
-
-.zen-pro-card__desc {
-  margin: 0 auto 22px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
-  max-width: 320px;
-}
-
-.zen-pro-features {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  text-align: left;
-  margin-bottom: 24px;
-}
-
-.zen-pro-feat {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.zen-pro-feat__check {
-  color: #ffd56b;
-  flex-shrink: 0;
-}
-
-.zen-btn-primary {
-  width: 100%;
-  padding: 14px 20px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #ffd56b 0%, #f59e0b 100%);
-  border: none;
-  color: #090a12;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 13.5px;
-  font-weight: 850;
-  cursor: pointer;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
-  transition: transform 0.16s ease;
-}
-
-.zen-btn-primary:active {
-  transform: scale(0.97);
-}
-
-/* Постер в истории */
-.zen-history-poster {
-  width: 38px;
-  height: 54px;
-  border-radius: 8px;
-  object-fit: cover;
-  flex-shrink: 0;
-  background: #111;
 }
