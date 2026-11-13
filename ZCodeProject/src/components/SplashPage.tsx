@@ -5,15 +5,25 @@ interface SplashPageProps {
   onDone?: () => void;
 }
 
+function publicAsset(file: string) {
+  const base = import.meta.env.BASE_URL || './';
+  return `${base}${file}`;
+}
+
 const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
+  const [muted, setMuted] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const finishedRef = useRef(false);
+  const retriedRef = useRef(false);
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+
+  const poster = publicAsset('zenova-splash-poster.jpg');
+  const primarySrc = publicAsset('zenova-splash.mp4');
 
   const finishSplash = useCallback(() => {
     if (finishedRef.current) return;
@@ -26,84 +36,95 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     }, 450);
   }, []);
 
-  const handleUnlockAudio = useCallback(() => {
+  const playMuted = useCallback((vid: HTMLVideoElement) => {
+    vid.defaultMuted = true;
+    vid.muted = true;
+    vid.volume = 1;
+    vid.setAttribute('playsinline', '');
+    vid.setAttribute('webkit-playsinline', 'true');
+    return vid.play();
+  }, []);
+
+  const toggleSound = useCallback((e?: React.MouseEvent) => {
+    e?.stopPropagation();
     const v = videoRef.current;
-    if (v) {
-      v.muted = false;
-      v.volume = 1.0;
-      if (v.paused) {
-        v.play().catch(() => {});
-      }
+    if (!v) return;
+    const nextMuted = !v.muted;
+    v.muted = nextMuted;
+    setMuted(nextMuted);
+    if (!nextMuted) {
+      v.volume = 1;
+      v.play().catch(() => {});
     }
   }, []);
 
   useEffect(() => {
     const vid = videoRef.current;
-    let removeUnlockListeners: (() => void) | null = null;
+    if (!vid) return;
 
-    if (vid) {
-      vid.volume = 1.0;
-      vid.muted = false;
-
-      // Пытаемся воспроизвести сразу со звуком на полную громкость
-      const p = vid.play();
-      if (p !== undefined) {
-        p.catch(() => {
-          // Если строгая политика браузера временно заблокировала звук:
-          // Запускаем видео и моментально разблокируем звук при первом касании экрана
+    const start = () => {
+      playMuted(vid)
+        .then(() => setVideoReady(true))
+        .catch(() => {
           vid.muted = true;
           vid.play().catch(() => {});
-
-          const unlockAudio = () => {
-            const v = videoRef.current;
-            if (!v) return;
-            v.muted = false;
-            v.volume = 1.0;
-            cleanup();
-          };
-
-          const cleanup = () => {
-            window.removeEventListener('pointerdown', unlockAudio);
-            window.removeEventListener('touchstart', unlockAudio);
-            window.removeEventListener('click', unlockAudio);
-            window.removeEventListener('keydown', unlockAudio);
-          };
-
-          window.addEventListener('pointerdown', unlockAudio, { passive: true });
-          window.addEventListener('touchstart', unlockAudio, { passive: true });
-          window.addEventListener('click', unlockAudio, { passive: true });
-          window.addEventListener('keydown', unlockAudio, { passive: true });
-          removeUnlockListeners = cleanup;
         });
-      }
-    }
+    };
 
-    // Страховочный таймер (30 сек) ТОЛЬКО на случай критического сбоя сети
-    // Ни при каких обстоятельствах не прерывает проигрываемое видео!
-    const fallbackTimer = setTimeout(() => {
+    if (vid.readyState >= 2) start();
+    else vid.addEventListener('canplay', start, { once: true });
+
+    const unlockAudio = () => {
       const v = videoRef.current;
-      if (v && !v.paused && !v.ended && v.currentTime > 0) {
-        // Видео ещё играет — даём доиграть до конца!
-        return;
-      }
-      finishSplash();
-    }, 30000);
+      if (!v || !v.muted) return;
+      v.muted = false;
+      v.volume = 1;
+      setMuted(false);
+      v.play().catch(() => {
+        v.muted = true;
+        setMuted(true);
+      });
+    };
 
-    // Точный прогресс синхронно с реальным временем воспроизведения видео
+    window.addEventListener('pointerdown', unlockAudio, { passive: true, once: true });
+
+    const fallbackTimer = setTimeout(() => {
+      finishSplash();
+    }, 14000);
+
     const progInterval = setInterval(() => {
       const v = videoRef.current;
       if (v && v.duration && isFinite(v.duration) && v.currentTime > 0) {
         const pct = Math.min(100, Math.round((v.currentTime / v.duration) * 100));
         setProgress(pct);
+      } else {
+        setProgress((prev) => Math.min(92, prev + 0.8));
       }
-    }, 50);
+    }, 80);
 
     return () => {
       clearTimeout(fallbackTimer);
       clearInterval(progInterval);
-      removeUnlockListeners?.();
+      vid.removeEventListener('canplay', start);
+      window.removeEventListener('pointerdown', unlockAudio);
     };
-  }, [finishSplash]);
+  }, [finishSplash, playMuted]);
+
+  const handleVideoError = () => {
+    const vid = videoRef.current;
+    if (!vid || finishedRef.current) return;
+    if (!retriedRef.current) {
+      retriedRef.current = true;
+      const fallback = `${primarySrc}${primarySrc.includes('?') ? '&' : '?'}retry=1`;
+      if (vid.getAttribute('src') !== fallback) {
+        vid.src = fallback;
+        vid.load();
+        playMuted(vid).catch(() => {});
+        return;
+      }
+    }
+    finishSplash();
+  };
 
   if (!visible) return null;
 
@@ -112,22 +133,25 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       className={`sp ${fading ? 'sp--fade' : ''}`}
       role="status"
       aria-label="Загрузка ZENOVA"
-      onClick={handleUnlockAudio}
-      onTouchStart={handleUnlockAudio}
     >
-      {/* Амбиент-фон для широких экранов */}
       <div
         className="sp__backdrop-blur"
-        style={{ backgroundImage: 'url(./zenova-splash-poster.jpg)' }}
+        style={{ backgroundImage: `url(${poster})` }}
         aria-hidden="true"
       />
       <div className="sp__backdrop-vignette" aria-hidden="true" />
 
-      {/* Видео-контейнер (видео идет от начала до самого конца со звуком без прерываний) */}
       <div className="sp__stage">
-        {/* Кнопка быстрого пропуска заставки */}
         <div className="sp__top-bar">
-          <div />
+          <button
+            type="button"
+            className="sp__pill-btn"
+            onClick={toggleSound}
+            aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+          >
+            {muted ? 'Включить звук' : 'Звук включен'}
+          </button>
+
           <button
             type="button"
             className="sp__pill-btn sp__pill-btn--skip"
@@ -137,25 +161,25 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
             }}
             aria-label="Пропустить заставку"
           >
-            Пропустить ✕
+            Пропустить
           </button>
         </div>
 
         <video
           ref={videoRef}
           className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}
-          src="./zenova-splash.mp4?v=holiday"
-          poster="./zenova-splash-poster.jpg"
+          src={primarySrc}
+          poster={poster}
           autoPlay
-          muted={false}
+          muted
           playsInline
           preload="auto"
           onLoadedData={() => setVideoReady(true)}
+          onPlaying={() => setVideoReady(true)}
           onEnded={finishSplash}
-          onError={finishSplash}
+          onError={handleVideoError}
         />
 
-        {/* Тонкий минималистичный индикатор загрузки в самом низу */}
         <div className="sp__bottom-hud">
           <div
             className="sp__track"

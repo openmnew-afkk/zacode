@@ -136,12 +136,12 @@ export const useTelegram = () => {
 
         if (isFs || csTop > 0 || (isMobileTg && saTop > 20)) {
           document.documentElement.classList.add('tg-fullscreen');
-          const minSafe = isFs ? 98 : isMobileTg ? 56 : 24;
-          const offset = Math.max(combinedTop + 8, saTop + 44, minSafe);
+          const minSafe = isMobileTg ? 52 : 48;
+          const offset = Math.max(combinedTop + 6, saTop + 36, minSafe);
           document.documentElement.style.setProperty('--tg-top-inset', `${offset}px`);
         } else {
           document.documentElement.classList.remove('tg-fullscreen');
-          document.documentElement.style.setProperty('--tg-top-inset', `${Math.max(combinedTop, 14)}px`);
+          document.documentElement.style.setProperty('--tg-top-inset', `${Math.max(combinedTop + 4, 48)}px`);
         }
       };
 

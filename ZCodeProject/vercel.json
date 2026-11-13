@@ -1,6 +1,7 @@
 {
-  "buildCommand": "npm install && npm run build",
-  "outputDirectory": "dist",
+  "installCommand": "npm ci --prefix ZCodeProject",
+  "buildCommand": "npm run build --prefix ZCodeProject",
+  "outputDirectory": "ZCodeProject/dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ],

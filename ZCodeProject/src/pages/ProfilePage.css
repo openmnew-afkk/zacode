@@ -15,9 +15,10 @@
 /* ── Шапка страницы ── */
 .zen-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 12px;
+  margin-bottom: 18px;
 }
 
 .zen-header__left {
@@ -1726,3 +1727,320 @@ html.light .zen-user-rank-track { background: rgba(0, 0, 0, 0.08); }
 html.light .zen-user-stats-strip { border-top-color: rgba(0, 0, 0, 0.07); }
 html.light .zen-copy-btn { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); color: rgba(30, 15, 25, 0.7); }
 html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  ✦ НОВЫЕ СТИЛИ НАСТРОЕК (OBSIDIAN CONTROL CENTER v3.4+)
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Шапка: кнопка смены темы и админка ── */
+.zen-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zen-theme-toggle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(10px);
+}
+
+.zen-theme-toggle-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ── Быстрые переключатели под карточкой профиля ── */
+.zen-quick-toggles-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.zen-quick-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: 16px;
+  background: rgba(20, 20, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-quick-pill:active {
+  transform: scale(0.95);
+}
+
+.zen-quick-pill__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  transition: all 0.18s ease;
+}
+
+.zen-quick-pill__label {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8.5px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.zen-quick-pill.is-active {
+  background: rgba(30, 32, 45, 0.85);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.zen-quick-pill.is-active .zen-quick-pill__icon {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3) 0%, rgba(2, 132, 199, 0.2) 100%);
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.zen-quick-pill--aurora.is-active {
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.zen-quick-pill--aurora.is-active .zen-quick-pill__icon {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(6, 182, 212, 0.2) 100%);
+  color: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+
+/* ── Кликабельные чипы статов ── */
+.zen-user-stat-chip.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  padding: 4px 6px;
+  border-radius: 10px;
+}
+
+.zen-user-stat-chip.clickable:active {
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Сегментированные чипы качества ── */
+.zen-quality-chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zen-quality-chip {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.zen-quality-chip.is-active {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+}
+
+/* ── Переключатель Switch (Apple Style) ── */
+.zen-switch {
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+  padding: 0;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.zen-switch.on {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+.zen-switch.on .zen-switch__thumb {
+  transform: translateX(18px);
+}
+
+/* ── Компактные кнопки в строках ── */
+.zen-set-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+  flex-shrink: 0;
+}
+
+.zen-set-btn-sm:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.zen-set-btn-sm .animate-spin {
+  animation: zen-spin 0.9s linear infinite;
+}
+
+@keyframes zen-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Облачный статус ── */
+.zen-cloud-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.zen-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: zen-dot-pulse 2s infinite ease-in-out;
+}
+
+@keyframes zen-dot-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px #34d399; }
+}
+
+/* ── Тост ProfilePage ── */
+.zen-profile-toast {
+  position: fixed;
+  bottom: calc(var(--tabbar-h, 74px) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 22, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 9999;
+  animation: zen-toast-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes zen-toast-up {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ── Светлая тема: новые элементы ── */
+html.light .zen-theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1c1218;
+}
+html.light .zen-quick-pill {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(180, 140, 160, 0.12);
+  color: rgba(30, 15, 25, 0.65);
+}
+html.light .zen-quick-pill__icon {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1c1218;
+}
+html.light .zen-quick-pill.is-active {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(2, 132, 199, 0.4);
+  color: #0284c7;
+}
+html.light .zen-quality-chips {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .zen-quality-chip {
+  color: rgba(30, 15, 25, 0.55);
+}
+html.light .zen-switch {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+html.light .zen-switch.on {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+html.light .zen-set-btn-sm {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1c1218;
+}
+html.light .zen-profile-toast {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1c1218;
+  box-shadow: 0 14px 40px rgba(180, 140, 160, 0.35);
+}

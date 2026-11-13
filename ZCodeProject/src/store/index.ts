@@ -384,29 +384,27 @@ export const useStore = create<AppState>((set, get) => ({
 
   /* ═══ Тема ═══ */
   theme: (() => {
-    const t = load<string>('tc_theme', 'dark');
-    const active = t === 'light' ? 'light' : 'dark';
     try {
-      document.documentElement.setAttribute('data-theme', active);
+      save('tc_theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
       document.documentElement.classList.remove('dark', 'light');
-      document.documentElement.classList.add(active);
+      document.documentElement.classList.add('dark');
     } catch {}
-    return active as AppTheme;
+    return 'dark' as AppTheme;
   })(),
   toggleTheme: () => {
-    const newTheme: AppTheme = get().theme === 'dark' ? 'light' : 'dark';
-    save('tc_theme', newTheme);
-    set({ theme: newTheme });
-    document.documentElement.setAttribute('data-theme', newTheme);
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(newTheme);
+    save('tc_theme', 'dark');
+    set({ theme: 'dark' });
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
   },
-  setTheme: (theme: AppTheme) => {
-    save('tc_theme', theme);
-    set({ theme });
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add(theme);
+  setTheme: () => {
+    save('tc_theme', 'dark');
+    set({ theme: 'dark' });
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.classList.remove('light');
+    document.documentElement.classList.add('dark');
   },
 
   /* ═══ Премиум ═══ */
