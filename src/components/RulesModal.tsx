@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { RULES_SECTIONS } from '../data/rules';
+import { ShieldCheck, Check, X } from 'lucide-react';
+import RulesSections from './RulesSections';
 import './RulesModal.css';
 
 interface RulesModalProps {
@@ -31,68 +32,44 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, mandato
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="rules-modal-overlay" onClick={mandatory ? undefined : onClose}>
+    <div className="rmo-overlay" onClick={mandatory ? undefined : onClose}>
       <div
-        className="rules-modal-sheet"
+        className="rmo-sheet"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="rules-modal-title"
+        aria-labelledby="rmo-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="rules-modal-handle-bar">
-          <div className="rules-modal-handle" />
-        </div>
+        <div className="rmo-handle" />
 
-        <header className="rules-modal-header">
-          <div className="rules-modal-header__text">
-            <h2 id="rules-modal-title" className="rules-modal-title">Пользовательское соглашение</h2>
-            <p className="rules-modal-subtitle">Условия использования · правовая информация</p>
+        <header className="rmo-header">
+          <div className="rmo-header__icon"><ShieldCheck size={19} /></div>
+          <div className="rmo-header__text">
+            <h2 id="rmo-title" className="rmo-title">Правила и соглашение</h2>
+            <p className="rmo-subtitle">ZENOVA — каталог. Материалы передают внешние источники.</p>
           </div>
           {!mandatory && (
-            <button className="rules-modal-close" onClick={onClose} aria-label="Закрыть">
-              ✕
+            <button type="button" className="rmo-close" onClick={onClose} aria-label="Закрыть">
+              <X size={17} />
             </button>
           )}
         </header>
 
-        <div className="rules-modal-body">
-          <div className="rules-modal-badge">
-            <div className="rules-modal-badge__icon">🛡️</div>
-            <div className="rules-modal-badge__content">
-              <strong>Каталог и внешние источники</strong>
-              <span>Ссылки и встроенные плееры ведут к сторонним сервисам; их содержание и права определяются владельцами источников.</span>
-            </div>
-          </div>
-
-          {RULES_SECTIONS.map((section) => (
-            <div key={section.title} className="rules-modal-section">
-              <h3 className="rules-modal-section__title">{section.title}</h3>
-              {section.items.map((item, idx) => (
-                <p key={idx} className="rules-modal-item">{item}</p>
-              ))}
-            </div>
-          ))}
-
-          <div className="rules-modal-contact">
-            <h4 className="rules-modal-contact__title">Обращения правообладателей</h4>
-            <p className="rules-modal-contact__desc">
-              Направьте сведения о произведении, ссылку на карточку или источник и подтверждение полномочий через канал поддержки, указанный в приложении.
-            </p>
-          </div>
+        <div className="rmo-body">
+          <RulesSections compact defaultOpen={['about']} />
+          <p className="rmo-note">
+            Обращения правообладателей и вопросы — через канал поддержки в приложении.
+            Полные условия открываются в разделе «Правила» настроек.
+          </p>
         </div>
 
-        <footer className="rules-modal-footer">
-          <p>© {new Date().getFullYear()} ZENOVA. Права сторон и пользователей определяются применимым законодательством.</p>
-          {mandatory && (
-            <button
-              className="rules-modal-accept"
-              onClick={() => onAccept?.()}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              Принимаю условия соглашения
+        <footer className="rmo-footer">
+          {mandatory ? (
+            <button type="button" className="rmo-accept" onClick={() => onAccept?.()}>
+              <Check size={16} /> Принимаю условия соглашения
             </button>
+          ) : (
+            <p className="rmo-copy">© {new Date().getFullYear()} ZENOVA · условия определяются применимым законодательством</p>
           )}
         </footer>
       </div>

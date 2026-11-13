@@ -565,6 +565,45 @@
 .ost-track__copy small { font-size: 11px; color: rgba(255, 255, 255, 0.45); }
 .ost-track.is-active .ost-track__copy strong { color: #fde68a; }
 
+.ost-track__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.ost-badge {
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-family: var(--font-cinema, 'Unbounded', sans-serif);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+.ost-badge--full {
+  color: #052e1b;
+  background: linear-gradient(135deg, #34d399, #a3e635);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.45);
+}
+
+.ost-badge--preview {
+  color: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.ost-track__dur {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  font-variant-numeric: tabular-nums;
+}
+
+.ost-track.is-active .ost-track__dur { color: rgba(253, 230, 138, 0.75); }
+
 .ost-track__like {
   width: 38px;
   height: 38px;

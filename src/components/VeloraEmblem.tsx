@@ -32,7 +32,7 @@ export const VeloraEmblem: React.FC<VeloraEmblemProps> = ({
 
   const effectiveSeason = seasonOverride ?? seasonId;
   const isWinter = effectiveSeason === 'winter';
-  const imgSrc = isWinter ? '/zenova-mask-winter.png' : '/zenova-mask-default.png';
+  const imgSrc = isWinter ? './zenova-mask-winter.png' : './zenova-mask-default.png';
 
   return (
     <div

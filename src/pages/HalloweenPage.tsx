@@ -58,13 +58,13 @@ const HalloweenPage: React.FC = () => {
           </svg>
         </button>
         <span className="hw-header__label">ZENOVA AFTER DARK</span>
-        <img src="/zenova-mask.svg" alt="" className="hw-header__mask" />
+        <img src="./zenova-mask.svg" alt="" className="hw-header__mask" />
       </header>
 
       <section className="hw-hero" aria-labelledby="hw-title">
         <div className="hw-seal" aria-hidden="true">
           <span className="hw-seal__orbit" />
-          <img src="/zenova-mask.svg" alt="" />
+          <img src="./zenova-mask.svg" alt="" />
         </div>
         <p className="hw-kicker"><span /> ПОСЛЕ ЗАКАТА ПРАВИЛА МЕНЯЮТСЯ</p>
         <h1 id="hw-title">Ты точно<br />здесь <em>один?</em></h1>

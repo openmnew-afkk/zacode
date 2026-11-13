@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer, getRecommendations } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';
@@ -984,7 +984,7 @@ const MovieDetailPage: React.FC = () => {
                 <div className="dp-cinema-hud__brand">
                   <div className="dp-cinema-hud__mask-wrap">
                     <img
-                      src={getStoredSeason().season.id === 'winter' ? '/zenova-mask-mini-winter.png' : '/zenova-mask-mini.png'}
+                      src={getStoredSeason().season.id === 'winter' ? './zenova-mask-mini-winter.png' : './zenova-mask-mini.png'}
                       alt="ZENOVA"
                       className="dp-cinema-hud__mask"
                     />

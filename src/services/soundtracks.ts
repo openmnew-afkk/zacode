@@ -1,7 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════════════
  *  ZENOVA SOUNDTRACKS — музыка из фильмов
- *  Источник: публичный iTunes Search API (бесплатно, без ключей, CORS открыт).
- *  Даёт официальный альбом саундтрека, обложку и 30-секундные превью треков.
+ *  Источник метаданных: публичный iTunes Search API (бесплатно, без ключей, CORS открыт).
+ *  Даёт официальный альбом саундтрека, обложку и названия треков. Короткие
+ *  превью iTunes заменяются ПОЛНЫМИ треками через services/fullMusic.ts
+ *  (Internet Archive + Audius), когда для трека находится полный источник.
  *
  *  «Услышано в кино» — когда пользователь начинает смотреть фильм, саундтрек
  *  этого фильма автоматически сохраняется в отдельный плейлист
@@ -11,63 +13,37 @@
 import type { Movie } from '../types';
 import type { Track } from '../store/musicStore';
 import { idbGet, idbSet, tgCloudLoadChunked, tgCloudSaveChunked } from './userCloudStorage';
-import { searchAudius } from './audius';
-
-/** Кэш найденных полных треков Audius */
-const fullTrackCache = new Map<string, { streamUrl: string; duration: number }>();
+import { resolveFullTrack, findFullAlbumTracksCached, type FullAudio } from './fullMusic';
 
 /**
- * 🎵 Поиск и воспроизведение ПОЛНОГО трека через Audius
- * Работает как прямой аудио-поток HTML5 Audio: без видео, без iframe,
- * без рекламы и без всплывающих окон мобильного YouTube!
+ * 🎵 Поиск и воспроизведение ПОЛНОГО трека (Internet Archive → Audius).
+ * Прямой аудио-поток HTML5 Audio: без видео, без iframe, без рекламы.
+ * Если полную версию найти не удалось — остаётся исходный трек (превью).
  */
 export async function resolveFullAudioTrack(track: Track): Promise<Track> {
-  if (!track || track.source === 'audius' || track.isLiveRadio) {
-    return track;
-  }
+  return resolveFullTrack(track);
+}
 
-  const cacheKey = `${track.title}__${track.artist}`.toLowerCase();
-  if (fullTrackCache.has(cacheKey)) {
-    const cached = fullTrackCache.get(cacheKey)!;
-    return {
-      ...track,
-      streamUrl: cached.streamUrl,
-      duration: cached.duration || track.duration,
-      source: 'audius',
-    };
-  }
-
-  try {
-    // 1. Поиск по «Название Исполнитель»
-    const cleanTitle = (track.title || '').replace(/[\(\)\[\]\-–—]/g, ' ').trim();
-    const cleanArtist = (track.artist || '').replace(/[\(\)\[\]\-–—]/g, ' ').trim();
-    const query = `${cleanTitle} ${cleanArtist}`.trim();
-
-    const list = await searchAudius(query, 4);
-    if (list && list.length > 0) {
-      const normTitle = cleanTitle.toLowerCase().replace(/[^a-z0-9а-яё]/gi, '');
-      const match =
-        list.find((t) => {
-          const tNorm = (t.title || '').toLowerCase().replace(/[^a-z0-9а-яё]/gi, '');
-          return tNorm.includes(normTitle) || normTitle.includes(tNorm);
-        }) || list[0];
-
-      if (match && match.streamUrl) {
-        const fullDur = match.duration > 30 ? match.duration : track.duration;
-        fullTrackCache.set(cacheKey, { streamUrl: match.streamUrl, duration: fullDur });
-        return {
-          ...track,
-          streamUrl: match.streamUrl,
-          duration: fullDur,
-          source: 'audius',
-        };
-      }
-    }
-  } catch (err) {
-    console.warn('Audius stream resolve fallback:', err);
-  }
-
-  return track;
+/**
+ * До-обогащение альбома полными треками из Internet Archive.
+ * Возвращает новый массив треков: совпавшие получают полный streamUrl,
+ * остальные остаются с превью. Вызывается в фоне после загрузки альбома.
+ */
+export async function upgradeAlbumToFull(
+  tracks: Track[],
+  collectionId: number,
+  albumName: string,
+  movieTitle?: string
+): Promise<{ tracks: Track[]; fullMap: Map<string, FullAudio> }> {
+  const fullMap = await findFullAlbumTracksCached(collectionId, tracks, albumName, movieTitle);
+  if (!fullMap.size) return { tracks, fullMap };
+  const upgraded = tracks.map((t) => {
+    const full = fullMap.get(t.id);
+    return full
+      ? { ...t, streamUrl: full.streamUrl, duration: full.duration || t.duration, source: full.source }
+      : t;
+  });
+  return { tracks: upgraded, fullMap };
 }
 
 export interface SoundtrackAlbum {

@@ -826,261 +826,6 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* ══════════════ 2. ZENOVA PRO (КОНФЕТКА) ══════════════ */
-.zen-pro-hero {
-  position: relative;
-  border-radius: 26px;
-  padding: 24px;
-  background:
-    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(245, 158, 11, 0.22) 0%, transparent 80%),
-    linear-gradient(145deg, rgba(28, 20, 14, 0.95) 0%, rgba(15, 12, 10, 0.98) 100%);
-  border: 1px solid rgba(255, 213, 107, 0.35);
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.75),
-    0 0 35px rgba(245, 158, 11, 0.15);
-  overflow: hidden;
-  margin-bottom: 22px;
-}
-
-.zen-pro-hero.is-active {
-  border-color: rgba(255, 213, 107, 0.6);
-  box-shadow:
-    0 20px 50px rgba(0, 0, 0, 0.8),
-    0 0 45px rgba(255, 213, 107, 0.25);
-}
-
-.zen-pro-hero__beam {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 60px;
-  height: 2.5px;
-  border-radius: 999px;
-  background: #ffd56b;
-  box-shadow: 0 0 16px rgba(255, 213, 107, 0.95);
-}
-
-.zen-pro-hero__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.zen-pro-crown-pod {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
-  background: radial-gradient(circle, rgba(255, 213, 107, 0.25) 0%, rgba(30, 20, 10, 0.8) 100%);
-  border: 1.5px solid rgba(255, 213, 107, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
-}
-
-.zen-pro-crown-icon {
-  color: #ffd56b;
-  filter: drop-shadow(0 0 10px rgba(255, 213, 107, 0.7));
-}
-
-.zen-pro-hero__badges {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
-}
-
-.zen-pro-status-badge {
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(255, 213, 107, 0.16);
-  border: 1px solid rgba(255, 213, 107, 0.4);
-  color: #ffd56b;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 8.5px;
-  font-weight: 850;
-  letter-spacing: 0.06em;
-}
-
-.zen-pro-days-badge {
-  padding: 2px 8px;
-  border-radius: 6px;
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #6ee7b7;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 8.5px;
-  font-weight: 850;
-}
-
-.zen-pro-hero__title {
-  margin: 0 0 6px;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 19px;
-  font-weight: 850;
-  color: #ffffff;
-  letter-spacing: -0.01em;
-}
-
-.zen-pro-hero__lead {
-  margin: 0 0 14px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.zen-pro-xp-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border-radius: 12px;
-  background: rgba(255, 213, 107, 0.12);
-  border: 1px solid rgba(255, 213, 107, 0.3);
-  font-size: 11.5px;
-  color: #ffffff;
-}
-
-.zen-pro-perks-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 22px;
-}
-
-.zen-perk-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px 16px;
-  border-radius: 18px;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.zen-perk-card__icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.zen-perk-card__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.zen-perk-card__info strong {
-  display: block;
-  font-size: 13.5px;
-  font-weight: 800;
-  color: #ffffff;
-  margin-bottom: 3px;
-}
-
-.zen-perk-card__info p {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.zen-pro-action-box {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.zen-btn-gold {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 15px 22px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, #ffd56b 0%, #f59e0b 100%);
-  border: none;
-  color: #090a12;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 13.5px;
-  font-weight: 850;
-  cursor: pointer;
-  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
-  transition: transform 0.16s ease;
-}
-
-.zen-btn-gold:active {
-  transform: scale(0.98);
-}
-
-.zen-btn-trial {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 13px 18px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #ffffff;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 12px;
-  font-weight: 750;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.zen-btn-trial:active {
-  transform: scale(0.98);
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.zen-pro-active-banner {
-  padding: 16px;
-  border-radius: 18px;
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.zen-pro-active-text strong {
-  display: block;
-  color: #6ee7b7;
-  font-size: 14px;
-  font-weight: 800;
-  margin-bottom: 2px;
-}
-
-.zen-pro-active-text span {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.zen-btn-outline {
-  width: 100%;
-  padding: 10px 16px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 11px;
-  font-weight: 750;
-  cursor: pointer;
-}
-
 /* ══════════════ 3. АТМОСФЕРА И ТЕМЫ (КРУТОЙ ДИЗАЙН) ══════════════ */
 .zen-aurora-card,
 .zen-fx-card {
@@ -1246,184 +991,6 @@
   font-size: 11px;
   color: rgba(255, 255, 255, 0.5);
   font-weight: 600;
-}
-
-/* ══════════════ 4. ПРАВИЛА И СОГЛАШЕНИЯ (ТОПОВЫЙ ДИЗАЙН) ══════════════ */
-.zen-rules-hero {
-  padding: 22px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, rgba(30, 24, 45, 0.9) 0%, rgba(15, 12, 22, 0.95) 100%);
-  border: 1px solid rgba(168, 85, 247, 0.28);
-  margin-bottom: 18px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-}
-
-.zen-rules-hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: rgba(168, 85, 247, 0.16);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #d8b4fe;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 8px;
-  font-weight: 850;
-  letter-spacing: 0.08em;
-  margin-bottom: 8px;
-}
-
-.zen-rules-hero__title {
-  margin: 0 0 6px;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 18px;
-  font-weight: 850;
-  color: #ffffff;
-}
-
-.zen-rules-hero__desc {
-  margin: 0 0 18px;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.zen-rules-highlights {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.zen-rule-hl {
-  padding: 10px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.zen-rule-hl__icon {
-  font-size: 16px;
-  margin-bottom: 2px;
-}
-
-.zen-rule-hl strong {
-  font-size: 11px;
-  font-weight: 750;
-  color: #ffffff;
-}
-
-.zen-rule-hl small {
-  font-size: 9.5px;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.3;
-}
-
-.zen-rules-cat-tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 12px;
-  scrollbar-width: none;
-}
-
-.zen-rules-cat-tabs::-webkit-scrollbar {
-  display: none;
-}
-
-.zen-rules-cat-btn {
-  flex-shrink: 0;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all 0.16s ease;
-}
-
-.zen-rules-cat-btn.active {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.28);
-  color: #ffffff;
-}
-
-.zen-rules-content-card {
-  padding: 20px;
-  border-radius: 20px;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  margin-bottom: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.zen-rules-block h3 {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.zen-rules-block p {
-  margin: 0 0 12px;
-  font-size: 13px;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.zen-rules-block p:last-child {
-  margin-bottom: 0;
-}
-
-.zen-rules-contact-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-}
-
-.zen-rules-contact-text strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 750;
-  color: #ffffff;
-  margin-bottom: 2px;
-}
-
-.zen-rules-contact-text span {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.5);
-}
-
-.zen-rules-contact-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: 750;
-  text-decoration: none;
-  flex-shrink: 0;
-  transition: background 0.15s ease;
-}
-
-.zen-rules-contact-btn:active {
-  background: rgba(255, 255, 255, 0.18);
 }
 
 /* ══════════════ 5. РАНГ И НАГРАДЫ ══════════════ */
@@ -1754,732 +1321,6 @@
   cursor: pointer;
 }
 
-/* ═══════════════════════════════════════════════════════════════════
- *  ✦ PINTEREST & iOS 18 LIQUID OBSIDIAN SETTINGS (ULTRA AESTHETIC)
- * ═══════════════════════════════════════════════════════════════════ */
-
-.zen-ios-section-header {
-  padding: 18px 20px 8px;
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 10.5px;
-  font-weight: 850;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(255, 255, 255, 0.45);
-}
-
-.zen-ios-section-footer {
-  padding: 4px 20px 14px;
-  font-size: 12px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.38);
-}
-
-.zen-ios-group {
-  margin: 0 16px 12px;
-  border-radius: 20px;
-  background: rgba(22, 23, 30, 0.78);
-  backdrop-filter: blur(28px) saturate(190%);
-  -webkit-backdrop-filter: blur(28px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 32px -6px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.zen-ios-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  position: relative;
-  cursor: pointer;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.15s ease, transform 0.12s ease;
-}
-
-.zen-ios-row:active {
-  background-color: rgba(255, 255, 255, 0.05);
-  transform: scale(0.99);
-}
-
-.zen-ios-row:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 64px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.zen-ios-squircle {
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  position: relative;
-  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.zen-ios-row:active .zen-ios-squircle {
-  transform: scale(0.94);
-}
-
-/* Цветовые градиенты Apple Squircle */
-.zen-squircle--gold {
-  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.38);
-}
-.zen-squircle--emerald {
-  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.38);
-}
-.zen-squircle--pink {
-  background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.38);
-}
-.zen-squircle--violet {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
-  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.38);
-}
-.zen-squircle--orange {
-  background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
-  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.38);
-}
-.zen-squircle--cyan {
-  background: linear-gradient(135deg, #06b6d4 0%, #0369a1 100%);
-  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.38);
-}
-.zen-squircle--indigo {
-  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.38);
-}
-.zen-squircle--sun {
-  background: linear-gradient(135deg, #eab308 0%, #a16207 100%);
-  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.38);
-}
-.zen-squircle--slate {
-  background: linear-gradient(135deg, #64748b 0%, #334155 100%);
-  box-shadow: 0 4px 14px rgba(100, 116, 139, 0.38);
-}
-.zen-squircle--blue {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.38);
-}
-.zen-squircle--red {
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.38);
-}
-
-.zen-ios-row__info {
-  flex: 1;
-  min-width: 0;
-}
-
-.zen-ios-row__title {
-  display: block;
-  font-size: 15px;
-  font-weight: 650;
-  color: #f1f2f6;
-  letter-spacing: -0.01em;
-}
-
-.zen-ios-row__sub {
-  display: block;
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-top: 2px;
-  line-height: 1.35;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.zen-ios-row__val {
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.48);
-  margin-left: auto;
-  margin-right: 4px;
-  white-space: nowrap;
-}
-
-.zen-ios-chevron {
-  color: rgba(255, 255, 255, 0.28);
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.zen-ios-row:active .zen-ios-chevron {
-  transform: translateX(2px);
-}
-
-/* ══════════════ ZENOVA STUDIO (CONCAT ENGINE) ══════════════ */
-.zen-studio-hero {
-  padding: 22px 18px;
-  margin-bottom: 18px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.2) 0%, rgba(15, 12, 28, 0.95) 100%);
-  border: 1px solid rgba(236, 72, 153, 0.35);
-  box-shadow: 0 12px 36px rgba(236, 72, 153, 0.15);
-}
-
-.zen-studio-hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(236, 72, 153, 0.25);
-  border: 1px solid rgba(236, 72, 153, 0.5);
-  color: #f472b6;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 9px;
-  font-weight: 850;
-  margin-bottom: 10px;
-}
-
-.zen-studio-hero__title {
-  margin: 0 0 8px;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 18px;
-  font-weight: 850;
-  color: #ffffff;
-  line-height: 1.35;
-}
-
-.zen-studio-hero__desc {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.zen-studio-movie-chips {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 12px;
-  margin-bottom: 14px;
-}
-
-.zen-studio-movie-chip {
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 12.5px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.zen-studio-movie-chip--active {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3) 0%, rgba(236, 72, 153, 0.15) 100%);
-  border-color: #ec4899;
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.35);
-}
-
-.zen-studio-presets-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-.zen-studio-preset-card {
-  padding: 14px;
-  border-radius: 16px;
-  background: rgba(20, 20, 28, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  user-select: none;
-}
-
-.zen-studio-preset-card--active {
-  background: rgba(236, 72, 153, 0.12);
-  border-color: #ec4899;
-  box-shadow: 0 6px 20px rgba(236, 72, 153, 0.25);
-}
-
-.zen-studio-preset-card__icon {
-  margin-bottom: 8px;
-}
-
-.zen-studio-preset-card strong {
-  display: block;
-  font-size: 13px;
-  font-weight: 750;
-  color: #ffffff;
-  margin-bottom: 3px;
-}
-
-.zen-studio-preset-card span {
-  display: block;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.5);
-  line-height: 1.35;
-}
-
-.zen-studio-preview-card {
-  padding: 16px;
-  border-radius: 20px;
-  background: rgba(18, 18, 26, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  margin-bottom: 18px;
-}
-
-.zen-studio-mockup {
-  position: relative;
-  width: 100%;
-  max-width: 260px;
-  height: 380px;
-  margin: 0 auto 16px;
-  border-radius: 24px;
-  background: linear-gradient(180deg, #181124 0%, #0b0c16 100%);
-  border: 2px solid rgba(236, 72, 153, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 14px;
-}
-
-.zen-studio-mockup__overlay {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.zen-studio-tag {
-  align-self: flex-start;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  font-family: 'Unbounded', sans-serif;
-  font-size: 8px;
-  font-weight: 800;
-  color: #38bdf8;
-  letter-spacing: 0.04em;
-}
-
-.zen-studio-film-badge {
-  align-self: center;
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: rgba(236, 72, 153, 0.3);
-  color: #ffffff;
-  font-size: 11px;
-  font-weight: 700;
-  margin: 10px 0;
-  text-align: center;
-}
-
-.zen-studio-waveform {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  height: 38px;
-  padding: 0 10px;
-  margin: auto 0;
-}
-
-.zen-wave-bar {
-  width: 3.5px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #ec4899 0%, #38bdf8 100%);
-  animation: zenWave 1.2s infinite ease-in-out alternate;
-}
-
-@keyframes zenWave {
-  0% { transform: scaleY(0.3); opacity: 0.5; }
-  100% { transform: scaleY(1); opacity: 1; }
-}
-
-.zen-studio-quote-box {
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(8px);
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  text-align: center;
-}
-
-.zen-studio-quote-text {
-  margin: 0 0 4px;
-  font-size: 11.5px;
-  font-weight: 650;
-  color: #ffffff;
-  line-height: 1.4;
-  font-style: italic;
-}
-
-.zen-studio-quote-sub {
-  font-size: 9px;
-  color: #ec4899;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-
-.zen-studio-rendering-box {
-  margin-bottom: 14px;
-}
-
-.zen-studio-progress-track {
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.zen-studio-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #ec4899, #8b5cf6);
-  transition: width 0.3s ease;
-}
-
-.zen-studio-render-status {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.zen-studio-success-box {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  margin-bottom: 14px;
-}
-
-.zen-studio-success-box strong {
-  display: block;
-  font-size: 13px;
-  color: #ffffff;
-}
-
-.zen-studio-success-box p {
-  margin: 2px 0 0;
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.zen-studio-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.zen-studio-done-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-
-.zen-studio-info-card {
-  padding: 16px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.zen-studio-info-title {
-  margin: 0 0 6px;
-  font-size: 13.5px;
-  font-weight: 750;
-  color: #ffffff;
-}
-
-.zen-studio-info-desc {
-  margin: 0 0 10px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.zen-studio-github-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: #ec4899;
-  font-size: 12px;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-/* ══════════════ SYNTHAX AI (UNCENSORED BRAIN) ══════════════ */
-.zen-ai-lead-card {
-  padding: 18px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.22) 0%, rgba(18, 14, 28, 0.95) 100%);
-  border: 1px solid rgba(139, 92, 246, 0.4);
-  box-shadow: 0 12px 36px rgba(139, 92, 246, 0.15);
-  margin-bottom: 18px;
-}
-
-.zen-ai-lead-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.zen-ai-lead-kicker {
-  display: inline-block;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 9px;
-  font-weight: 850;
-  color: #a78bfa;
-  letter-spacing: 0.08em;
-  margin-bottom: 4px;
-}
-
-.zen-ai-lead-title {
-  margin: 0 0 6px;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 17px;
-  font-weight: 850;
-  color: #ffffff;
-}
-
-.zen-ai-lead-desc {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.45;
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.zen-ai-status-strip {
-  padding-top: 10px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.zen-ai-status-pill {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.05em;
-}
-
-.zen-ai-status-pill--active {
-  color: #34d399;
-  text-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
-}
-
-.zen-ai-models-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.zen-ai-model-card {
-  padding: 12px 14px;
-  border-radius: 16px;
-  background: rgba(20, 20, 28, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.zen-ai-model-card--active {
-  background: rgba(139, 92, 246, 0.15);
-  border-color: #8b5cf6;
-  box-shadow: 0 4px 18px rgba(139, 92, 246, 0.25);
-}
-
-.zen-ai-model-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-}
-
-.zen-ai-model-title {
-  font-size: 13px;
-  font-weight: 750;
-  color: #ffffff;
-}
-
-.zen-ai-model-tag {
-  font-size: 9px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: rgba(139, 92, 246, 0.3);
-  color: #c4b5fd;
-}
-
-.zen-ai-model-desc {
-  margin: 0;
-  font-size: 11px;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.55);
-}
-
-.zen-ai-chips-scroll {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  padding-bottom: 10px;
-  margin-bottom: 14px;
-}
-
-.zen-ai-chip {
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.zen-ai-chip:active {
-  background: rgba(139, 92, 246, 0.2);
-}
-
-.zen-ai-chat-box {
-  border-radius: 20px;
-  background: rgba(16, 17, 24, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.zen-ai-messages {
-  max-height: 320px;
-  overflow-y: auto;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.zen-ai-bubble {
-  max-width: 90%;
-  padding: 12px 14px;
-  border-radius: 16px;
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.zen-ai-bubble--user {
-  align-self: flex-end;
-  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-  color: #ffffff;
-  border-bottom-right-radius: 4px;
-}
-
-.zen-ai-bubble--assistant {
-  align-self: flex-start;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  color: rgba(255, 255, 255, 0.9);
-  border-bottom-left-radius: 4px;
-}
-
-.zen-ai-bubble__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: 'Unbounded', sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  color: #a78bfa;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-}
-
-.zen-ai-typing-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #a78bfa;
-  margin: 0 2px;
-  animation: zenTyping 1.2s infinite ease-in-out alternate;
-}
-
-.zen-ai-typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.zen-ai-typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes zenTyping {
-  0% { transform: translateY(0); opacity: 0.4; }
-  100% { transform: translateY(-5px); opacity: 1; }
-}
-
-.zen-ai-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(12, 13, 18, 0.9);
-}
-
-.zen-ai-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  color: #ffffff;
-  font-size: 13.5px;
-}
-
-.zen-ai-input::placeholder {
-  color: rgba(255, 255, 255, 0.35);
-}
-
-.zen-ai-send-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: #8b5cf6;
-  border: none;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.zen-ai-send-btn:active {
-  transform: scale(0.92);
-}
-
-.zen-ai-send-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
-}
-
 /* ══════════════ ARCADE GAME CENTER (60 FPS) ══════════════ */
 .zen-subpage__body--arcade {
   display: flex;
@@ -2586,4 +1427,611 @@
 
 .zen-arcade-jump-btn:active {
   transform: scale(0.96);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ⚙️ НАСТРОЙКИ · OBSIDIAN CONTROL CENTER (редизайн v3.4)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.zen-header__kicker {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--accent, #fb7185);
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+
+.zen-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ── Баннер подписки PRO ── */
+.zen-pro-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 16px 18px;
+  margin-bottom: 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 213, 107, 0.32);
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgba(255, 213, 107, 0.16) 0%, transparent 55%),
+    linear-gradient(135deg, rgba(38, 30, 12, 0.92) 0%, rgba(20, 16, 8, 0.94) 100%);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease-smooth), border-color 0.16s ease;
+  animation: zen-set-in 0.4s var(--ease-smooth) both;
+}
+
+.zen-pro-banner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 235, 180, 0.09) 50%, transparent 60%);
+  transform: translateX(-100%);
+  animation: zen-pro-shimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes zen-pro-shimmer {
+  0%, 55% { transform: translateX(-100%); }
+  85%, 100% { transform: translateX(100%); }
+}
+
+.zen-pro-banner:active { transform: scale(0.98); }
+
+.zen-pro-banner--active {
+  border-color: rgba(74, 222, 128, 0.35);
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgba(74, 222, 128, 0.14) 0%, transparent 55%),
+    linear-gradient(135deg, rgba(12, 32, 20, 0.92) 0%, rgba(8, 18, 12, 0.94) 100%);
+}
+
+.zen-pro-banner__icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffd56b;
+  background: linear-gradient(145deg, rgba(255, 213, 107, 0.24), rgba(255, 160, 60, 0.12));
+  border: 1px solid rgba(255, 213, 107, 0.4);
+  box-shadow: 0 4px 16px rgba(255, 190, 80, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.zen-pro-banner--active .zen-pro-banner__icon {
+  color: #4ade80;
+  background: linear-gradient(145deg, rgba(74, 222, 128, 0.22), rgba(34, 197, 94, 0.1));
+  border-color: rgba(74, 222, 128, 0.4);
+  box-shadow: 0 4px 16px rgba(74, 222, 128, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.zen-pro-banner__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+.zen-pro-banner__title {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #ffe9b8;
+  letter-spacing: 0.01em;
+}
+
+.zen-pro-banner--active .zen-pro-banner__title { color: #bbf7d0; }
+
+.zen-pro-banner__sub {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.zen-pro-banner__cta {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 750;
+  color: #1a1206;
+  background: linear-gradient(135deg, #ffd56b, #ffab4a);
+  box-shadow: 0 4px 14px rgba(255, 190, 80, 0.35);
+}
+
+.zen-pro-banner--active .zen-pro-banner__cta {
+  color: #06180d;
+  background: linear-gradient(135deg, #86efac, #4ade80);
+  box-shadow: 0 4px 14px rgba(74, 222, 128, 0.3);
+}
+
+/* ── Группы настроек ── */
+.zen-set-group {
+  margin-bottom: 22px;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+.zen-set-group:nth-of-type(2) { animation-delay: 0.05s; }
+.zen-set-group:nth-of-type(3) { animation-delay: 0.1s; }
+.zen-set-group:nth-of-type(4) { animation-delay: 0.15s; }
+
+@keyframes zen-set-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.zen-set-group__title {
+  margin: 0 0 8px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.zen-set-card {
+  background: rgba(16, 15, 21, 0.86);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+/* ── Строка настройки ── */
+.zen-set-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 16px;
+  min-height: 62px;
+  color: inherit;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-set-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 66px;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.zen-set-row:active { background: rgba(255, 255, 255, 0.055); }
+
+/* Цветные squircle-иконки */
+.zen-set-row__icon {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s var(--ease-spring);
+}
+
+.zen-set-row:active .zen-set-row__icon { transform: scale(0.92); }
+
+.zen-set-row__icon--emerald { background: linear-gradient(145deg, #34d399, #059669); }
+.zen-set-row__icon--amber   { background: linear-gradient(145deg, #fbbf24, #d97706); }
+.zen-set-row__icon--orange  { background: linear-gradient(145deg, #fb923c, #ea580c); }
+.zen-set-row__icon--cyan    { background: linear-gradient(145deg, #38bdf8, #0284c7); }
+.zen-set-row__icon--violet  { background: linear-gradient(145deg, #a78bfa, #7c3aed); }
+.zen-set-row__icon--slate   { background: linear-gradient(145deg, #94a3b8, #475569); }
+.zen-set-row__icon--blue    { background: linear-gradient(145deg, #60a5fa, #2563eb); }
+.zen-set-row__icon--indigo  { background: linear-gradient(145deg, #818cf8, #4f46e5); }
+.zen-set-row__icon--red     { background: linear-gradient(145deg, #f87171, #dc2626); }
+.zen-set-row__icon--gold    { background: linear-gradient(145deg, #ffd56b, #f59e0b); color: #241a05; }
+
+.zen-set-row__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.zen-set-row__title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+
+.zen-set-row--danger .zen-set-row__title { color: #fca5a5; }
+
+.zen-set-row__sub {
+  font-size: 11.5px;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.zen-set-row__value {
+  flex-shrink: 0;
+  max-width: 34%;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.55);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.zen-set-row__value--accent { color: var(--accent, #fb7185); }
+
+.zen-set-row__chev { flex-shrink: 0; color: rgba(255, 255, 255, 0.28); }
+
+/* ── Подпись версии ── */
+.zen-set-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 26px;
+  font-size: 11px;
+  font-weight: 550;
+  color: rgba(255, 255, 255, 0.38);
+  text-align: center;
+}
+
+.zen-set-footer svg { color: var(--accent, #fb7185); opacity: 0.8; }
+
+/* Светлая тема */
+html.light .zen-set-card {
+  background: rgba(255, 255, 255, 0.82);
+  border-color: rgba(0, 0, 0, 0.07);
+  box-shadow: 0 12px 30px rgba(180, 140, 160, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+html.light .zen-set-row:not(:last-child)::after { background: rgba(0, 0, 0, 0.06); }
+html.light .zen-set-row:active { background: rgba(0, 0, 0, 0.04); }
+html.light .zen-set-row__title { color: #1c1218; }
+html.light .zen-set-row--danger .zen-set-row__title { color: #dc2626; }
+html.light .zen-set-row__sub { color: rgba(30, 15, 25, 0.52); }
+html.light .zen-set-row__value { color: rgba(30, 15, 25, 0.5); }
+html.light .zen-set-row__chev { color: rgba(0, 0, 0, 0.25); }
+html.light .zen-set-group__title { color: rgba(30, 15, 25, 0.45); }
+html.light .zen-set-footer { color: rgba(30, 15, 25, 0.42); }
+html.light .zen-header__title { color: #1c1218; }
+html.light .zen-user-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 16px 40px rgba(180, 140, 160, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+html.light .zen-user-name { color: #1c1218; }
+html.light .zen-user-handle { color: rgba(30, 15, 25, 0.6); }
+html.light .zen-user-kicker { color: rgba(30, 15, 25, 0.45); }
+html.light .zen-user-rank-labels { color: rgba(30, 15, 25, 0.5); }
+html.light .zen-user-rank-title { color: rgba(30, 15, 25, 0.8); }
+html.light .zen-user-stat-val { color: #1c1218; }
+html.light .zen-user-stat-lbl { color: rgba(30, 15, 25, 0.5); }
+html.light .zen-user-stat-div { background: rgba(0, 0, 0, 0.08); }
+html.light .zen-user-rank-track { background: rgba(0, 0, 0, 0.08); }
+html.light .zen-user-stats-strip { border-top-color: rgba(0, 0, 0, 0.07); }
+html.light .zen-copy-btn { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); color: rgba(30, 15, 25, 0.7); }
+html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  ✦ НОВЫЕ СТИЛИ НАСТРОЕК (OBSIDIAN CONTROL CENTER v3.4+)
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Шапка: кнопка смены темы и админка ── */
+.zen-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zen-theme-toggle-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  backdrop-filter: blur(10px);
+}
+
+.zen-theme-toggle-btn:active {
+  transform: scale(0.92);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ── Быстрые переключатели под карточкой профиля ── */
+.zen-quick-toggles-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.zen-quick-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 6px;
+  border-radius: 16px;
+  background: rgba(20, 20, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-quick-pill:active {
+  transform: scale(0.95);
+}
+
+.zen-quick-pill__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  transition: all 0.18s ease;
+}
+
+.zen-quick-pill__label {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8.5px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.zen-quick-pill.is-active {
+  background: rgba(30, 32, 45, 0.85);
+  border-color: rgba(56, 189, 248, 0.35);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.zen-quick-pill.is-active .zen-quick-pill__icon {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3) 0%, rgba(2, 132, 199, 0.2) 100%);
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.zen-quick-pill--aurora.is-active {
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.zen-quick-pill--aurora.is-active .zen-quick-pill__icon {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(6, 182, 212, 0.2) 100%);
+  color: #34d399;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+}
+
+/* ── Кликабельные чипы статов ── */
+.zen-user-stat-chip.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+  padding: 4px 6px;
+  border-radius: 10px;
+}
+
+.zen-user-stat-chip.clickable:active {
+  transform: scale(0.94);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Сегментированные чипы качества ── */
+.zen-quality-chips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zen-quality-chip {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.zen-quality-chip.is-active {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
+}
+
+/* ── Переключатель Switch (Apple Style) ── */
+.zen-switch {
+  width: 44px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+  padding: 0;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-switch__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.zen-switch.on {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+}
+
+.zen-switch.on .zen-switch__thumb {
+  transform: translateX(18px);
+}
+
+/* ── Компактные кнопки в строках ── */
+.zen-set-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: transform 0.12s ease, background 0.12s ease;
+  flex-shrink: 0;
+}
+
+.zen-set-btn-sm:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* ── Облачный статус ── */
+.zen-cloud-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.zen-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: zen-dot-pulse 2s infinite ease-in-out;
+}
+
+@keyframes zen-dot-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); box-shadow: 0 0 12px #34d399; }
+}
+
+/* ── Тост ProfilePage ── */
+.zen-profile-toast {
+  position: fixed;
+  bottom: calc(var(--tabbar-h, 74px) + 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 22, 32, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 9999;
+  animation: zen-toast-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes zen-toast-up {
+  from { opacity: 0; transform: translate(-50%, 14px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ── Светлая тема: новые элементы ── */
+html.light .zen-theme-toggle-btn {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1c1218;
+}
+html.light .zen-quick-pill {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 14px rgba(180, 140, 160, 0.12);
+  color: rgba(30, 15, 25, 0.65);
+}
+html.light .zen-quick-pill__icon {
+  background: rgba(0, 0, 0, 0.05);
+  color: #1c1218;
+}
+html.light .zen-quick-pill.is-active {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(2, 132, 199, 0.4);
+  color: #0284c7;
+}
+html.light .zen-quality-chips {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .zen-quality-chip {
+  color: rgba(30, 15, 25, 0.55);
+}
+html.light .zen-switch {
+  background: rgba(0, 0, 0, 0.1);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+html.light .zen-switch.on {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+html.light .zen-set-btn-sm {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1c1218;
+}
+html.light .zen-profile-toast {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1c1218;
+  box-shadow: 0 14px 40px rgba(180, 140, 160, 0.35);
 }
