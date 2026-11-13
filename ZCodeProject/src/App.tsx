@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import MovieDetailPage from './pages/MovieDetailPage';
@@ -99,6 +99,13 @@ function App() {
     } catch {}
   }, [theme, setTelegramUsername]);
 
+  /* ═══ Принудительно отключаем браузерное восстановление скролла (чтобы страницы не открывались по центру) ═══ */
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
   /* ═══ При каждом входе — всегда главная (Telegram восстанавливает последний URL) ═══ */
   useEffect(() => {
     if (location.pathname !== '/') {
@@ -107,11 +114,31 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, [location.key]);
+  /* ═══ Гарантированный сброс скролла на самый верх при переходе между страницами ═══ */
+  useLayoutEffect(() => {
+    const resetScroll = () => {
+      try {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+      } catch {
+        window.scrollTo(0, 0);
+      }
+      if (document.documentElement) document.documentElement.scrollTop = 0;
+      if (document.body) document.body.scrollTop = 0;
+      const root = document.getElementById('root');
+      if (root) root.scrollTop = 0;
+      const appMain = document.querySelector('.app-main');
+      if (appMain) (appMain as HTMLElement).scrollTop = 0;
+    };
+
+    resetScroll();
+    const rafId = requestAnimationFrame(resetScroll);
+    const t = setTimeout(resetScroll, 40);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(t);
+    };
+  }, [location.pathname, location.search]);
 
   return (
     <div className="app-root">

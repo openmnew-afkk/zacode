@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer, getRecommendations } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';

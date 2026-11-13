@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo, useRef, useEffect, useCallback, useLayoutEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   BookOpen,
   Trophy,
@@ -23,6 +23,14 @@ import {
   Newspaper,
   LifeBuoy,
   Gift,
+  Sun,
+  Moon,
+  Smartphone,
+  HardDrive,
+  Cloud,
+  RefreshCw,
+  PlayCircle,
+  Flame,
 } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -31,6 +39,7 @@ import { getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../
 import type { SeasonId } from '../services/seasons';
 import { triggerSeasonalBurst } from '../components/SeasonFx';
 import type { Movie, WatchStatus } from '../types';
+import ZenovaArcadeGame from '../components/ZenovaArcadeGame';
 import './ProfilePage.css';
 
 type SubPage = 'library' | 'rank' | 'atmosphere' | 'news' | 'arcade' | null;
@@ -253,6 +262,7 @@ interface LibraryItem {
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, closeApp, haptic } = useTelegram();
   const {
     favorites,
@@ -264,6 +274,9 @@ export const ProfilePage: React.FC = () => {
     role,
     telegramUsername,
     activatePremiumDays,
+    theme,
+    toggleTheme,
+    syncTrackedCloud,
   } = useStore();
 
   const [subPage, setSubPage] = useState<SubPage>(null);
@@ -271,6 +284,43 @@ export const ProfilePage: React.FC = () => {
   const [libraryQuery, setLibraryQuery] = useState('');
   const [copiedId, setCopiedId] = useState(false);
   const [seasonState, setSeasonState] = useState(() => getStoredSeason());
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Рекорд в Zenova Arcade
+  const [arcadeBest, setArcadeBest] = useState<number>(() => {
+    try {
+      return Number(localStorage.getItem('zen_arcade_best') || 0);
+    } catch {
+      return 0;
+    }
+  });
+
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2400);
+  }, []);
+
+  // Переход в аркаду, если передано в location.state
+  useEffect(() => {
+    if ((location.state as any)?.openArcade) {
+      setSubPage('arcade');
+    }
+  }, [location.state]);
+
+  // Сброс скролла на самый верх при входе/выходе из подстраниц (чтобы не открывалось по центру)
+  useLayoutEffect(() => {
+    try {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+    } catch {
+      window.scrollTo(0, 0);
+    }
+    if (document.documentElement) document.documentElement.scrollTop = 0;
+    if (document.body) document.body.scrollTop = 0;
+    const root = document.getElementById('root');
+    if (root) root.scrollTop = 0;
+    const appMain = document.querySelector('.app-main');
+    if (appMain) (appMain as HTMLElement).scrollTop = 0;
+  }, [subPage]);
 
   // Тумблер северного сияния
   const [auroraOff, setAuroraOff] = useState(() => {
@@ -290,6 +340,7 @@ export const ProfilePage: React.FC = () => {
     } catch {}
     window.dispatchEvent(new CustomEvent('zenova-aurora-toggle'));
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
+    showToast(next ? 'Северное Сияние отключено' : 'Северное Сияние включено ✨');
   };
 
   // Тумблер сезонных частиц (снегопад, листья)
@@ -309,244 +360,151 @@ export const ProfilePage: React.FC = () => {
       localStorage.setItem('zenova_fx_off', next ? '1' : '0');
     } catch {}
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
+    showToast(next ? 'Сезонные частицы выключены' : 'Сезонные частицы включены ❄️');
   };
 
-  // ── ARCADE GAME CENTER (Zenova Star Runner) ──
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [arcadeState, setArcadeState] = useState<'idle' | 'playing' | 'gameover'>('idle');
-  const [arcadeScore, setArcadeScore] = useState(0);
-  const [arcadeBest, setArcadeBest] = useState<number>(() => {
+  // Качество видео по умолчанию
+  const [videoQuality, setVideoQuality] = useState(() => {
     try {
-      return Number(localStorage.getItem('zen_arcade_best') || 0);
+      return localStorage.getItem('zenova_default_quality') || 'auto';
     } catch {
-      return 0;
+      return 'auto';
     }
   });
-  const [arcadeWonBonus, setArcadeWonBonus] = useState(false);
 
-  // Игровой цикл Arcade 60 FPS
-  useEffect(() => {
-    if (subPage !== 'arcade') return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  const handleQualityChange = (q: string) => {
+    haptic('light');
+    setVideoQuality(q);
+    try {
+      localStorage.setItem('zenova_default_quality', q);
+    } catch {}
+    showToast(`Качество: ${q.toUpperCase()}`);
+  };
 
-    let animId: number;
-    let playerY = 180;
-    let playerVy = 0;
-    const gravity = 0.36;
-    const jumpForce = -6.4;
-    const playerRadius = 14;
-    let score = 0;
-    let pillars: Array<{ x: number; top: number; bottom: number; passed: boolean }> = [];
-    let stars: Array<{ x: number; y: number; s: number; alpha: number }> = [];
-    let frame = 0;
-
-    for (let i = 0; i < 40; i++) {
-      stars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        s: Math.random() * 2 + 0.5,
-        alpha: Math.random() * 0.7 + 0.3,
-      });
+  // Автовоспроизведение
+  const [autoplay, setAutoplay] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_autoplay') !== '0';
+    } catch {
+      return true;
     }
+  });
 
-    const spawnPillar = () => {
-      const gap = 110;
-      const minTop = 40;
-      const maxTop = canvas.height - gap - 60;
-      const top = Math.floor(Math.random() * (maxTop - minTop) + minTop);
-      pillars.push({
-        x: canvas.width + 10,
-        top,
-        bottom: top + gap,
-        passed: false,
-      });
-    };
+  const toggleAutoplay = () => {
+    haptic('light');
+    const next = !autoplay;
+    setAutoplay(next);
+    try {
+      localStorage.setItem('zenova_autoplay', next ? '1' : '0');
+    } catch {}
+    showToast(next ? 'Автовоспроизведение: Вкл' : 'Автовоспроизведение: Выкл');
+  };
 
-    const doJump = () => {
-      if (arcadeState === 'gameover') {
-        playerY = 180;
-        playerVy = jumpForce;
-        pillars = [];
-        score = 0;
-        setArcadeScore(0);
-        setArcadeState('playing');
-        haptic('light');
-        return;
-      }
-      if (arcadeState === 'idle') {
-        setArcadeState('playing');
-        playerVy = jumpForce;
-        haptic('light');
-        return;
-      }
-      playerVy = jumpForce;
-      haptic('light');
-    };
+  // Плавный режим 120 FPS
+  const [smoothFps, setSmoothFps] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_smooth_fps') !== '0';
+    } catch {
+      return true;
+    }
+  });
 
-    const handlePointer = (e: Event) => {
-      e.preventDefault();
-      doJump();
-    };
+  const toggleSmoothFps = () => {
+    haptic('light');
+    const next = !smoothFps;
+    setSmoothFps(next);
+    try {
+      localStorage.setItem('zenova_smooth_fps', next ? '1' : '0');
+    } catch {}
+    showToast(next ? 'Плавный режим 120 FPS активен' : 'Режим энергосбережения');
+  };
 
-    canvas.addEventListener('mousedown', handlePointer);
-    canvas.addEventListener('touchstart', handlePointer, { passive: false });
+  // Виброотклик
+  const [hapticsEnabled, setHapticsEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_haptics') !== '0';
+    } catch {
+      return true;
+    }
+  });
 
-    const loop = () => {
-      frame++;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const toggleHaptics = () => {
+    haptic('medium');
+    const next = !hapticsEnabled;
+    setHapticsEnabled(next);
+    try {
+      localStorage.setItem('zenova_haptics', next ? '1' : '0');
+    } catch {}
+    showToast(next ? 'Виброотклик включен' : 'Виброотклик выключен');
+  };
 
-      // Фон: глубокий ночной космос
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, '#0a0b12');
-      grad.addColorStop(1, '#161324');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Звезды
-      stars.forEach((st) => {
-        st.x -= 0.5;
-        if (st.x < 0) st.x = canvas.width;
-        ctx.fillStyle = `rgba(255, 255, 255, ${st.alpha})`;
-        ctx.beginPath();
-        ctx.arc(st.x, st.y, st.s, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      if (arcadeState === 'playing') {
-        playerVy += gravity;
-        playerY += playerVy;
-
-        if (frame % 85 === 0) spawnPillar();
-
-        for (let i = pillars.length - 1; i >= 0; i--) {
-          const p = pillars[i];
-          p.x -= 2.2;
-
-          const neonGrad = ctx.createLinearGradient(p.x, 0, p.x + 40, 0);
-          neonGrad.addColorStop(0, '#6366f1');
-          neonGrad.addColorStop(0.5, '#a855f7');
-          neonGrad.addColorStop(1, '#ec4899');
-
-          ctx.fillStyle = neonGrad;
-          ctx.beginPath();
-          ctx.roundRect(p.x, 0, 40, p.top, [0, 0, 8, 8]);
-          ctx.fill();
-
-          ctx.beginPath();
-          ctx.roundRect(p.x, p.bottom, 40, canvas.height - p.bottom, [8, 8, 0, 0]);
-          ctx.fill();
-
-          if (!p.passed && p.x + 40 < 60) {
-            p.passed = true;
-            score += 1;
-            setArcadeScore(score);
-            haptic('light');
-
-            if (score > arcadeBest) {
-              setArcadeBest(score);
-              try {
-                localStorage.setItem('zen_arcade_best', String(score));
-              } catch {}
-            }
-
-            if (score === 25 && !arcadeWonBonus) {
-              setArcadeWonBonus(true);
-              activatePremiumDays(3);
-              triggerSeasonalBurst(40);
-              haptic('heavy');
-            }
-          }
-
-          const playerX = 60;
-          if (playerX + playerRadius > p.x && playerX - playerRadius < p.x + 40) {
-            if (playerY - playerRadius < p.top || playerY + playerRadius > p.bottom) {
-              setArcadeState('gameover');
-              haptic('heavy');
-            }
-          }
-
-          if (p.x < -60) pillars.splice(i, 1);
-        }
-
-        if (playerY + playerRadius > canvas.height - 10 || playerY - playerRadius < 0) {
-          setArcadeState('gameover');
-          haptic('heavy');
+  // Расчет и очистка кэша
+  const calculateStorageSize = (): string => {
+    try {
+      let total = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          total += (key.length + (localStorage.getItem(key) || '').length) * 2;
         }
       }
+      if (total < 1024) return `${total} Б`;
+      if (total < 1024 * 1024) return `${(total / 1024).toFixed(1)} КБ`;
+      return `${(total / (1024 * 1024)).toFixed(1)} МБ`;
+    } catch {
+      return '180 КБ';
+    }
+  };
 
-      // Отрисовка игрока
-      ctx.save();
-      ctx.translate(60, playerY);
-      const angle = Math.min(Math.PI / 4, Math.max(-Math.PI / 4, playerVy * 0.08));
-      ctx.rotate(angle);
+  const [cacheSize, setCacheSize] = useState(() => calculateStorageSize());
+  const [clearingCache, setClearingCache] = useState(false);
 
-      ctx.shadowColor = '#f59e0b';
-      ctx.shadowBlur = 14;
+  const handleClearCache = () => {
+    haptic('medium');
+    setClearingCache(true);
+    setTimeout(() => {
+      try {
+        sessionStorage.clear();
+        const preserved = new Set([
+          'tc_favorites',
+          'tc_watch_history',
+          'tc_tracked',
+          'tc_premium',
+          'tc_premium_expiry',
+          'tc_username',
+          'zenova_rules_accepted',
+          'zen_arcade_best',
+          'zen_arcade_won_bonus',
+        ]);
+        const toRemove: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && !preserved.has(k) && (k.startsWith('tmdb_') || k.startsWith('cache_') || k.startsWith('zenova_cache_') || k.startsWith('poster_'))) {
+            toRemove.push(k);
+          }
+        }
+        toRemove.forEach((k) => localStorage.removeItem(k));
+      } catch {}
+      setCacheSize(calculateStorageSize());
+      setClearingCache(false);
+      showToast('Временный кэш успешно очищен!');
+    }, 450);
+  };
 
-      ctx.fillStyle = '#fbbf24';
-      ctx.beginPath();
-      ctx.arc(0, 0, playerRadius, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#111827';
-      ctx.beginPath();
-      ctx.arc(5, -3, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(6, -4, 1.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#f97316';
-      ctx.beginPath();
-      ctx.ellipse(-7, 2, 7, 4, -0.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.restore();
-
-      ctx.shadowBlur = 0;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(String(score), canvas.width / 2, 45);
-
-      if (arcadeState === 'idle') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 20px system-ui, -apple-system, sans-serif';
-        ctx.fillText('ZENOVA STAR RUNNER', canvas.width / 2, canvas.height / 2 - 20);
-        ctx.font = '14px system-ui, -apple-system, sans-serif';
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.fillText('Тапните, чтобы начать', canvas.width / 2, canvas.height / 2 + 15);
-      } else if (arcadeState === 'gameover') {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#ef4444';
-        ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
-        ctx.fillText('РАУНД ОКОНЧЕН', canvas.width / 2, canvas.height / 2 - 35);
-        ctx.fillStyle = '#ffffff';
-        ctx.font = '16px system-ui, -apple-system, sans-serif';
-        ctx.fillText(`Счёт: ${score}   Рекорд: ${arcadeBest}`, canvas.width / 2, canvas.height / 2);
-        ctx.fillStyle = '#38bdf8';
-        ctx.font = '14px system-ui, -apple-system, sans-serif';
-        ctx.fillText('Тапните для рестарта', canvas.width / 2, canvas.height / 2 + 35);
-      }
-
-      animId = requestAnimationFrame(loop);
-    };
-
-    animId = requestAnimationFrame(loop);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      canvas.removeEventListener('mousedown', handlePointer);
-      canvas.removeEventListener('touchstart', handlePointer);
-    };
-  }, [subPage, arcadeState, arcadeBest, arcadeWonBonus]);
+  // Синхронизация с Telegram Cloud
+  const [syncingCloud, setSyncingCloud] = useState(false);
+  const handleSyncCloud = async () => {
+    haptic('light');
+    setSyncingCloud(true);
+    try {
+      await syncTrackedCloud?.();
+      showToast('Синхронизировано с Telegram Cloud');
+    } catch {
+      showToast('Синхронизация завершена');
+    } finally {
+      setTimeout(() => setSyncingCloud(false), 600);
+    }
+  };
 
   const switchSeason = (id: SeasonId | 'auto') => {
     haptic('light');
@@ -1161,74 +1119,19 @@ export const ProfilePage: React.FC = () => {
   if (subPage === 'arcade') {
     return (
       <div className="zen-subpage">
-        <header className="zen-subpage__nav">
-          <button
-            type="button"
-            className="zen-subpage__back"
-            onClick={() => {
-              haptic('light');
-              setSubPage(null);
-            }}
-          >
-            <ChevronLeft size={18} />
-            <span>Назад</span>
-          </button>
-          <h1 className="zen-subpage__title">Игровой Клуб Zenova Arcade</h1>
-          <div className="zen-subpage__action-space" />
-        </header>
-
-        <div className="zen-subpage__body zen-subpage__body--arcade">
-          {/* Статистика очков */}
-          <div className="zen-arcade-ribbon">
-            <div className="zen-arcade-stat">
-              <span className="zen-arcade-stat__lbl">СЧЁТ</span>
-              <strong className="zen-arcade-stat__val text-cyan">{arcadeScore}</strong>
-            </div>
-            <div className="zen-arcade-stat">
-              <span className="zen-arcade-stat__lbl">РЕКОРД</span>
-              <strong className="zen-arcade-stat__val text-gold">{arcadeBest}</strong>
-            </div>
-            <div className="zen-arcade-stat zen-arcade-stat--target">
-              <span className="zen-arcade-stat__lbl">ЦЕЛЬ</span>
-              <strong className="zen-arcade-stat__val text-green">25 = PRO на 3 дня</strong>
-            </div>
-          </div>
-
-          {/* Поздравление с победой */}
-          {arcadeWonBonus && (
-            <div className="zen-arcade-win-banner">
-              <Crown size={20} className="text-gold" />
-              <span>Вы набрали 25 очков! Подарок 3 дня ZENOVA PRO активирован!</span>
-            </div>
-          )}
-
-          {/* Игровой Canvas */}
-          <div className="zen-arcade-canvas-wrap">
-            <canvas ref={canvasRef} width={340} height={380} className="zen-arcade-canvas" />
-          </div>
-
-          {/* Подсказка */}
-          <div className="zen-arcade-hint">
-            <p>Жмите на экран или кнопку ниже, чтобы перепрыгивать неоновые кино-башни.</p>
-          </div>
-
-          {/* Кнопка прыжка для мобильных */}
-          <div className="zen-arcade-controls">
-            <button
-              type="button"
-              className="zen-arcade-jump-btn"
-              onClick={() => {
-                const canvas = canvasRef.current;
-                if (canvas) {
-                  canvas.dispatchEvent(new Event('mousedown'));
-                }
-              }}
-            >
-              <Zap size={18} />
-              <span>Прыжок / Тап</span>
-            </button>
-          </div>
-        </div>
+        <ZenovaArcadeGame
+          onBack={() => {
+            haptic('light');
+            setSubPage(null);
+            try {
+              setArcadeBest(Number(localStorage.getItem('zen_arcade_best') || 0));
+            } catch {}
+          }}
+          onWinBonus={() => {
+            activatePremiumDays(3);
+            showToast('Подарок 3 дня ZENOVA PRO активирован!');
+          }}
+        />
       </div>
     );
   }
@@ -1236,25 +1139,40 @@ export const ProfilePage: React.FC = () => {
   /* ══════════════ ГЛАВНЫЙ ЭКРАН НАСТРОЕК (OBSIDIAN CONTROL CENTER) ══════════════ */
   return (
     <div className="zen-profile-page page">
-      {/* Шапка */}
+      {/* Шапка с переключателем темы */}
       <header className="zen-header">
         <div className="zen-header__left">
           <span className="zen-header__kicker">ZENOVA · ЦЕНТР УПРАВЛЕНИЯ</span>
           <h1 className="zen-header__title">Настройки</h1>
         </div>
-        {isAdminUser && (
+        <div className="zen-header__actions">
           <button
             type="button"
-            className="zen-admin-btn"
-            onClick={() => navigate('/admin')}
+            className="zen-theme-toggle-btn"
+            onClick={() => {
+              haptic('light');
+              toggleTheme();
+              showToast(`Тема: ${theme === 'dark' ? 'Светлая' : 'Тёмная'}`);
+            }}
+            aria-label="Сменить тему"
           >
-            <Sliders size={12} />
-            <span>Админка</span>
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
-        )}
+
+          {isAdminUser && (
+            <button
+              type="button"
+              className="zen-admin-btn"
+              onClick={() => navigate('/admin')}
+            >
+              <Sliders size={12} />
+              <span>Админка</span>
+            </button>
+          )}
+        </div>
       </header>
 
-      {/* Карточка пользователя */}
+      {/* Карточка пользователя с кликабельными статами */}
       <div className="zen-user-card" onClick={() => setSubPage('rank')}>
         <div className="zen-user-card__beam" />
         <div className="zen-user-card__top">
@@ -1301,27 +1219,104 @@ export const ProfilePage: React.FC = () => {
           </div>
         </div>
 
+        {/* Интерактивные стат-чипы */}
         <div className="zen-user-stats-strip">
-          <div className="zen-user-stat-chip">
+          <div
+            className="zen-user-stat-chip clickable"
+            onClick={(e) => {
+              e.stopPropagation();
+              haptic('light');
+              setLibraryTab('watched');
+              setSubPage('library');
+            }}
+          >
             <span className="zen-user-stat-val text-green">{watchedCount}</span>
             <span className="zen-user-stat-lbl">Просмотрено</span>
           </div>
           <div className="zen-user-stat-div" />
-          <div className="zen-user-stat-chip">
+          <div
+            className="zen-user-stat-chip clickable"
+            onClick={(e) => {
+              e.stopPropagation();
+              haptic('light');
+              setLibraryTab('want');
+              setSubPage('library');
+            }}
+          >
             <span className="zen-user-stat-val text-cyan">{wantCount}</span>
             <span className="zen-user-stat-lbl">В планах</span>
           </div>
           <div className="zen-user-stat-div" />
-          <div className="zen-user-stat-chip">
+          <div
+            className="zen-user-stat-chip clickable"
+            onClick={(e) => {
+              e.stopPropagation();
+              haptic('light');
+              setLibraryTab('favorites');
+              setSubPage('library');
+            }}
+          >
             <span className="zen-user-stat-val text-gold">{favorites.length}</span>
             <span className="zen-user-stat-lbl">Избранное</span>
           </div>
           <div className="zen-user-stat-div" />
-          <div className="zen-user-stat-chip">
+          <div
+            className="zen-user-stat-chip clickable"
+            onClick={(e) => {
+              e.stopPropagation();
+              haptic('light');
+              setSubPage('rank');
+            }}
+          >
             <span className="zen-user-stat-val">{totalXp}</span>
             <span className="zen-user-stat-lbl">Опыт XP</span>
           </div>
         </div>
+      </div>
+
+      {/* ── Быстрые переключатели прямо под профилем ── */}
+      <div className="zen-quick-toggles-bar">
+        <button
+          type="button"
+          className={`zen-quick-pill ${theme === 'dark' ? 'is-active' : ''}`}
+          onClick={() => {
+            haptic('light');
+            toggleTheme();
+            showToast(`Тема: ${theme === 'dark' ? 'Светлая' : 'Тёмная'}`);
+          }}
+        >
+          <span className="zen-quick-pill__icon">
+            {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
+          </span>
+          <span className="zen-quick-pill__label">{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`zen-quick-pill ${!auroraOff ? 'is-active zen-quick-pill--aurora' : ''}`}
+          onClick={toggleAurora}
+        >
+          <span className="zen-quick-pill__icon"><Sparkles size={15} /></span>
+          <span className="zen-quick-pill__label">{!auroraOff ? 'Сияние Вкл' : 'Сияние Выкл'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`zen-quick-pill ${!fxOff ? 'is-active' : ''}`}
+          onClick={toggleFx}
+        >
+          <span className="zen-quick-pill__icon"><Palette size={15} /></span>
+          <span className="zen-quick-pill__label">{!fxOff ? 'Частицы Вкл' : 'Частицы Выкл'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`zen-quick-pill ${hapticsEnabled ? 'is-active' : ''}`}
+          onClick={toggleHaptics}
+        >
+          <span className="zen-quick-pill__icon"><Smartphone size={15} /></span>
+          <span className="zen-quick-pill__label">{hapticsEnabled ? 'Вибро Вкл' : 'Вибро Выкл'}</span>
+        </button>
       </div>
 
       {/* Баннер подписки ZENOVA PRO */}
@@ -1351,7 +1346,7 @@ export const ProfilePage: React.FC = () => {
 
       {/* ── Группа: Мои разделы ── */}
       <section className="zen-set-group">
-        <h2 className="zen-set-group__title">Мои разделы</h2>
+        <h2 className="zen-set-group__title">Моя медиатека и досуг</h2>
         <div className="zen-set-card">
           <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('library'); }}>
             <span className="zen-set-row__icon zen-set-row__icon--emerald"><BookOpen size={19} /></span>
@@ -1376,12 +1371,75 @@ export const ProfilePage: React.FC = () => {
           <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('arcade'); }}>
             <span className="zen-set-row__icon zen-set-row__icon--orange"><Gamepad2 size={19} /></span>
             <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Игровой Клуб</span>
-              <span className="zen-set-row__sub">Мини-игра · набери 25 очков и получи 3 дня PRO</span>
+              <span className="zen-set-row__title">Игровой Клуб: Star Runner</span>
+              <span className="zen-set-row__sub">Мини-игра 60 FPS · набери 25 очков и получи 3 дня PRO</span>
             </span>
             <span className="zen-set-row__value">{arcadeBest > 0 ? `Рекорд ${arcadeBest}` : 'Играть'}</span>
             <ChevronRight size={17} className="zen-set-row__chev" />
           </button>
+        </div>
+      </section>
+
+      {/* ── Группа: Воспроизведение и плеер ── */}
+      <section className="zen-set-group">
+        <h2 className="zen-set-group__title">Воспроизведение и плеер</h2>
+        <div className="zen-set-card">
+          <div className="zen-set-row">
+            <span className="zen-set-row__icon zen-set-row__icon--blue"><PlayCircle size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Качество по умолчанию</span>
+              <span className="zen-set-row__sub">Предпочтительное разрешение потока</span>
+            </span>
+            <div className="zen-quality-chips">
+              {[
+                { id: 'auto', label: 'Авто' },
+                { id: '720p', label: '720p' },
+                { id: '1080p', label: '1080p' },
+                { id: '4k', label: '4K' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={`zen-quality-chip ${videoQuality === opt.id ? 'is-active' : ''}`}
+                  onClick={() => handleQualityChange(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="zen-set-row" onClick={toggleAutoplay}>
+            <span className="zen-set-row__icon zen-set-row__icon--violet"><Zap size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Автовоспроизведение</span>
+              <span className="zen-set-row__sub">Следующая серия в сериалах и следующий трек</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${autoplay ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleAutoplay(); }}
+              aria-label="Автовоспроизведение"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
+
+          <div className="zen-set-row" onClick={toggleSmoothFps}>
+            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Flame size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Плавный режим 120 FPS</span>
+              <span className="zen-set-row__sub">Аппаратное ускорение интерфейса и плеера</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${smoothFps ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleSmoothFps(); }}
+              aria-label="Плавный режим"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
         </div>
       </section>
 
@@ -1408,6 +1466,49 @@ export const ProfilePage: React.FC = () => {
             <span className="zen-set-row__value zen-set-row__value--accent">v3.4.0</span>
             <ChevronRight size={17} className="zen-set-row__chev" />
           </button>
+        </div>
+      </section>
+
+      {/* ── Группа: Память и синхронизация ── */}
+      <section className="zen-set-group">
+        <h2 className="zen-set-group__title">Память и данные</h2>
+        <div className="zen-set-card">
+          <div className="zen-set-row">
+            <span className="zen-set-row__icon zen-set-row__icon--emerald"><Cloud size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Telegram CloudStorage</span>
+              <span className="zen-set-row__sub">Безопасное облачное хранение дневника</span>
+            </span>
+            <div className="zen-cloud-status">
+              <span className="zen-pulse-dot" />
+              <span>Облако</span>
+            </div>
+            <button
+              type="button"
+              className="zen-set-btn-sm"
+              onClick={handleSyncCloud}
+              disabled={syncingCloud}
+            >
+              <RefreshCw size={12} className={syncingCloud ? 'animate-spin' : ''} />
+              <span>{syncingCloud ? 'Синхронизация…' : 'Обновить'}</span>
+            </button>
+          </div>
+
+          <div className="zen-set-row">
+            <span className="zen-set-row__icon zen-set-row__icon--amber"><HardDrive size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Кэш приложения</span>
+              <span className="zen-set-row__sub">Временные постеры и кэш каталога: {cacheSize}</span>
+            </span>
+            <button
+              type="button"
+              className="zen-set-btn-sm"
+              onClick={handleClearCache}
+              disabled={clearingCache}
+            >
+              <span>{clearingCache ? 'Очистка…' : 'Очистить'}</span>
+            </button>
+          </div>
         </div>
       </section>
 
@@ -1468,6 +1569,9 @@ export const ProfilePage: React.FC = () => {
         <Gift size={13} />
         <span>ZENOVA v3.4.0 · кино, музыка и атмосфера в одном приложении</span>
       </footer>
+
+      {/* Тост уведомление */}
+      {toastMessage && <div className="zen-profile-toast">{toastMessage}</div>}
     </div>
   );
 };

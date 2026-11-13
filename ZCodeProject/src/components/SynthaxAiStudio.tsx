@@ -100,8 +100,8 @@ export const SynthaxAiStudio: React.FC<SynthaxAiStudioProps> = ({ onBackToOracle
           <div className="syn-video-container" onClick={togglePlay}>
             <video
               ref={videoRef}
-              src="./zenova-splash.mp4"
-              poster="./zenova-splash-poster.jpg"
+              src="/zenova-splash.mp4"
+              poster="/zenova-splash-poster.jpg"
               playsInline
               loop
               muted={isMuted}
