@@ -11,7 +11,7 @@ interface SynthaxAiStudioProps {
 export const SynthaxAiStudio: React.FC<SynthaxAiStudioProps> = ({ onBackToOracle }) => {
   const { haptic } = useTelegram();
   const isWinter = getStoredSeason().season.id === 'winter';
-  const maskSrc = isWinter ? '/zenova-mask-mini-winter.png' : '/zenova-mask-mini.png';
+  const maskSrc = isWinter ? './zenova-mask-mini-winter.png' : './zenova-mask-mini.png';
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);

@@ -18,13 +18,19 @@ import {
   Sliders,
   Sparkles,
   Gamepad2,
+  Zap,
   Palette,
   Newspaper,
   LifeBuoy,
   Gift,
+  Sun,
+  Moon,
+  Smartphone,
   HardDrive,
   Cloud,
   RefreshCw,
+  PlayCircle,
+  Flame,
 } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -267,6 +273,8 @@ export const ProfilePage: React.FC = () => {
     premiumExpiry,
     role,
     telegramUsername,
+    theme,
+    toggleTheme,
     syncTrackedCloud,
   } = useStore();
 
@@ -352,6 +360,81 @@ export const ProfilePage: React.FC = () => {
     } catch {}
     window.dispatchEvent(new CustomEvent('zenova-fx-change'));
     showToast(next ? 'Сезонные частицы выключены' : 'Сезонные частицы включены ❄️');
+  };
+
+  // Качество видео по умолчанию
+  const [videoQuality, setVideoQuality] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_default_quality') || 'auto';
+    } catch {
+      return 'auto';
+    }
+  });
+
+  const handleQualityChange = (q: string) => {
+    haptic('light');
+    setVideoQuality(q);
+    try {
+      localStorage.setItem('zenova_default_quality', q);
+    } catch {}
+    showToast(`Качество: ${q.toUpperCase()}`);
+  };
+
+  // Автовоспроизведение
+  const [autoplay, setAutoplay] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_autoplay') !== '0';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleAutoplay = () => {
+    haptic('light');
+    const next = !autoplay;
+    setAutoplay(next);
+    try {
+      localStorage.setItem('zenova_autoplay', next ? '1' : '0');
+    } catch {}
+    showToast(next ? 'Автовоспроизведение: Вкл' : 'Автовоспроизведение: Выкл');
+  };
+
+  // Плавный режим 120 FPS
+  const [smoothFps, setSmoothFps] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_smooth_fps') !== '0';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleSmoothFps = () => {
+    haptic('light');
+    const next = !smoothFps;
+    setSmoothFps(next);
+    try {
+      localStorage.setItem('zenova_smooth_fps', next ? '1' : '0');
+    } catch {}
+    showToast(next ? 'Плавный режим 120 FPS активен' : 'Режим энергосбережения');
+  };
+
+  // Виброотклик
+  const [hapticsEnabled, setHapticsEnabled] = useState(() => {
+    try {
+      return localStorage.getItem('zenova_haptics') !== '0';
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleHaptics = () => {
+    haptic('medium');
+    const next = !hapticsEnabled;
+    setHapticsEnabled(next);
+    try {
+      localStorage.setItem('zenova_haptics', next ? '1' : '0');
+    } catch {}
+    showToast(next ? 'Виброотклик включен' : 'Виброотклик выключен');
   };
 
   // Расчет и очистка кэша
@@ -1057,19 +1140,34 @@ export const ProfilePage: React.FC = () => {
       {/* Шапка с переключателем темы */}
       <header className="zen-header">
         <div className="zen-header__left">
+          <span className="zen-header__kicker">ZENOVA · ЦЕНТР УПРАВЛЕНИЯ</span>
           <h1 className="zen-header__title">Настройки</h1>
-          <span className="zen-header__subtitle">Кинотека, атмосфера и ZENOVA PRO</span>
         </div>
-        {isAdminUser && (
+        <div className="zen-header__actions">
           <button
             type="button"
-            className="zen-admin-btn"
-            onClick={() => navigate('/admin')}
+            className="zen-theme-toggle-btn"
+            onClick={() => {
+              haptic('light');
+              toggleTheme();
+              showToast(`Тема: ${theme === 'dark' ? 'Светлая' : 'Тёмная'}`);
+            }}
+            aria-label="Сменить тему"
           >
-            <Sliders size={12} />
-            <span>Админка</span>
+            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
-        )}
+
+          {isAdminUser && (
+            <button
+              type="button"
+              className="zen-admin-btn"
+              onClick={() => navigate('/admin')}
+            >
+              <Sliders size={12} />
+              <span>Админка</span>
+            </button>
+          )}
+        </div>
       </header>
 
       {/* Карточка пользователя с кликабельными статами */}
@@ -1174,6 +1272,51 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
+      {/* ── Быстрые переключатели прямо под профилем ── */}
+      <div className="zen-quick-toggles-bar">
+        <button
+          type="button"
+          className={`zen-quick-pill ${theme === 'dark' ? 'is-active' : ''}`}
+          onClick={() => {
+            haptic('light');
+            toggleTheme();
+            showToast(`Тема: ${theme === 'dark' ? 'Светлая' : 'Тёмная'}`);
+          }}
+        >
+          <span className="zen-quick-pill__icon">
+            {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
+          </span>
+          <span className="zen-quick-pill__label">{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`zen-quick-pill ${!auroraOff ? 'is-active zen-quick-pill--aurora' : ''}`}
+          onClick={toggleAurora}
+        >
+          <span className="zen-quick-pill__icon"><Sparkles size={15} /></span>
+          <span className="zen-quick-pill__label">{!auroraOff ? 'Сияние Вкл' : 'Сияние Выкл'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`zen-quick-pill ${!fxOff ? 'is-active' : ''}`}
+          onClick={toggleFx}
+        >
+          <span className="zen-quick-pill__icon"><Palette size={15} /></span>
+          <span className="zen-quick-pill__label">{!fxOff ? 'Частицы Вкл' : 'Частицы Выкл'}</span>
+        </button>
+
+        <button
+          type="button"
+          className={`zen-quick-pill ${hapticsEnabled ? 'is-active' : ''}`}
+          onClick={toggleHaptics}
+        >
+          <span className="zen-quick-pill__icon"><Smartphone size={15} /></span>
+          <span className="zen-quick-pill__label">{hapticsEnabled ? 'Вибро Вкл' : 'Вибро Выкл'}</span>
+        </button>
+      </div>
+
       {/* Баннер подписки ZENOVA PRO */}
       <button
         type="button"
@@ -1232,6 +1375,69 @@ export const ProfilePage: React.FC = () => {
             <span className="zen-set-row__value">{arcadeBest > 0 ? `Рекорд ${arcadeBest}` : 'Играть'}</span>
             <ChevronRight size={17} className="zen-set-row__chev" />
           </button>
+        </div>
+      </section>
+
+      {/* ── Группа: Воспроизведение и плеер ── */}
+      <section className="zen-set-group">
+        <h2 className="zen-set-group__title">Воспроизведение и плеер</h2>
+        <div className="zen-set-card">
+          <div className="zen-set-row">
+            <span className="zen-set-row__icon zen-set-row__icon--blue"><PlayCircle size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Качество по умолчанию</span>
+              <span className="zen-set-row__sub">Предпочтительное разрешение потока</span>
+            </span>
+            <div className="zen-quality-chips">
+              {[
+                { id: 'auto', label: 'Авто' },
+                { id: '720p', label: '720p' },
+                { id: '1080p', label: '1080p' },
+                { id: '4k', label: '4K' },
+              ].map((opt) => (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={`zen-quality-chip ${videoQuality === opt.id ? 'is-active' : ''}`}
+                  onClick={() => handleQualityChange(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="zen-set-row" onClick={toggleAutoplay}>
+            <span className="zen-set-row__icon zen-set-row__icon--violet"><Zap size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Автовоспроизведение</span>
+              <span className="zen-set-row__sub">Следующая серия в сериалах и следующий трек</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${autoplay ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleAutoplay(); }}
+              aria-label="Автовоспроизведение"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
+
+          <div className="zen-set-row" onClick={toggleSmoothFps}>
+            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Flame size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Плавный режим 120 FPS</span>
+              <span className="zen-set-row__sub">Аппаратное ускорение интерфейса и плеера</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${smoothFps ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleSmoothFps(); }}
+              aria-label="Плавный режим"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
         </div>
       </section>
 

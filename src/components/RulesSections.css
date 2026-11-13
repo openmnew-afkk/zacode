@@ -1,0 +1,136 @@
+/* Общие карточки-аккордеоны разделов соглашения (страница + модалка) */
+
+.rsec { display: flex; flex-direction: column; gap: 10px; }
+
+.rsec-card {
+  background: rgba(15, 15, 22, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  overflow: hidden;
+  scroll-margin-top: calc(var(--header-safe-top, 24px) + 12px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 0.18s ease;
+}
+
+.rsec-card.is-open { border-color: rgba(255, 255, 255, 0.18); }
+
+.rsec-card__head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 14px;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.rsec-card__head:active { background: rgba(255, 255, 255, 0.04); }
+
+.rsec-card__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+}
+
+.rsec-card__icon--rose    { color: #fb7185; background: rgba(251, 113, 133, 0.12); border-color: rgba(251, 113, 133, 0.3); }
+.rsec-card__icon--amber   { color: #fbbf24; background: rgba(251, 191, 36, 0.1);  border-color: rgba(251, 191, 36, 0.28); }
+.rsec-card__icon--cyan    { color: #38bdf8; background: rgba(56, 189, 248, 0.1);  border-color: rgba(56, 189, 248, 0.28); }
+.rsec-card__icon--violet  { color: #c084fc; background: rgba(168, 85, 247, 0.12); border-color: rgba(168, 85, 247, 0.3); }
+.rsec-card__icon--emerald { color: #34d399; background: rgba(52, 211, 153, 0.1);  border-color: rgba(52, 211, 153, 0.28); }
+.rsec-card__icon--pink    { color: #f472b6; background: rgba(244, 114, 182, 0.1); border-color: rgba(244, 114, 182, 0.28); }
+.rsec-card__icon--gold    { color: #ffd56b; background: rgba(255, 213, 107, 0.1); border-color: rgba(255, 213, 107, 0.3); }
+.rsec-card__icon--blue    { color: #60a5fa; background: rgba(96, 165, 250, 0.1);  border-color: rgba(96, 165, 250, 0.28); }
+.rsec-card__icon--slate   { color: #94a3b8; background: rgba(148, 163, 184, 0.1); border-color: rgba(148, 163, 184, 0.25); }
+
+.rsec-card__copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rsec-card__title {
+  font-size: 13px;
+  font-weight: 750;
+  color: #fff;
+  line-height: 1.3;
+}
+
+.rsec-card__summary {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.rsec-card__chev {
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.35);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.rsec-card.is-open .rsec-card__chev { transform: rotate(180deg); color: rgba(255, 255, 255, 0.75); }
+
+.rsec-card__body {
+  padding: 2px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  animation: rsec-in 0.22s ease both;
+}
+
+@keyframes rsec-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.rsec-card__item {
+  margin: 0;
+  padding-left: 14px;
+  position: relative;
+  font-size: 12px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.rsec-card__item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Компактный режим (модалка) */
+.rsec--compact { gap: 8px; }
+.rsec--compact .rsec-card { border-radius: 15px; box-shadow: none; }
+.rsec--compact .rsec-card__head { padding: 11px 12px; gap: 10px; }
+.rsec--compact .rsec-card__icon { width: 32px; height: 32px; border-radius: 10px; }
+.rsec--compact .rsec-card__title { font-size: 12.5px; }
+.rsec--compact .rsec-card__summary { font-size: 11px; }
+.rsec--compact .rsec-card__body { padding: 0 13px 12px; }
+.rsec--compact .rsec-card__item { font-size: 11.5px; }
+
+/* Светлая тема */
+html.light .rsec-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 18px rgba(80, 60, 90, 0.08);
+}
+
+html.light .rsec-card.is-open { border-color: rgba(0, 0, 0, 0.16); }
+html.light .rsec-card__head:active { background: rgba(0, 0, 0, 0.04); }
+html.light .rsec-card__title { color: #16121f; }
+html.light .rsec-card__summary { color: rgba(20, 15, 30, 0.52); }
+html.light .rsec-card__chev { color: rgba(20, 15, 30, 0.35); }
+html.light .rsec-card.is-open .rsec-card__chev { color: rgba(20, 15, 30, 0.7); }
+html.light .rsec-card__item { color: rgba(20, 15, 30, 0.62); }
+html.light .rsec-card__item::before { background: rgba(20, 15, 30, 0.25); }

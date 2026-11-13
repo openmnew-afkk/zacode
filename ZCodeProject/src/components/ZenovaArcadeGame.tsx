@@ -204,7 +204,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
   onWinBonus,
 }) => {
   const { haptic } = useTelegram();
-  const activatePremiumDays = useStore((s) => s.activatePremiumDays);
+  const { activatePremiumDays } = useStore();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -251,9 +251,6 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
 
   const wonBonusRef = useRef(wonBonus);
   wonBonusRef.current = wonBonus;
-
-  const onWinBonusRef = useRef(onWinBonus);
-  onWinBonusRef.current = onWinBonus;
 
   // Игровые сущности
   const gameEntitiesRef = useRef<{
@@ -424,92 +421,10 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
       }
     };
 
-    const awardPoints = (pts: number) => {
-      const prev = scoreRef.current;
-      const next = prev + pts;
-      scoreRef.current = next;
-      setScore(next);
-
-      if (next > bestScoreRef.current) {
-        setBestScore(next);
-        bestScoreRef.current = next;
-        try {
-          localStorage.setItem('zen_arcade_best', String(next));
-        } catch {}
-      }
-
-      if (prev < 25 && next >= 25 && !wonBonusRef.current) {
-        wonBonusRef.current = true;
-        setWonBonus(true);
-        try {
-          localStorage.setItem('zen_arcade_won_bonus', '1');
-        } catch {}
-        triggerSeasonalBurst(45);
-        soundSynth.playWin();
-        haptic('heavy');
-        onWinBonusRef.current?.();
-        ent.floatingTexts.push({
-          x: 180,
-          y: 120,
-          text: '3 ДНЯ PRO',
-          color: '#fbbf24',
-          life: 0,
-          maxLife: 75,
-        });
-      }
-    };
-
-    const burst = (x: number, y: number, color: string, count: number, speed: number) => {
-      for (let k = 0; k < count; k++) {
-        ent.particles.push({
-          x,
-          y,
-          vx: (Math.random() - 0.5) * speed,
-          vy: (Math.random() - 0.5) * speed,
-          color,
-          size: Math.random() * 4 + 2,
-          life: 0,
-          maxLife: 22,
-        });
-      }
-    };
-
-    const loseLife = (x: number, y: number) => {
-      if (ent.invulnerable > 0 || stateRef.current !== 'playing') return;
-      if (livesRef.current > 1) {
-        const remainingLives = livesRef.current - 1;
-        setLives(remainingLives);
-        livesRef.current = remainingLives;
-        ent.invulnerable = 90;
-        ent.screenShake = 10;
-        ent.combo = 0;
-        soundSynth.playHit();
-        haptic('heavy');
-        burst(x, y, '#ef4444', 16, 7);
-        return;
-      }
-      setLives(0);
-      livesRef.current = 0;
-      setGameState('gameover');
-      soundSynth.playHit();
-      haptic('heavy');
-      burst(x, y, '#fbbf24', 12, 9);
-      burst(x, y, '#38bdf8', 12, 9);
-      burst(x, y, '#ef4444', 12, 9);
-    };
-
-    let lastTs = 0;
-    let step = 1;
-    let spawnTravel = 0;
-    let exhaustAcc = 0;
-
-    // Главный цикл отрисовки. step = 1 на 60 Гц, чтобы на 120 Гц игра не ускорялась.
-    const render = (ts: number) => {
+    // Главный цикл отрисовки
+    const render = () => {
       const w = 360;
       const h = 420;
-      if (!lastTs) lastTs = ts;
-      step = Math.min(2, (ts - lastTs) / 16.67);
-      lastTs = ts;
 
       ent.frame++;
 
@@ -517,7 +432,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
       let offsetX = 0;
       let offsetY = 0;
       if (ent.screenShake > 0) {
-        ent.screenShake = Math.max(0, ent.screenShake - step);
+        ent.screenShake--;
         offsetX = (Math.random() - 0.5) * 6;
         offsetY = (Math.random() - 0.5) * 6;
       }
@@ -545,7 +460,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
       // Параллакс звездного поля
       ent.bgStars.forEach((st) => {
         if (stateRef.current === 'playing') {
-          st.x -= st.v * step;
+          st.x -= st.v;
           if (st.x < 0) {
             st.x = w;
             st.y = Math.random() * h;

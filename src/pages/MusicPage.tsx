@@ -12,10 +12,12 @@ import {
   restoreHeardList,
   removeHeard,
   heardToAlbum,
+  upgradeAlbumToFull,
   HEARD_EVENT,
   type HeardEntry,
   type SoundtrackAlbum,
 } from '../services/soundtracks';
+import { isFullTrack } from '../services/fullMusic';
 import './MusicPage.css';
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -86,6 +88,11 @@ const Eq: React.FC<{ on: boolean }> = ({ on }) => (
   </span>
 );
 
+const fmtDur = (sec: number) => {
+  const s = Math.max(0, Math.round(sec || 0));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+};
+
 const MusicPage: React.FC = () => {
   const navigate = useNavigate();
   const { haptic } = useTelegram();
@@ -152,7 +159,18 @@ const MusicPage: React.FC = () => {
     scrollToTemplate();
     const ost = await getSoundtrack(m);
     if (id !== reqId.current) return;
-    setSelected(ost ? { film, status: 'ready', album: ost.album, tracks: ost.tracks } : { film, status: 'empty' });
+    if (!ost) {
+      setSelected({ film, status: 'empty' });
+      return;
+    }
+    setSelected({ film, status: 'ready', album: ost.album, tracks: ost.tracks });
+    upgradeAlbumToFull(ost.tracks, ost.album.collectionId, ost.album.name, film.originalTitle || film.title)
+      .then(({ tracks }) => {
+        if (id === reqId.current) {
+          setSelected((s) => (s && s.status === 'ready' ? { ...s, tracks } : s));
+        }
+      })
+      .catch(() => {});
   }, [haptic]);
 
   const openHeard = useCallback(async (e: HeardEntry) => {
@@ -164,7 +182,18 @@ const MusicPage: React.FC = () => {
     const album = heardToAlbum(e);
     const tracks = await getAlbumTracks(album, e.title);
     if (id !== reqId.current) return;
-    setSelected(tracks.length ? { film, status: 'ready', album, tracks } : { film, status: 'empty' });
+    if (!tracks.length) {
+      setSelected({ film, status: 'empty' });
+      return;
+    }
+    setSelected({ film, status: 'ready', album, tracks });
+    upgradeAlbumToFull(tracks, album.collectionId, album.name, film.originalTitle || film.title)
+      .then(({ tracks: full }) => {
+        if (id === reqId.current) {
+          setSelected((s) => (s && s.status === 'ready' ? { ...s, tracks: full } : s));
+        }
+      })
+      .catch(() => {});
   }, [haptic]);
 
   const playAt = (tracks: Track[], idx: number) => {
@@ -195,7 +224,10 @@ const MusicPage: React.FC = () => {
     setSlide(0);
   };
 
-  const likedOst = useMemo(() => likedTracks.filter((t) => t.source === 'ZENOVA OST'), [likedTracks]);
+  const likedOst = useMemo(
+    () => likedTracks.filter((t) => t.source === 'ZENOVA OST' || t.genre === 'Soundtrack' || isFullTrack(t)),
+    [likedTracks]
+  );
   const isLiked = (id: string) => likedTracks.some((t) => t.id === id);
 
   const readyTracks = selected?.status === 'ready' ? selected.tracks : [];
@@ -277,7 +309,7 @@ const MusicPage: React.FC = () => {
                 <h2 className="ost-film__title">{selected.film.title}</h2>
                 <span className="ost-film__sub">
                   {selected.status === 'ready'
-                    ? `${selected.album.artist} · ${selected.tracks.length} треков${selected.album.year ? ` · ${selected.album.year}` : ''}`
+                    ? `${selected.album.artist} · ${selected.tracks.length} треков${selected.album.year ? ` · ${selected.album.year}` : ''}${selected.tracks.some(isFullTrack) ? ` · ${selected.tracks.filter(isFullTrack).length} FULL` : ''}`
                     : selected.film.year}
                 </span>
               </div>
@@ -373,6 +405,12 @@ const MusicPage: React.FC = () => {
                           <strong>{t.title}</strong>
                           <small>{t.artist}</small>
                         </span>
+                        <span className="ost-track__meta">
+                          {isFullTrack(t)
+                            ? <span className="ost-badge ost-badge--full">FULL</span>
+                            : <span className="ost-badge ost-badge--preview">0:30</span>}
+                          <span className="ost-track__dur">{isFullTrack(t) ? fmtDur(t.duration) : 'превью'}</span>
+                        </span>
                       </button>
                       <button
                         type="button"
@@ -390,7 +428,11 @@ const MusicPage: React.FC = () => {
                   );
                 })}
               </ol>
-              <p className="ost-note">Официальные 30-секундные превью · Apple Music</p>
+              <p className="ost-note">
+                {readyTracks.some(isFullTrack)
+                  ? `Полные треки (${readyTracks.filter(isFullTrack).length} из ${readyTracks.length}) · Internet Archive / Audius. Остальные — превью Apple Music.`
+                  : 'Превью 30 сек · Apple Music. Полные версии ищем в Internet Archive и Audius.'}
+              </p>
             </div>
           )}
         </section>
