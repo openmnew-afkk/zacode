@@ -1800,30 +1800,56 @@ html.light .zen-profile-toast {
  *  слоновая кость карточек, бейдж уровня и круглые ярлыки разделов
  * ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Холст страницы: десатурированный индиго-нави как на референсе ── */
+/* ── Холст страницы: тёмный нейтральный графит с лёгким индиго ── */
 .zen-profile-page {
   background:
-    radial-gradient(130% 46% at 50% -4%, rgba(101, 118, 186, 0.22) 0%, transparent 62%),
-    radial-gradient(90% 30% at 85% 4%, rgba(146, 118, 215, 0.12) 0%, transparent 60%),
-    linear-gradient(180deg, #262b42 0%, #1d2133 34%, #171a27 72%, #14161f 100%);
+    radial-gradient(120% 40% at 50% -4%, rgba(124, 140, 205, 0.14) 0%, transparent 60%),
+    radial-gradient(80% 26% at 88% 2%, rgba(146, 118, 215, 0.1) 0%, transparent 58%),
+    linear-gradient(180deg, #201f2c 0%, #1a1926 40%, #16151f 100%);
 }
 
 .zen-profile-page .zen-header__kicker { color: rgba(196, 205, 238, 0.72); }
 .zen-profile-page .zen-header__title { color: #f2f4fb; }
 
-/* ── Карточка пользователя: слоновая кость (Tiering hero-card) ── */
+/* ── Карточка пользователя: цветной градиент как на референсе Tiering ── */
 html:not(.light) .zen-user-card {
-  background: linear-gradient(165deg, #fdfaf0 0%, #f7f1e2 58%, #f1e9d4 100%);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  position: relative;
+  background: linear-gradient(135deg, #9ad9ff 0%, #5b8def 48%, #6d5df6 100%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
   box-shadow:
-    0 22px 48px rgba(6, 8, 18, 0.5),
-    0 4px 14px rgba(6, 8, 18, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    0 22px 48px rgba(8, 12, 40, 0.55),
+    0 4px 14px rgba(8, 12, 40, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
+/* PRO — золотая градиентная карточка (S2 на референсе) */
+html:not(.light) .zen-user-card--gold {
+  background: linear-gradient(135deg, #ffe9a8 0%, #ffc95e 52%, #ff9e3d 100%);
+}
+
 html:not(.light) .zen-user-card__beam { display: none; }
+
+/* Гема ранга справа от карточки */
+.zen-user-gem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #2b3fa0;
+  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 10px rgba(43, 63, 160, 0.55));
+  animation: zenGemFloat 3.8s ease-in-out infinite;
+  pointer-events: none;
+}
+html:not(.light) .zen-user-card--gold .zen-user-gem {
+  color: rgba(120, 78, 10, 0.55);
+  filter: drop-shadow(0 6px 14px rgba(255, 244, 200, 0.65));
+}
+@keyframes zenGemFloat {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-4px) rotate(3deg); }
+}
 
 html:not(.light) .zen-user-card .zen-user-kicker { color: rgba(38, 43, 68, 0.62); }
 html:not(.light) .zen-user-card .zen-user-rank-chip {
@@ -1854,10 +1880,13 @@ html:not(.light) .zen-user-card .zen-user-stat-val.text-green { color: #0e9f6e; 
 html:not(.light) .zen-user-card .zen-user-stat-val.text-cyan { color: #0284c7; }
 html:not(.light) .zen-user-card .zen-user-stat-val.text-gold { color: #b7791f; }
 html:not(.light) .zen-user-card .zen-user-stat-div { background: rgba(38, 43, 68, 0.12); }
-html:not(.light) .zen-user-card .zen-user-stats-strip { border-top-color: rgba(38, 43, 68, 0.12); }
-html:not(.light) .zen-user-card .zen-user-rank-track { background: rgba(38, 43, 68, 0.12); }
+html:not(.light) .zen-user-card .zen-user-stats-strip { border-top-color: rgba(38, 43, 68, 0.16); }
+html:not(.light) .zen-user-card .zen-user-rank-track { background: rgba(38, 43, 68, 0.22); }
 html:not(.light) .zen-user-card .zen-user-rank-fill {
-  background: linear-gradient(90deg, #3a4370 0%, #5a67a8 100%);
+  background: linear-gradient(90deg, #2c3560 0%, #4a5590 100%);
+}
+html:not(.light) .zen-user-card--gold .zen-user-rank-fill {
+  background: linear-gradient(90deg, #8a6414 0%, #b98a1e 100%);
 }
 html:not(.light) .zen-user-card .zen-user-rank-title { color: rgba(38, 43, 68, 0.78); }
 html:not(.light) .zen-user-card .zen-user-rank-pts { color: rgba(38, 43, 68, 0.55); }
@@ -1887,8 +1916,8 @@ html:not(.light) .zen-user-progress-row .zen-user-rank-bar {
   font-weight: 800;
   letter-spacing: 0.02em;
   color: #f6f2e6;
-  background: linear-gradient(135deg, #2e3554 0%, #4a549b 100%);
-  box-shadow: 0 8px 18px rgba(30, 38, 80, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  background: linear-gradient(135deg, #22222f 0%, #3a3a52 100%);
+  box-shadow: 0 8px 18px rgba(10, 12, 30, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16);
   transition: transform 0.16s ease, box-shadow 0.16s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -2064,3 +2093,260 @@ html.light .zen-subpage__back {
 }
 html.light .zen-subpage__back:active { background: rgba(255, 255, 255, 0.95); }
 html.light .zen-section-header { color: rgba(31, 26, 36, 0.5); }
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  ✦ TIERING v2 — табы, теги секций, сетка привилегий, сезонный деск
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Табы с подчёркиванием (Coupons / Earn / Use на референсе) ── */
+.zen-tabs {
+  display: flex;
+  gap: 2px;
+  margin: 0 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.zen-tab {
+  flex: 1;
+  position: relative;
+  padding: 11px 0 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(210, 216, 240, 0.5);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  transition: color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-tab.active { color: #f6f2e6; }
+
+.zen-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ffd56b 0%, #ffab4a 100%);
+  box-shadow: 0 2px 10px rgba(255, 213, 107, 0.5);
+}
+
+/* ── Тег-пилюля у заголовка секции («Limited offers») ── */
+.zen-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: 2px;
+}
+
+.zen-tag-pill--gold {
+  background: rgba(255, 213, 107, 0.14);
+  border: 1px solid rgba(255, 213, 107, 0.42);
+  color: #ffd56b;
+}
+
+.zen-tag-pill--cyan {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  color: #7dd3fc;
+}
+
+/* ── Сетка привилегий (бренд-грид на референсе) ── */
+.zen-perk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-perk-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 13px 12px;
+  border-radius: 18px;
+  background: linear-gradient(170deg, #fcf8ee 0%, #f4eee0 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 10px 26px rgba(6, 8, 18, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: transform 0.15s ease;
+}
+
+.zen-perk-card:active { transform: scale(0.97); }
+
+.zen-perk-card__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.zen-perk-card__icon--blue { color: #0284c7; background: rgba(56, 189, 248, 0.16); }
+.zen-perk-card__icon--violet { color: #8b5cf6; background: rgba(139, 92, 246, 0.15); }
+.zen-perk-card__icon--orange { color: #ea580c; background: rgba(249, 115, 22, 0.15); }
+.zen-perk-card__icon--cyan { color: #0891b2; background: rgba(6, 182, 212, 0.15); }
+.zen-perk-card__icon--amber { color: #d97706; background: rgba(245, 158, 11, 0.16); }
+.zen-perk-card__icon--gold { color: #b7791f; background: rgba(255, 213, 107, 0.25); }
+
+.zen-perk-card__title {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #262b45;
+}
+
+.zen-perk-card__sub {
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(38, 43, 68, 0.58);
+}
+
+.zen-perk-card__value {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(38, 43, 68, 0.07);
+  border: 1px solid rgba(38, 43, 68, 0.16);
+  color: #2c3252;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+}
+
+.zen-perk-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffd56b 0%, #ffab4a 100%);
+  color: #241d06;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 850;
+  box-shadow: 0 10px 24px rgba(210, 150, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-perk-cta:active { transform: scale(0.97); }
+
+/* ── Деск сезонных коллекций (карточки-градиенты) ── */
+.zen-season-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-season-card {
+  position: relative;
+  padding: 15px 16px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-season-card:active { transform: scale(0.985); }
+
+.zen-season-card.is-active {
+  border-color: rgba(255, 213, 107, 0.75);
+  box-shadow: 0 0 0 1px rgba(255, 213, 107, 0.45), 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.zen-season-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.zen-season-card__badge {
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.38);
+  color: rgba(255, 255, 255, 0.75);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.zen-season-card__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+}
+
+.zen-season-card__name {
+  margin: 0 0 4px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-season-card__sub {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.zen-season-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 13px;
+}
+
+.zen-season-card__palette { display: flex; gap: 5px; }
+
+.zen-season-card__palette span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.zen-season-card__fx {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}

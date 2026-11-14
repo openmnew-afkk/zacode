@@ -23,7 +23,7 @@ import {
   Newspaper,
   LifeBuoy,
   Gift,
-  Sun,
+  Gem,
   Smartphone,
   HardDrive,
   Cloud,
@@ -247,6 +247,23 @@ const THEME_OPTIONS: ThemeOption[] = [
   },
 ];
 
+interface ProPerk {
+  icon: typeof Tv;
+  title: string;
+  sub: string;
+  value: string;
+  tint: string;
+}
+
+const PRO_PERKS: ProPerk[] = [
+  { icon: Tv, title: '4K HDR', sub: 'Максимальное качество плеера', value: '4K', tint: 'zen-perk-card__icon--blue' },
+  { icon: Zap, title: '×2 опыт', sub: 'Двойной XP за просмотры и оценки', value: '×2', tint: 'zen-perk-card__icon--violet' },
+  { icon: Gamepad2, title: 'Аркада PRO', sub: 'Двойные очки в Zenova Arcade', value: 'PRO', tint: 'zen-perk-card__icon--orange' },
+  { icon: Palette, title: 'Атмосферы', sub: 'Все сезонные коллекции эффектов', value: '4+', tint: 'zen-perk-card__icon--cyan' },
+  { icon: Gift, title: 'Закрытые подборки', sub: 'Коллекции и премьеры недели', value: 'PRO', tint: 'zen-perk-card__icon--amber' },
+  { icon: Crown, title: 'Золотой статус', sub: 'Гем-карточка и бейдж в профиле', value: 'GOLD', tint: 'zen-perk-card__icon--gold' },
+];
+
 interface LibraryItem {
   id: string;
   movie: Movie;
@@ -270,12 +287,11 @@ export const ProfilePage: React.FC = () => {
     premiumExpiry,
     role,
     telegramUsername,
-    theme,
-    setTheme,
     syncTrackedCloud,
   } = useStore();
 
   const [subPage, setSubPage] = useState<SubPage>(null);
+  const [settingsTab, setSettingsTab] = useState<'overview' | 'perks' | 'seasons'>('overview');
   const [libraryTab, setLibraryTab] = useState<'all' | 'favorites' | 'history' | 'watched' | 'want' | 'watching'>('all');
   const [libraryQuery, setLibraryQuery] = useState('');
   const [copiedId, setCopiedId] = useState(false);
@@ -1120,7 +1136,10 @@ export const ProfilePage: React.FC = () => {
       </header>
 
       {/* Карточка пользователя с кликабельными статами */}
-      <div className="zen-user-card" onClick={() => setSubPage('rank')}>
+      <div
+        className={`zen-user-card ${effectivePremium ? 'zen-user-card--gold' : 'zen-user-card--azure'}`}
+        onClick={() => setSubPage('rank')}
+      >
         <div className="zen-user-card__beam" />
         <div className="zen-user-card__top">
           <div className="zen-user-avatar-wrap">
@@ -1153,7 +1172,9 @@ export const ProfilePage: React.FC = () => {
               </button>
             </div>
           </div>
-          <ChevronRight size={18} className="zen-chevron" />
+          <span className="zen-user-gem" aria-hidden="true">
+            <Gem size={44} strokeWidth={1.3} />
+          </span>
         </div>
 
         <div className="zen-user-progress-row">
@@ -1163,7 +1184,7 @@ export const ProfilePage: React.FC = () => {
             </div>
             <div className="zen-user-rank-labels">
               <span className="zen-user-rank-title">Ранг: {rankTitle}</span>
-              <span className="zen-user-rank-pts">{totalXp % 140} / 140 XP</span>
+              <span className="zen-user-rank-pts">Ещё {140 - (totalXp % 140)} XP · до LVL {cineLevel + 1}</span>
             </div>
           </div>
           <button
@@ -1258,6 +1279,38 @@ export const ProfilePage: React.FC = () => {
         </button>
       </div>
 
+      {/* ── Таби в стиле Tiering ── */}
+      <div className="zen-tabs" role="tablist">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={settingsTab === 'overview'}
+          className={`zen-tab ${settingsTab === 'overview' ? 'active' : ''}`}
+          onClick={() => { haptic('light'); setSettingsTab('overview'); }}
+        >
+          Обзор
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={settingsTab === 'perks'}
+          className={`zen-tab ${settingsTab === 'perks' ? 'active' : ''}`}
+          onClick={() => { haptic('light'); setSettingsTab('perks'); }}
+        >
+          Привилегии
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={settingsTab === 'seasons'}
+          className={`zen-tab ${settingsTab === 'seasons' ? 'active' : ''}`}
+          onClick={() => { haptic('light'); setSettingsTab('seasons'); }}
+        >
+          Коллекции
+        </button>
+      </div>
+
+      {settingsTab === 'overview' && (<>
       {/* ── Группа: Плеер и отклик ── */}
       <section className="zen-set-group">
         <h2 className="zen-set-group__title">Плеер и отклик</h2>
@@ -1300,36 +1353,6 @@ export const ProfilePage: React.FC = () => {
       <section className="zen-set-group">
         <h2 className="zen-set-group__title">Оформление</h2>
         <div className="zen-set-card">
-          <div
-            className="zen-set-row"
-            onClick={() => {
-              haptic('light');
-              const nextTheme: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark';
-              setTheme(nextTheme);
-              showToast(nextTheme === 'light' ? 'Светлая тема включена' : 'Тёмная тема включена');
-            }}
-          >
-            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Sun size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Светлая тема</span>
-              <span className="zen-set-row__sub">Нежный дневной интерфейс ZENOVA</span>
-            </span>
-            <button
-              type="button"
-              className={`zen-switch ${theme === 'light' ? 'on' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                haptic('light');
-                const nextTheme: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark';
-                setTheme(nextTheme);
-                showToast(nextTheme === 'light' ? 'Светлая тема включена' : 'Тёмная тема включена');
-              }}
-              aria-label="Светлая тема"
-            >
-              <span className="zen-switch__thumb" />
-            </button>
-          </div>
-
           <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('news'); }}>
             <span className="zen-set-row__icon zen-set-row__icon--violet"><Newspaper size={19} /></span>
             <span className="zen-set-row__body">
@@ -1436,6 +1459,75 @@ export const ProfilePage: React.FC = () => {
           </button>
         </div>
       </section>
+      </>)}
+
+      {/* ── Таб: Привилегии (Tiering perks) ── */}
+      {settingsTab === 'perks' && (
+        <section className="zen-set-group">
+          <h2 className="zen-set-group__title">
+            Привилегии ZENOVA <span className="zen-tag-pill zen-tag-pill--gold">PRO</span>
+          </h2>
+          <div className="zen-perk-grid">
+            {PRO_PERKS.map((perk) => {
+              const PerkIcon = perk.icon;
+              return (
+                <div key={perk.title} className="zen-perk-card">
+                  <span className={`zen-perk-card__icon ${perk.tint}`}>
+                    <PerkIcon size={17} />
+                  </span>
+                  <span className="zen-perk-card__title">{perk.title}</span>
+                  <span className="zen-perk-card__sub">{perk.sub}</span>
+                  <span className="zen-perk-card__value">{perk.value}</span>
+                </div>
+              );
+            })}
+          </div>
+          <button
+            type="button"
+            className="zen-perk-cta"
+            onClick={() => { haptic('light'); navigate('/premium'); }}
+          >
+            <Crown size={15} />
+            <span>{effectivePremium ? 'Ваш ZENOVA PRO активен' : 'Открыть ZENOVA PRO'}</span>
+            <ChevronRight size={15} />
+          </button>
+        </section>
+      )}
+
+      {/* ── Таб: Коллекции (сезонные атмосферы) ── */}
+      {settingsTab === 'seasons' && (
+        <section className="zen-set-group">
+          <h2 className="zen-set-group__title">
+            Сезонные коллекции <span className="zen-tag-pill zen-tag-pill--cyan">ЭФФЕКТЫ</span>
+          </h2>
+          <div className="zen-season-deck">
+            {THEME_OPTIONS.filter((t) => t.id !== 'auto').map((t) => {
+              const active = !seasonState.auto && seasonState.season.id === t.id;
+              return (
+                <div
+                  key={t.id}
+                  className={`zen-season-card ${active ? 'is-active' : ''}`}
+                  style={{ background: t.gradient }}
+                  onClick={() => { haptic('light'); switchSeason(t.id); }}
+                >
+                  <div className="zen-season-card__top">
+                    <span className="zen-season-card__badge">{t.badge}</span>
+                    {active && <span className="zen-season-card__pill">АКТИВНА</span>}
+                  </div>
+                  <h3 className="zen-season-card__name">{t.name}</h3>
+                  <p className="zen-season-card__sub">{t.sub}</p>
+                  <div className="zen-season-card__bottom">
+                    <div className="zen-season-card__palette">
+                      {t.palette.map((c) => <span key={c} style={{ background: c }} />)}
+                    </div>
+                    <span className="zen-season-card__fx">{t.fxName}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Подпись версии */}
       <footer className="zen-set-footer">
