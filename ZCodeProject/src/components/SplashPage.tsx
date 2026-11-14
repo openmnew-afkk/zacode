@@ -58,7 +58,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           // Если браузер блокирует звук без жеста: гарантированно стартуем с muted
           vid.muted = true;
           setMuted(true);
-          vid.play().catch(() => {});
+          vid.play().catch(() => finishSplash());
         });
     }
 
@@ -69,16 +69,20 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         v.muted = false;
         v.volume = 1.0;
         setMuted(false);
+        v.play().catch(() => {
+          v.muted = true;
+          setMuted(true);
+        });
       }
     };
 
     window.addEventListener('pointerdown', unlockAudio, { passive: true, once: true });
     window.addEventListener('touchstart', unlockAudio, { passive: true, once: true });
 
-    // Страховочный таймер: максимум 12 секунд
+    // Страховочный таймер: видео не завелось — не задерживаем пользователя дольше 6.5с
     const fallbackTimer = setTimeout(() => {
       finishSplash();
-    }, 12000);
+    }, 6500);
 
     // Точный прогресс загрузки и воспроизведения
     const progInterval = setInterval(() => {

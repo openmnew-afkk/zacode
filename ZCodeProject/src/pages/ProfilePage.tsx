@@ -23,8 +23,6 @@ import {
   Newspaper,
   LifeBuoy,
   Gift,
-  Sun,
-  Moon,
   Smartphone,
   HardDrive,
   Cloud,
@@ -273,8 +271,6 @@ export const ProfilePage: React.FC = () => {
     premiumExpiry,
     role,
     telegramUsername,
-    theme,
-    toggleTheme,
     syncTrackedCloud,
   } = useStore();
 
@@ -1144,19 +1140,6 @@ export const ProfilePage: React.FC = () => {
           <h1 className="zen-header__title">Настройки</h1>
         </div>
         <div className="zen-header__actions">
-          <button
-            type="button"
-            className="zen-theme-toggle-btn"
-            onClick={() => {
-              haptic('light');
-              toggleTheme();
-              showToast(`Тема: ${theme === 'dark' ? 'Светлая' : 'Тёмная'}`);
-            }}
-            aria-label="Сменить тему"
-          >
-            {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
-
           {isAdminUser && (
             <button
               type="button"
@@ -1272,50 +1255,59 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Быстрые переключатели прямо под профилем ── */}
-      <div className="zen-quick-toggles-bar">
-        <button
-          type="button"
-          className={`zen-quick-pill ${theme === 'dark' ? 'is-active' : ''}`}
-          onClick={() => {
-            haptic('light');
-            toggleTheme();
-            showToast(`Тема: ${theme === 'dark' ? 'Светлая' : 'Тёмная'}`);
-          }}
-        >
-          <span className="zen-quick-pill__icon">
-            {theme === 'dark' ? <Moon size={15} /> : <Sun size={15} />}
-          </span>
-          <span className="zen-quick-pill__label">{theme === 'dark' ? 'Тёмная' : 'Светлая'}</span>
-        </button>
+      {/* ── Эффекты и отклик: отдельные тумблеры ── */}
+      <section className="zen-set-group">
+        <h2 className="zen-set-group__title">Эффекты и отклик</h2>
+        <div className="zen-set-card">
+          <div className="zen-set-row" onClick={toggleAurora}>
+            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Sparkles size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Северное Сияние</span>
+              <span className="zen-set-row__sub">Полярная аврора в верхней части экрана</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${!auroraOff ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleAurora(); }}
+              aria-label="Северное Сияние"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
 
-        <button
-          type="button"
-          className={`zen-quick-pill ${!auroraOff ? 'is-active zen-quick-pill--aurora' : ''}`}
-          onClick={toggleAurora}
-        >
-          <span className="zen-quick-pill__icon"><Sparkles size={15} /></span>
-          <span className="zen-quick-pill__label">{!auroraOff ? 'Сияние Вкл' : 'Сияние Выкл'}</span>
-        </button>
+          <div className="zen-set-row" onClick={toggleFx}>
+            <span className="zen-set-row__icon zen-set-row__icon--blue"><Palette size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Сезонные частицы</span>
+              <span className="zen-set-row__sub">Снегопад, лепестки, светлячки и листопад</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${!fxOff ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleFx(); }}
+              aria-label="Сезонные частицы"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
 
-        <button
-          type="button"
-          className={`zen-quick-pill ${!fxOff ? 'is-active' : ''}`}
-          onClick={toggleFx}
-        >
-          <span className="zen-quick-pill__icon"><Palette size={15} /></span>
-          <span className="zen-quick-pill__label">{!fxOff ? 'Частицы Вкл' : 'Частицы Выкл'}</span>
-        </button>
-
-        <button
-          type="button"
-          className={`zen-quick-pill ${hapticsEnabled ? 'is-active' : ''}`}
-          onClick={toggleHaptics}
-        >
-          <span className="zen-quick-pill__icon"><Smartphone size={15} /></span>
-          <span className="zen-quick-pill__label">{hapticsEnabled ? 'Вибро Вкл' : 'Вибро Выкл'}</span>
-        </button>
-      </div>
+          <div className="zen-set-row" onClick={toggleHaptics}>
+            <span className="zen-set-row__icon zen-set-row__icon--violet"><Smartphone size={19} /></span>
+            <span className="zen-set-row__body">
+              <span className="zen-set-row__title">Виброотклик</span>
+              <span className="zen-set-row__sub">Тактильный отклик на нажатия</span>
+            </span>
+            <button
+              type="button"
+              className={`zen-switch ${hapticsEnabled ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleHaptics(); }}
+              aria-label="Виброотклик"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* Баннер подписки ZENOVA PRO */}
       <button
