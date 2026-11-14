@@ -382,27 +382,31 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
-  /* ═══ Тема: приложение всегда тёмное, светлой темы больше нет ═══ */
+  /* ═══ Тема: тёмная по умолчанию + полноценная светлая (переключается в настройках) ═══ */
   theme: (() => {
-    try { localStorage.removeItem('tc_theme'); } catch {}
+    const t = load<string>('tc_theme', 'dark');
+    const active = t === 'light' ? 'light' : 'dark';
     try {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', active);
       document.documentElement.classList.remove('dark', 'light');
-      document.documentElement.classList.add('dark');
+      document.documentElement.classList.add(active);
     } catch {}
-    return 'dark' as AppTheme;
+    return active as AppTheme;
   })(),
   toggleTheme: () => {
-    set({ theme: 'dark' });
-    document.documentElement.setAttribute('data-theme', 'dark');
+    const newTheme: AppTheme = get().theme === 'dark' ? 'light' : 'dark';
+    save('tc_theme', newTheme);
+    set({ theme: newTheme });
+    document.documentElement.setAttribute('data-theme', newTheme);
     document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.add(newTheme);
   },
-  setTheme: () => {
-    set({ theme: 'dark' });
-    document.documentElement.setAttribute('data-theme', 'dark');
+  setTheme: (theme: AppTheme) => {
+    save('tc_theme', theme);
+    set({ theme });
+    document.documentElement.setAttribute('data-theme', theme);
     document.documentElement.classList.remove('dark', 'light');
-    document.documentElement.classList.add('dark');
+    document.documentElement.classList.add(theme);
   },
 
   /* ═══ Премиум ═══ */

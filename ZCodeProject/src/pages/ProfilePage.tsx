@@ -23,12 +23,11 @@ import {
   Newspaper,
   LifeBuoy,
   Gift,
+  Sun,
   Smartphone,
   HardDrive,
   Cloud,
   RefreshCw,
-  PlayCircle,
-  Flame,
 } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
@@ -271,6 +270,8 @@ export const ProfilePage: React.FC = () => {
     premiumExpiry,
     role,
     telegramUsername,
+    theme,
+    setTheme,
     syncTrackedCloud,
   } = useStore();
 
@@ -358,25 +359,9 @@ export const ProfilePage: React.FC = () => {
     showToast(next ? 'Сезонные частицы выключены' : 'Сезонные частицы включены ❄️');
   };
 
-  // Качество видео по умолчанию
-  const [videoQuality, setVideoQuality] = useState(() => {
-    try {
-      return localStorage.getItem('zenova_default_quality') || 'auto';
-    } catch {
-      return 'auto';
-    }
-  });
+  // Качество выбирается внутри плеера — отдельная настройка не нужна
 
-  const handleQualityChange = (q: string) => {
-    haptic('light');
-    setVideoQuality(q);
-    try {
-      localStorage.setItem('zenova_default_quality', q);
-    } catch {}
-    showToast(`Качество: ${q.toUpperCase()}`);
-  };
-
-  // Автовоспроизведение
+  // Автовоспроизведение (музыка: следующий трек после текущего)
   const [autoplay, setAutoplay] = useState(() => {
     try {
       return localStorage.getItem('zenova_autoplay') !== '0';
@@ -393,25 +378,6 @@ export const ProfilePage: React.FC = () => {
       localStorage.setItem('zenova_autoplay', next ? '1' : '0');
     } catch {}
     showToast(next ? 'Автовоспроизведение: Вкл' : 'Автовоспроизведение: Выкл');
-  };
-
-  // Плавный режим 120 FPS
-  const [smoothFps, setSmoothFps] = useState(() => {
-    try {
-      return localStorage.getItem('zenova_smooth_fps') !== '0';
-    } catch {
-      return true;
-    }
-  });
-
-  const toggleSmoothFps = () => {
-    haptic('light');
-    const next = !smoothFps;
-    setSmoothFps(next);
-    try {
-      localStorage.setItem('zenova_smooth_fps', next ? '1' : '0');
-    } catch {}
-    showToast(next ? 'Плавный режим 120 FPS активен' : 'Режим энергосбережения');
   };
 
   // Виброотклик
@@ -1190,14 +1156,29 @@ export const ProfilePage: React.FC = () => {
           <ChevronRight size={18} className="zen-chevron" />
         </div>
 
-        <div className="zen-user-rank-bar">
-          <div className="zen-user-rank-track">
-            <div className="zen-user-rank-fill" style={{ width: `${levelProgress}%` }} />
+        <div className="zen-user-progress-row">
+          <div className="zen-user-rank-bar">
+            <div className="zen-user-rank-track">
+              <div className="zen-user-rank-fill" style={{ width: `${levelProgress}%` }} />
+            </div>
+            <div className="zen-user-rank-labels">
+              <span className="zen-user-rank-title">Ранг: {rankTitle}</span>
+              <span className="zen-user-rank-pts">{totalXp % 140} / 140 XP</span>
+            </div>
           </div>
-          <div className="zen-user-rank-labels">
-            <span className="zen-user-rank-title">Ранг: {rankTitle}</span>
-            <span className="zen-user-rank-pts">{totalXp % 140} / 140 XP</span>
-          </div>
+          <button
+            type="button"
+            className={`zen-upgrade-btn ${effectivePremium ? 'zen-upgrade-btn--active' : ''}`}
+            title={effectivePremium ? (proDaysLeft ? `ZENOVA PRO · осталось ${proDaysLeft} дн.` : 'ZENOVA PRO · бессрочный доступ') : 'Открыть ZENOVA PRO'}
+            onClick={(e) => {
+              e.stopPropagation();
+              haptic('light');
+              navigate('/premium');
+            }}
+          >
+            {effectivePremium ? 'PRO' : 'Upgrade'}
+            <ChevronRight size={13} />
+          </button>
         </div>
 
         {/* Интерактивные стат-чипы */}
@@ -1255,47 +1236,53 @@ export const ProfilePage: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Эффекты и отклик: отдельные тумблеры ── */}
-      <section className="zen-set-group">
-        <h2 className="zen-set-group__title">Эффекты и отклик</h2>
-        <div className="zen-set-card">
-          <div className="zen-set-row" onClick={toggleAurora}>
-            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Sparkles size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Северное Сияние</span>
-              <span className="zen-set-row__sub">Полярная аврора в верхней части экрана</span>
-            </span>
-            <button
-              type="button"
-              className={`zen-switch ${!auroraOff ? 'on' : ''}`}
-              onClick={(e) => { e.stopPropagation(); toggleAurora(); }}
-              aria-label="Северное Сияние"
-            >
-              <span className="zen-switch__thumb" />
-            </button>
-          </div>
+      {/* ── Круговые быстрые разделы ── */}
+      <div className="zen-shortcuts">
+        <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('library'); }}>
+          <span className="zen-shortcut__icon zen-shortcut__icon--emerald"><BookOpen size={20} /></span>
+          <span className="zen-shortcut__label">Кинотека</span>
+          {totalSavedCount > 0 && <span className="zen-shortcut__badge">{totalSavedCount}</span>}
+        </button>
+        <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('rank'); }}>
+          <span className="zen-shortcut__icon zen-shortcut__icon--amber"><Trophy size={20} /></span>
+          <span className="zen-shortcut__label">Рейтинг</span>
+        </button>
+        <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('arcade'); }}>
+          <span className="zen-shortcut__icon zen-shortcut__icon--orange"><Gamepad2 size={20} /></span>
+          <span className="zen-shortcut__label">Аркада</span>
+          {arcadeBest > 0 && <span className="zen-shortcut__badge">{arcadeBest}</span>}
+        </button>
+        <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('atmosphere'); }}>
+          <span className="zen-shortcut__icon zen-shortcut__icon--cyan"><Palette size={20} /></span>
+          <span className="zen-shortcut__label">Атмосфера</span>
+        </button>
+      </div>
 
-          <div className="zen-set-row" onClick={toggleFx}>
-            <span className="zen-set-row__icon zen-set-row__icon--blue"><Palette size={19} /></span>
+      {/* ── Группа: Плеер и отклик ── */}
+      <section className="zen-set-group">
+        <h2 className="zen-set-group__title">Плеер и отклик</h2>
+        <div className="zen-set-card">
+          <div className="zen-set-row" onClick={toggleAutoplay}>
+            <span className="zen-set-row__icon zen-set-row__icon--violet"><Zap size={19} /></span>
             <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Сезонные частицы</span>
-              <span className="zen-set-row__sub">Снегопад, лепестки, светлячки и листопад</span>
+              <span className="zen-set-row__title">Автовоспроизведение</span>
+              <span className="zen-set-row__sub">Следующий трек после окончания текущего</span>
             </span>
             <button
               type="button"
-              className={`zen-switch ${!fxOff ? 'on' : ''}`}
-              onClick={(e) => { e.stopPropagation(); toggleFx(); }}
-              aria-label="Сезонные частицы"
+              className={`zen-switch ${autoplay ? 'on' : ''}`}
+              onClick={(e) => { e.stopPropagation(); toggleAutoplay(); }}
+              aria-label="Автовоспроизведение"
             >
               <span className="zen-switch__thumb" />
             </button>
           </div>
 
           <div className="zen-set-row" onClick={toggleHaptics}>
-            <span className="zen-set-row__icon zen-set-row__icon--violet"><Smartphone size={19} /></span>
+            <span className="zen-set-row__icon zen-set-row__icon--blue"><Smartphone size={19} /></span>
             <span className="zen-set-row__body">
               <span className="zen-set-row__title">Виброотклик</span>
-              <span className="zen-set-row__sub">Тактильный отклик на нажатия</span>
+              <span className="zen-set-row__sub">Тактильный отклик на нажатия по всему приложению</span>
             </span>
             <button
               type="button"
@@ -1309,143 +1296,39 @@ export const ProfilePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Баннер подписки ZENOVA PRO */}
-      <button
-        type="button"
-        className={`zen-pro-banner ${effectivePremium ? 'zen-pro-banner--active' : ''}`}
-        onClick={() => { haptic('light'); navigate('/premium'); }}
-      >
-        <span className="zen-pro-banner__icon">
-          <Crown size={22} />
-        </span>
-        <span className="zen-pro-banner__body">
-          <span className="zen-pro-banner__title">
-            {effectivePremium ? 'ZENOVA PRO активен' : 'ZENOVA PRO'}
-          </span>
-          <span className="zen-pro-banner__sub">
-            {effectivePremium
-              ? (proDaysLeft ? `Осталось ${proDaysLeft} дн. · все привилегии включены` : 'Бессрочный доступ · все привилегии включены')
-              : '4K, все озвучки и музыка без ограничений · 2 дня бесплатно'}
-          </span>
-        </span>
-        <span className="zen-pro-banner__cta">
-          {effectivePremium ? 'Управлять' : 'Открыть'}
-          <ChevronRight size={14} />
-        </span>
-      </button>
-
-      {/* ── Группа: Мои разделы ── */}
-      <section className="zen-set-group">
-        <h2 className="zen-set-group__title">Моя медиатека и досуг</h2>
-        <div className="zen-set-card">
-          <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('library'); }}>
-            <span className="zen-set-row__icon zen-set-row__icon--emerald"><BookOpen size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Моя Кинотека</span>
-              <span className="zen-set-row__sub">Избранное, история, дневник и оценки</span>
-            </span>
-            <span className="zen-set-row__value">{totalSavedCount}</span>
-            <ChevronRight size={17} className="zen-set-row__chev" />
-          </button>
-
-          <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('rank'); }}>
-            <span className="zen-set-row__icon zen-set-row__icon--amber"><Trophy size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Рейтинг и награды</span>
-              <span className="zen-set-row__sub">Опыт киномана, уровни и привилегии</span>
-            </span>
-            <span className="zen-set-row__value">LVL {cineLevel}</span>
-            <ChevronRight size={17} className="zen-set-row__chev" />
-          </button>
-
-          <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('arcade'); }}>
-            <span className="zen-set-row__icon zen-set-row__icon--orange"><Gamepad2 size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Игровой Клуб: Star Runner</span>
-              <span className="zen-set-row__sub">Мини-игра 60 FPS · набери 25 очков и получи 3 дня PRO</span>
-            </span>
-            <span className="zen-set-row__value">{arcadeBest > 0 ? `Рекорд ${arcadeBest}` : 'Играть'}</span>
-            <ChevronRight size={17} className="zen-set-row__chev" />
-          </button>
-        </div>
-      </section>
-
-      {/* ── Группа: Воспроизведение и плеер ── */}
-      <section className="zen-set-group">
-        <h2 className="zen-set-group__title">Воспроизведение и плеер</h2>
-        <div className="zen-set-card">
-          <div className="zen-set-row">
-            <span className="zen-set-row__icon zen-set-row__icon--blue"><PlayCircle size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Качество по умолчанию</span>
-              <span className="zen-set-row__sub">Предпочтительное разрешение потока</span>
-            </span>
-            <div className="zen-quality-chips">
-              {[
-                { id: 'auto', label: 'Авто' },
-                { id: '720p', label: '720p' },
-                { id: '1080p', label: '1080p' },
-                { id: '4k', label: '4K' },
-              ].map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  className={`zen-quality-chip ${videoQuality === opt.id ? 'is-active' : ''}`}
-                  onClick={() => handleQualityChange(opt.id)}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="zen-set-row" onClick={toggleAutoplay}>
-            <span className="zen-set-row__icon zen-set-row__icon--violet"><Zap size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Автовоспроизведение</span>
-              <span className="zen-set-row__sub">Следующая серия в сериалах и следующий трек</span>
-            </span>
-            <button
-              type="button"
-              className={`zen-switch ${autoplay ? 'on' : ''}`}
-              onClick={(e) => { e.stopPropagation(); toggleAutoplay(); }}
-              aria-label="Автовоспроизведение"
-            >
-              <span className="zen-switch__thumb" />
-            </button>
-          </div>
-
-          <div className="zen-set-row" onClick={toggleSmoothFps}>
-            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Flame size={19} /></span>
-            <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Плавный режим 120 FPS</span>
-              <span className="zen-set-row__sub">Аппаратное ускорение интерфейса и плеера</span>
-            </span>
-            <button
-              type="button"
-              className={`zen-switch ${smoothFps ? 'on' : ''}`}
-              onClick={(e) => { e.stopPropagation(); toggleSmoothFps(); }}
-              aria-label="Плавный режим"
-            >
-              <span className="zen-switch__thumb" />
-            </button>
-          </div>
-        </div>
-      </section>
-
       {/* ── Группа: Оформление ── */}
       <section className="zen-set-group">
         <h2 className="zen-set-group__title">Оформление</h2>
         <div className="zen-set-card">
-          <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('atmosphere'); }}>
-            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Palette size={19} /></span>
+          <div
+            className="zen-set-row"
+            onClick={() => {
+              haptic('light');
+              const nextTheme: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark';
+              setTheme(nextTheme);
+              showToast(nextTheme === 'light' ? 'Светлая тема включена' : 'Тёмная тема включена');
+            }}
+          >
+            <span className="zen-set-row__icon zen-set-row__icon--cyan"><Sun size={19} /></span>
             <span className="zen-set-row__body">
-              <span className="zen-set-row__title">Атмосфера и темы</span>
-              <span className="zen-set-row__sub">Северное сияние, сезонные эффекты и палитры</span>
+              <span className="zen-set-row__title">Светлая тема</span>
+              <span className="zen-set-row__sub">Нежный дневной интерфейс ZENOVA</span>
             </span>
-            <span className="zen-set-row__value">{seasonState.auto ? 'Авто' : seasonState.season.label}</span>
-            <ChevronRight size={17} className="zen-set-row__chev" />
-          </button>
+            <button
+              type="button"
+              className={`zen-switch ${theme === 'light' ? 'on' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                haptic('light');
+                const nextTheme: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark';
+                setTheme(nextTheme);
+                showToast(nextTheme === 'light' ? 'Светлая тема включена' : 'Тёмная тема включена');
+              }}
+              aria-label="Светлая тема"
+            >
+              <span className="zen-switch__thumb" />
+            </button>
+          </div>
 
           <button type="button" className="zen-set-row" onClick={() => { haptic('light'); setSubPage('news'); }}>
             <span className="zen-set-row__icon zen-set-row__icon--violet"><Newspaper size={19} /></span>

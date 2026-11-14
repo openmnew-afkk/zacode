@@ -90,7 +90,7 @@ function App() {
     try {
       const tg = (window as any).Telegram?.WebApp;
       if (tg) {
-        const bgCol = '#09080b';
+        const bgCol = theme === 'light' ? '#fff5f7' : '#09080b';
         if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor(bgCol);
         if (typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor(bgCol);
       }

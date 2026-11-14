@@ -213,9 +213,12 @@ export const useTelegram = () => {
     tg?.MainButton.hide();
   }, []);
 
-  /** Тактильный отклик */
+  /** Тактильный отклик (уважает переключатель «Виброотклик» в настройках) */
   const haptic = useCallback(
     (type: 'light' | 'medium' | 'heavy' = 'light') => {
+      try {
+        if (localStorage.getItem('zenova_haptics') === '0') return;
+      } catch {}
       tg?.HapticFeedback?.impactOccurred(type);
     },
     []

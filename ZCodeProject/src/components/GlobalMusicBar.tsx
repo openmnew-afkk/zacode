@@ -46,6 +46,14 @@ const GlobalMusicBar: React.FC = () => {
         state.setPlaying(true);
         return;
       }
+      // «Автовоспроизведение» из настроек: выключено — останавливаемся после трека
+      try {
+        if (localStorage.getItem('zenova_autoplay') === '0') {
+          state.setPlaying(false);
+          showToastMsg('Трек завершён · автоплей выключен');
+          return;
+        }
+      } catch {}
       nextTrack();
     });
     const unsubTime = audioEngine.onTimeUpdate((time) => {
