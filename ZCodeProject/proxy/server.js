@@ -22,6 +22,7 @@ const http = require('http');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { URL } = require('url');
 
 const PORT = process.env.PORT || 8080;
@@ -33,11 +34,17 @@ const DATA_FILE = path.join(__dirname, 'data.json');
 const DEFAULT_DATA = {
   adsEnabled: true,
   announcement: '',
-  autoApprove: true, // премиум активируется сразу после оплаты
+  autoApprove: false,
   requisites: { card: '', sbp: '', crypto: '', note: '' },
-  prices: { month: 199, monthFirst: 99, year: 2400, yearFirst: 1600 },
+  prices: { month: 180, monthFirst: 15, year: 0, yearFirst: 0 },
   /* Выданный премиум: { name, username, expiry, forever, by, at } */
   premiumGrants: [],
+  telegramPremiumGrants: [],
+  starInvoices: [],
+  processedTelegramCharges: [],
+  arcadeRewardClaims: [],
+  arcadeRuns: [],
+  telegramUpdateOffset: 0,
   /* Платежи: { username, plan, txn, status: 'paid'|'pending', at } */
   payments: [],
   /* Модераторы: ['username', 'Имя Фамилия', …] */
@@ -120,6 +127,121 @@ function isGrantActive(grant) {
   return !!grant.expiry && grant.expiry > Date.now();
 }
 
+const PREMIUM_PLANS = {
+  trial: { days: 7, amount: 15, title: 'ZENOVA PRO · 7 дней' },
+  month: { days: 30, amount: 180, title: 'ZENOVA PRO · 30 дней' },
+};
+
+function botToken() {
+  return String(process.env.BOT_TOKEN || '').trim();
+}
+
+function validateTelegramInitData(raw) {
+  const token = botToken();
+  if (!token) throw new Error('BOT_TOKEN не настроен на сервере');
+  const params = new URLSearchParams(String(raw || ''));
+  const receivedHash = params.get('hash') || '';
+  if (!receivedHash || !/^[a-f0-9]{64}$/i.test(receivedHash)) throw new Error('Некорректные данные Telegram');
+  params.delete('hash');
+  const checkString = Array.from(params.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n');
+  const secret = crypto.createHmac('sha256', 'WebAppData').update(token).digest();
+  const expected = crypto.createHmac('sha256', secret).update(checkString).digest('hex');
+  const valid = receivedHash.length === expected.length && crypto.timingSafeEqual(
+    Buffer.from(receivedHash, 'hex'), Buffer.from(expected, 'hex')
+  );
+  if (!valid) throw new Error('Подпись Telegram не подтверждена');
+  const authDate = Number(params.get('auth_date') || 0);
+  if (!authDate || Math.abs(Date.now() / 1000 - authDate) > 86400) {
+    throw new Error('Сессия Telegram устарела, перезапустите приложение');
+  }
+  const user = JSON.parse(params.get('user') || 'null');
+  if (!user || !Number.isSafeInteger(Number(user.id)) || Number(user.id) <= 0) {
+    throw new Error('Пользователь Telegram не найден');
+  }
+  return { id: Number(user.id), username: String(user.username || ''), firstName: String(user.first_name || '') };
+}
+
+function telegramIdentity(body) {
+  return validateTelegramInitData(body && body.initData);
+}
+
+function findTelegramGrant(userId) {
+  return (data.telegramPremiumGrants || []).find((grant) => Number(grant.userId) === Number(userId)) || null;
+}
+
+function grantTelegramPremium(user, days, by) {
+  let grant = findTelegramGrant(user.id);
+  if (!grant) {
+    grant = { userId: user.id, username: user.username, expiry: 0, forever: false };
+    data.telegramPremiumGrants.push(grant);
+  }
+  const base = grant.expiry > Date.now() ? grant.expiry : Date.now();
+  grant.expiry = base + days * 86400000;
+  grant.username = user.username || grant.username;
+  grant.by = by;
+  grant.at = Date.now();
+  saveData();
+  return grant;
+}
+
+function trialUsed(userId) {
+  return (data.starInvoices || []).some((invoice) =>
+    Number(invoice.userId) === Number(userId) && invoice.plan === 'trial' && invoice.status === 'paid'
+  );
+}
+
+function arcadeRewardClaimed(userId) {
+  return (data.arcadeRewardClaims || []).some((claim) => Number(claim.userId) === Number(userId));
+}
+
+async function telegramApi(method, payload) {
+  const response = await fetch(`https://api.telegram.org/bot${botToken()}/${method}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(15000),
+  });
+  const result = await response.json();
+  if (!result.ok) throw new Error(result.description || 'Ошибка Telegram API');
+  return result.result;
+}
+
+async function processTelegramUpdate(update) {
+  if (update.pre_checkout_query) {
+    const query = update.pre_checkout_query;
+    const invoice = (data.starInvoices || []).find((item) => item.payload === query.invoice_payload);
+    const donation = String(query.invoice_payload || '').startsWith('stars_tip_');
+    const valid = donation || (invoice && invoice.status === 'created' &&
+      Number(invoice.userId) === Number(query.from && query.from.id) &&
+      invoice.amount === query.total_amount && query.currency === 'XTR');
+    await telegramApi('answerPreCheckoutQuery', valid
+      ? { pre_checkout_query_id: query.id, ok: true }
+      : { pre_checkout_query_id: query.id, ok: false, error_message: 'Счёт недействителен. Создайте новый в ZENOVA.' });
+    return;
+  }
+
+  const payment = update.message && update.message.successful_payment;
+  if (!payment || String(payment.invoice_payload || '').startsWith('stars_tip_')) return;
+  const invoice = (data.starInvoices || []).find((item) => item.payload === payment.invoice_payload);
+  if (!invoice || invoice.status === 'paid') return;
+  const userId = Number(update.message.from && update.message.from.id);
+  if (Number(invoice.userId) !== userId || invoice.amount !== payment.total_amount || payment.currency !== 'XTR') return;
+  const chargeId = String(payment.telegram_payment_charge_id || '');
+  if (!chargeId || (data.processedTelegramCharges || []).includes(chargeId)) return;
+  if (invoice.plan === 'trial' && trialUsed(userId)) return;
+
+  const plan = PREMIUM_PLANS[invoice.plan];
+  if (!plan) return;
+  invoice.status = 'paid';
+  invoice.paidAt = Date.now();
+  invoice.chargeId = chargeId;
+  data.processedTelegramCharges.unshift(chargeId);
+  data.processedTelegramCharges = data.processedTelegramCharges.slice(0, 1000);
+  grantTelegramPremium({ id: userId, username: String(update.message.from.username || invoice.username || '') }, plan.days, `stars:${invoice.plan}`);
+}
 
 /* ════════════ API-маршруты ════════════ */
 
@@ -149,6 +271,123 @@ async function handleApi(req, res, reqUrl) {
       return json(res, 200, { ok: true, premium: true, forever: !!grant.forever, expiry: grant.expiry });
     }
     return json(res, 200, { ok: true, premium: false });
+  }
+
+  if (route === '/api/telegram/webhook' && req.method === 'POST') {
+    const configured = String(process.env.TELEGRAM_WEBHOOK_SECRET || '');
+    if (!configured || req.headers['x-telegram-bot-api-secret-token'] !== configured) {
+      return json(res, 403, { ok: false, error: 'Webhook secret rejected' });
+    }
+    const update = await readBody(req);
+    await processTelegramUpdate(update);
+    return json(res, 200, { ok: true });
+  }
+
+  if (route === '/api/premium/status' && req.method === 'POST') {
+    try {
+      const user = telegramIdentity(await readBody(req));
+      const grant = findTelegramGrant(user.id);
+      return json(res, 200, {
+        ok: true,
+        premium: isGrantActive(grant),
+        expiry: grant && grant.expiry ? grant.expiry : null,
+        trialUsed: trialUsed(user.id),
+        arcadeRewardClaimed: arcadeRewardClaimed(user.id),
+      });
+    } catch (error) {
+      return json(res, 401, { ok: false, message: error.message });
+    }
+  }
+
+  if (route === '/api/premium/invoice' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const user = telegramIdentity(body);
+      const plan = PREMIUM_PLANS[body.plan];
+      if (!plan) return json(res, 400, { ok: false, message: 'Неизвестный тариф' });
+      if (body.plan === 'trial' && trialUsed(user.id)) {
+        return json(res, 409, { ok: false, message: 'Пробный период уже использован на этом аккаунте' });
+      }
+      const pendingTrial = body.plan === 'trial' && data.starInvoices.find((invoice) =>
+        Number(invoice.userId) === user.id && invoice.plan === 'trial' && invoice.status === 'created'
+      );
+      if (pendingTrial) {
+        if (pendingTrial.url) return json(res, 200, { ok: true, url: pendingTrial.url });
+        return json(res, 409, { ok: false, message: 'Счёт уже создаётся, повторите через секунду' });
+      }
+      const payload = `zenova_${body.plan}_${user.id}_${crypto.randomUUID()}`;
+      const invoice = {
+        payload, userId: user.id, username: user.username, plan: body.plan,
+        amount: plan.amount, days: plan.days, status: 'created', createdAt: Date.now(),
+      };
+      data.starInvoices.unshift(invoice);
+      data.starInvoices = data.starInvoices.slice(0, 2000);
+      saveData();
+      let url;
+      try {
+        url = await telegramApi('createInvoiceLink', {
+          title: plan.title,
+          description: body.plan === 'trial'
+            ? 'Пробные 7 дней ZENOVA PRO. Один раз на аккаунт, без автопродления.'
+            : '30 дней ZENOVA PRO. Разовый платёж, без автопродления.',
+          payload,
+          currency: 'XTR',
+          prices: [{ label: plan.title, amount: plan.amount }],
+        });
+      } catch (error) {
+        invoice.status = 'failed';
+        saveData();
+        throw error;
+      }
+      invoice.url = url;
+      saveData();
+      return json(res, 200, { ok: true, url });
+    } catch (error) {
+      return json(res, 400, { ok: false, message: error.message || 'Не удалось создать счёт' });
+    }
+  }
+
+  if (route === '/api/arcade/start' && req.method === 'POST') {
+    try {
+      const user = telegramIdentity(await readBody(req));
+      if (arcadeRewardClaimed(user.id)) {
+        return json(res, 200, { ok: true, claimed: true, runId: null });
+      }
+      const runId = crypto.randomUUID();
+      data.arcadeRuns.unshift({ runId, userId: user.id, startedAt: Date.now(), status: 'active' });
+      data.arcadeRuns = data.arcadeRuns.filter((run) => Date.now() - run.startedAt < 86400000).slice(0, 1000);
+      saveData();
+      return json(res, 200, { ok: true, claimed: false, runId });
+    } catch (error) {
+      return json(res, 401, { ok: false, message: error.message });
+    }
+  }
+
+  if (route === '/api/arcade/claim' && req.method === 'POST') {
+    try {
+      const body = await readBody(req);
+      const user = telegramIdentity(body);
+      if (arcadeRewardClaimed(user.id)) {
+        return json(res, 200, { ok: true, activated: false, claimed: true, message: 'Награда уже была получена на этом аккаунте' });
+      }
+      const run = (data.arcadeRuns || []).find((item) => item.runId === String(body.runId || ''));
+      const elapsed = run ? Date.now() - run.startedAt : 0;
+      const score = Math.floor(Number(body.score) || 0);
+      if (!run || Number(run.userId) !== user.id || run.status !== 'active') {
+        return json(res, 400, { ok: false, message: 'Игровая сессия не найдена. Начните новый раунд.' });
+      }
+      if (score < 25 || elapsed < 20000 || elapsed > 900000) {
+        return json(res, 400, { ok: false, message: 'Раунд ещё не подтверждён. Продолжайте играть.' });
+      }
+      run.status = 'claimed';
+      run.score = score;
+      run.claimedAt = Date.now();
+      data.arcadeRewardClaims.unshift({ userId: user.id, runId: run.runId, score, at: Date.now() });
+      const grant = grantTelegramPremium(user, 3, 'arcade:star-runner');
+      return json(res, 200, { ok: true, activated: true, claimed: true, expiry: grant.expiry, message: '3 дня ZENOVA PRO активированы' });
+    } catch (error) {
+      return json(res, 401, { ok: false, message: error.message });
+    }
   }
 
   /* ── Telegram Stars: инвойс «поддержать звёздами» (сумма 1 – ∞) ──
@@ -187,40 +426,10 @@ async function handleApi(req, res, reqUrl) {
     }
   }
 
-  /* ── Заявка на оплату → авто-выдача премиума ── */
   if (route === '/api/premium/claim' && req.method === 'POST') {
-    const body = await readBody(req);
-    const username = String(body.username || '').trim().replace(/^@/, '');
-    if (!username) return json(res, 400, { ok: false, error: 'Укажите имя или @username' });
-
-    const plan = body.plan === 'month' ? 'month' : 'year';
-    const days = plan === 'year' ? 365 : 30;
-
-    if (data.autoApprove) {
-      grantPremium({ name: username, username, days, by: 'payment' });
-      data.payments.unshift({
-        username, plan, txn: String(body.txn || '').slice(0, 60),
-        status: 'paid', at: Date.now(), auto: true,
-      });
-      data.payments = data.payments.slice(0, 200);
-      saveData();
-      const grant = findGrant(username);
-      return json(res, 200, {
-        ok: true, activated: true, expiry: grant ? grant.expiry : null,
-        message: '👑 Премиум активирован! Спасибо за оплату.',
-      });
-    }
-
-    /* Ручное подтверждение админом */
-    data.payments.unshift({
-      username, plan, txn: String(body.txn || '').slice(0, 60),
-      status: 'pending', at: Date.now(), auto: false,
-    });
-    data.payments = data.payments.slice(0, 200);
-    saveData();
-    return json(res, 200, {
-      ok: true, activated: false,
-      message: '✅ Заявка отправлена, ожидайте подтверждения',
+    return json(res, 410, {
+      ok: false, activated: false,
+      message: 'Ручная активация отключена. Используйте счёт Telegram Stars.',
     });
   }
 
@@ -471,9 +680,59 @@ const server = http.createServer((req, res) => {
   req.pipe(upstreamReq);
 });
 
+function configureTelegramPayments() {
+  if (!botToken()) {
+    console.log('Telegram Stars: BOT_TOKEN не задан, оплата отключена');
+    return;
+  }
+  const webhookUrl = String(process.env.TELEGRAM_WEBHOOK_URL || '').replace(/\/+$/, '');
+  const webhookSecret = String(process.env.TELEGRAM_WEBHOOK_SECRET || '');
+  if (webhookUrl && webhookSecret) {
+    telegramApi('setWebhook', {
+      url: `${webhookUrl}/api/telegram/webhook`,
+      secret_token: webhookSecret,
+      allowed_updates: ['message', 'pre_checkout_query'],
+    }).then(() => console.log('Telegram Stars: webhook подключён'))
+      .catch((error) => console.error('Telegram Stars webhook:', error.message));
+    return;
+  }
+  if (process.env.TELEGRAM_PAYMENTS_POLLING !== '1') {
+    console.log('Telegram Stars: задайте TELEGRAM_WEBHOOK_URL/SECRET или включите TELEGRAM_PAYMENTS_POLLING=1');
+    return;
+  }
+
+  const poll = async () => {
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${botToken()}/getUpdates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          offset: Number(data.telegramUpdateOffset || 0),
+          timeout: 25,
+          allowed_updates: ['message', 'pre_checkout_query'],
+        }),
+        signal: AbortSignal.timeout(35000),
+      });
+      const result = await response.json();
+      if (!result.ok) throw new Error(result.description || 'getUpdates failed');
+      for (const update of result.result) {
+        await processTelegramUpdate(update);
+        data.telegramUpdateOffset = Number(update.update_id) + 1;
+      }
+      if (result.result.length) saveData();
+      setTimeout(poll, 0);
+    } catch (error) {
+      console.error('Telegram Stars polling:', error.message);
+      setTimeout(poll, 5000);
+    }
+  };
+  poll();
+}
+
 server.listen(PORT, () => {
   console.log(`🇷🇺 RU-Proxy + Mini Backend запущен на порту ${PORT}`);
   console.log(`Прокси:    http://localhost:${PORT}/?url=<encoded player url>`);
   console.log(`Конфиг:    http://localhost:${PORT}/api/config`);
   console.log(`Админ API: http://localhost:${PORT}/api/admin/config (X-Admin-Token)`);
+  configureTelegramPayments();
 });

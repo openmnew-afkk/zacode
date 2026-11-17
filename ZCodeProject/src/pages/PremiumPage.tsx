@@ -1,23 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Crown, Check, Sparkles, MonitorPlay, Mic2, Music4, ShieldOff,
-  BadgeCheck, Zap, ChevronDown, Star, Gift, CalendarDays, CalendarRange,
-  HelpCircle, ArrowLeft,
+  ArrowLeft, BadgeCheck, CalendarDays, Check, ChevronDown, Crown,
+  Gift, HelpCircle, MonitorPlay, ShieldOff, Sparkles, Star, Zap,
 } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
-import { claimPremium } from '../api/backend';
+import {
+  createPremiumInvoice, fetchPremiumStatus, type PremiumPlanId,
+} from '../api/backend';
 import RulesModal from '../components/RulesModal';
 import './PremiumPage.css';
 
-/* ZENOVA PRO — понятная подписка: что даёт, сколько стоит, как подключить. */
-
-type PlanType = 'free2' | 'stars5' | 'stars7' | 'month' | 'year';
-
 interface Plan {
-  id: PlanType;
-  days: number;
+  id: PremiumPlanId;
   name: string;
   price: string;
   perDay: string;
@@ -26,177 +22,152 @@ interface Plan {
   icon: React.ReactNode;
 }
 
-const COMPARISON: { label: string; free: string; pro: string; icon: React.ReactNode }[] = [
-  { label: 'Каталог фильмов и сериалов', free: 'Полный', pro: 'Полный', icon: <MonitorPlay size={16} /> },
-  { label: 'Качество видео', free: 'До 1080p', pro: '4K HDR*', icon: <Sparkles size={16} /> },
-  { label: 'Студии озвучки', free: 'Основные', pro: 'Все доступные', icon: <Mic2 size={16} /> },
-  { label: 'Музыка из фильмов', free: 'Превью 30 сек', pro: 'Полные треки', icon: <Music4 size={16} /> },
-  { label: 'Реклама', free: 'Может появляться', pro: 'Нет', icon: <ShieldOff size={16} /> },
-  { label: 'Опыт за просмотры', free: 'x1', pro: 'x2', icon: <Zap size={16} /> },
-  { label: 'Бейдж в профиле', free: '—', pro: 'Золотой PRO', icon: <BadgeCheck size={16} /> },
+const COMPARISON = [
+  { label: 'Каталог и поиск', free: 'Полные', pro: 'Полные', icon: <MonitorPlay size={16} /> },
+  { label: 'Плееры, качество и озвучка', free: 'От источника', pro: 'От источника', icon: <Sparkles size={16} /> },
+  { label: 'Внутреннее объявление', free: 'Показывается', pro: 'Скрыто', icon: <ShieldOff size={16} /> },
+  { label: 'Опыт профиля', free: 'Базовый', pro: '+250 XP', icon: <Zap size={16} /> },
+  { label: 'Оформление профиля', free: 'Обычное', pro: 'Золотое PRO', icon: <BadgeCheck size={16} /> },
 ];
 
-const FAQ: { q: string; a: string }[] = [
+const FAQ = [
   {
-    q: 'Как активировать подписку?',
-    a: 'Выберите тариф и нажмите кнопку оплаты. Для Stars-тарифов отправьте звёзды и укажите свой @username — активация проверяется автоматически. Пробные 2 дня включаются сразу, без оплаты.',
+    q: 'Как проходит оплата?',
+    a: 'После выбора тарифа Telegram откроет официальный счёт в Stars. PRO включается только после подтверждения платежа сервером Telegram. Банковская карта и переводы по реквизитам не нужны.',
   },
   {
-    q: 'Что будет, когда срок закончится?',
-    a: 'Приложение продолжит работать в обычном режиме: каталог, поиск и избранное останутся с вами. PRO-привилегии просто отключатся, ничего не списывается автоматически.',
+    q: 'Как работает пробный период?',
+    a: '7 дней PRO стоят 15 Stars. Предложение доступно один раз на Telegram-аккаунт. Это платный пробный период, а не бесплатная подписка.',
   },
   {
-    q: 'Можно ли продлить или сменить тариф?',
-    a: 'Да. Дни нового тарифа добавляются к остатку текущего. Можно начать с пробных 2 дней, а потом перейти на месяц или год.',
+    q: 'PRO улучшает качество фильмов?',
+    a: 'Нет. Видео, качество, озвучка и реклама зависят от сторонних плееров и конкретного источника. ZENOVA не управляет ими и не обещает 4K, HDR или отсутствие рекламы внутри плееров.',
   },
   {
-    q: 'Что означает «4K HDR*»?',
-    a: 'Качество зависит от источника: PRO открывает максимальное качество, которое поддерживает конкретный плеер и фильм. Если источник отдаёт только 1080p — будет 1080p.',
+    q: 'Есть ли автопродление?',
+    a: 'Нет. Оба тарифа — разовая покупка на указанный срок. Когда PRO закончится, каталог, поиск и кинотека останутся доступны, а золотое оформление и бонус XP отключатся.',
+  },
+];
+
+const PLANS: Plan[] = [
+  {
+    id: 'trial', name: 'Пробные 7 дней', price: '15 Stars', perDay: '≈ 2,1 Stars / день',
+    note: 'Один раз на Telegram-аккаунт', badge: 'Попробовать', icon: <Gift size={18} />,
+  },
+  {
+    id: 'month', name: '30 дней', price: '180 Stars', perDay: '6 Stars / день',
+    note: 'Полный месяц ZENOVA PRO', badge: 'На месяц', icon: <CalendarDays size={18} />,
   },
 ];
 
 const PremiumPage: React.FC = () => {
   const navigate = useNavigate();
-  const { haptic } = useTelegram();
+  const { tg, haptic } = useTelegram();
   const {
-    isPremium, setPremium, activatePremiumDays, activatePremiumForever,
-    premiumExpiry, telegramUsername, requisites, prices, applyRemotePremium,
+    isPremium, setPremium, activatePremiumForever,
+    premiumExpiry, telegramUsername, applyRemotePremium,
   } = useStore();
 
-  const [selectedPlan, setSelectedPlan] = useState<PlanType>('stars7');
+  const [selectedPlan, setSelectedPlan] = useState<PremiumPlanId>('month');
+  const [trialUsed, setTrialUsed] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-
-  const [freeTrialUsed, setFreeTrialUsed] = useState(() => {
-    try { return localStorage.getItem('tc_free_trial_claimed') === 'true'; } catch { return false; }
-  });
-
-  const [showPayModal, setShowPayModal] = useState(false);
   const [showRules, setShowRules] = useState(false);
-  const [payName, setPayName] = useState(telegramUsername);
   const [payMsg, setPayMsg] = useState('');
   const [payLoading, setPayLoading] = useState(false);
 
   const isAdmin = telegramUsername === 'ZenovaAdmin';
-
   const daysLeft = premiumExpiry
-    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / (24 * 60 * 60 * 1000)))
+    ? Math.max(1, Math.ceil((premiumExpiry - Date.now()) / 86400000))
     : null;
 
   useEffect(() => {
-    if (isPremium && premiumExpiry && Date.now() > premiumExpiry) {
-      setPremium(false);
-    }
+    if (isPremium && premiumExpiry && Date.now() > premiumExpiry) setPremium(false);
   }, [isPremium, premiumExpiry, setPremium]);
 
-  const monthPrice = prices.month ?? 199;
-  const yearPrice = prices.year ?? 1600;
-  const yearSavings = Math.round((1 - yearPrice / (monthPrice * 12)) * 100);
-
-  const plans: Plan[] = [
-    {
-      id: 'free2', days: 2, name: 'Проба', price: '0 ₽', perDay: 'бесплатно',
-      note: '2 дня PRO без оплаты и карты', badge: freeTrialUsed ? 'Использован' : 'Бесплатно',
-      icon: <Gift size={18} />,
-    },
-    {
-      id: 'stars5', days: 5, name: '5 дней', price: '7 ⭐', perDay: '≈ 1,4 ⭐ / день',
-      note: 'Оплата звёздами Telegram', icon: <Star size={18} />,
-    },
-    {
-      id: 'stars7', days: 7, name: '7 дней', price: '10 ⭐', perDay: '≈ 1,4 ⭐ / день',
-      note: 'Неделя без ограничений', badge: 'Популярный',
-      icon: <CalendarDays size={18} />,
-    },
-    {
-      id: 'month', days: 30, name: 'Месяц', price: `${monthPrice} ₽`, perDay: `≈ ${Math.round(monthPrice / 30)} ₽ / день`,
-      note: '30 дней PRO', icon: <CalendarDays size={18} />,
-    },
-    {
-      id: 'year', days: 365, name: 'Год', price: `${yearPrice} ₽`, perDay: `≈ ${Math.round(yearPrice / 365)} ₽ / день`,
-      note: '365 дней PRO', badge: yearSavings > 0 ? `−${yearSavings}%` : undefined,
-      icon: <CalendarRange size={18} />,
-    },
-  ];
+  useEffect(() => {
+    let active = true;
+    fetchPremiumStatus().then((status) => {
+      if (!active) return;
+      setTrialUsed(status.trialUsed);
+      if (status.premium) applyRemotePremium(status.expiry);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [applyRemotePremium]);
 
   const flash = (msg: string) => {
     setSuccessMsg(msg);
     setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
+    setTimeout(() => setShowSuccess(false), 3500);
   };
 
-  const handleSubscribe = () => {
-    haptic('medium');
+  const waitForConfirmedPremium = async () => {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const status = await fetchPremiumStatus();
+      setTrialUsed(status.trialUsed);
+      if (status.premium) {
+        applyRemotePremium(status.expiry);
+        return true;
+      }
+      if (attempt < 7) await new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+    return false;
+  };
 
+  const handleInvoiceResult = async (status: string) => {
+    try {
+      if (status === 'paid') {
+        setPayMsg('Оплата принята Telegram. Подтверждаем активацию…');
+        if (await waitForConfirmedPremium()) {
+          haptic('heavy');
+          setPayMsg('');
+          flash('ZENOVA PRO активирован. Спасибо!');
+        } else {
+          setPayMsg('Оплата принята. Telegram ещё передаёт подтверждение — откройте страницу через минуту.');
+        }
+      } else if (status === 'pending') {
+        setPayMsg('Платёж ожидает подтверждения. PRO включится после подтверждения Telegram.');
+      } else {
+        setPayMsg(status === 'cancelled' ? 'Оплата отменена. Premium не активирован.' : 'Платёж не завершён. Premium не активирован.');
+      }
+    } catch {
+      setPayMsg('Не удалось проверить статус. Откройте страницу ещё раз — оплата не будет активирована локально.');
+    } finally {
+      setPayLoading(false);
+    }
+  };
+
+  const handleSubscribe = async () => {
+    haptic('medium');
     if (isAdmin) {
       activatePremiumForever();
       flash('PRO активирован навсегда (Admin)');
       return;
     }
-
-    if (selectedPlan === 'free2') {
-      if (freeTrialUsed) {
-        flash('Пробные 2 дня уже использованы на этом аккаунте');
-        return;
-      }
-      activatePremiumDays(2);
-      setFreeTrialUsed(true);
-      try { localStorage.setItem('tc_free_trial_claimed', 'true'); } catch {}
-      haptic('heavy');
-      flash('Готово! 2 дня PRO активированы');
+    if (selectedPlan === 'trial' && trialUsed) {
+      setPayMsg('Пробный период уже использован на этом аккаунте');
+      return;
+    }
+    if (!tg?.openInvoice) {
+      setPayMsg('Оплата Stars доступна внутри Telegram Mini App');
       return;
     }
 
-    setPayName(telegramUsername || payName);
-    setPayMsg('');
-    setShowPayModal(true);
-  };
-
-  const handlePaid = async () => {
-    if (!payName.trim()) {
-      setPayMsg('Укажите ваше имя или @username в Telegram');
-      return;
-    }
     setPayLoading(true);
-    setPayMsg('Проверяем активацию тарифа…');
-
-    const daysMap: Record<PlanType, number> = { free2: 2, stars5: 5, stars7: 7, month: 30, year: 365 };
-    const targetDays = daysMap[selectedPlan];
-    const backendPlan = selectedPlan === 'year' ? 'year' : 'month';
-    const res = await claimPremium(payName.trim().replace(/^@/, ''), backendPlan);
-
-    setPayLoading(false);
-    setPayMsg(res.message || '');
-
-    if (res.ok && res.activated) {
-      if (res.expiry) {
-        applyRemotePremium(res.expiry);
-      } else {
-        activatePremiumDays(targetDays);
-      }
-      haptic('heavy');
-      setTimeout(() => setShowPayModal(false), 2500);
-    } else {
-      activatePremiumDays(targetDays);
-      flash(`PRO на ${targetDays} дней активирован!`);
-      setTimeout(() => setShowPayModal(false), 2000);
+    setPayMsg('Создаём официальный счёт Telegram…');
+    try {
+      const invoice = await createPremiumInvoice(selectedPlan);
+      setPayMsg('Открываем оплату Telegram Stars…');
+      tg.openInvoice(invoice.url, (status) => { void handleInvoiceResult(status); });
+    } catch (error) {
+      setPayMsg(error instanceof Error ? error.message : 'Не удалось создать счёт. Попробуйте позже.');
+      setPayLoading(false);
     }
   };
 
-  const ctaLabel = isAdmin
-    ? 'Активировать навсегда (Admin)'
-    : selectedPlan === 'free2'
-      ? (freeTrialUsed ? 'Пробный период уже использован' : 'Включить 2 дня бесплатно')
-      : selectedPlan === 'stars5'
-        ? 'Подключить 5 дней · 7 ⭐'
-        : selectedPlan === 'stars7'
-          ? 'Подключить 7 дней · 10 ⭐'
-          : selectedPlan === 'month'
-            ? `Подключить месяц · ${monthPrice} ₽`
-            : `Подключить год · ${yearPrice} ₽`;
+  const selected = PLANS.find((plan) => plan.id === selectedPlan) || PLANS[1];
 
-  /* ══════════ ЭКРАН АКТИВНОГО PRO ══════════ */
   if (isPremium) {
     return (
       <div className="zp page">
@@ -209,12 +180,12 @@ const PremiumPage: React.FC = () => {
           <div className="zp-active">
             <div className="zp-active__crown"><Crown size={30} /></div>
             <span className="zp-active__tag">ZENOVA PRO</span>
-            <h1 className="zp-active__title">Подписка активна</h1>
+            <h1 className="zp-active__title">PRO активен</h1>
             <p className="zp-active__sub">
               {isAdmin
                 ? 'Статус администратора · бессрочный доступ'
                 : daysLeft
-                  ? `Осталось ${daysLeft} ${daysLeft === 1 ? 'день' : daysLeft < 5 ? 'дня' : 'дней'}${premiumExpiry ? ` · до ${new Date(premiumExpiry).toLocaleDateString('ru-RU')}` : ''}`
+                  ? `Осталось ${daysLeft} ${daysLeft === 1 ? 'день' : daysLeft < 5 ? 'дня' : 'дней'} · до ${new Date(premiumExpiry!).toLocaleDateString('ru-RU')}`
                   : 'Бессрочный доступ'}
             </p>
             {daysLeft !== null && !isAdmin && (
@@ -225,32 +196,27 @@ const PremiumPage: React.FC = () => {
           </div>
 
           <div className="zp-card">
-            <div className="zp-card__head">Ваши привилегии</div>
+            <div className="zp-card__head">Что сейчас доступно</div>
             <ul className="zp-perks">
-              <li><Check size={15} /> Максимальное качество видео, которое даёт источник (вплоть до 4K HDR)</li>
-              <li><Check size={15} /> Все доступные студии озвучки в плеере</li>
-              <li><Check size={15} /> Полные музыкальные треки вместо 30-секундных превью</li>
-              <li><Check size={15} /> Без рекламы</li>
-              <li><Check size={15} /> Двойной опыт (x2 XP) за просмотры</li>
-              <li><Check size={15} /> Золотой бейдж PRO в профиле</li>
+              <li><Check size={15} /> Золотой бейдж, кристалл и оформление профиля PRO</li>
+              <li><Check size={15} /> +250 XP к прогрессу кинематографического ранга</li>
+              <li><Check size={15} /> Внутреннее промообъявление ZENOVA скрыто</li>
+              <li><Check size={15} /> Срок PRO привязан к Telegram-аккаунту и проверяется сервером</li>
             </ul>
           </div>
 
           <p className="zp-hint">
-            Дни можно продлить в любой момент — они добавятся к остатку. Автосписаний нет.
+            Качество видео, озвучка и реклама по-прежнему зависят от сторонних плееров. Автосписаний нет.
           </p>
-
           <button type="button" className="zp-legal" onClick={() => { haptic('light'); setShowRules(true); }}>
             Правила и пользовательское соглашение
           </button>
-
           <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
         </div>
       </div>
     );
   }
 
-  /* ══════════ ЭКРАН ВЫБОРА ТАРИФА ══════════ */
   return (
     <div className="zp page">
       <div className="zp-glow" aria-hidden="true" />
@@ -263,12 +229,12 @@ const PremiumPage: React.FC = () => {
           <div className="zp-hero__crown"><Crown size={28} /></div>
           <h1 className="zp-hero__title">ZENOVA <span>PRO</span></h1>
           <p className="zp-hero__sub">
-            Одна подписка — максимум от кинотеатра: качество, озвучки, полная музыка и ничего лишнего.
+            Золотое оформление и бонусы внутри приложения. Без ложных обещаний про качество сторонних плееров.
           </p>
         </header>
 
         <section className="zp-card">
-          <div className="zp-card__head">Что даёт PRO</div>
+          <div className="zp-card__head">Что вы получаете</div>
           <div className="zp-compare">
             <div className="zp-compare__row zp-compare__row--head">
               <span />
@@ -283,64 +249,67 @@ const PremiumPage: React.FC = () => {
               </div>
             ))}
           </div>
-          <p className="zp-card__foot">* Максимальное качество зависит от источника и плеера.</p>
+          <p className="zp-card__foot">Внешние плееры одинаковы для всех: их качество, озвучка и реклама от ZENOVA не зависят.</p>
         </section>
 
         <section className="zp-plans">
-          <div className="zp-section-title">Выберите срок</div>
+          <div className="zp-section-title">Оплата только Telegram Stars</div>
           <div className="zp-plans__grid">
-            {plans.map((p) => {
-              const disabled = p.id === 'free2' && freeTrialUsed;
+            {PLANS.map((plan) => {
+              const disabled = plan.id === 'trial' && trialUsed;
               return (
                 <button
-                  key={p.id}
+                  key={plan.id}
                   type="button"
-                  className={`zp-plan ${selectedPlan === p.id ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''} ${p.id === 'year' ? 'zp-plan--wide' : ''}`}
-                  onClick={() => { if (!disabled) { setSelectedPlan(p.id); haptic('light'); } }}
+                  className={`zp-plan ${selectedPlan === plan.id ? 'is-selected' : ''} ${disabled ? 'is-disabled' : ''}`}
+                  onClick={() => {
+                    if (!disabled && !payLoading) {
+                      setSelectedPlan(plan.id);
+                      setPayMsg('');
+                      haptic('light');
+                    }
+                  }}
+                  disabled={disabled || payLoading}
                 >
-                  {p.badge && <span className={`zp-plan__badge ${p.id === 'free2' ? 'zp-plan__badge--green' : ''}`}>{p.badge}</span>}
-                  <span className="zp-plan__icon">{p.icon}</span>
-                  <span className="zp-plan__name">{p.name}</span>
-                  <span className="zp-plan__price">{p.price}</span>
-                  <span className="zp-plan__perday">{p.perDay}</span>
-                  <span className="zp-plan__note">{p.note}</span>
-                  <span className="zp-plan__check">{selectedPlan === p.id ? <Check size={13} /> : null}</span>
+                  <span className="zp-plan__badge">{disabled ? 'Использован' : plan.badge}</span>
+                  <span className="zp-plan__icon">{plan.icon}</span>
+                  <span className="zp-plan__name">{plan.name}</span>
+                  <span className="zp-plan__price">{plan.price}</span>
+                  <span className="zp-plan__perday">{plan.perDay}</span>
+                  <span className="zp-plan__note">{plan.note}</span>
+                  <span className="zp-plan__check">{selectedPlan === plan.id ? <Check size={13} /> : null}</span>
                 </button>
               );
             })}
           </div>
         </section>
 
-        <button type="button" className="zp-cta" onClick={handleSubscribe}>
-          <Crown size={17} /> {ctaLabel}
+        <button type="button" className="zp-cta" onClick={handleSubscribe} disabled={payLoading || (selectedPlan === 'trial' && trialUsed)}>
+          <Star size={17} fill="currentColor" />
+          {payLoading ? 'Ждём Telegram…' : `Оплатить ${selected.price}`}
         </button>
-        <p className="zp-cta-note">
-          {selectedPlan === 'free2'
-            ? 'Активация в один тап · без карты и списаний'
-            : selectedPlan === 'stars5' || selectedPlan === 'stars7'
-              ? 'Оплата звёздами Telegram Stars · активация после подтверждения'
-              : 'Разовая оплата · без автопродления и скрытых списаний'}
-        </p>
+        <p className="zp-cta-note">Официальный счёт Telegram · разовый платёж · без автопродления</p>
+        {payMsg && <p className="zp-payment-msg" role="status">{payMsg}</p>}
 
         <section className="zp-card">
           <div className="zp-card__head">Как подключить</div>
           <ol className="zp-steps">
-            <li><span className="zp-steps__num">1</span><div><strong>Выберите тариф</strong><small>Пробные 2 дня — бесплатно, дальше любой срок.</small></div></li>
-            <li><span className="zp-steps__num">2</span><div><strong>Оплатите удобным способом</strong><small>Telegram Stars или перевод по реквизитам.</small></div></li>
-            <li><span className="zp-steps__num">3</span><div><strong>PRO включится сам</strong><small>Бейдж и привилегии появятся сразу после активации.</small></div></li>
+            <li><span className="zp-steps__num">1</span><div><strong>Выберите срок</strong><small>7 дней за 15 Stars или 30 дней за 180 Stars.</small></div></li>
+            <li><span className="zp-steps__num">2</span><div><strong>Оплатите в Telegram</strong><small>Откроется официальный счёт Stars — никаких переводов людям и реквизитов.</small></div></li>
+            <li><span className="zp-steps__num">3</span><div><strong>Дождитесь подтверждения</strong><small>PRO включится после подтверждённого платежа, а не после простого закрытия счёта.</small></div></li>
           </ol>
         </section>
 
         <section className="zp-card">
           <div className="zp-card__head"><HelpCircle size={15} /> Частые вопросы</div>
           <div className="zp-faq">
-            {FAQ.map((item, i) => (
-              <div key={i} className={`zp-faq__item ${openFaq === i ? 'is-open' : ''}`}>
-                <button type="button" className="zp-faq__q" onClick={() => { setOpenFaq(openFaq === i ? null : i); haptic('light'); }}>
+            {FAQ.map((item, index) => (
+              <div key={item.q} className={`zp-faq__item ${openFaq === index ? 'is-open' : ''}`}>
+                <button type="button" className="zp-faq__q" onClick={() => { setOpenFaq(openFaq === index ? null : index); haptic('light'); }}>
                   {item.q}
                   <ChevronDown size={15} className="zp-faq__chev" />
                 </button>
-                {openFaq === i && <p className="zp-faq__a">{item.a}</p>}
+                {openFaq === index && <p className="zp-faq__a">{item.a}</p>}
               </div>
             ))}
           </div>
@@ -349,80 +318,9 @@ const PremiumPage: React.FC = () => {
         <button type="button" className="zp-legal" onClick={() => { haptic('light'); setShowRules(true); }}>
           Правила и пользовательское соглашение
         </button>
-        <p className="zp-footer">
-          PRO — подписка на возможности приложения. Права на фильмы и музыку принадлежат их правообладателям.
-        </p>
+        <p className="zp-footer">PRO — цифровой статус внутри ZENOVA. Права на фильмы и музыку принадлежат их правообладателям.</p>
 
-        {showPayModal && (
-          <div className="zp-pay-overlay" onClick={() => !payLoading && setShowPayModal(false)}>
-            <div className="zp-pay" onClick={(e) => e.stopPropagation()}>
-              <div className="zp-pay__handle" />
-              <h2 className="zp-pay__title">
-                {selectedPlan === 'stars5'
-                  ? '5 дней PRO · 7 ⭐'
-                  : selectedPlan === 'stars7'
-                    ? '7 дней PRO · 10 ⭐'
-                    : selectedPlan === 'month'
-                      ? `Месяц PRO · ${monthPrice} ₽`
-                      : `Год PRO · ${yearPrice} ₽`}
-              </h2>
-
-              <div className="zp-pay__instruction">
-                <p>1. Отправьте звёзды ⭐ или перевод по реквизитам ниже.</p>
-                <p>2. Укажите свой @username и нажмите «Подтвердить».</p>
-              </div>
-
-              <div className="zp-pay__req">
-                <div className="zp-pay__row">
-                  <div className="zp-pay__row-left">
-                    <span className="zp-pay__label">Telegram Stars</span>
-                    <span className="zp-pay__value">
-                      {selectedPlan === 'stars5' ? '7 ⭐' : selectedPlan === 'stars7' ? '10 ⭐' : 'Перевод по реквизитам'}
-                    </span>
-                  </div>
-                </div>
-
-                {requisites.crypto && (
-                  <button
-                    type="button"
-                    className="zp-pay__row zp-pay__row--btn"
-                    onClick={() => { navigator.clipboard?.writeText(requisites.crypto); haptic('light'); setPayMsg('Адрес скопирован'); }}
-                  >
-                    <div className="zp-pay__row-left">
-                      <span className="zp-pay__label">USDT TRC-20 / TON</span>
-                      <span className="zp-pay__value">{requisites.crypto}</span>
-                    </div>
-                    <span className="zp-pay__copy">Копировать</span>
-                  </button>
-                )}
-              </div>
-
-              <input
-                className="zp-pay__input"
-                type="text"
-                placeholder="Ваш @username в Telegram"
-                value={payName}
-                onChange={(e) => { setPayName(e.target.value); setPayMsg(''); }}
-                spellCheck={false}
-                autoComplete="off"
-              />
-
-              <button type="button" className="zp-pay__btn" onClick={handlePaid} disabled={payLoading}>
-                {payLoading ? 'Проверяем оплату…' : 'Подтвердить активацию'}
-              </button>
-              {payMsg && <p className="zp-pay__msg">{payMsg}</p>}
-
-              <button type="button" className="zp-pay__cancel" onClick={() => setShowPayModal(false)} disabled={payLoading}>
-                Отмена
-              </button>
-            </div>
-          </div>
-        )}
-
-        {showSuccess && (
-          <div className="zp-success"><Check size={16} /> {successMsg}</div>
-        )}
-
+        {showSuccess && <div className="zp-success"><Check size={16} /> {successMsg}</div>}
         <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
       </div>
     </div>

@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import './SplashPage.css';
 
 interface SplashPageProps {
   onDone?: () => void;
 }
+
+type PlaybackStatus = 'loading' | 'playing' | 'buffering' | 'blocked' | 'error';
 
 const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
@@ -11,172 +13,280 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [fading, setFading] = useState(false);
   const [muted, setMuted] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
+  const [playbackStatus, setPlaybackStatus] = useState<PlaybackStatus>('loading');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const finishedRef = useRef(false);
+  const finishTimerRef = useRef<number | null>(null);
+  const playbackStatusRef = useRef<PlaybackStatus>('loading');
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
+
+  const changePlaybackStatus = useCallback((nextStatus: PlaybackStatus) => {
+    if (finishedRef.current) return;
+    playbackStatusRef.current = nextStatus;
+    setPlaybackStatus(nextStatus);
+  }, []);
 
   const finishSplash = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
-    setProgress(100);
     setFading(true);
-    setTimeout(() => {
+    finishTimerRef.current = window.setTimeout(() => {
       setVisible(false);
       onDoneRef.current?.();
     }, 450);
   }, []);
 
-  const toggleSound = useCallback((e?: React.MouseEvent) => {
-    e?.stopPropagation();
-    const v = videoRef.current;
-    if (!v) return;
-    const nextMuted = !v.muted;
-    v.muted = nextMuted;
-    setMuted(nextMuted);
-    if (!nextMuted) {
-      v.volume = 1.0;
-      v.play().catch(() => {});
+  const handlePlayFailure = useCallback((error: unknown) => {
+    if (finishedRef.current) return;
+    const errorName = error instanceof DOMException
+      ? error.name
+      : (error as { name?: string } | null)?.name;
+
+    // A newer play()/load() request superseded this one.
+    if (errorName === 'AbortError') return;
+
+    if (errorName === 'NotAllowedError' || errorName === 'SecurityError') {
+      changePlaybackStatus('blocked');
+      return;
     }
+
+    console.warn('Splash video playback failed:', error);
+    changePlaybackStatus('error');
+  }, [changePlaybackStatus]);
+
+  const attemptPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || finishedRef.current) return;
+
+    try {
+      const playPromise = video.play();
+      if (playPromise) {
+        playPromise
+          .then(() => {
+            if (finishedRef.current || videoRef.current !== video || video.paused) return;
+            changePlaybackStatus(video.readyState >= 3 ? 'playing' : 'buffering');
+          })
+          .catch((error: unknown) => {
+            if (videoRef.current === video) handlePlayFailure(error);
+          });
+      }
+    } catch (error) {
+      handlePlayFailure(error);
+    }
+  }, [changePlaybackStatus, handlePlayFailure]);
+
+  const updateProgress = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+    const actualProgress = (video.currentTime / video.duration) * 100;
+    setProgress(Math.min(100, Math.max(0, actualProgress)));
   }, []);
 
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
+  const toggleSound = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+    const video = videoRef.current;
+    if (!video) return;
 
-    // Сначала пробуем со звуком (если браузер позволяет)
-    vid.muted = false;
-    vid.volume = 1.0;
+    const nextMuted = !video.muted;
+    video.muted = nextMuted;
+    video.volume = 1;
+    setMuted(nextMuted);
 
-    const playPromise = vid.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setMuted(false);
-        })
-        .catch(() => {
-          // Если браузер блокирует звук без жеста: гарантированно стартуем с muted
-          vid.muted = true;
-          setMuted(true);
-          vid.play().catch(() => finishSplash());
-        });
+    if (!nextMuted && video.paused && playbackStatusRef.current !== 'error') {
+      changePlaybackStatus('loading');
+      attemptPlay();
     }
+  }, [attemptPlay, changePlaybackStatus]);
 
-    // Разблокировка звука при первом клике/касании
-    const unlockAudio = () => {
-      const v = videoRef.current;
-      if (v && v.muted) {
-        v.muted = false;
-        v.volume = 1.0;
-        setMuted(false);
-        v.play().catch(() => {
-          v.muted = true;
-          setMuted(true);
-        });
+  const retryPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video || finishedRef.current) return;
+
+    setVideoReady(false);
+    setProgress(0);
+    changePlaybackStatus('loading');
+    video.load();
+    attemptPlay();
+  }, [attemptPlay, changePlaybackStatus]);
+
+  const startFromGesture = useCallback(() => {
+    changePlaybackStatus('loading');
+    attemptPlay();
+  }, [attemptPlay, changePlaybackStatus]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Muted inline autoplay is the fastest reliable path; sound remains opt-in.
+    video.muted = true;
+    video.volume = 1;
+    setMuted(true);
+    attemptPlay();
+  }, [attemptPlay]);
+
+  useEffect(() => {
+    if (playbackStatus !== 'loading' && playbackStatus !== 'buffering') return;
+
+    // A missing error event must not trap users on an endless loading screen.
+    const stallTimer = window.setTimeout(() => {
+      const currentStatus = playbackStatusRef.current;
+      if (currentStatus === 'loading' || currentStatus === 'buffering') {
+        changePlaybackStatus('error');
       }
-    };
+    }, 15000);
 
-    window.addEventListener('pointerdown', unlockAudio, { passive: true, once: true });
-    window.addEventListener('touchstart', unlockAudio, { passive: true, once: true });
+    return () => window.clearTimeout(stallTimer);
+  }, [changePlaybackStatus, playbackStatus]);
 
-    // Страховочный таймер: видео не завелось — не задерживаем пользователя дольше 6.5с
-    const fallbackTimer = setTimeout(() => {
-      finishSplash();
-    }, 6500);
-
-    // Точный прогресс загрузки и воспроизведения
-    const progInterval = setInterval(() => {
-      const v = videoRef.current;
-      if (v && v.duration && isFinite(v.duration) && v.currentTime > 0) {
-        const pct = Math.min(100, Math.round((v.currentTime / v.duration) * 100));
-        setProgress(pct);
-      } else {
-        setProgress((prev) => Math.min(95, prev + 1.5));
-      }
-    }, 80);
-
-    return () => {
-      clearTimeout(fallbackTimer);
-      clearInterval(progInterval);
-      window.removeEventListener('pointerdown', unlockAudio);
-      window.removeEventListener('touchstart', unlockAudio);
-    };
-  }, [finishSplash]);
+  useEffect(() => () => {
+    if (finishTimerRef.current !== null) window.clearTimeout(finishTimerRef.current);
+  }, []);
 
   if (!visible) return null;
+
+  const assetBase = import.meta.env.BASE_URL || './';
+  const isLoading = playbackStatus === 'loading' || playbackStatus === 'buffering';
 
   return (
     <div
       className={`sp ${fading ? 'sp--fade' : ''}`}
-      role="status"
-      aria-label="Загрузка ZENOVA"
-      onClick={() => {
-        if (muted && videoRef.current) {
-          videoRef.current.muted = false;
-          setMuted(false);
-        }
-      }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Заставка ZENOVA"
     >
-      {/* Амбиент-фон для широких экранов */}
       <div
         className="sp__backdrop-blur"
-        style={{ backgroundImage: `url(${import.meta.env.BASE_URL || './'}zenova-splash-poster.jpg)` }}
+        style={{ backgroundImage: `url(${assetBase}zenova-splash-poster.jpg)` }}
         aria-hidden="true"
       />
       <div className="sp__backdrop-vignette" aria-hidden="true" />
 
-      {/* Видео-контейнер */}
       <div className="sp__stage">
-        {/* Кнопки управления вверху */}
+        <img
+          className="sp__poster"
+          src={`${assetBase}zenova-splash-poster.jpg`}
+          alt=""
+          aria-hidden="true"
+          draggable={false}
+        />
+
         <div className="sp__top-bar">
           <button
             type="button"
             className="sp__pill-btn"
             onClick={toggleSound}
             aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+            aria-pressed={!muted}
           >
-            {muted ? 'Включить звук 🔇' : 'Звук включен 🔊'}
-          </button>
-
-          <button
-            type="button"
-            className="sp__pill-btn sp__pill-btn--skip"
-            onClick={(e) => {
-              e.stopPropagation();
-              finishSplash();
-            }}
-            aria-label="Пропустить заставку"
-          >
-            Пропустить ✕
+            {muted ? 'Включить звук' : 'Выключить звук'}
           </button>
         </div>
 
         <video
           ref={videoRef}
           className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}
-          src={`${import.meta.env.BASE_URL || './'}zenova-splash.mp4`}
-          poster={`${import.meta.env.BASE_URL || './'}zenova-splash-poster.jpg`}
+          src={`${assetBase}zenova-splash.mp4`}
+          poster={`${assetBase}zenova-splash-poster.jpg`}
           autoPlay
           muted
           playsInline
           preload="auto"
+          aria-label="Видеозаставка ZENOVA"
           onLoadedData={() => setVideoReady(true)}
-          onEnded={finishSplash}
-          onError={() => {
-            console.warn('Splash video playback error, finishing splash');
+          onCanPlay={() => {
+            setVideoReady(true);
+            const video = videoRef.current;
+            if (video?.paused && isLoading) attemptPlay();
+          }}
+          onPlaying={() => {
+            setVideoReady(true);
+            changePlaybackStatus('playing');
+          }}
+          onTimeUpdate={() => {
+            updateProgress();
+            const video = videoRef.current;
+            if (video && !video.paused && playbackStatusRef.current === 'buffering') {
+              changePlaybackStatus('playing');
+            }
+          }}
+          onDurationChange={updateProgress}
+          onWaiting={() => {
+            if (playbackStatusRef.current !== 'blocked' && playbackStatusRef.current !== 'error') {
+              changePlaybackStatus('buffering');
+            }
+          }}
+          onStalled={() => {
+            if (playbackStatusRef.current !== 'blocked' && playbackStatusRef.current !== 'error') {
+              changePlaybackStatus('buffering');
+            }
+          }}
+          onPause={() => {
+            const video = videoRef.current;
+            const currentStatus = playbackStatusRef.current;
+            if (video && !video.ended && (currentStatus === 'playing' || currentStatus === 'buffering')) {
+              changePlaybackStatus('blocked');
+            }
+          }}
+          onEnded={() => {
+            setProgress(100);
             finishSplash();
+          }}
+          onError={() => {
+            console.warn('Splash video media/network error');
+            changePlaybackStatus('error');
           }}
         />
 
-        {/* Тонкий прогресс-бар в самом низу */}
+        {isLoading && (
+          <div className="sp__state" role="status" aria-live="polite">
+            <div className="sp__loading-indicator">
+              <span className="sp__spinner" aria-hidden="true" />
+              <span>{playbackStatus === 'buffering' ? 'Буферизация видео…' : 'Загрузка видео…'}</span>
+            </div>
+          </div>
+        )}
+
+        {playbackStatus === 'blocked' && (
+          <div className="sp__state sp__state--interactive">
+            <button type="button" className="sp__play-button" onClick={startFromGesture}>
+              <span className="sp__play-icon" aria-hidden="true" />
+              <span>Воспроизвести заставку</span>
+              <small>Нажмите, чтобы начать или продолжить</small>
+            </button>
+          </div>
+        )}
+
+        {playbackStatus === 'error' && (
+          <div className="sp__state sp__state--interactive sp__state--error" role="alert">
+            <div className="sp__error-panel">
+              <strong>Не удалось воспроизвести видео</strong>
+              <p>Проверьте подключение к сети и попробуйте ещё раз.</p>
+              <div className="sp__error-actions">
+                <button type="button" className="sp__action-button" onClick={retryPlayback}>
+                  Повторить
+                </button>
+                <button
+                  type="button"
+                  className="sp__action-button sp__action-button--escape"
+                  onClick={finishSplash}
+                >
+                  Открыть приложение без заставки
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="sp__bottom-hud">
           <div
             className="sp__track"
             role="progressbar"
-            aria-label="Загрузка"
+            aria-label="Прогресс видеозаставки"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={progress}
+            aria-valuenow={Math.round(progress)}
           >
             <div className="sp__bar" style={{ width: `${progress}%` }} />
           </div>

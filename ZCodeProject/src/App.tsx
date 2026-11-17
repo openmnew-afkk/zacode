@@ -25,6 +25,7 @@ import { RulesModal } from './components/RulesModal';
 import { useStore } from './store';
 import { useMusicStore } from './store/musicStore';
 import { getStoredSeason, applySeason } from './services/seasons';
+import { fetchPremiumStatus } from './api/backend';
 import { enforceTelegramFullscreen } from './hooks/useTelegram';
 
 const RULES_ACCEPTED_KEY = 'zenova_rules_accepted';
@@ -39,7 +40,7 @@ function App() {
   });
   const location = useLocation();
   const navigate = useNavigate();
-  const { theme, setTelegramUsername, syncCloudState, syncTrackedCloud } = useStore();
+  const { theme, setTelegramUsername, syncCloudState, syncTrackedCloud, applyRemotePremium } = useStore();
   const { currentTrack } = useMusicStore();
 
   /* ═══ Пользовательское соглашение: обязательное при первом запуске ═══ */
@@ -77,6 +78,14 @@ function App() {
       console.warn('Could not restore watch statuses from Telegram CloudStorage:', error);
     });
   }, [syncTrackedCloud]);
+
+  useEffect(() => {
+    let active = true;
+    fetchPremiumStatus().then((status) => {
+      if (active && status.premium) applyRemotePremium(status.expiry);
+    }).catch(() => {});
+    return () => { active = false; };
+  }, [applyRemotePremium]);
 
   /* ═══ Гарантированный полноразмерный вид под телефон в Telegram WebApp ═══ */
   useEffect(() => {
@@ -142,10 +151,6 @@ function App() {
 
   return (
     <div className="app-root">
-      {/* Сезонные эффекты: снегопад с сугробом, лепестки сакуры, листья, светлячки */}
-      {season.id !== 'none' && <SeasonFx season={season.id} />}
-      <NorthernLights season={season.id} />
-
       {showSplash && (
         <SplashPage
           onDone={() => {
@@ -156,40 +161,59 @@ function App() {
           }}
         />
       )}
-      {/* Соглашение при первом заходе: блокирует использование до принятия */}
-      <RulesModal isOpen={rulesGate} onClose={() => {}} mandatory onAccept={acceptRules} />
-      <MandatorySubModal />
 
-      <div className={`app-main ${currentTrack ? 'app-main--with-player' : ''}`}>
-        <Routes location={location}>
-          {/* Всегда главная по умолчанию */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/feed" element={<FeedPage />} />
-          <Route path="/studios" element={<StudiosPage />} />
-          <Route path="/studios/:studioId" element={<StudiosPage />} />
-          <Route path="/new-year" element={<NewYearPage />} />
-          <Route path="/halloween" element={<HalloweenPage />} />
-          <Route path="/movie/:id" element={<MovieDetailPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/music" element={<MusicPage />} />
-          <Route path="/ai" element={<AiPickPage />} />
-          <Route path="/premium" element={<PremiumPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/rules" element={<RulesPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          {/* Любой неизвестный путь → главная */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+      {/* Keep route data work mounted, but hide and disable all app UI behind the splash. */}
+      <div
+        className="app-content"
+        ref={(element) => {
+          if (element) element.inert = showSplash;
+        }}
+        hidden={showSplash}
+        aria-hidden={showSplash ? true : undefined}
+      >
+        {/* Сезонные эффекты: снегопад с сугробом, лепестки сакуры, листья, светлячки */}
+        {season.id !== 'none' && <SeasonFx season={season.id} />}
+        <NorthernLights season={season.id} />
+
+        {/* Portalled mandatory dialogs must not mount until the splash is complete. */}
+        {!showSplash && (
+          <>
+            <RulesModal isOpen={rulesGate} onClose={() => {}} mandatory onAccept={acceptRules} />
+            <MandatorySubModal />
+          </>
+        )}
+
+        <div className={`app-main ${currentTrack ? 'app-main--with-player' : ''}`}>
+          <Routes location={location}>
+            {/* Всегда главная по умолчанию */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/feed" element={<FeedPage />} />
+            <Route path="/studios" element={<StudiosPage />} />
+            <Route path="/studios/:studioId" element={<StudiosPage />} />
+            <Route path="/new-year" element={<NewYearPage />} />
+            <Route path="/halloween" element={<HalloweenPage />} />
+            <Route path="/movie/:id" element={<MovieDetailPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/music" element={<MusicPage />} />
+            <Route path="/ai" element={<AiPickPage />} />
+            <Route path="/premium" element={<PremiumPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/rules" element={<RulesPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            {/* Любой неизвестный путь → главная */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
+
+        {/* Боковое выезжающее меню (разделы, Кино-Миры, сезоны) */}
+        <SideMenu />
+
+        {/* Глобальная музыкальная панель над TabBar */}
+        {currentTrack && <GlobalMusicBar />}
+
+        <TabBar />
       </div>
-
-      {/* Боковое выезжающее меню (разделы, Кино-Миры, сезоны) */}
-      <SideMenu />
-
-      {/* Глобальная музыкальная панель над TabBar */}
-      {currentTrack && <GlobalMusicBar />}
-
-      <TabBar />
     </div>
   );
 }

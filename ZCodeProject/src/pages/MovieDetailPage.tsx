@@ -993,7 +993,7 @@ const MovieDetailPage: React.FC = () => {
                   <div className="dp-cinema-hud__meta">
                     <div className="dp-cinema-hud__meta-top">
                       <span className="dp-cinema-hud__brand-name">ZENOVA</span>
-                      <span className="dp-cinema-hud__badge-4k">4K ULTRA HD</span>
+                      <span className="dp-cinema-hud__badge-4k">СТОРОННИЙ ПЛЕЕР</span>
                       <span className="dp-cinema-hud__live-dot" />
                     </div>
                     <h3 className="dp-cinema-hud__title" title={movie.title}>
@@ -1115,9 +1115,9 @@ const MovieDetailPage: React.FC = () => {
             {!isPlayerFullscreen && (
               <div className="dp-cinema-bottom-strip">
                 <div className="dp-cinema-bottom-strip__left">
-                  <span className="dp-cinema-bottom-strip__tag">DOLBY ATMOS</span>
+                  <span className="dp-cinema-bottom-strip__tag">КАЧЕСТВО ОТ ИСТОЧНИКА</span>
                   <span className="dp-cinema-bottom-strip__dot">·</span>
-                  <span className="dp-cinema-bottom-strip__tag">HDR 60FPS</span>
+                  <span className="dp-cinema-bottom-strip__tag">НАСТРОЙКИ В ПЛЕЕРЕ</span>
                 </div>
                 <div className="dp-cinema-bottom-strip__hint">
                   Озвучка, качество и серии {isSerial ? 'сериала' : 'фильма'} доступны внутри плеера

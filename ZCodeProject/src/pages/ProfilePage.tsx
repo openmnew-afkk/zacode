@@ -119,7 +119,7 @@ const CHANGELOG: ReleaseNote[] = [
       {
         type: 'improved',
         title: 'Переработанный ZENOVA PRO',
-        desc: 'Сделали статус PRO настоящей привилегией: 8 элитных возможностей, x2 опыт, 4K HDR, Dolby Atmos и бесплатный 3-дневный пробный период.',
+        desc: 'Золотое оформление профиля, бонус к рангу и понятные тарифы Telegram Stars без обещаний качества сторонних плееров.',
       },
       {
         type: 'fixed',
@@ -255,12 +255,10 @@ interface ProPerk {
 }
 
 const PRO_PERKS: ProPerk[] = [
-  { icon: Tv, title: '4K HDR', sub: 'Максимальное качество плеера', value: '4K', tint: 'zen-perk-card__icon--blue' },
-  { icon: Zap, title: '×2 опыт', sub: 'Двойной XP за просмотры и оценки', value: '×2', tint: 'zen-perk-card__icon--violet' },
-  { icon: Gamepad2, title: 'Аркада PRO', sub: 'Двойные очки в Zenova Arcade', value: 'PRO', tint: 'zen-perk-card__icon--orange' },
-  { icon: Palette, title: 'Атмосферы', sub: 'Все сезонные коллекции эффектов', value: '4+', tint: 'zen-perk-card__icon--cyan' },
-  { icon: Gift, title: 'Закрытые подборки', sub: 'Коллекции и премьеры недели', value: 'PRO', tint: 'zen-perk-card__icon--amber' },
-  { icon: Crown, title: 'Золотой статус', sub: 'Гем-карточка и бейдж в профиле', value: 'GOLD', tint: 'zen-perk-card__icon--gold' },
+  { icon: Crown, title: 'Золотой статус', sub: 'Кристалл и бейдж PRO в профиле', value: 'GOLD', tint: 'zen-perk-card__icon--gold' },
+  { icon: Zap, title: '+250 XP', sub: 'Бонус к кинематографическому рангу', value: '+250', tint: 'zen-perk-card__icon--violet' },
+  { icon: Sparkles, title: 'Меньше лишнего', sub: 'Внутреннее промообъявление скрыто', value: 'PRO', tint: 'zen-perk-card__icon--cyan' },
+  { icon: ShieldCheck, title: 'Единый статус', sub: 'Срок PRO привязан к Telegram-аккаунту', value: 'SYNC', tint: 'zen-perk-card__icon--blue' },
 ];
 
 const RANK_ARC = [
@@ -666,63 +664,76 @@ export const ProfilePage: React.FC = () => {
         </header>
 
         <div className="zen-subpage__body">
-          {/* Сводка Кинотеки */}
-          <div className="zen-lib-hero">
-            <div className="zen-lib-hero__stat">
-              <span className="zen-lib-hero__num">{totalSavedCount}</span>
-              <span className="zen-lib-hero__lbl">Всего в базе</span>
+          {/* Компактная сводка Кинотеки */}
+          <section className="zen-lib-hero" aria-label="Сводка кинотеки">
+            <div className="zen-lib-hero__top">
+              <div>
+                <span className="zen-lib-hero__eyebrow">ЛИЧНАЯ КОЛЛЕКЦИЯ</span>
+                <div className="zen-lib-hero__headline">
+                  <span className="zen-lib-hero__num">{totalSavedCount}</span>
+                  <span className="zen-lib-hero__headline-label">сохранено</span>
+                </div>
+              </div>
+              <span className="zen-lib-hero__emblem" aria-hidden="true">
+                <BookOpen size={22} />
+              </span>
             </div>
-            <div className="zen-lib-hero__divider" />
-            <div className="zen-lib-hero__stat">
-              <span className="zen-lib-hero__num text-green">{watchedCount}</span>
-              <span className="zen-lib-hero__lbl">Просмотрено</span>
+            <div className="zen-lib-hero__stats">
+              <div className="zen-lib-hero__stat">
+                <span className="zen-lib-hero__stat-num text-green">{watchedCount}</span>
+                <span className="zen-lib-hero__lbl">Просмотрено</span>
+              </div>
+              <div className="zen-lib-hero__stat">
+                <span className="zen-lib-hero__stat-num text-gold">{favorites.length}</span>
+                <span className="zen-lib-hero__lbl">Избранное</span>
+              </div>
+              <div className="zen-lib-hero__stat">
+                <span className="zen-lib-hero__stat-num text-cyan">{wantCount}</span>
+                <span className="zen-lib-hero__lbl">В планах</span>
+              </div>
             </div>
-            <div className="zen-lib-hero__divider" />
-            <div className="zen-lib-hero__stat">
-              <span className="zen-lib-hero__num text-gold">{favorites.length}</span>
-              <span className="zen-lib-hero__lbl">Избранное</span>
-            </div>
-            <div className="zen-lib-hero__divider" />
-            <div className="zen-lib-hero__stat">
-              <span className="zen-lib-hero__num text-cyan">{wantCount}</span>
-              <span className="zen-lib-hero__lbl">В планах</span>
-            </div>
-          </div>
+          </section>
 
           {/* Поиск внутри библиотеки */}
-          <div className="zen-lib-search">
-            <Search size={16} className="zen-lib-search__icon" />
+          <div className="zen-lib-search" role="search">
+            <Search size={18} className="zen-lib-search__icon" />
             <input
-              type="text"
+              type="search"
               value={libraryQuery}
               onChange={(e) => setLibraryQuery(e.target.value)}
-              placeholder="Поиск по названию или жанру в коллекции…"
+              placeholder="Название или жанр"
               className="zen-lib-search__input"
+              aria-label="Поиск по названию или жанру в коллекции"
+              autoComplete="off"
+              enterKeyHint="search"
             />
             {libraryQuery && (
               <button
                 type="button"
                 className="zen-lib-search__clear"
                 onClick={() => setLibraryQuery('')}
+                aria-label="Очистить поиск"
               >
                 ✕
               </button>
             )}
           </div>
 
-          {/* Сегментированные вкладки Кинотеки */}
-          <div className="zen-lib-tabs">
+          {/* Горизонтальные фильтры Кинотеки */}
+          <div className="zen-lib-tabs" role="tablist" aria-label="Фильтры кинотеки">
             {[
-              { id: 'all', label: `Все (${allLibraryItems.length})`, icon: '✦' },
-              { id: 'favorites', label: `Избранное (${favorites.length})`, icon: '★' },
-              { id: 'history', label: `История (${watchHistory.length})`, icon: '⏱' },
-              { id: 'watched', label: `Просмотрено (${watchedCount})`, icon: '✓' },
-              { id: 'want', label: `В планах (${wantCount})`, icon: '📌' },
-              { id: 'watching', label: `Смотрю (${watchingCount})`, icon: '▶' },
+              { id: 'all', label: 'Все', count: allLibraryItems.length },
+              { id: 'favorites', label: 'Избранное', count: favorites.length },
+              { id: 'history', label: 'История', count: watchHistory.length },
+              { id: 'watched', label: 'Просмотрено', count: watchedCount },
+              { id: 'want', label: 'В планах', count: wantCount },
+              { id: 'watching', label: 'Смотрю', count: watchingCount },
             ].map((tab) => (
               <button
                 key={tab.id}
                 type="button"
+                role="tab"
+                aria-selected={libraryTab === tab.id}
                 className={`zen-lib-tab ${libraryTab === tab.id ? 'active' : ''}`}
                 onClick={() => {
                   haptic('light');
@@ -730,11 +741,12 @@ export const ProfilePage: React.FC = () => {
                 }}
               >
                 <span>{tab.label}</span>
+                <span className="zen-lib-tab__count">{tab.count}</span>
               </button>
             ))}
           </div>
 
-          {/* Список фильмов */}
+          {/* Постерная коллекция */}
           {filteredLibrary.length === 0 ? (
             <div className="zen-empty-state">
               <span className="zen-empty-state__icon"><BookOpen size={36} /></span>
@@ -757,44 +769,63 @@ export const ProfilePage: React.FC = () => {
           ) : (
             <div className="zen-lib-grid">
               {filteredLibrary.map((item) => (
-                <div
+                <button
                   key={item.id}
+                  type="button"
                   className="zen-lib-card"
+                  aria-label={`${item.movie.title}. Открыть подробнее`}
                   onClick={() => {
                     haptic('light');
                     navigate(`/movie/${item.movie.id}`);
                   }}
                 >
-                  <div className="zen-lib-card__poster-wrap">
-                    <img
-                      src={item.movie.poster_path || ''}
-                      alt={item.movie.title}
-                      className="zen-lib-card__poster"
-                      loading="lazy"
-                    />
-                    {item.rating && (
-                      <span className="zen-lib-card__rating">★ {item.rating}</span>
+                  <span className="zen-lib-card__poster-wrap">
+                    <span className="zen-lib-card__poster-fallback" aria-hidden="true">
+                      <Tv size={30} />
+                      <span>Нет постера</span>
+                    </span>
+                    {item.movie.poster_path && (
+                      <img
+                        src={item.movie.poster_path}
+                        alt=""
+                        className="zen-lib-card__poster"
+                        loading="lazy"
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
                     )}
-                  </div>
+                    <span className="zen-lib-card__shade" />
 
-                  <div className="zen-lib-card__content">
-                    <div className="zen-lib-card__tags">
-                      {item.isFav && <span className="zen-tag-fav">★ Избранное</span>}
-                      {item.status === 'watched' && <span className="zen-tag-watched">✓ Просмотрено</span>}
-                      {item.status === 'want' && <span className="zen-tag-want">📌 В планах</span>}
-                      {item.status === 'watching' && <span className="zen-tag-watching">▶ Смотрю</span>}
-                      {item.isHistory && !item.status && <span className="zen-tag-hist">⏱ История</span>}
-                    </div>
+                    <span className="zen-lib-card__topline">
+                      <span className="zen-lib-card__tags">
+                        {item.status === 'watched' && <span className="zen-tag-watched">Просмотрено</span>}
+                        {item.status === 'want' && <span className="zen-tag-want">В планах</span>}
+                        {item.status === 'watching' && <span className="zen-tag-watching">Смотрю</span>}
+                        {item.isHistory && !item.status && <span className="zen-tag-hist">История</span>}
+                      </span>
+                      {item.rating && (
+                        <span className="zen-lib-card__rating">
+                          <Star size={11} fill="currentColor" />
+                          {item.rating}
+                        </span>
+                      )}
+                    </span>
 
-                    <h4 className="zen-lib-card__title">{item.movie.title}</h4>
-                    <div className="zen-lib-card__meta">
-                      {item.movie.release_date?.slice(0, 4) || '—'} ·{' '}
-                      {item.movie.genres?.[0] || 'Кино'}
-                    </div>
-                  </div>
-
-                  <ChevronRight size={18} className="zen-chevron" />
-                </div>
+                    <span className="zen-lib-card__content">
+                      <span className="zen-lib-card__copy">
+                        <span className="zen-lib-card__title">{item.movie.title}</span>
+                        <span className="zen-lib-card__meta">
+                          {item.movie.release_date?.slice(0, 4) || '—'} ·{' '}
+                          {item.movie.genres?.[0] || 'Кино'}
+                        </span>
+                      </span>
+                      {item.isFav && (
+                        <span className="zen-lib-card__favorite" aria-label="В избранном">
+                          <Star size={13} fill="currentColor" />
+                        </span>
+                      )}
+                    </span>
+                  </span>
+                </button>
               ))}
             </div>
           )}
@@ -824,48 +855,6 @@ export const ProfilePage: React.FC = () => {
         </header>
 
         <div className="zen-subpage__body">
-          {/* Визуальная карточка Северного Сияния */}
-          <div className="zen-aurora-card">
-            <div className="zen-aurora-preview">
-              <div className="zen-aurora-ribbon zen-aurora-ribbon--1" />
-              <div className="zen-aurora-ribbon zen-aurora-ribbon--2" />
-            </div>
-            <div className="zen-aurora-card__body">
-              <div className="zen-aurora-card__info">
-                <span className="zen-aurora-badge">ПОЛЯРНЫЙ ЭФФЕКТ</span>
-                <h3 className="zen-aurora-title">Северное Сияние</h3>
-                <p className="zen-aurora-desc">Живые переливы изумрудной и лазурной авроры вверху экрана.</p>
-              </div>
-              <button
-                type="button"
-                className={`zen-toggle ${auroraOff ? '' : 'on'}`}
-                onClick={toggleAurora}
-                aria-label="Включить Северное Сияние"
-              >
-                <span className="zen-toggle__thumb" />
-              </button>
-            </div>
-          </div>
-
-          {/* Визуальная карточка Сезонных Частиц */}
-          <div className="zen-fx-card">
-            <div className="zen-fx-card__body">
-              <div className="zen-fx-card__info">
-                <span className="zen-fx-badge">ЧАСТИЦЫ</span>
-                <h3 className="zen-fx-title">Сезонные микро-частицы</h3>
-                <p className="zen-fx-desc">Пушистый 3D-снегопад, лепестки сакуры, светлячки и листопад.</p>
-              </div>
-              <button
-                type="button"
-                className={`zen-toggle ${fxOff ? '' : 'on'}`}
-                onClick={toggleFx}
-                aria-label="Включить частицы"
-              >
-                <span className="zen-toggle__thumb" />
-              </button>
-            </div>
-          </div>
-
           <div className="zen-section-header">КОЛЛЕКЦИЯ ТЕМАТИЧЕСКИХ АТМОСФЕР</div>
           <div className="zen-themes-catalog">
             {THEME_OPTIONS.map((t) => {
@@ -993,7 +982,7 @@ export const ProfilePage: React.FC = () => {
               <div className={`zen-rank-priv__item ${cineLevel >= 13 ? 'unlocked' : ''}`}>
                 <span className="zen-rank-priv__icon"><Crown size={17} /></span>
                 <span className="zen-rank-priv__name">Кинокритик · L13</span>
-                <span className="zen-rank-priv__desc">Золотой значок Критика в дневнике, приоритет 4K Ultra HD</span>
+                <span className="zen-rank-priv__desc">Золотой значок Критика в дневнике и особая отметка ранга</span>
               </div>
               <div className={`zen-rank-priv__item ${cineLevel >= 21 ? 'unlocked' : ''}`}>
                 <span className="zen-rank-priv__icon"><Sparkles size={17} /></span>
@@ -1297,10 +1286,6 @@ export const ProfilePage: React.FC = () => {
           <span className="zen-shortcut__label">Аркада</span>
           {arcadeBest > 0 && <span className="zen-shortcut__badge">{arcadeBest}</span>}
         </button>
-        <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('atmosphere'); }}>
-          <span className="zen-shortcut__icon"><Palette size={20} /></span>
-          <span className="zen-shortcut__label">Атмосфера</span>
-        </button>
       </div>
 
       {/* ── Светлая панель с табами (Tiering) ── */}
@@ -1526,6 +1511,50 @@ export const ProfilePage: React.FC = () => {
           <h2 className="zen-set-group__title">
             Сезонные коллекции <span className="zen-tag-pill zen-tag-pill--cyan">ЭФФЕКТЫ</span>
           </h2>
+
+          {/* Управление атмосферой доступно прямо в коллекциях */}
+          <div className="zen-aurora-card">
+            <div className="zen-aurora-preview">
+              <div className="zen-aurora-ribbon zen-aurora-ribbon--1" />
+              <div className="zen-aurora-ribbon zen-aurora-ribbon--2" />
+            </div>
+            <div className="zen-aurora-card__body">
+              <div className="zen-aurora-card__info">
+                <span className="zen-aurora-badge">ПОЛЯРНЫЙ ЭФФЕКТ</span>
+                <h3 className="zen-aurora-title">Северное Сияние</h3>
+                <p className="zen-aurora-desc">Живые переливы изумрудной и лазурной авроры вверху экрана.</p>
+              </div>
+              <button
+                type="button"
+                className={`zen-toggle ${auroraOff ? '' : 'on'}`}
+                onClick={toggleAurora}
+                aria-label={auroraOff ? 'Включить Северное Сияние' : 'Выключить Северное Сияние'}
+                aria-pressed={!auroraOff}
+              >
+                <span className="zen-toggle__thumb" />
+              </button>
+            </div>
+          </div>
+
+          <div className="zen-fx-card">
+            <div className="zen-fx-card__body">
+              <div className="zen-fx-card__info">
+                <span className="zen-fx-badge">ЧАСТИЦЫ</span>
+                <h3 className="zen-fx-title">Сезонные микро-частицы</h3>
+                <p className="zen-fx-desc">Пушистый 3D-снегопад, лепестки сакуры, светлячки и листопад.</p>
+              </div>
+              <button
+                type="button"
+                className={`zen-toggle ${fxOff ? '' : 'on'}`}
+                onClick={toggleFx}
+                aria-label={fxOff ? 'Включить частицы' : 'Выключить частицы'}
+                aria-pressed={!fxOff}
+              >
+                <span className="zen-toggle__thumb" />
+              </button>
+            </div>
+          </div>
+
           <div className="zen-season-deck">
             {THEME_OPTIONS.filter((t) => t.id !== 'auto').map((t) => {
               const active = !seasonState.auto && seasonState.season.id === t.id;

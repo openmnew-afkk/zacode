@@ -45,10 +45,12 @@ declare global {
         disableVerticalSwipes?: () => void;
         setHeaderColor?: (color: string) => void;
         setBottomBarColor?: (color: string) => void;
+        initData: string;
         initDataUnsafe: {
           user?: TelegramUser;
           query_id?: string;
         };
+        openInvoice?: (url: string, callback?: (status: 'paid' | 'cancelled' | 'failed' | 'pending') => void) => void;
         themeParams: {
           bg_color?: string;
           text_color?: string;

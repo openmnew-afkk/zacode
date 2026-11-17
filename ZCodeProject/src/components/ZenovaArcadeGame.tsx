@@ -15,6 +15,7 @@ import {
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import { triggerSeasonalBurst } from './SeasonFx';
+import { claimArcadeReward, fetchPremiumStatus, startArcadeRun } from '../api/backend';
 import './ZenovaArcadeGame.css';
 
 interface ZenovaArcadeGameProps {
@@ -204,7 +205,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
   onWinBonus,
 }) => {
   const { haptic } = useTelegram();
-  const { activatePremiumDays } = useStore();
+  const { applyRemotePremium } = useStore();
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -214,6 +215,8 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
   const [lives, setLives] = useState(3);
   const [isMuted, setIsMuted] = useState(() => soundSynth.muted);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [rewardPending, setRewardPending] = useState(false);
+  const [rewardError, setRewardError] = useState('');
 
   const [bestScore, setBestScore] = useState<number>(() => {
     try {
@@ -252,6 +255,11 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
   const wonBonusRef = useRef(wonBonus);
   wonBonusRef.current = wonBonus;
 
+  const runIdRef = useRef<string | null>(null);
+  const runPromiseRef = useRef<Promise<void> | null>(null);
+  const rewardInFlightRef = useRef(false);
+  const claimRewardRef = useRef<(score: number) => void>(() => {});
+
   // Игровые сущности
   const gameEntitiesRef = useRef<{
     playerY: number;
@@ -278,6 +286,71 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
     screenShake: 0,
     frame: 0,
   });
+
+  const markBonusClaimed = useCallback(() => {
+    wonBonusRef.current = true;
+    setWonBonus(true);
+    try { localStorage.setItem('zen_arcade_won_bonus', '1'); } catch {}
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    fetchPremiumStatus().then((status) => {
+      if (!active) return;
+      wonBonusRef.current = status.arcadeRewardClaimed;
+      setWonBonus(status.arcadeRewardClaimed);
+      if (!status.arcadeRewardClaimed) {
+        try { localStorage.removeItem('zen_arcade_won_bonus'); } catch {}
+      }
+    }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+
+  const beginArcadeRun = useCallback(() => {
+    runIdRef.current = null;
+    setRewardError('');
+    runPromiseRef.current = (async () => {
+      try {
+        const run = await startArcadeRun();
+        if (run.claimed) markBonusClaimed();
+        else runIdRef.current = run.runId;
+      } catch {
+        setRewardError('Награда доступна при запуске внутри Telegram и подключённом сервере');
+      }
+    })();
+  }, [markBonusClaimed]);
+
+  const claimReward = useCallback(async (finalScore: number) => {
+    if (rewardInFlightRef.current || wonBonusRef.current || finalScore < 25) return;
+    rewardInFlightRef.current = true;
+    setRewardPending(true);
+    setRewardError('');
+    try {
+      await runPromiseRef.current;
+      const runId = runIdRef.current;
+      if (!runId) throw new Error('Игровая сессия не подтверждена. Начните новый раунд внутри Telegram.');
+      const result = await claimArcadeReward(runId, finalScore);
+      if (result.activated && result.expiry) applyRemotePremium(result.expiry);
+      if (result.claimed) {
+        markBonusClaimed();
+        triggerSeasonalBurst(45);
+        soundSynth.playWin();
+        haptic('heavy');
+        onWinBonus?.();
+        showToast(result.message);
+        gameEntitiesRef.current.floatingTexts.push({
+          x: 180, y: 120, text: '3 ДНЯ PRO АКТИВИРОВАНО!', color: '#fbbf24', life: 0, maxLife: 75,
+        });
+      }
+    } catch (error) {
+      setRewardError(error instanceof Error ? error.message : 'Не удалось подтвердить награду. Попробуйте ещё раз.');
+    } finally {
+      rewardInFlightRef.current = false;
+      setRewardPending(false);
+    }
+  }, [applyRemotePremium, haptic, markBonusClaimed, onWinBonus, showToast]);
+
+  claimRewardRef.current = (finalScore) => { void claimReward(finalScore); };
 
   // Переключение звука
   const toggleSound = () => {
@@ -314,6 +387,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
       ent.invulnerable = 0;
       ent.screenShake = 0;
       ent.frame = 0;
+      beginArcadeRun();
 
       setScore(0);
       setLives(3);
@@ -343,7 +417,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
         maxLife: Math.random() * 12 + 8,
       });
     }
-  }, [haptic]);
+  }, [beginArcadeRun, haptic]);
 
   // Поделиться рекордом
   const handleShare = () => {
@@ -419,6 +493,19 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
           collected: false,
         });
       }
+    };
+
+    const registerScore = (points: number) => {
+      const newScore = scoreRef.current + points;
+      scoreRef.current = newScore;
+      setScore(newScore);
+      if (newScore > bestScoreRef.current) {
+        bestScoreRef.current = newScore;
+        setBestScore(newScore);
+        try { localStorage.setItem('zen_arcade_best', String(newScore)); } catch {}
+      }
+      if (newScore >= 25 && !wonBonusRef.current) claimRewardRef.current(newScore);
+      return newScore;
     };
 
     // Главный цикл отрисовки
@@ -497,44 +584,10 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
           if (!p.passed && p.x + 42 < playerX) {
             p.passed = true;
             ent.combo++;
-            const newScore = scoreRef.current + 1;
-            setScore(newScore);
-            scoreRef.current = newScore;
+            registerScore(1);
 
             soundSynth.playScore();
             haptic('light');
-
-            // Рекорд
-            if (newScore > bestScoreRef.current) {
-              setBestScore(newScore);
-              bestScoreRef.current = newScore;
-              try {
-                localStorage.setItem('zen_arcade_best', String(newScore));
-              } catch {}
-            }
-
-            // Награда за 25 очков
-            if (newScore === 25 && !wonBonusRef.current) {
-              wonBonusRef.current = true;
-              setWonBonus(true);
-              try {
-                localStorage.setItem('zen_arcade_won_bonus', '1');
-              } catch {}
-              activatePremiumDays(3);
-              triggerSeasonalBurst(45);
-              soundSynth.playWin();
-              haptic('heavy');
-              onWinBonus?.();
-
-              ent.floatingTexts.push({
-                x: w / 2,
-                y: 120,
-                text: '👑 3 ДНЯ PRO АКТИВИРОВАНО!',
-                color: '#fbbf24',
-                life: 0,
-                maxLife: 75,
-              });
-            }
 
             // Всплывающий комбо-текст
             if (ent.combo >= 3) {
@@ -622,9 +675,7 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
           const dist = Math.hypot(playerX - s.x, ent.playerY - s.y);
           if (!s.collected && dist < playerRadius + 15) {
             s.collected = true;
-            const newScore = scoreRef.current + 3;
-            setScore(newScore);
-            scoreRef.current = newScore;
+            registerScore(3);
 
             soundSynth.playCoin();
             haptic('medium');
@@ -1015,12 +1066,24 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
             <span>ЦЕЛЬ: 25 = 3 ДНЯ PRO</span>
           </span>
           <span className="zen-arcade-goal-status">
-            {wonBonus ? '✓ Получено!' : `${score} / 25`}
+            {wonBonus ? '✓ Получено!' : rewardPending ? 'Проверка…' : `${score} / 25`}
           </span>
         </div>
         <div className="zen-arcade-goal-bar">
           <div className="zen-arcade-goal-fill" style={{ width: `${goalProgress}%` }} />
         </div>
+        {score >= 25 && !wonBonus && (
+          <button
+            type="button"
+            className="zen-arcade-reward-btn"
+            onClick={() => { void claimReward(score); }}
+            disabled={rewardPending}
+          >
+            <Crown size={14} />
+            {rewardPending ? 'Подтверждаем награду…' : 'Получить 3 дня PRO'}
+          </button>
+        )}
+        {rewardError && !wonBonus && <p className="zen-arcade-reward-error">{rewardError}</p>}
       </div>
 
       {/* ── Игровой холст с оверлеями ── */}
@@ -1032,11 +1095,12 @@ export const ZenovaArcadeGame: React.FC<ZenovaArcadeGameProps> = ({
           <div className="zen-arcade-overlay">
             <span className="zen-arcade-badge zen-arcade-badge--gold">
               <Sparkles size={11} />
-              <span>ZENOVA ARCADE 60 FPS</span>
+              <span>ZENOVA ARCADE</span>
             </span>
             <h2 className="zen-arcade-overlay-title">Star Runner</h2>
             <p className="zen-arcade-overlay-desc">
               Управляйте кибер-шаттлом, облетайте неоновые башни и собирайте звёзды ✦
+              Награда за 25 очков выдаётся один раз на Telegram-аккаунт.
             </p>
 
             <div className="zen-arcade-stats-panel">

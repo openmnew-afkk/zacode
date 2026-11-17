@@ -85,6 +85,54 @@ function headers(extra: Record<string, string> = {}): Record<string, string> {
   return { 'Content-Type': 'application/json', ...extra };
 }
 
+export type PremiumPlanId = 'trial' | 'month';
+
+export interface PremiumStatus {
+  ok: boolean;
+  premium: boolean;
+  expiry: number | null;
+  trialUsed: boolean;
+  arcadeRewardClaimed: boolean;
+}
+
+export function getTelegramInitData(): string {
+  try { return String((window as any).Telegram?.WebApp?.initData || ''); } catch { return ''; }
+}
+
+async function telegramApi<T>(route: string, payload: Record<string, unknown> = {}): Promise<T> {
+  const base = getApiBase();
+  if (!base) throw new Error('Сервер оплаты не настроен');
+  const initData = getTelegramInitData();
+  if (!initData) throw new Error('Откройте ZENOVA внутри Telegram');
+  let res: Response;
+  try {
+    res = await fetch(`${base}${route}`, {
+      method: 'POST',
+      headers: headers(),
+      body: JSON.stringify({ ...payload, initData }),
+      signal: AbortSignal.timeout(12000),
+    });
+  } catch {
+    throw new Error('Не удалось связаться с сервером. Проверьте соединение и попробуйте снова.');
+  }
+  const data = await res.json().catch(() => null);
+  if (!res.ok || data?.ok === false) throw new Error(data?.message || 'Сервер временно недоступен');
+  return data as T;
+}
+
+export const fetchPremiumStatus = () => telegramApi<PremiumStatus>('/api/premium/status');
+
+export const createPremiumInvoice = (plan: PremiumPlanId) =>
+  telegramApi<{ ok: boolean; url: string }>('/api/premium/invoice', { plan });
+
+export const startArcadeRun = () =>
+  telegramApi<{ ok: boolean; claimed: boolean; runId: string | null }>('/api/arcade/start');
+
+export const claimArcadeReward = (runId: string, score: number) =>
+  telegramApi<{ ok: boolean; activated: boolean; claimed: boolean; expiry?: number | null; message: string }>(
+    '/api/arcade/claim', { runId, score }
+  );
+
 /* ════════════ Публичное API ════════════ */
 
 /** Центральный конфиг (реклама, объявления, реквизиты, гранты премиума) */
@@ -115,30 +163,6 @@ export async function checkPremiumRemote(
     if (!res.ok) return null;
     return await res.json();
   } catch { return null; }
-}
-
-/** Заявка на оплату → авто-активация премиума (или заявка админу) */
-export async function claimPremium(
-  username: string,
-  plan: 'month' | 'year',
-  txn = ''
-): Promise<{ ok: boolean; activated: boolean; message: string; expiry?: number | null }> {
-  const base = getApiBase();
-  if (!base) {
-    return { ok: false, activated: false, message: '❌ Сервер не настроен. Попросите админа указать адрес API.' };
-  }
-  try {
-    const res = await fetch(`${base}/api/premium/claim`, {
-      method: 'POST',
-      headers: headers(),
-      body: JSON.stringify({ username, plan, txn }),
-      signal: AbortSignal.timeout(10000),
-    });
-    const data = await res.json();
-    return data;
-  } catch {
-    return { ok: false, activated: false, message: '❌ Сервер недоступен, попробуйте позже' };
-  }
 }
 
 /** Вход модератора по имени */
