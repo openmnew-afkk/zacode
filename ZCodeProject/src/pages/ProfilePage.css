@@ -1811,44 +1811,49 @@ html.light .zen-profile-toast {
 .zen-profile-page .zen-header__kicker { color: rgba(196, 205, 238, 0.72); }
 .zen-profile-page .zen-header__title { color: #f2f4fb; }
 
-/* ── Карточка пользователя: цветной градиент как на референсе Tiering ── */
+/* ── Карточка пользователя: пастельный градиент как на референсе Tiering ── */
 html:not(.light) .zen-user-card {
   position: relative;
-  background: linear-gradient(135deg, #9ad9ff 0%, #5b8def 48%, #6d5df6 100%);
-  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: linear-gradient(140deg, #d8ecf7 0%, #b3d7ee 46%, #92bde4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
   box-shadow:
-    0 22px 48px rgba(8, 12, 40, 0.55),
-    0 4px 14px rgba(8, 12, 40, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+    0 22px 48px rgba(8, 12, 40, 0.5),
+    0 4px 14px rgba(8, 12, 40, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* PRO — золотая градиентная карточка (S2 на референсе) */
+/* PRO — кремово-золотая пастель (S2 на референсе) */
 html:not(.light) .zen-user-card--gold {
-  background: linear-gradient(135deg, #ffe9a8 0%, #ffc95e 52%, #ff9e3d 100%);
+  background: linear-gradient(140deg, #f9efce 0%, #efdf9f 48%, #e6cb7d 100%);
 }
 
 html:not(.light) .zen-user-card__beam { display: none; }
 
-/* Гема ранга справа от карточки */
+/* 3D-гема ранга справа на карточке */
 .zen-user-gem {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 96px;
+  height: 96px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  color: #2b3fa0;
-  filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.65)) drop-shadow(0 0 10px rgba(43, 63, 160, 0.55));
-  animation: zenGemFloat 3.8s ease-in-out infinite;
   pointer-events: none;
+  animation: zenGemFloat 4.2s ease-in-out infinite;
 }
-html:not(.light) .zen-user-card--gold .zen-user-gem {
-  color: rgba(120, 78, 10, 0.55);
-  filter: drop-shadow(0 6px 14px rgba(255, 244, 200, 0.65));
+.zen-user-gem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(31, 37, 71, 0.35));
 }
+html:not(.light) .zen-user-card .zen-user-info { margin-right: 88px; }
 @keyframes zenGemFloat {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50% { transform: translateY(-4px) rotate(3deg); }
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
 }
 
 html:not(.light) .zen-user-card .zen-user-kicker { color: rgba(38, 43, 68, 0.62); }
@@ -2349,4 +2354,672 @@ html.light .zen-section-header { color: rgba(31, 26, 36, 0.5); }
   font-weight: 700;
   color: rgba(255, 255, 255, 0.6);
   text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  TIERING CINEMA — финальная композиция по референсу
+ * ═══════════════════════════════════════════════════════════════════ */
+
+html:not(.light) .zen-user-card {
+  padding: 20px 18px 14px;
+  border-radius: 25px;
+}
+
+html:not(.light) .zen-user-card .zen-user-card__top {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+html:not(.light) .zen-user-card .zen-user-avatar-wrap {
+  width: 54px;
+  height: 54px;
+}
+
+html:not(.light) .zen-user-card .zen-user-info { margin-right: 68px; }
+html:not(.light) .zen-user-card .zen-user-kicker { display: none; }
+html:not(.light) .zen-user-card .zen-user-kicker-row { margin-bottom: 3px; }
+html:not(.light) .zen-user-card .zen-user-rank-chip {
+  padding: 2px 7px;
+  font-size: 8.5px;
+  background: rgba(35, 40, 65, 0.09);
+}
+html:not(.light) .zen-user-card .zen-user-name {
+  margin-bottom: 5px;
+  font-size: 18px;
+}
+html:not(.light) .zen-user-card .zen-user-handle { font-size: 11.5px; }
+html:not(.light) .zen-user-card .zen-copy-btn { padding: 2px 7px; }
+
+.zen-user-gem {
+  top: -5px;
+  right: 0;
+  width: 102px;
+  height: 102px;
+}
+
+.zen-user-rank-hint {
+  color: rgba(35, 40, 65, 0.62);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.zen-user-progress-row {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+html:not(.light) .zen-user-progress-row .zen-user-rank-bar {
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+html:not(.light) .zen-user-card .zen-user-rank-track { height: 5px; }
+html:not(.light) .zen-user-card .zen-user-rank-labels {
+  font-size: 9.5px;
+  font-weight: 700;
+}
+html:not(.light) .zen-user-card .zen-user-stats-strip { padding-top: 12px; }
+html:not(.light) .zen-user-card .zen-user-stat-val { font-size: 12.5px; }
+html:not(.light) .zen-user-card .zen-user-stat-lbl { font-size: 9.5px; }
+
+.zen-upgrade-btn {
+  padding: 10px 14px;
+  color: #f7f8fb;
+  background: #262b3a;
+  box-shadow: 0 6px 14px rgba(27, 31, 49, 0.24);
+  font-size: 10px;
+}
+
+.zen-upgrade-btn--active {
+  color: #2e250f;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(87, 66, 17, 0.18);
+  box-shadow: none;
+}
+
+/* Нейтральные тёмные круги и белые line-иконки */
+.zen-shortcuts {
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.zen-shortcut { gap: 7px; }
+
+.zen-shortcut__icon {
+  width: 50px;
+  height: 50px;
+  color: #f5f6fa;
+  background: linear-gradient(145deg, #2b2e3c 0%, #20222e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 7px 16px rgba(4, 5, 12, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.zen-shortcut__icon svg { stroke-width: 1.8; }
+
+.zen-shortcut__label {
+  color: rgba(224, 228, 239, 0.72);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.zen-shortcut__badge {
+  top: 1px;
+  right: 9px;
+  border-color: #1c1b27;
+}
+
+/* Светлый лист контента с подчёркнутыми табами */
+.zen-panel {
+  position: relative;
+  margin: 0;
+  padding: 0 14px 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.78);
+  border-radius: 27px;
+  background: linear-gradient(180deg, #f8f9fb 0%, #eef1f5 100%);
+  box-shadow:
+    0 22px 44px rgba(4, 6, 15, 0.34),
+    inset 0 1px 0 #ffffff;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 34px;
+  height: 5px;
+  border-radius: 0 0 8px 8px;
+  background: #d5dae3;
+  transform: translateX(-50%);
+}
+
+.zen-panel .zen-tabs {
+  gap: 0;
+  margin: 0 -14px 19px;
+  padding: 0 12px;
+  border-bottom: 1px solid #dfe4eb;
+  background: rgba(255, 255, 255, 0.46);
+}
+
+.zen-panel .zen-tab {
+  padding: 16px 0 13px;
+  color: #9aa1af;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.zen-panel .zen-tab.active { color: #252b3b; }
+
+.zen-panel .zen-tab.active::after {
+  left: 20%;
+  right: 20%;
+  bottom: -1px;
+  width: auto;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: #30394e;
+  box-shadow: none;
+  transform: none;
+}
+
+.zen-panel .zen-set-group {
+  margin: 0 0 19px;
+}
+
+.zen-panel .zen-set-group:last-child { margin-bottom: 0; }
+
+html:not(.light) .zen-panel .zen-set-group__title {
+  margin: 0 0 9px 2px;
+  color: #262c3b;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+html:not(.light) .zen-panel .zen-set-card {
+  background: #ffffff;
+  border: 1px solid #e2e6ec;
+  border-radius: 17px;
+  box-shadow: 0 4px 12px rgba(31, 38, 55, 0.045);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.zen-panel .zen-set-row {
+  min-height: 62px;
+  padding: 12px 13px;
+  gap: 11px;
+}
+
+.zen-panel .zen-set-row:not(:last-child)::after {
+  left: 60px;
+  background: #edf0f4;
+}
+
+.zen-panel .zen-set-row:active { background: #f7f8fa; }
+
+.zen-panel .zen-set-row__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  color: #3d4a65;
+  background: #edf1f6;
+  box-shadow: none;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__title {
+  color: #282e3d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row--danger .zen-set-row__title {
+  color: #d65262;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__sub {
+  color: #8a919f;
+  font-size: 10.5px;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__value {
+  color: #737c8e;
+  font-size: 10px;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__value--accent { color: #48708f; }
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__chev { color: #b1b8c4; }
+
+html:not(.light) .zen-panel .zen-set-card .zen-switch {
+  background: #d9dee6;
+  border-color: #d3d9e2;
+  box-shadow: none;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-switch.on {
+  background: #33415c;
+  border-color: #33415c;
+  box-shadow: none;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-btn-sm {
+  padding: 6px 9px;
+  color: #46536c;
+  background: #eef1f5;
+  border-color: #e2e6ec;
+  font-size: 9.5px;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-cloud-status {
+  color: #36806b;
+  font-size: 9.5px;
+}
+
+/* Привилегии — светлые карточки внутри общего листа */
+.zen-panel .zen-perk-grid {
+  gap: 9px;
+  margin-bottom: 12px;
+}
+
+.zen-panel .zen-perk-card {
+  min-height: 154px;
+  padding: 13px 12px 11px;
+  gap: 5px;
+  border: 1px solid #e1e6ec;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(31, 38, 55, 0.04);
+}
+
+.zen-panel .zen-perk-card__icon {
+  width: 32px;
+  height: 32px;
+  margin-bottom: 5px;
+  border-radius: 10px;
+}
+
+.zen-panel .zen-perk-card__title {
+  color: #2a3040;
+  font-size: 10.5px;
+}
+
+.zen-panel .zen-perk-card__sub {
+  color: #858d9c;
+  font-size: 9.5px;
+}
+
+.zen-panel .zen-perk-card__value {
+  margin-top: auto;
+  padding: 3px 8px;
+  color: #536078;
+  background: #eef1f5;
+  border-color: #e2e6ec;
+  font-size: 7.5px;
+}
+
+.zen-panel .zen-tag-pill { vertical-align: 1px; }
+
+.zen-panel .zen-tag-pill--gold {
+  color: #8b681c;
+  background: #faf1d7;
+  border-color: #ecdba9;
+}
+
+.zen-panel .zen-tag-pill--cyan {
+  color: #34768c;
+  background: #e2f1f5;
+  border-color: #c6e2e9;
+}
+
+.zen-panel .zen-perk-cta {
+  padding: 13px 14px;
+  color: #f7f8fb;
+  background: #293145;
+  border-radius: 15px;
+  box-shadow: 0 7px 16px rgba(35, 43, 62, 0.18);
+  font-size: 10px;
+}
+
+.zen-panel .zen-perk-cta svg:first-child { color: #f1cf78; }
+
+/* Сезонные коллекции — preview + белая информационная часть */
+.zen-season-deck {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.zen-season-card {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #dfe4eb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(31, 38, 55, 0.05);
+}
+
+.zen-season-card.is-active {
+  border-color: #43516d;
+  box-shadow: 0 0 0 1px #43516d, 0 7px 16px rgba(31, 38, 55, 0.12);
+}
+
+.zen-season-card__preview {
+  position: relative;
+  height: 112px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.zen-season-card__preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 78% 20%, rgba(255, 255, 255, 0.3), transparent 32%),
+    radial-gradient(circle at 20% 100%, rgba(255, 255, 255, 0.12), transparent 46%);
+}
+
+.zen-season-card__preview::after {
+  content: '';
+  position: absolute;
+  right: -18px;
+  bottom: -28px;
+  width: 92px;
+  height: 92px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 12px rgba(255, 255, 255, 0.035),
+    0 0 0 26px rgba(255, 255, 255, 0.025);
+}
+
+.zen-season-card__badge {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 1;
+  padding: 3px 6px;
+  border-radius: 5px;
+  background: rgba(5, 8, 18, 0.46);
+  font-size: 6.5px;
+  letter-spacing: 0.06em;
+}
+
+.zen-season-card__pill {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 1;
+  padding: 3px 6px;
+  font-size: 6px;
+  box-shadow: none;
+}
+
+.zen-season-card__name {
+  position: absolute;
+  right: 10px;
+  bottom: 11px;
+  left: 10px;
+  z-index: 1;
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.3;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.zen-season-card__info { padding: 10px; }
+
+.zen-season-card__sub {
+  display: -webkit-box;
+  min-height: 40px;
+  margin: 0;
+  overflow: hidden;
+  color: #7d8594;
+  font-size: 9.5px;
+  line-height: 1.4;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.zen-season-card__bottom {
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.zen-season-card__palette { gap: 4px; }
+
+.zen-season-card__palette span {
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgba(36, 43, 58, 0.12);
+}
+
+.zen-season-card__fx {
+  max-width: 78px;
+  color: #8b929f;
+  font-size: 7.5px;
+  line-height: 1.25;
+}
+
+/* Дуга рангов и большая 3D-гема */
+.zen-rank-arc {
+  margin: -8px -6px 0;
+}
+
+.zen-rank-arc__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.zen-rank-arc__dot {
+  fill: #737b8e;
+  stroke: #1b1c28;
+  stroke-width: 2;
+}
+
+.zen-rank-arc__dot--active {
+  fill: #d9f6ff;
+  stroke: #73c9ee;
+  filter: drop-shadow(0 0 5px rgba(114, 211, 250, 0.8));
+}
+
+.zen-rank-arc__lbl {
+  fill: #7f8698;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.zen-rank-arc__lbl--active { fill: #eef8ff; }
+
+.zen-rank-gem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -4px 0 24px;
+  text-align: center;
+  isolation: isolate;
+}
+
+.zen-rank-gem::before {
+  content: '';
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  z-index: -1;
+  width: 230px;
+  height: 160px;
+  background: radial-gradient(ellipse, rgba(86, 189, 239, 0.17) 0%, transparent 67%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.zen-rank-gem::after {
+  content: '';
+  position: absolute;
+  top: 172px;
+  left: 50%;
+  z-index: -1;
+  width: 190px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(116, 205, 243, 0.18) 0%, transparent 70%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.zen-rank-gem > img {
+  display: block;
+  width: 190px;
+  height: 190px;
+  margin-bottom: -4px;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 16px rgba(77, 183, 235, 0.32))
+    drop-shadow(0 16px 18px rgba(0, 0, 0, 0.36));
+  animation: zenGemFloat 4.2s ease-in-out infinite;
+}
+
+.zen-rank-gem__title {
+  color: #f3f5fb;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.zen-rank-gem__sub {
+  margin-top: 7px;
+  color: #8e96aa;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.zen-rank-gem__bar {
+  width: min(240px, 78%);
+  height: 5px;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.zen-rank-gem__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #71c7eb, #c3efff);
+  box-shadow: 0 0 10px rgba(113, 199, 235, 0.5);
+}
+
+.zen-rank-gem__hint {
+  margin-top: 8px;
+  color: #828b9f;
+  font-size: 10px;
+}
+
+.zen-rank-priv {
+  padding: 19px 16px 17px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.zen-rank-priv__title {
+  color: #eff1f7;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.zen-rank-priv__sub {
+  margin-top: 5px;
+  color: #7f8799;
+  font-size: 10.5px;
+}
+
+.zen-rank-priv__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 13px;
+  margin-top: 20px;
+}
+
+.zen-rank-priv__item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-content: start;
+  column-gap: 9px;
+  opacity: 0.38;
+}
+
+.zen-rank-priv__item.unlocked { opacity: 1; }
+
+.zen-rank-priv__icon {
+  grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #dce7f2;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.zen-rank-priv__name {
+  align-self: center;
+  color: #e4e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.zen-rank-priv__desc {
+  margin-top: 4px;
+  color: #7d8597;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+@media (max-width: 420px) {
+  html:not(.light) .zen-user-card .zen-user-info { margin-right: 60px; }
+  html:not(.light) .zen-user-card .zen-user-name { font-size: 16px; }
+}
+
+@media (max-width: 359px) {
+  html:not(.light) .zen-user-card { padding-right: 14px; padding-left: 14px; }
+  html:not(.light) .zen-user-card .zen-user-avatar-wrap { width: 48px; height: 48px; }
+  html:not(.light) .zen-user-card .zen-user-info { margin-right: 44px; }
+  html:not(.light) .zen-user-card .zen-user-name { font-size: 14.5px; }
+  html:not(.light) .zen-user-card .zen-copy-btn span { display: none; }
+  .zen-user-gem { top: 0; right: -2px; width: 76px; height: 76px; }
+  .zen-upgrade-btn { padding: 9px 11px; }
+  .zen-shortcut__label { font-size: 8px; }
+  .zen-panel { padding-right: 10px; padding-left: 10px; }
+  .zen-panel .zen-tabs { margin-right: -10px; margin-left: -10px; }
+  .zen-panel .zen-set-row__value { display: none; }
+  .zen-season-card__name { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zen-user-gem,
+  .zen-rank-gem > img { animation: none; }
 }

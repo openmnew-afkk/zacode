@@ -23,7 +23,6 @@ import {
   Newspaper,
   LifeBuoy,
   Gift,
-  Gem,
   Smartphone,
   HardDrive,
   Cloud,
@@ -262,6 +261,13 @@ const PRO_PERKS: ProPerk[] = [
   { icon: Palette, title: 'Атмосферы', sub: 'Все сезонные коллекции эффектов', value: '4+', tint: 'zen-perk-card__icon--cyan' },
   { icon: Gift, title: 'Закрытые подборки', sub: 'Коллекции и премьеры недели', value: 'PRO', tint: 'zen-perk-card__icon--amber' },
   { icon: Crown, title: 'Золотой статус', sub: 'Гем-карточка и бейдж в профиле', value: 'GOLD', tint: 'zen-perk-card__icon--gold' },
+];
+
+const RANK_ARC = [
+  { x: 20, y: 26, lvl: 1 },
+  { x: 113, y: 59, lvl: 6 },
+  { x: 207, y: 59, lvl: 13 },
+  { x: 300, y: 26, lvl: 21 },
 ];
 
 interface LibraryItem {
@@ -910,6 +916,7 @@ export const ProfilePage: React.FC = () => {
 
   /* ══════════════ ПОДСТРАНИЦА: РАНГ И ПРИВИЛЕГИИ ══════════════ */
   if (subPage === 'rank') {
+    const rankTierIdx = cineLevel >= 21 ? 3 : cineLevel >= 13 ? 2 : cineLevel >= 6 ? 1 : 0;
     return (
       <div className="zen-subpage">
         <header className="zen-subpage__nav">
@@ -929,20 +936,70 @@ export const ProfilePage: React.FC = () => {
         </header>
 
         <div className="zen-subpage__body">
-          {/* Карточка текущего ранга */}
-          <div className="zen-rank-hero">
-            <div className="zen-rank-hero__beam" />
-            <div className="zen-rank-hero__badge">УРОВЕНЬ {cineLevel}</div>
-            <h2 className="zen-rank-hero__title">{rankTitle}</h2>
-            <div className="zen-rank-hero__bar">
-              <div
-                className="zen-rank-hero__fill"
-                style={{ width: `${levelProgress}%` }}
-              />
+          {/* Дуга рангов (Tiering Detail) */}
+          <div className="zen-rank-arc">
+            <svg viewBox="0 0 320 104" className="zen-rank-arc__svg" aria-hidden="true">
+              <path d="M 20 26 Q 160 92 300 26" fill="none" stroke="rgba(255,255,255,0.14)" strokeWidth="2" />
+              {RANK_ARC.map((n, i) => {
+                const isCurrent = i === rankTierIdx;
+                return (
+                  <g key={n.lvl}>
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={isCurrent ? 7 : 4.5}
+                      className={`zen-rank-arc__dot ${isCurrent ? 'zen-rank-arc__dot--active' : ''}`}
+                    />
+                    <text
+                      x={n.x}
+                      y={n.y + 26}
+                      textAnchor="middle"
+                      className={`zen-rank-arc__lbl ${isCurrent ? 'zen-rank-arc__lbl--active' : ''}`}
+                    >
+                      L{n.lvl}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+
+          {/* Большая гема ранга */}
+          <div className="zen-rank-gem">
+            <img src={effectivePremium ? './gem-gold.webp' : './gem-azure.webp'} alt="" />
+            <div className="zen-rank-gem__title">{rankTitle}</div>
+            <div className="zen-rank-gem__sub">УРОВЕНЬ {cineLevel} · {totalXp} XP</div>
+            <div className="zen-rank-gem__bar">
+              <div className="zen-rank-gem__fill" style={{ width: `${levelProgress}%` }} />
             </div>
-            <div className="zen-rank-hero__xp">
-              <span>{totalXp % 140} XP</span>
-              <span>140 XP до следующего ранга</span>
+            <div className="zen-rank-gem__hint">Ещё {140 - (totalXp % 140)} XP до LVL {cineLevel + 1}</div>
+          </div>
+
+          {/* Карточка привилегий рангов */}
+          <div className="zen-rank-priv">
+            <div className="zen-rank-priv__title">Привилегии рангов</div>
+            <div className="zen-rank-priv__sub">4 уровня наград за кино-активность</div>
+            <div className="zen-rank-priv__grid">
+              <div className={`zen-rank-priv__item ${cineLevel >= 1 ? 'unlocked' : ''}`}>
+                <span className="zen-rank-priv__icon"><Tv size={17} /></span>
+                <span className="zen-rank-priv__name">Кинолюбитель · L1</span>
+                <span className="zen-rank-priv__desc">HD доступ, облако Telegram и синхронизация дневника</span>
+              </div>
+              <div className={`zen-rank-priv__item ${cineLevel >= 6 ? 'unlocked' : ''}`}>
+                <span className="zen-rank-priv__icon"><Star size={17} /></span>
+                <span className="zen-rank-priv__name">Синефил · L6</span>
+                <span className="zen-rank-priv__desc">Неоновый градиент никнейма, эксклюзивные темы профиля</span>
+              </div>
+              <div className={`zen-rank-priv__item ${cineLevel >= 13 ? 'unlocked' : ''}`}>
+                <span className="zen-rank-priv__icon"><Crown size={17} /></span>
+                <span className="zen-rank-priv__name">Кинокритик · L13</span>
+                <span className="zen-rank-priv__desc">Золотой значок Критика в дневнике, приоритет 4K Ultra HD</span>
+              </div>
+              <div className={`zen-rank-priv__item ${cineLevel >= 21 ? 'unlocked' : ''}`}>
+                <span className="zen-rank-priv__icon"><Sparkles size={17} /></span>
+                <span className="zen-rank-priv__name">Легенда Кино · L21</span>
+                <span className="zen-rank-priv__desc">Перламутровая рамка аватара, статус VIP амбассадора</span>
+              </div>
             </div>
           </div>
 
@@ -982,40 +1039,6 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
 
-          <div className="zen-section-header">РЕЙТИНГОВЫЕ ПРИВИЛЕГИИ</div>
-          <div className="zen-tiers">
-            <div className={`zen-tier ${cineLevel >= 1 ? 'unlocked' : ''}`}>
-              <div className="zen-tier__head">
-                <span className="zen-tier__lvl">1–5 LVL</span>
-                <span className="zen-tier__name">Кинолюбитель</span>
-              </div>
-              <p className="zen-tier__desc">Базовый HD доступ, сохранение в облако Telegram и синхронизация.</p>
-            </div>
-
-            <div className={`zen-tier ${cineLevel >= 6 ? 'unlocked' : ''}`}>
-              <div className="zen-tier__head">
-                <span className="zen-tier__lvl">6–12 LVL</span>
-                <span className="zen-tier__name">Синефил</span>
-              </div>
-              <p className="zen-tier__desc">Кастомный неоновый градиент никнейма, эксклюзивные кино-темы профиля.</p>
-            </div>
-
-            <div className={`zen-tier ${cineLevel >= 13 ? 'unlocked' : ''}`}>
-              <div className="zen-tier__head">
-                <span className="zen-tier__lvl">13–20 LVL</span>
-                <span className="zen-tier__name">Кинокритик</span>
-              </div>
-              <p className="zen-tier__desc">Золотой значок Критика в дневнике, автовыбор высшего битрейта (4K Ultra HD).</p>
-            </div>
-
-            <div className={`zen-tier ${cineLevel >= 21 ? 'unlocked' : ''}`}>
-              <div className="zen-tier__head">
-                <span className="zen-tier__lvl">21–30 LVL</span>
-                <span className="zen-tier__name">Легенда Кино</span>
-              </div>
-              <p className="zen-tier__desc">Перламутровая рамка аватара, бессрочный статус VIP амбассадора ZENOVA.</p>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -1173,18 +1196,19 @@ export const ProfilePage: React.FC = () => {
             </div>
           </div>
           <span className="zen-user-gem" aria-hidden="true">
-            <Gem size={44} strokeWidth={1.3} />
+            <img src={effectivePremium ? './gem-gold.webp' : './gem-azure.webp'} alt="" />
           </span>
         </div>
 
         <div className="zen-user-progress-row">
           <div className="zen-user-rank-bar">
+            <div className="zen-user-rank-hint">Ещё {140 - (totalXp % 140)} XP до LVL {cineLevel + 1}</div>
             <div className="zen-user-rank-track">
               <div className="zen-user-rank-fill" style={{ width: `${levelProgress}%` }} />
             </div>
             <div className="zen-user-rank-labels">
-              <span className="zen-user-rank-title">Ранг: {rankTitle}</span>
-              <span className="zen-user-rank-pts">Ещё {140 - (totalXp % 140)} XP · до LVL {cineLevel + 1}</span>
+              <span className="zen-user-rank-title">LVL {cineLevel} · {rankTitle}</span>
+              <span className="zen-user-rank-pts">LVL {cineLevel + 1}</span>
             </div>
           </div>
           <button
@@ -1260,25 +1284,27 @@ export const ProfilePage: React.FC = () => {
       {/* ── Круговые быстрые разделы ── */}
       <div className="zen-shortcuts">
         <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('library'); }}>
-          <span className="zen-shortcut__icon zen-shortcut__icon--emerald"><BookOpen size={20} /></span>
+          <span className="zen-shortcut__icon"><BookOpen size={20} /></span>
           <span className="zen-shortcut__label">Кинотека</span>
           {totalSavedCount > 0 && <span className="zen-shortcut__badge">{totalSavedCount}</span>}
         </button>
         <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('rank'); }}>
-          <span className="zen-shortcut__icon zen-shortcut__icon--amber"><Trophy size={20} /></span>
+          <span className="zen-shortcut__icon"><Trophy size={20} /></span>
           <span className="zen-shortcut__label">Рейтинг</span>
         </button>
         <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('arcade'); }}>
-          <span className="zen-shortcut__icon zen-shortcut__icon--orange"><Gamepad2 size={20} /></span>
+          <span className="zen-shortcut__icon"><Gamepad2 size={20} /></span>
           <span className="zen-shortcut__label">Аркада</span>
           {arcadeBest > 0 && <span className="zen-shortcut__badge">{arcadeBest}</span>}
         </button>
         <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('atmosphere'); }}>
-          <span className="zen-shortcut__icon zen-shortcut__icon--cyan"><Palette size={20} /></span>
+          <span className="zen-shortcut__icon"><Palette size={20} /></span>
           <span className="zen-shortcut__label">Атмосфера</span>
         </button>
       </div>
 
+      {/* ── Светлая панель с табами (Tiering) ── */}
+      <div className="zen-panel">
       {/* ── Таби в стиле Tiering ── */}
       <div className="zen-tabs" role="tablist">
         <button
@@ -1507,20 +1533,21 @@ export const ProfilePage: React.FC = () => {
                 <div
                   key={t.id}
                   className={`zen-season-card ${active ? 'is-active' : ''}`}
-                  style={{ background: t.gradient }}
                   onClick={() => { haptic('light'); switchSeason(t.id); }}
                 >
-                  <div className="zen-season-card__top">
+                  <div className="zen-season-card__preview" style={{ background: t.gradient }}>
                     <span className="zen-season-card__badge">{t.badge}</span>
                     {active && <span className="zen-season-card__pill">АКТИВНА</span>}
+                    <h3 className="zen-season-card__name">{t.name}</h3>
                   </div>
-                  <h3 className="zen-season-card__name">{t.name}</h3>
-                  <p className="zen-season-card__sub">{t.sub}</p>
-                  <div className="zen-season-card__bottom">
-                    <div className="zen-season-card__palette">
-                      {t.palette.map((c) => <span key={c} style={{ background: c }} />)}
+                  <div className="zen-season-card__info">
+                    <p className="zen-season-card__sub">{t.sub}</p>
+                    <div className="zen-season-card__bottom">
+                      <div className="zen-season-card__palette">
+                        {t.palette.map((c) => <span key={c} style={{ background: c }} />)}
+                      </div>
+                      <span className="zen-season-card__fx">{t.fxName}</span>
                     </div>
-                    <span className="zen-season-card__fx">{t.fxName}</span>
                   </div>
                 </div>
               );
@@ -1528,6 +1555,8 @@ export const ProfilePage: React.FC = () => {
           </div>
         </section>
       )}
+
+      </div>
 
       {/* Подпись версии */}
       <footer className="zen-set-footer">
