@@ -463,11 +463,10 @@ const MovieDetailPage: React.FC = () => {
       season,
       episode,
     });
-    const globalIndex = options.findIndex((option) => option.provider === 'GlobalUS');
     setCurrentSeason(season);
     setCurrentEpisode(episode);
     setWatchOptions(options);
-    setWatchIdx(globalIndex >= 0 ? globalIndex : 0);
+    setWatchIdx((prev) => (prev >= 0 && prev < options.length ? prev : 0));
     haptic('light');
   };
 
@@ -1188,43 +1187,82 @@ const MovieDetailPage: React.FC = () => {
             {isSerial && (
               <div className="dp-episode-nav">
                 <div className="dp-episode-nav__top">
-                  <div>
-                    <strong>Сезон и серия</strong>
-                    <span>Внешний выбор серии использует GlobalUS</span>
+                  <span className="dp-episode-badge">
+                    Сезон {currentSeason} · Серия {currentEpisode}
+                  </span>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={autoNext}
+                    className={`dp-auto-toggle ${autoNext ? 'is-on' : ''}`}
+                    onClick={() => {
+                      const next = !autoNext;
+                      haptic('light');
+                      setAutoNext(next);
+                      try { localStorage.setItem('zenova_auto_next', next ? '1' : '0'); } catch {}
+                    }}
+                  >
+                    <span className="dp-auto-toggle__label">Автопереход</span>
+                    <span className="dp-auto-toggle__track" aria-hidden="true">
+                      <span className="dp-auto-toggle__thumb" />
+                    </span>
+                  </button>
+                </div>
+
+                <div className="dp-episode-nav__bar">
+                  <button
+                    type="button"
+                    className="dp-ep-step"
+                    onClick={() => goToAdjacentEpisode(-1)}
+                    aria-label="Предыдущая серия"
+                  >
+                    ‹
+                  </button>
+
+                  <div className="dp-ep-selects">
+                    <label className="dp-ep-pill">
+                      <span>Сезон</span>
+                      <select
+                        value={currentSeason}
+                        onChange={(event) => openEpisode(Number(event.target.value), 1)}
+                      >
+                        {movie.seasons?.filter((season) => season.episodes_count > 0).map((season) => (
+                          <option key={season.id} value={season.season_number}>
+                            {season.season_number}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <span className="dp-ep-divider" aria-hidden="true" />
+
+                    <label className="dp-ep-pill">
+                      <span>Серия</span>
+                      <select
+                        value={currentEpisode}
+                        onChange={(event) => openEpisode(currentSeason, Number(event.target.value))}
+                      >
+                        {Array.from(
+                          { length: movie.seasons?.find((season) => season.season_number === currentSeason)?.episodes_count || 1 },
+                          (_, index) => index + 1
+                        ).map((episode) => (
+                          <option key={episode} value={episode}>
+                            {episode}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
-                  <label className="dp-auto-next">
-                    <input
-                      type="checkbox"
-                      checked={autoNext}
-                      onChange={(event) => {
-                        setAutoNext(event.target.checked);
-                        try { localStorage.setItem('zenova_auto_next', event.target.checked ? '1' : '0'); } catch {}
-                      }}
-                    />
-                    <span>Автоследующая</span>
-                  </label>
+
+                  <button
+                    type="button"
+                    className="dp-ep-step dp-ep-step--next"
+                    onClick={() => goToAdjacentEpisode(1)}
+                    aria-label="Следующая серия"
+                  >
+                    ›
+                  </button>
                 </div>
-                <div className="dp-episode-nav__controls">
-                  <button type="button" onClick={() => goToAdjacentEpisode(-1)} aria-label="Предыдущая серия">Назад</button>
-                  <label>
-                    <span>Сезон</span>
-                    <select value={currentSeason} onChange={(event) => openEpisode(Number(event.target.value), 1)}>
-                      {movie.seasons?.filter((season) => season.episodes_count > 0).map((season) => (
-                        <option key={season.id} value={season.season_number}>{season.season_number}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    <span>Серия</span>
-                    <select value={currentEpisode} onChange={(event) => openEpisode(currentSeason, Number(event.target.value))}>
-                      {Array.from({ length: movie.seasons?.find((season) => season.season_number === currentSeason)?.episodes_count || 1 }, (_, index) => index + 1).map((episode) => (
-                        <option key={episode} value={episode}>{episode}</option>
-                      ))}
-                    </select>
-                  </label>
-                  <button type="button" className="dp-episode-next" onClick={() => goToAdjacentEpisode(1)}>Следующая</button>
-                </div>
-                <p>Автопереход сработает, если источник пришлёт событие окончания серии. Иначе нажмите «Следующая» — ZENOVA не может читать состояние произвольного стороннего плеера.</p>
               </div>
             )}
 

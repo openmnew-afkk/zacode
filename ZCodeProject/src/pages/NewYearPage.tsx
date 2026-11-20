@@ -68,7 +68,15 @@ const NewYearPage: React.FC = () => {
 
   useEffect(() => {
     const timer = window.setInterval(() => setCountdown(getCountdown()), 1000);
-    return () => window.clearInterval(timer);
+    const onSync = (e: Event) => {
+      const detail = (e as CustomEvent<{ tickets?: number }>).detail;
+      if (typeof detail?.tickets === 'number') setTickets(detail.tickets);
+    };
+    window.addEventListener('zenova-giftfest-sync', onSync);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('zenova-giftfest-sync', onSync);
+    };
   }, []);
 
   useEffect(() => {

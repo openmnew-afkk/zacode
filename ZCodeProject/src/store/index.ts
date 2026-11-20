@@ -56,6 +56,44 @@ const ADMIN_USERNAMES = ['ZenovaAdmin', 'admin'];
 /* ── Премиум: срок действия ── */
 const PREMIUM_EXPIRY_KEY = 'tc_premium_expiry';
 
+interface PremiumSyncState {
+  active: boolean;
+  expiry: number | null;
+  updatedAt?: number;
+}
+
+function readLocalExpiryNumber(): number | null {
+  try {
+    const raw = localStorage.getItem(PREMIUM_EXPIRY_KEY);
+    if (!raw) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) && n > 0 ? n : null;
+  } catch {
+    return null;
+  }
+}
+
+function persistPremiumState(active: boolean, expiry: number | null, syncCloud = true): void {
+  try {
+    if (active) {
+      localStorage.setItem('tc_premium', 'true');
+      if (expiry !== null) {
+        localStorage.setItem(PREMIUM_EXPIRY_KEY, String(expiry));
+      } else {
+        localStorage.removeItem(PREMIUM_EXPIRY_KEY);
+      }
+    } else {
+      localStorage.removeItem('tc_premium');
+      localStorage.removeItem(PREMIUM_EXPIRY_KEY);
+    }
+  } catch {}
+  const payload: PremiumSyncState = { active, expiry, updatedAt: Date.now() };
+  idbSet('tc_premium_state', payload);
+  if (syncCloud) {
+    tgCloudSaveChunked('znv_prem', payload);
+  }
+}
+
 /** Премиум активен = флаг стоит И (нет срока ИЛИ срок не истёк) */
 function computePremium(flag: boolean): { isPremium: boolean; expiry: number | null } {
   let expiry: number | null = null;
@@ -377,6 +415,36 @@ export const useStore = create<AppState>((set, get) => ({
       idbSet('tc_tracked', mergedTracked);
       tgCloudSaveChunked('znv_trck', compactTrackedMap(mergedTracked));
       set({ tracked: mergedTracked });
+
+      /* 4. Восстановление и синхронизация PRO-подписки (максимальный срок из local + IDB + TG Cloud) */
+      const now = Date.now();
+      const idbPrem = await idbGet<PremiumSyncState>('tc_premium_state');
+      const cloudPrem = await tgCloudLoadChunked<PremiumSyncState | null>('znv_prem', null);
+      const localActive = get().isPremium;
+      const localExpiry = get().premiumExpiry ?? readLocalExpiryNumber();
+
+      const hasForever =
+        (localActive && localExpiry === null) ||
+        (idbPrem?.active === true && idbPrem.expiry === null) ||
+        (cloudPrem?.active === true && cloudPrem.expiry === null);
+
+      if (hasForever) {
+        persistPremiumState(true, null, !(cloudPrem?.active === true && cloudPrem.expiry === null));
+        set({ isPremium: true, premiumExpiry: null });
+      } else {
+        const candidates = [
+          localActive && localExpiry && localExpiry > now ? localExpiry : 0,
+          readLocalExpiryNumber() ?? 0,
+          idbPrem?.active && idbPrem.expiry && idbPrem.expiry > now ? idbPrem.expiry : 0,
+          cloudPrem?.active && cloudPrem.expiry && cloudPrem.expiry > now ? cloudPrem.expiry : 0,
+        ].filter((v) => v > now);
+
+        if (candidates.length > 0) {
+          const maxExpiry = Math.max(...candidates);
+          persistPremiumState(true, maxExpiry, maxExpiry !== cloudPrem?.expiry);
+          set({ isPremium: true, premiumExpiry: maxExpiry });
+        }
+      }
     } catch (e) {
       console.warn('[ZenovaCloud] Error during syncUserDataCloud:', e);
     }
@@ -400,30 +468,36 @@ export const useStore = create<AppState>((set, get) => ({
     return { isPremium: state.isPremium, premiumExpiry: state.expiry };
   })(),
   setPremium: (val: boolean) => {
-    save('tc_premium', val);
     if (!val) {
-      try { localStorage.removeItem(PREMIUM_EXPIRY_KEY); } catch {}
+      persistPremiumState(false, null);
       set({ isPremium: false, premiumExpiry: null });
     } else {
+      const current = get().premiumExpiry;
+      persistPremiumState(true, current);
       set({ isPremium: true });
     }
   },
   activatePremiumDays: (days: number) => {
-    // Если премиум уже активен — продлеваем от текущего срока
-    const current = get().premiumExpiry;
-    const base = current && current > Date.now() ? current : Date.now();
+    const now = Date.now();
+    const stateExpiry = get().premiumExpiry;
+    // Если уже активен бессрочный PRO — не затираем его конечным сроком
+    if (get().isPremium && stateExpiry === null && readLocalExpiryNumber() === null) {
+      persistPremiumState(true, null);
+      set({ isPremium: true, premiumExpiry: null });
+      return;
+    }
+    const lsExpiry = readLocalExpiryNumber();
+    const base = Math.max(
+      now,
+      stateExpiry && stateExpiry > now ? stateExpiry : 0,
+      lsExpiry && lsExpiry > now ? lsExpiry : 0
+    );
     const expiry = base + days * 24 * 60 * 60 * 1000;
-    try {
-      localStorage.setItem(PREMIUM_EXPIRY_KEY, String(expiry));
-      localStorage.setItem('tc_premium', 'true');
-    } catch {}
+    persistPremiumState(true, expiry);
     set({ isPremium: true, premiumExpiry: expiry });
   },
   activatePremiumForever: () => {
-    try {
-      localStorage.setItem('tc_premium', 'true');
-      localStorage.removeItem(PREMIUM_EXPIRY_KEY);
-    } catch {}
+    persistPremiumState(true, null);
     set({ isPremium: true, premiumExpiry: null });
   },
 
@@ -557,10 +631,25 @@ export const useStore = create<AppState>((set, get) => ({
   role: load<'admin' | 'moderator' | null>('tc_role', null),
   setRole: (role) => { save('tc_role', role); set({ role }); },
   applyRemotePremium: (expiry) => {
-    // Премиум с сервера: только в state (не в localStorage) —
-    // при следующем запуске конфиг подтянется заново
-    if (expiry === null || expiry > Date.now()) {
-      set({ isPremium: true, premiumExpiry: expiry });
+    const now = Date.now();
+    const stateExpiry = get().premiumExpiry;
+    const lsExpiry = readLocalExpiryNumber();
+    const isForeverLocal = get().isPremium && stateExpiry === null && lsExpiry === null;
+
+    if (expiry === null || isForeverLocal) {
+      persistPremiumState(true, null);
+      set({ isPremium: true, premiumExpiry: null });
+      return;
+    }
+
+    if (expiry > now) {
+      const bestExpiry = Math.max(
+        expiry,
+        stateExpiry && stateExpiry > now ? stateExpiry : 0,
+        lsExpiry && lsExpiry > now ? lsExpiry : 0
+      );
+      persistPremiumState(true, bestExpiry);
+      set({ isPremium: true, premiumExpiry: bestExpiry });
     }
   },
   applyBackendConfig: (cfg, myName) => {

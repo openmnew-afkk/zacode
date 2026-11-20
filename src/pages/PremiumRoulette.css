@@ -1,59 +1,59 @@
 .pm-roulette {
   width: 100%;
   text-align: center;
-  padding: 24px 16px 20px;
+  padding: 15px 14px 14px;
   background:
-    radial-gradient(circle at 50% 24%, rgba(231, 199, 137, 0.09), transparent 54%),
-    #111018;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 26px;
-  box-shadow: 0 22px 52px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    radial-gradient(circle at 50% 20%, rgba(125, 211, 252, 0.08), transparent 56%),
+    rgba(12, 18, 30, 0.78);
+  border: 1px solid rgba(186, 230, 253, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 .pm-roulette__head {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 22px;
+  gap: 4px;
+  margin-bottom: 13px;
 }
 
 .pm-roulette__badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #f4dfae;
-  padding: 5px 11px;
-  background: rgba(212, 175, 100, 0.12);
-  border: 1px solid rgba(231, 199, 137, 0.26);
+  color: #e0f2fe;
+  padding: 4px 10px;
+  background: rgba(125, 211, 252, 0.12);
+  border: 1px solid rgba(186, 230, 253, 0.24);
   border-radius: 999px;
 }
 
 .pm-roulette__title {
-  color: #ffffff;
+  color: #f8fbff;
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 18px;
   margin: 0;
   letter-spacing: -0.025em;
 }
 
 .pm-roulette__desc {
-  color: rgba(255, 255, 255, 0.54);
-  font-size: 12px;
-  line-height: 1.48;
+  color: rgba(203, 222, 244, 0.62);
+  font-size: 11px;
+  line-height: 1.4;
   margin: 0;
-  max-width: 315px;
+  max-width: 290px;
 }
 
 .pm-roulette__stage {
   position: relative;
-  width: 286px;
-  height: 286px;
-  margin: 0 auto 22px;
+  width: 226px;
+  height: 226px;
+  margin: 0 auto 14px;
   display: grid;
   place-items: center;
 }
@@ -64,8 +64,8 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 6;
-  width: 26px;
-  height: 30px;
+  width: 22px;
+  height: 26px;
   display: grid;
   place-items: center;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.72));
@@ -74,23 +74,23 @@
 .pm-roulette__pointer span {
   width: 0;
   height: 0;
-  border-left: 11px solid transparent;
-  border-right: 11px solid transparent;
-  border-top: 23px solid #f4dfae;
+  border-left: 9px solid transparent;
+  border-right: 9px solid transparent;
+  border-top: 19px solid #f4dfae;
 }
 
 .pm-roulette__bezel {
   position: relative;
-  width: 282px;
-  height: 282px;
+  width: 222px;
+  height: 222px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: radial-gradient(circle at 30% 25%, #342c42, #14121b 75%);
-  border: 2.5px solid rgba(231, 199, 137, 0.55);
+  background: radial-gradient(circle at 30% 25%, #1d283d, #0a0f1c 75%);
+  border: 2px solid rgba(231, 199, 137, 0.52);
   box-shadow:
-    0 22px 48px rgba(0, 0, 0, 0.7),
-    0 0 28px rgba(212, 175, 100, 0.14),
+    0 16px 36px rgba(0, 0, 0, 0.65),
+    0 0 24px rgba(125, 211, 252, 0.12),
     inset 0 2px 8px rgba(255, 255, 255, 0.14);
 }
 
@@ -120,8 +120,8 @@
 }
 
 .pm-roulette__wheel {
-  width: 252px;
-  height: 252px;
+  width: 196px;
+  height: 196px;
   border-radius: 50%;
   position: relative;
   transition: transform 4.5s cubic-bezier(0.11, 0.8, 0.1, 1);
@@ -139,18 +139,18 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 58px;
-  height: 58px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   display: grid;
   place-items: center;
   color: #171008;
   font-family: var(--font-display);
-  font-size: 10.5px;
+  font-size: 9.5px;
   font-weight: 900;
   letter-spacing: 0.08em;
   background: linear-gradient(135deg, #f4dfae 0%, #c89f54 100%);
-  border: 3px solid #16141f;
+  border: 2.5px solid #0e1422;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.65);
   cursor: pointer;
 }
@@ -160,24 +160,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .pm-roulette__spin {
   width: 100%;
-  max-width: 300px;
-  min-height: 48px;
-  padding: 12px 22px;
-  border-radius: 15px;
+  max-width: 280px;
+  min-height: 42px;
+  padding: 10px 18px;
+  border-radius: 13px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   background: linear-gradient(135deg, #f4dfae 0%, #c89f54 100%);
   color: #171008;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 850;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.55);
   transition: transform 0.14s ease, filter 0.14s ease;
 }
 .pm-roulette__spin:active { transform: scale(0.97); }
@@ -185,17 +185,17 @@
 
 .pm-roulette__spin-stars {
   width: 100%;
-  max-width: 300px;
-  height: 40px;
-  border-radius: 13px;
+  max-width: 280px;
+  height: 36px;
+  border-radius: 11px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #f4dfae;
-  font-size: 12.5px;
+  background: rgba(224, 242, 254, 0.06);
+  border: 1px solid rgba(186, 230, 253, 0.14);
+  color: #e0f2fe;
+  font-size: 12px;
   font-weight: 750;
 }
 

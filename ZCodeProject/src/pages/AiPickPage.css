@@ -4,12 +4,12 @@
    ════════════════════════════════════════════════════════════════ */
 
 .orc {
-  --orc-tint: #fb7185;
+  --orc-tint: var(--accent, #7dd3fc);
   position: relative;
   min-height: 100vh;
   padding: 0 16px calc(var(--tabbar-h, 90px) + 24px);
-  background: #09090d;
-  color: #fff;
+  background: transparent;
+  color: var(--text);
   overflow-x: hidden;
 }
 

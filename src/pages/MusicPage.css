@@ -7,8 +7,8 @@
   position: relative;
   min-height: 100vh;
   padding: var(--header-safe-top, 56px) 16px calc(var(--tabbar-h, 90px) + 96px);
-  background: #09090d;
-  color: #f8fafc;
+  background: transparent;
+  color: var(--text);
   overflow-x: hidden;
   display: flex;
   flex-direction: column;

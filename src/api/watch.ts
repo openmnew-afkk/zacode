@@ -43,17 +43,21 @@ export function buildWatchOptions({
 
   const opts: WatchOption[] = [];
 
+  const epQsAmp = isSerial ? `&season=${season}&episode=${episode}` : '';
+  const epQsQ = isSerial ? `?season=${season}&episode=${episode}` : '';
+  const epShortQ = isSerial ? `?s=${season}&e=${episode}` : '';
+
   /* 1. Плеер 1 — СЕРВЕР №1 (главный студийный балансер: LostFilm, Red Head Sound, Резка, Дубляж) */
   opts.push({
     id: 'collaps',
     label: 'Плеер 1',
     sublabel: '⚡ Ultra HD 4K · Дубляж и студии (Основной)',
     url: cleanKp
-      ? `https://api.delivembed.cc/embed/kp/${cleanKp}?host=delivembed.cc`
+      ? `https://api.delivembed.cc/embed/kp/${cleanKp}?host=delivembed.cc${epQsAmp}`
       : isSerial
         ? cleanImdb
-          ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
-          : `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+          ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc${epQsAmp}`
+          : `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc${epQsAmp}`
         : cleanImdb
           ? `https://api.delivembed.cc/embed/imdb/${cleanImdb}?host=delivembed.cc`
           : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
@@ -70,11 +74,11 @@ export function buildWatchOptions({
     label: 'Плеер 2',
     sublabel: '🍿 Full HD · Все переводы (Резерв #1)',
     url: cleanKp
-      ? `https://voidboost.net/embed/${cleanKp}`
+      ? `https://voidboost.net/embed/${cleanKp}${epShortQ}`
       : cleanImdb
-        ? `https://voidboost.net/embed/${cleanImdb}`
+        ? `https://voidboost.net/embed/${cleanImdb}${epShortQ}`
         : isSerial
-          ? `https://voidboost.net/embed/tv/${cleanTmdb}`
+          ? `https://voidboost.net/embed/tv/${cleanTmdb}${epShortQ}`
           : `https://voidboost.net/embed/movie/${cleanTmdb}`,
     type: 'iframe',
     lang: 'ru',
@@ -89,11 +93,11 @@ export function buildWatchOptions({
     label: 'Плеер 3',
     sublabel: '✨ Full HD · Альтернативный поток (Резерв #2)',
     url: cleanKp
-      ? `https://stream.voidboost.cc/embed/${cleanKp}`
+      ? `https://stream.voidboost.cc/embed/${cleanKp}${epShortQ}`
       : cleanImdb
-        ? `https://stream.voidboost.cc/embed/${cleanImdb}`
+        ? `https://stream.voidboost.cc/embed/${cleanImdb}${epShortQ}`
         : isSerial
-          ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc`
+          ? `https://api.delivembed.cc/embed/tv/${cleanTmdb}?host=delivembed.cc${epQsAmp}`
           : `https://api.delivembed.cc/embed/movie/${cleanTmdb}?host=delivembed.cc`,
     type: 'iframe',
     lang: 'ru',
@@ -108,11 +112,11 @@ export function buildWatchOptions({
     label: 'Плеер 4',
     sublabel: '🎥 Скоростной видео-CDN · Full HD (Резерв #3)',
     url: cleanKp
-      ? `https://v1727192800.lumex.news/embed/${cleanKp}`
+      ? `https://v1727192800.lumex.news/embed/${cleanKp}${epQsQ}`
       : cleanImdb
-        ? `https://v1727192800.lumex.news/embed/${cleanImdb}`
+        ? `https://v1727192800.lumex.news/embed/${cleanImdb}${epQsQ}`
         : isSerial
-          ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}`
+          ? `https://v1727192800.lumex.news/embed/tv/${cleanTmdb}${epQsQ}`
           : `https://v1727192800.lumex.news/embed/movie/${cleanTmdb}`,
     type: 'iframe',
     lang: 'ru',
@@ -127,7 +131,7 @@ export function buildWatchOptions({
       id: 'kinobox',
       label: 'Плеер 5',
       sublabel: '🎬 Мульти-поток · HD (Резерв #4)',
-      url: `https://kinobox.tv/embed?kinopoisk=${cleanKp}`,
+      url: `https://kinobox.tv/embed?kinopoisk=${cleanKp}${epQsAmp}`,
       type: 'iframe',
       lang: 'ru',
       provider: 'Kinobox',

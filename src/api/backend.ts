@@ -132,14 +132,19 @@ const AI_LOCAL_USAGE_KEY = 'zenova_ai_local_usage_v1';
 
 function readLocalPremium(): { premium: boolean; expiry: number | null } {
   try {
-    const active = localStorage.getItem('tc_premium') === '1';
+    const flag = localStorage.getItem('tc_premium');
     const rawExp = localStorage.getItem('tc_premium_expiry');
     const expiry = rawExp ? Number(rawExp) : null;
-    if (active && expiry && Date.now() > expiry) {
-      localStorage.setItem('tc_premium', '0');
+    const validExpiry = expiry !== null && Number.isFinite(expiry) && expiry > 0 ? expiry : null;
+
+    if (validExpiry && Date.now() > validExpiry) {
+      localStorage.removeItem('tc_premium');
+      localStorage.removeItem('tc_premium_expiry');
       return { premium: false, expiry: null };
     }
-    return { premium: active, expiry: Number.isFinite(expiry) ? expiry : null };
+
+    const active = flag === 'true' || flag === '1' || (validExpiry !== null && validExpiry > Date.now());
+    return { premium: active, expiry: validExpiry };
   } catch {
     return { premium: false, expiry: null };
   }

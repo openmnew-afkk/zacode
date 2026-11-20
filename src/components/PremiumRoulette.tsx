@@ -83,7 +83,19 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({
         if (config.prizes?.length >= 5) setPrizes(config.prizes);
       })
       .catch(() => {});
+
+    const onSync = (e: Event) => {
+      const detail = (e as CustomEvent<{ tickets?: number; lastFreeSpinAt?: number }>).detail;
+      if (!detail) return;
+      if (typeof detail.tickets === 'number') setLocalTickets(detail.tickets);
+      if (typeof detail.lastFreeSpinAt === 'number' && detail.lastFreeSpinAt > 0) {
+        setLastFreeAt((prev) => Math.max(prev, detail.lastFreeSpinAt!));
+      }
+    };
+    window.addEventListener('zenova-giftfest-sync', onSync);
+
     return () => {
+      window.removeEventListener('zenova-giftfest-sync', onSync);
       if (finishTimer.current) window.clearTimeout(finishTimer.current);
     };
   }, []);
@@ -92,6 +104,7 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({
     setLocalTickets(val);
     try { localStorage.setItem(TICKETS_KEY, String(val)); } catch {}
     onTicketsChange?.(val);
+    window.dispatchEvent(new CustomEvent('zenova-giftfest-sync', { detail: { tickets: val } }));
   };
 
   const count = prizes.length || 6;
@@ -112,8 +125,8 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({
       setShowPrizeModal(true);
       if (spin.days && spin.days > 0) {
         activatePremiumDays(spin.days);
-        const newExpiry = Date.now() + spin.days * DAY_MS;
-        onPremium?.(spin.expiry || newExpiry);
+        const updatedExpiry = useStore.getState().premiumExpiry;
+        onPremium?.(updatedExpiry ?? spin.expiry ?? null);
       } else if (spin.expiry) {
         onPremium?.(spin.expiry);
       }
@@ -166,6 +179,7 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({
       const now = Date.now();
       setLastFreeAt(now);
       try { localStorage.setItem(FREE_SPIN_KEY, String(now)); } catch {}
+      window.dispatchEvent(new CustomEvent('zenova-giftfest-sync', { detail: { lastFreeSpinAt: now } }));
       const spin = spinRouletteLocal(prizes);
       animateSpinResult(spin, 0);
       return;
@@ -252,7 +266,7 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({
             <span
               key={idx}
               className="pm-roulette__bulb"
-              style={{ transform: `rotate(${idx * 15}deg) translateY(-136px)` }}
+              style={{ transform: `rotate(${idx * 15}deg) translateY(-105px)` }}
             />
           ))}
 

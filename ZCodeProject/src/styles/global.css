@@ -5,22 +5,22 @@
  */
 
 :root {
-  --bg:             #09080b;
-  --bg-2:           #100e13;
-  --bg-3:           #17141b;
-  --surface:        rgba(255,255,255,0.05);
-  --surface-2:      rgba(255,255,255,0.08);
-  --surface-3:      rgba(255,255,255,0.12);
-  --surface-4:      rgba(255,255,255,0.16);
-  --border:         rgba(255,255,255,0.08);
-  --border-light:   rgba(255,255,255,0.13);
-  --text:           #ffffff;
-  --text-2:         rgba(255,255,255,0.74);
-  --text-3:         rgba(255,255,255,0.48);
-  --accent:         #fb7185;
-  --accent-2:       #f43f5e;
-  --accent-3:       #fda4af;
-  --accent-glow:    rgba(251,113,133,0.32);
+  --bg:             #070a10;
+  --bg-2:           #0c111b;
+  --bg-3:           #121826;
+  --surface:        rgba(224,242,254,0.045);
+  --surface-2:      rgba(224,242,254,0.075);
+  --surface-3:      rgba(224,242,254,0.115);
+  --surface-4:      rgba(224,242,254,0.16);
+  --border:         rgba(186,230,253,0.085);
+  --border-light:   rgba(224,242,254,0.15);
+  --text:           #f8fbff;
+  --text-2:         rgba(235,245,255,0.78);
+  --text-3:         rgba(196,218,242,0.52);
+  --accent:         #7dd3fc;
+  --accent-2:       #38bdf8;
+  --accent-3:       #e0f2fe;
+  --accent-glow:    rgba(125,211,252,0.28);
   --glass-bg:       rgba(255,255,255,0.05);
   --glass-border:   rgba(255,255,255,0.09);
   --glass-blur:     20px;
@@ -82,6 +82,7 @@ html.tg-fullscreen, body.tg-fullscreen {
 }
 
 body {
+  position: relative;
   font-family: var(--font-body);
   background: var(--bg);
   color: var(--text);
@@ -94,7 +95,24 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Глобальное атмосферное сезонное/арктическое свечение на всех экранах */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(
+    --season-glow-bg,
+    radial-gradient(ellipse 85% 42% at 50% -8%, rgba(125, 211, 252, 0.11), transparent 68%),
+    radial-gradient(ellipse 55% 30% at 85% 15%, rgba(224, 242, 254, 0.05), transparent 72%)
+  );
+  transition: opacity 0.35s ease;
+}
+
 #root {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   padding-bottom: var(--tabbar-h);
   overscroll-behavior-y: none;
@@ -137,38 +155,39 @@ a:focus-visible,
    ═══════════════════════════════════════════════ */
 
 :root[data-season='winter'] {
-  --accent: #93c5fd;
-  --accent-2: #60a5fa;
-  --accent-3: #bfdbfe;
-  --accent-glow: rgba(147, 197, 253, 0.32);
+  --accent: #7dd3fc;
+  --accent-2: #38bdf8;
+  --accent-3: #e0f2fe;
+  --accent-glow: rgba(125, 211, 252, 0.32);
 }
 
 :root[data-season='spring'] {
   --accent: #f9a8d4;
   --accent-2: #f472b6;
-  --accent-3: #fbcfe8;
+  --accent-3: #fce7f3;
   --accent-glow: rgba(249, 168, 212, 0.32);
 }
 
 :root[data-season='summer'] {
-  --accent: #fbbf24;
-  --accent-2: #f59e0b;
-  --accent-3: #fde68a;
-  --accent-glow: rgba(251, 191, 36, 0.3);
+  --accent: #67e8f9;
+  --accent-2: #22d3ee;
+  --accent-3: #cffafe;
+  --accent-glow: rgba(103, 232, 249, 0.3);
 }
 
 :root[data-season='autumn'] {
   --accent: #fdba74;
   --accent-2: #fb923c;
-  --accent-3: #fed7aa;
+  --accent-3: #ffedd5;
   --accent-glow: rgba(253, 186, 116, 0.3);
 }
 
-/* Сезонное свечение фона страниц */
+/* Сезонное свечение фона страниц (дополнительно к глобальному body::before) */
 html[data-season='winter'] .page,
 html[data-season='spring'] .page,
 html[data-season='summer'] .page,
 html[data-season='autumn'] .page {
+  background-color: transparent !important;
   background-image: var(--season-glow-bg, none) !important;
 }
 

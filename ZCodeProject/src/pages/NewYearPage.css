@@ -8,9 +8,9 @@
   isolation: isolate;
   min-height: 100vh;
   overflow-x: hidden;
-  padding: calc(var(--header-safe-top, 18px) + 6px) 16px 128px;
-  background: #09090d;
-  color: #f8fafc;
+  padding: calc(var(--header-safe-top, 16px) + 4px) 14px 118px;
+  background: transparent;
+  color: var(--text);
 }
 
 .ny-ambient {
@@ -18,10 +18,12 @@
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 80% 42% at 50% 0%, rgba(56, 189, 248, 0.13), transparent 68%),
-    radial-gradient(ellipse 65% 36% at 85% 18%, rgba(168, 85, 247, 0.09), transparent 70%),
-    radial-gradient(ellipse 55% 32% at 15% 24%, rgba(16, 185, 129, 0.07), transparent 70%),
-    #09090d;
+    var(
+      --season-glow-bg,
+      radial-gradient(ellipse 80% 42% at 50% 0%, rgba(125, 211, 252, 0.14), transparent 68%),
+      radial-gradient(ellipse 65% 36% at 85% 18%, rgba(56, 189, 248, 0.08), transparent 70%)
+    ),
+    var(--bg);
   pointer-events: none;
 }
 
@@ -61,28 +63,27 @@
   color: rgba(255, 255, 255, 0.35);
 }
 
-/* ── Минималистичная Hero-карточка ── */
+/* ── Компактная Hero-карточка в стиле Arctic Obsidian ── */
 .ny-hero-card {
   width: min(100%, 760px);
-  margin: 0 auto 22px;
-  padding: 22px 18px 20px;
-  border-radius: 26px;
+  margin: 0 auto 14px;
+  padding: 14px 15px;
+  border-radius: 20px;
   background:
-    radial-gradient(120% 100% at 100% 0%, rgba(56, 189, 248, 0.14) 0%, transparent 58%),
-    radial-gradient(90% 90% at 0% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 55%),
-    linear-gradient(160deg, rgba(22, 24, 38, 0.94) 0%, rgba(12, 13, 21, 0.98) 100%);
-  border: 1px solid rgba(147, 197, 253, 0.16);
+    radial-gradient(120% 100% at 100% 0%, rgba(125, 211, 252, 0.13) 0%, transparent 58%),
+    linear-gradient(160deg, rgba(16, 24, 40, 0.88) 0%, rgba(9, 13, 23, 0.95) 100%);
+  border: 1px solid rgba(186, 230, 253, 0.13);
   box-shadow:
-    0 24px 54px rgba(0, 0, 0, 0.6),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    0 16px 38px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(224, 242, 254, 0.1);
 }
 
 .ny-hero-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .ny-hero__copy {
@@ -92,35 +93,35 @@
 
 .ny-eyebrow {
   display: block;
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 9px;
+  font-weight: 800;
   letter-spacing: 0.16em;
-  color: rgba(251, 113, 133, 0.85);
-  margin-bottom: 6px;
+  color: #7dd3fc;
+  margin-bottom: 4px;
 }
 
 .ny-hero__copy h1 {
-  margin: 0 0 6px;
-  font-size: clamp(22px, 5vw, 30px);
+  margin: 0 0 4px;
+  font-size: clamp(19px, 4.5vw, 25px);
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  color: #ffffff;
+  color: #f8fbff;
 }
 
 .ny-hero__copy p {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.5);
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: rgba(203, 222, 244, 0.62);
 }
 
 .ny-mascot-minimal {
-  width: 72px;
-  height: 72px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(224, 242, 254, 0.045);
+  border: 1px solid rgba(186, 230, 253, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -128,47 +129,49 @@
 }
 
 .ny-mascot-img {
-  width: 58px;
-  height: 58px;
+  width: 44px;
+  height: 44px;
   object-fit: contain;
-  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.6));
+  filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.55));
 }
 
-/* ── Сдержанный таймер ── */
+/* ── Компактный стеклянный таймер ── */
 .ny-countdown {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .ny-time {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 10px 4px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  justify-content: center;
+  gap: 1px;
+  min-height: 46px;
+  padding: 7px 4px;
+  border-radius: 13px;
+  background: rgba(224, 242, 254, 0.045);
+  border: 1px solid rgba(186, 230, 253, 0.1);
 }
 
 .ny-time strong {
-  font-size: 20px;
+  font-size: 17px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: #ffffff;
+  color: #f8fbff;
   line-height: 1.1;
 }
 
 .ny-time--accent strong {
-  color: #fb7185;
+  color: #7dd3fc;
 }
 
 .ny-time span {
-  font-size: 10px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.4);
+  font-size: 9px;
+  font-weight: 600;
+  color: rgba(203, 222, 244, 0.54);
 }
 
 /* ── Кнопки действий ── */

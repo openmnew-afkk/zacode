@@ -2,8 +2,8 @@
 
 .adm {
   min-height: 100vh;
-  background: #07060b;
-  color: #fff;
+  background: transparent;
+  color: var(--text);
   padding: 0 16px 120px;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
