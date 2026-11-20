@@ -11,7 +11,6 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
   const [visible, setVisible] = useState(true);
   const [fading, setFading] = useState(false);
-  const [muted, setMuted] = useState(true);
   const [videoReady, setVideoReady] = useState(false);
   const [playbackStatus, setPlaybackStatus] = useState<PlaybackStatus>('loading');
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -34,47 +33,48 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     finishTimerRef.current = window.setTimeout(() => {
       setVisible(false);
       onDoneRef.current?.();
-    }, 450);
+    }, 420);
   }, []);
-
-  const handlePlayFailure = useCallback((error: unknown) => {
-    if (finishedRef.current) return;
-    const errorName = error instanceof DOMException
-      ? error.name
-      : (error as { name?: string } | null)?.name;
-
-    // A newer play()/load() request superseded this one.
-    if (errorName === 'AbortError') return;
-
-    if (errorName === 'NotAllowedError' || errorName === 'SecurityError') {
-      changePlaybackStatus('blocked');
-      return;
-    }
-
-    console.warn('Splash video playback failed:', error);
-    changePlaybackStatus('error');
-  }, [changePlaybackStatus]);
 
   const attemptPlay = useCallback(() => {
     const video = videoRef.current;
     if (!video || finishedRef.current) return;
+
+    video.muted = false;
+    video.volume = 1;
 
     try {
       const playPromise = video.play();
       if (playPromise) {
         playPromise
           .then(() => {
-            if (finishedRef.current || videoRef.current !== video || video.paused) return;
+            if (finishedRef.current || videoRef.current !== video) return;
             changePlaybackStatus(video.readyState >= 3 ? 'playing' : 'buffering');
           })
-          .catch((error: unknown) => {
-            if (videoRef.current === video) handlePlayFailure(error);
+          .catch(() => {
+            // Если политика браузера блокирует звук без тапа — запускаем без звука и включаем звук при первом касании
+            if (finishedRef.current || videoRef.current !== video) return;
+            video.muted = true;
+            video.play()
+              .then(() => {
+                if (!finishedRef.current) {
+                  changePlaybackStatus(video.readyState >= 3 ? 'playing' : 'buffering');
+                }
+              })
+              .catch((err: unknown) => {
+                const name = err instanceof DOMException ? err.name : (err as { name?: string } | null)?.name;
+                if (name === 'NotAllowedError' || name === 'SecurityError') {
+                  changePlaybackStatus('blocked');
+                } else if (name !== 'AbortError') {
+                  changePlaybackStatus('error');
+                }
+              });
           });
       }
-    } catch (error) {
-      handlePlayFailure(error);
+    } catch {
+      changePlaybackStatus('error');
     }
-  }, [changePlaybackStatus, handlePlayFailure]);
+  }, [changePlaybackStatus]);
 
   const updateProgress = useCallback(() => {
     const video = videoRef.current;
@@ -82,22 +82,6 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
     const actualProgress = (video.currentTime / video.duration) * 100;
     setProgress(Math.min(100, Math.max(0, actualProgress)));
   }, []);
-
-  const toggleSound = useCallback((event: React.MouseEvent) => {
-    event.stopPropagation();
-    const video = videoRef.current;
-    if (!video) return;
-
-    const nextMuted = !video.muted;
-    video.muted = nextMuted;
-    video.volume = 1;
-    setMuted(nextMuted);
-
-    if (!nextMuted && video.paused && playbackStatusRef.current !== 'error') {
-      changePlaybackStatus('loading');
-      attemptPlay();
-    }
-  }, [attemptPlay, changePlaybackStatus]);
 
   const retryPlayback = useCallback(() => {
     const video = videoRef.current;
@@ -116,20 +100,26 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
   }, [attemptPlay, changePlaybackStatus]);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Muted inline autoplay is the fastest reliable path; sound remains opt-in.
-    video.muted = true;
-    video.volume = 1;
-    setMuted(true);
     attemptPlay();
+
+    const unlockSound = () => {
+      const v = videoRef.current;
+      if (v && v.muted) {
+        v.muted = false;
+        v.volume = 1;
+      }
+    };
+    window.addEventListener('pointerdown', unlockSound, { passive: true });
+    window.addEventListener('touchstart', unlockSound, { passive: true });
+    return () => {
+      window.removeEventListener('pointerdown', unlockSound);
+      window.removeEventListener('touchstart', unlockSound);
+    };
   }, [attemptPlay]);
 
   useEffect(() => {
     if (playbackStatus !== 'loading' && playbackStatus !== 'buffering') return;
 
-    // A missing error event must not trap users on an endless loading screen.
     const stallTimer = window.setTimeout(() => {
       const currentStatus = playbackStatusRef.current;
       if (currentStatus === 'loading' || currentStatus === 'buffering') {
@@ -157,59 +147,37 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
       aria-label="Заставка ZENOVA"
       onClick={() => {
         const video = videoRef.current;
-        if (video && video.muted && playbackStatusRef.current === 'playing') {
+        if (video && video.muted) {
           video.muted = false;
           video.volume = 1;
-          setMuted(false);
         }
       }}
     >
-      <div
-        className="sp__backdrop-blur"
-        style={{ backgroundImage: `url(${assetBase}zenova-splash-poster.jpg)` }}
-        aria-hidden="true"
-      />
       <div className="sp__backdrop-vignette" aria-hidden="true" />
 
       <div className="sp__stage">
-        <img
-          className="sp__poster"
-          src={`${assetBase}zenova-splash-poster.jpg`}
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-        />
-
         <div className="sp__top-bar">
+          <span />
           <button
             type="button"
-            className="sp__pill-btn"
-            onClick={toggleSound}
-            aria-label={muted ? 'Включить звук' : 'Выключить звук'}
-            aria-pressed={!muted}
-          >
-            {muted ? 'Звук выкл' : 'Звук вкл'}
-          </button>
-
-          <button
-            type="button"
-            className="sp__pill-btn sp__pill-btn--skip"
+            className="sp__skip-btn"
             onClick={(e) => {
               e.stopPropagation();
               finishSplash();
             }}
             aria-label="Пропустить заставку"
           >
-            Пропустить ✕
+            <span>Пропустить</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </button>
         </div>
 
         <video
           ref={videoRef}
           className={`sp__video ${videoReady ? 'sp__video--ready' : ''}`}
-          poster={`${assetBase}zenova-splash-poster.jpg`}
           autoPlay
-          muted
           playsInline
           preload="auto"
           aria-label="Видеозаставка ZENOVA"
@@ -257,7 +225,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
           <div className="sp__state" role="status" aria-live="polite">
             <div className="sp__loading-indicator">
               <span className="sp__spinner" aria-hidden="true" />
-              <span>{playbackStatus === 'buffering' ? 'Буферизация видео…' : 'Загрузка видео…'}</span>
+              <span>{playbackStatus === 'buffering' ? 'Буферизация…' : 'Загрузка…'}</span>
             </div>
           </div>
         )}
@@ -267,7 +235,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
             <button type="button" className="sp__play-button" onClick={startFromGesture}>
               <span className="sp__play-icon" aria-hidden="true" />
               <span>Воспроизвести заставку</span>
-              <small>Нажмите, чтобы начать или продолжить</small>
+              <small>Нажмите для старта со звуком</small>
             </button>
           </div>
         )}
@@ -275,7 +243,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
         {playbackStatus === 'error' && (
           <div className="sp__state sp__state--interactive sp__state--error" role="alert">
             <div className="sp__error-panel">
-              <strong>Не удалось воспроизвести видео</strong>
+              <strong>Не удалось загрузить видео</strong>
               <p>Проверьте подключение к сети и попробуйте ещё раз.</p>
               <div className="sp__error-actions">
                 <button type="button" className="sp__action-button" onClick={retryPlayback}>
@@ -286,7 +254,7 @@ const SplashPage: React.FC<SplashPageProps> = ({ onDone }) => {
                   className="sp__action-button sp__action-button--escape"
                   onClick={finishSplash}
                 >
-                  Открыть приложение без заставки
+                  Открыть приложение
                 </button>
               </div>
             </div>

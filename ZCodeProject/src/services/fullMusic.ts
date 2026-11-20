@@ -201,39 +201,63 @@ export async function resolveFullTrack(track: Track): Promise<Track> {
     return track;
   }
 
-  // 1. Internet Archive — полные саундтреки / альбомы
+  // 1. Internet Archive — пробуем по названию+артисту, затем по альбому и чистому названию
   try {
-    const q = `${track.title} ${track.artist}`.trim();
-    const ids = await searchArchiveItems(q, 3);
-    for (const id of ids) {
-      const files = await getArchiveAudioFiles(id);
-      const match = matchFile(track, files);
-      if (match) {
-        return {
-          ...track,
-          streamUrl: streamUrlFor(match),
-          duration: match.seconds || track.duration,
-          source: 'archive',
-        };
+    const cleanTitle = (track.title || '').replace(/\(.*?\)|\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanAlbum = (track.album || '').replace(/\(.*?\)|\[.*?\]/g, ' ').replace(/\s+/g, ' ').trim();
+    const queries = Array.from(
+      new Set(
+        [
+          `${cleanTitle} ${track.artist}`.trim(),
+          cleanAlbum && !/^zenova/i.test(cleanAlbum) ? cleanAlbum : '',
+          cleanTitle,
+        ].filter((s) => s.length >= 3)
+      )
+    );
+    for (const q of queries) {
+      const ids = await searchArchiveItems(q, 4);
+      for (const id of ids) {
+        const files = await getArchiveAudioFiles(id);
+        const match = matchFile(track, files);
+        if (match) {
+          return {
+            ...track,
+            streamUrl: streamUrlFor(match),
+            duration: match.seconds || track.duration,
+            source: 'archive',
+          };
+        }
       }
     }
   } catch {
     /* переходим к Audius */
   }
 
-  // 2. Audius — полные треки от артистов
+  // 2. Audius — полные треки от артистов и ремиксы/каверы саундтреков
   try {
-    const cleanTitle = (track.title || '').replace(/[()[\]\-–—]/g, ' ').trim();
-    const cleanArtist = (track.artist || '').replace(/[()[\]\-–—]/g, ' ').trim();
-    const list = await searchAudius(`${cleanTitle} ${cleanArtist}`.trim(), 4);
+    const cleanTitle = (track.title || '').replace(/\(.*?\)|\[.*?\]|[\-–—]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanArtist = (track.artist || '').replace(/\(.*?\)|\[.*?\]|[\-–—]/g, ' ').replace(/\s+/g, ' ').trim();
+    const cleanAlbum = (track.album || '').replace(/\(.*?\)|\[.*?\]|[\-–—]/g, ' ').replace(/\s+/g, ' ').trim();
     const normT = normTitle(track.title);
-    const match =
-      list.find((t) => {
+    const audiusQueries = Array.from(
+      new Set(
+        [
+          `${cleanTitle} ${cleanArtist}`.trim(),
+          cleanTitle,
+          cleanAlbum && !/^zenova/i.test(cleanAlbum) ? `${cleanAlbum} ${cleanTitle}`.trim() : '',
+        ].filter((s) => s.length >= 3)
+      )
+    );
+
+    for (const aq of audiusQueries) {
+      const list = await searchAudius(aq, 6);
+      const match = list.find((t) => {
         const tn = normTitle(t.title);
-        return tn.includes(normT) || normT.includes(tn);
-      }) || list[0];
-    if (match && match.streamUrl && match.duration > 35) {
-      return { ...track, streamUrl: match.streamUrl, duration: match.duration, source: 'audius' };
+        return t.streamUrl && t.duration > 40 && (tn.includes(normT) || normT.includes(tn));
+      }) || list.find((t) => t.streamUrl && t.duration > 45);
+      if (match) {
+        return { ...track, streamUrl: match.streamUrl, duration: match.duration, source: 'audius' };
+      }
     }
   } catch {
     /* остаётся превью */

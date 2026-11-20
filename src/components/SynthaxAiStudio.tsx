@@ -9,6 +9,7 @@ import './SynthaxAiStudio.css';
 
 interface SynthaxAiStudioProps {
   onBackToOracle?: () => void;
+  backLabel?: string;
 }
 
 type ModelId = 'deepseek' | 'gemini' | 'kimi';
@@ -58,7 +59,7 @@ const SUGGESTIONS = [
   'Составь список из 5 мини-сериалов на выходные без спойлеров',
 ];
 
-export const SynthaxAiStudio: React.FC<SynthaxAiStudioProps> = ({ onBackToOracle }) => {
+export const SynthaxAiStudio: React.FC<SynthaxAiStudioProps> = ({ onBackToOracle, backLabel = 'Назад' }) => {
   const { haptic } = useTelegram();
   const { isPremium, applyRemotePremium } = useStore();
   const navigate = useNavigate();
@@ -168,17 +169,19 @@ export const SynthaxAiStudio: React.FC<SynthaxAiStudioProps> = ({ onBackToOracle
             <h2 className="syn9-brand__title">SYNTHAX-9</h2>
           </div>
         </div>
-        <button
-          type="button"
-          className="syn9-back-btn"
-          onClick={() => {
-            haptic('light');
-            onBackToOracle?.();
-          }}
-        >
-          <ArrowLeft size={15} />
-          <span>Оракул</span>
-        </button>
+        {onBackToOracle && (
+          <button
+            type="button"
+            className="syn9-back-btn"
+            onClick={() => {
+              haptic('light');
+              onBackToOracle();
+            }}
+          >
+            <ArrowLeft size={15} />
+            <span>{backLabel}</span>
+          </button>
+        )}
       </header>
 
       {/* Выбор нейросети */}

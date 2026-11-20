@@ -6,7 +6,6 @@ import { useStore } from '../store';
 import { useTelegram } from '../hooks/useTelegram';
 import type { Movie } from '../types';
 import { getStoredSeason } from '../services/seasons';
-import { SynthaxAiStudio } from '../components/SynthaxAiStudio';
 import YandexGlowInput from '../components/YandexGlowInput';
 import './AiPickPage.css';
 
@@ -74,7 +73,6 @@ const AiPickPage: React.FC = () => {
   const isWinter = getStoredSeason().season.id === 'winter';
   const maskSrc = isWinter ? '/zenova-mask-mini-winter.png' : '/zenova-mask-mini.png';
 
-  const [mainTab, setMainTab] = useState<'oracle' | 'synthax'>('oracle');
   const [prompt, setPrompt] = useState('');
   const [company, setCompany] = useState<Company>('solo');
   const [format, setFormat] = useState<Format>('all');
@@ -274,15 +272,11 @@ const AiPickPage: React.FC = () => {
             <img src={maskSrc} alt="" />
           </span>
           <div className="orc-brand__copy">
-            <span className="orc-brand__kicker">
-              {mainTab === 'synthax' ? 'ZENOVA · PRO NEURAL' : 'ZENOVA · AI'}
-            </span>
-            <h1 className="orc-brand__title">
-              {mainTab === 'synthax' ? 'SYNTHAX-9' : 'Оракул'}
-            </h1>
+            <span className="orc-brand__kicker">ZENOVA · AI</span>
+            <h1 className="orc-brand__title">Оракул</h1>
           </div>
         </div>
-        {mainTab === 'oracle' && !showMenu && (
+        {!showMenu && (
           <button type="button" className="orc-head__back" onClick={reset}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M15 18l-6-6 6-6" /></svg>
             Новый подбор
@@ -290,38 +284,7 @@ const AiPickPage: React.FC = () => {
         )}
       </header>
 
-      {/* ── Двухрежимный переключатель: Оракул (Колода) / SYNTHAX-9 (PRO ИИ Студия) ── */}
-      <div className="orc-main-switch">
-        <button
-          type="button"
-          className={`orc-main-switch__btn ${mainTab === 'oracle' ? 'is-active' : ''}`}
-          onClick={() => {
-            haptic('light');
-            setMainTab('oracle');
-          }}
-        >
-          <span className="orc-main-switch__icon">🔮</span>
-          <span>Кино-Оракул</span>
-        </button>
-
-        <button
-          type="button"
-          className={`orc-main-switch__btn orc-main-switch__btn--pro ${mainTab === 'synthax' ? 'is-active' : ''}`}
-          onClick={() => {
-            haptic('medium');
-            setMainTab('synthax');
-          }}
-        >
-          <span className="orc-main-switch__icon">⚡</span>
-          <span>SYNTHAX-9</span>
-          <span className="orc-main-switch__badge">AI</span>
-        </button>
-      </div>
-
-      {mainTab === 'synthax' ? (
-        <SynthaxAiStudio onBackToOracle={() => setMainTab('oracle')} />
-      ) : (
-        <>
+      <>
           {/* ═════════ МЕНЮ ВЫБОРА (уезжает после нажатия) ═════════ */}
       {showMenu && (
         <div className={`orc-menu ${stage === 'leaving' ? 'is-leaving' : ''}`}>
@@ -539,7 +502,6 @@ const AiPickPage: React.FC = () => {
         </section>
       )}
         </>
-      )}
     </div>
   );
 };

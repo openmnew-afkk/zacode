@@ -270,3 +270,106 @@
   line-height: 1.4;
   color: rgba(255, 255, 255, 0.48);
 }
+
+/* План подарков / Кино-ачивки */
+.gf-quests__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.gf-quests__head .gf-prizes__title {
+  margin: 0;
+}
+.gf-quests__count {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 11px;
+  font-weight: 750;
+  color: #f4dfae;
+}
+
+.gf-quests__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gf-quest {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 13px;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.gf-quest.is-ready {
+  background: rgba(212, 175, 100, 0.08);
+  border-color: rgba(231, 199, 137, 0.28);
+}
+.gf-quest.is-claimed {
+  opacity: 0.62;
+}
+
+.gf-quest__icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  color: #f4dfae;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.gf-quest__copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gf-quest__badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #e7c789;
+  text-transform: uppercase;
+}
+.gf-quest__copy strong {
+  font-size: 13px;
+  font-weight: 750;
+  color: #ffffff;
+}
+.gf-quest__copy p {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.48);
+  line-height: 1.35;
+}
+
+.gf-quest__btn {
+  flex-shrink: 0;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 11px;
+  font-weight: 800;
+}
+.gf-quest__btn.is-ready {
+  background: linear-gradient(135deg, #f4dfae, #c89f54);
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #171008;
+}
+.gf-quest__btn.is-claimed {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.3);
+  color: #6ee7b7;
+}
+

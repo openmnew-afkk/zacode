@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, Gift, Snowflake, Sparkles, Crown, Clock, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft, Gift, Snowflake, Sparkles, Crown, Clock, CheckCircle2, Film, Star, Bookmark, Award } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import PremiumRoulette from './PremiumRoulette';
@@ -12,11 +12,22 @@ interface GiftFestHubProps {
 
 const TICKETS_KEY = 'zenova_giftfest_tickets';
 const DAILY_KEY = 'zenova_giftfest_daily_at';
+const QUESTS_KEY = 'zenova_giftfest_quests_v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+interface QuestDef {
+  id: string;
+  title: string;
+  desc: string;
+  badge: string;
+  reward: number;
+  icon: React.ReactNode;
+  done: boolean;
+}
 
 export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) => {
   const { haptic } = useTelegram();
-  const { applyRemotePremium, isPremium } = useStore();
+  const { applyRemotePremium, isPremium, watchHistory, favorites, tracked } = useStore();
 
   const [tickets, setTickets] = useState<number>(() => {
     try { return Number(localStorage.getItem(TICKETS_KEY) || 0); } catch { return 0; }
@@ -24,6 +35,10 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
 
   const [lastDailyAt, setLastDailyAt] = useState<number>(() => {
     try { return Number(localStorage.getItem(DAILY_KEY) || 0); } catch { return 0; }
+  });
+
+  const [claimedQuests, setClaimedQuests] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(QUESTS_KEY) || '[]'); } catch { return []; }
   });
 
   const [dailyOpening, setDailyOpening] = useState(false);
@@ -34,6 +49,72 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
     const t = window.setInterval(() => setNow(Date.now()), 30000);
     return () => window.clearInterval(t);
   }, []);
+
+  const quests = useMemo<QuestDef[]>(() => {
+    const ratedCount = Object.values(tracked || {}).filter((t) => (t.rating || 0) > 0).length;
+    const hasOpenedBox = lastDailyAt > 0;
+    return [
+      {
+        id: 'first_watch',
+        title: 'Первый киносеанс',
+        desc: 'Откройте любой фильм в каталоге или плеере',
+        badge: 'Ачивка: Зритель',
+        reward: 25,
+        icon: <Film size={16} />,
+        done: watchHistory.length >= 1,
+      },
+      {
+        id: 'critic',
+        title: 'Кинокритик',
+        desc: 'Поставьте оценку фильму в «Моём дневнике»',
+        badge: 'Ачивка: Критик',
+        reward: 35,
+        icon: <Star size={16} />,
+        done: ratedCount >= 1,
+      },
+      {
+        id: 'collector',
+        title: 'Золотая коллекция',
+        desc: 'Сохраните 3 фильма в Избранное',
+        badge: 'Ачивка: Эстет',
+        reward: 50,
+        icon: <Bookmark size={16} />,
+        done: favorites.length >= 3,
+      },
+      {
+        id: 'gift_hunter',
+        title: 'Охотник GiftFest',
+        desc: 'Откройте бесплатный «Снежный бокс дня»',
+        badge: 'Ачивка: Удачливый',
+        reward: 40,
+        icon: <Gift size={16} />,
+        done: hasOpenedBox,
+      },
+      {
+        id: 'marathon',
+        title: 'Зимний марафонец',
+        desc: 'Посмотрите 5 фильмов или сериалов',
+        badge: 'Ачивка: Легенда Зала',
+        reward: 100,
+        icon: <Award size={16} />,
+        done: watchHistory.length >= 5,
+      },
+    ];
+  }, [watchHistory.length, favorites.length, tracked, lastDailyAt]);
+
+  const claimQuest = (q: QuestDef) => {
+    if (!q.done || claimedQuests.includes(q.id)) return;
+    haptic('heavy');
+    const nextClaimed = [...claimedQuests, q.id];
+    const nextTickets = tickets + q.reward;
+    setClaimedQuests(nextClaimed);
+    setTickets(nextTickets);
+    try {
+      localStorage.setItem(QUESTS_KEY, JSON.stringify(nextClaimed));
+      localStorage.setItem(TICKETS_KEY, String(nextTickets));
+    } catch {}
+    onNotice?.(`${q.badge} открыта! +${q.reward} ❄️`);
+  };
 
   const nextDailyInMs = Math.max(0, lastDailyAt + DAY_MS - now);
   const canOpenDaily = nextDailyInMs === 0;
@@ -156,12 +237,45 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
         <PremiumRoulette
           onPremium={(expiry) => {
             applyRemotePremium(expiry);
+          }}
+          onSpinComplete={() => {
             const bonusTickets = tickets + 30;
             setTickets(bonusTickets);
             try { localStorage.setItem(TICKETS_KEY, String(bonusTickets)); } catch {}
             onNotice?.('Приз начислен + 30 ❄️ за спин!');
           }}
         />
+
+        {/* План подарков и Ачивки в стиле кино */}
+        <section className="gf-quests">
+          <div className="gf-quests__head">
+            <h3 className="gf-prizes__title">План подарков · Кино-ачивки</h3>
+            <span className="gf-quests__count">{claimedQuests.length} / {quests.length}</span>
+          </div>
+          <div className="gf-quests__list">
+            {quests.map((q) => {
+              const claimed = claimedQuests.includes(q.id);
+              return (
+                <div key={q.id} className={`gf-quest ${claimed ? 'is-claimed' : q.done ? 'is-ready' : ''}`}>
+                  <span className="gf-quest__icon">{q.icon}</span>
+                  <div className="gf-quest__copy">
+                    <span className="gf-quest__badge">{q.badge}</span>
+                    <strong>{q.title}</strong>
+                    <p>{q.desc}</p>
+                  </div>
+                  <button
+                    type="button"
+                    className={`gf-quest__btn ${claimed ? 'is-claimed' : q.done ? 'is-ready' : ''}`}
+                    onClick={() => claimQuest(q)}
+                    disabled={!q.done || claimed}
+                  >
+                    {claimed ? 'Получено' : q.done ? `+${q.reward} ❄️` : `${q.reward} ❄️`}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         {/* Призовой фонд */}
         <section className="gf-prizes">

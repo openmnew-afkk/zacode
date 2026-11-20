@@ -108,31 +108,32 @@
   gap: 10px;
 }
 
-.sp__pill-btn {
+.sp__skip-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 13px;
+  gap: 4px;
+  height: 32px;
+  padding: 0 11px 0 14px;
   border-radius: 999px;
-  background: rgba(10, 10, 16, 0.52);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: rgba(255, 255, 255, 0.88);
+  background: rgba(14, 14, 20, 0.48);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 11.5px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform 0.16s ease, background 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.16s ease, background 0.18s ease, color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
 
-.sp__pill-btn:hover {
-  background: rgba(20, 20, 32, 0.68);
-  border-color: rgba(255, 255, 255, 0.28);
+.sp__skip-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
 }
 
-.sp__pill-btn:active {
+.sp__skip-btn:active {
   transform: scale(0.94);
 }
 

@@ -1119,6 +1119,21 @@ const HomePage: React.FC = () => {
         </div>
 
         <div className="hp-header__actions">
+          {/* ✨ AI SYNTHAX-9 — светящаяся кнопка нейросети в шапке */}
+          <button
+            type="button"
+            className="hp-header__ai-btn"
+            onClick={() => {
+              haptic('medium');
+              navigate('/synthax');
+            }}
+            title="Нейросеть SYNTHAX-9"
+            aria-label="Открыть SYNTHAX-9 AI"
+          >
+            <span className="hp-header__ai-dot" aria-hidden="true" />
+            <span>AI</span>
+          </button>
+
           {/* ✦ Вселенные — стильная роскошная капсула доступа к 10 студиям */}
           <button
             type="button"

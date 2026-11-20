@@ -9,6 +9,7 @@ import PremiumPage from './pages/PremiumPage';
 import AdminPage from './pages/AdminPage';
 import MusicPage from './pages/MusicPage';
 import AiPickPage from './pages/AiPickPage';
+import SynthaxPage from './pages/SynthaxPage';
 import RulesPage from './pages/RulesPage';
 import FeedPage from './pages/FeedPage';
 import NewYearPage from './pages/NewYearPage';
@@ -190,6 +191,7 @@ function App() {
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/music" element={<MusicPage />} />
             <Route path="/ai" element={<AiPickPage />} />
+            <Route path="/synthax" element={<SynthaxPage />} />
             <Route path="/premium" element={<PremiumPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/rules" element={<RulesPage />} />
