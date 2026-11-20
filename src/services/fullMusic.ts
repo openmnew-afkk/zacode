@@ -74,13 +74,13 @@ interface IaAudioFile {
 const cleanQuery = (q: string) => q.replace(/[+\-&|!(){}\[\]^"~*?:\\/]/g, ' ').replace(/\s+/g, ' ').trim();
 
 /** Поиск аудио-альбомов (items) в Internet Archive по произвольному запросу */
-async function searchArchiveItems(query: string, rows = 5): Promise<string[]> {
+async function searchArchiveItems(query: string, rows = 6): Promise<string[]> {
   const q = cleanQuery(query);
   if (!q) return [];
-  const lucene = `mediatype:(audio) AND format:(MP3 OR "MPEG-4 Audio" OR Ogg) AND (title:(${q}) OR creator:(${q}))`;
+  const lucene = `mediatype:(audio) AND (title:(${q}) OR creator:(${q}) OR subject:(${q}))`;
   const url =
     `${IA}/advancedsearch.php?q=${encodeURIComponent(lucene)}` +
-    `&fl%5B%5D=identifier&rows=${rows}&page=1&output=json`;
+    `&fl%5B%5D=identifier&sort%5B%5D=downloads+desc&rows=${rows}&page=1&output=json`;
   const data = await fetchJson(url);
   const docs: Array<{ identifier?: string }> = Array.isArray(data?.response?.docs) ? data.response.docs : [];
   return docs.map((d) => d.identifier).filter(Boolean) as string[];
@@ -101,18 +101,31 @@ const streamUrlFor = (f: IaAudioFile) =>
 /** Сопоставление названия трека с файлами архива; возвращает лучший файл */
 function matchFile(track: Track, files: IaAudioFile[]): IaAudioFile | null {
   const nt = normTitle(track.title);
-  if (nt.length < 3) return null;
+  if (nt.length < 2) return null;
+  const ntWords = nt.split(' ').filter((w) => w.length >= 2);
   let best: IaAudioFile | null = null;
   let bestScore = -1;
   for (const f of files) {
     const nf = normTitle(f.name.replace(AUDIO_EXT, ''));
     let score = 0;
-    if (nf.includes(nt)) score = 10 + nt.length;
-    else if (nt.includes(nf) && nf.length >= 4) score = 6 + nf.length;
-    else continue;
+    if (nf.includes(nt)) {
+      score = 12 + nt.length;
+    } else if (nt.includes(nf) && nf.length >= 4) {
+      score = 7 + nf.length;
+    } else if (ntWords.length >= 2) {
+      const nfWords = new Set(nf.split(' '));
+      const overlap = ntWords.filter((w) => nfWords.has(w)).length;
+      if (overlap >= Math.ceil(ntWords.length * 0.65)) {
+        score = 5 + overlap * 3;
+      } else {
+        continue;
+      }
+    } else {
+      continue;
+    }
     if (track.duration > 0 && f.seconds > 0) {
       const ratio = f.seconds / track.duration;
-      if (ratio > 0.8 && ratio < 1.2) score += 5;
+      if (ratio > 0.75 && ratio < 1.25) score += 5;
     }
     if (/\.mp3$/i.test(f.name)) score += 1;
     if (score > bestScore) {

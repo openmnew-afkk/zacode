@@ -2854,13 +2854,13 @@
   z-index: 1;
 }
 
-/* Вырезы по верхним углам (как в Профиле) */
+/* Плавающие стеклянные угловые кнопки без чёрных квадратных вырезов */
 .dp-stage__notch {
   position: absolute;
-  top: 0;
-  width: 58px;
-  height: 58px;
-  background: #09090d;
+  top: 14px;
+  width: auto;
+  height: auto;
+  background: transparent;
   z-index: 4;
   display: flex;
   align-items: center;
@@ -2868,22 +2868,22 @@
 }
 
 .dp-stage__notch--tl {
-  left: 0;
-  border-bottom-right-radius: 26px;
+  left: 14px;
 }
 
 .dp-stage__notch--tr {
-  right: 0;
-  border-bottom-left-radius: 26px;
+  right: 14px;
 }
 
 .dp-stage__corner-btn {
-  width: 40px;
-  height: 40px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: #13131b;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(15, 15, 22, 0.58);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3034,13 +3034,14 @@
 .dp-btn-primary {
   flex: 1;
   height: 46px;
-  padding: 0 18px;
-  border-radius: 16px;
-  background: #f8fafc;
-  border: 1px solid #f8fafc;
-  color: #09090d;
+  padding: 0 20px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #f1f5f9 0%, #dce3ec 100%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  color: #0b0b12;
   font-size: 13.5px;
   font-weight: 800;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.42), inset 0 1px 0 #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3056,12 +3057,12 @@
 .dp-btn-secondary {
   height: 46px;
   padding: 0 18px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: rgba(255, 255, 255, 0.92);
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 650;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3205,10 +3206,10 @@
 }
 .dp-source-tabs button:active { transform: scale(0.95); }
 .dp-source-tabs button.is-active {
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
-  border-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  color: #0b0b12;
+  background: #f1f5f9;
+  border-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* ── Панель управления сериями и автопереключением ── */
@@ -3310,10 +3311,10 @@
 .dp-episode-nav__controls > button:active { transform: scale(0.96); }
 
 .dp-episode-nav__controls > button.dp-episode-next {
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--accent-2), var(--accent));
-  border-color: rgba(255, 255, 255, 0.24);
-  box-shadow: 0 6px 18px var(--accent-glow);
+  color: #0b0b12;
+  background: #f1f5f9;
+  border-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 }
 
 .dp-episode-nav > p {

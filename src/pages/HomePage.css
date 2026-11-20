@@ -64,7 +64,7 @@
   flex-shrink: 0;
 }
 
-/* ✦ Вселенные — эксклюзивная кнопка открытия студий */
+/* ✦ Вселенные — аккуратная стеклянная кнопка */
 .hp-header__studios-btn {
   display: inline-flex;
   align-items: center;
@@ -72,31 +72,25 @@
   height: 36px;
   padding: 0 13px;
   border-radius: 999px;
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(244, 63, 94, 0.22) 0%, transparent 60%),
-    rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.065);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
 .hp-header__studios-btn:hover {
-  background:
-    radial-gradient(120% 120% at 20% 0%, rgba(244, 63, 94, 0.35) 0%, transparent 60%),
-    rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 .hp-header__studios-btn:active {
   transform: scale(0.94);
 }
 .hp-header__studios-spark {
-  color: #fda4af;
-  font-size: 13px;
+  color: #e7c789;
+  font-size: 12px;
   line-height: 1;
-  filter: drop-shadow(0 0 6px rgba(251, 113, 133, 0.8));
-  animation: sparkPulse 2.2s ease-in-out infinite alternate;
 }
 @keyframes sparkPulse {
   from { transform: scale(0.9); opacity: 0.8; }
@@ -175,10 +169,8 @@
   height: 38px;
   border-radius: 50%;
   padding: 1.5px;
-  background: linear-gradient(135deg, #fde047 0%, #d97706 100%);
-  box-shadow:
-    0 0 16px rgba(251, 191, 36, 0.45),
-    0 2px 8px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, #f4dfae 0%, #b5893d 100%);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -383,11 +375,11 @@
   transform: scale(0.94);
 }
 .hp-tab.active {
-  background: #ffffff;
-  border-color: #ffffff;
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.92);
   color: #0b0b14;
-  font-weight: 700;
-  box-shadow: 0 4px 18px rgba(255, 255, 255, 0.22);
+  font-weight: 750;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
 }
 
 /* ── Контент ── */
@@ -513,15 +505,15 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 18px;
-  border-radius: 999px;
-  background: #ffffff;
-  border: none;
+  padding: 9px 18px;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.95);
   color: #090810;
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.28);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
   transition: transform 0.15s ease;
 }
 .hp-hero__btn:active {

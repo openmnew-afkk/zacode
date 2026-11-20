@@ -203,17 +203,71 @@
 }
 
 .ny-btn--primary {
-  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #061321;
-  box-shadow: 0 10px 26px rgba(56, 189, 248, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.95);
+  color: #09090d;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .ny-btn--secondary {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: rgba(255, 255, 255, 0.9);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Компактная плашка GiftFest вместо громоздкого баннера */
+.ny-giftfest-strip {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  margin-bottom: 14px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  text-align: left;
+  transition: transform 0.14s ease, background 0.16s ease;
+}
+.ny-giftfest-strip:active {
+  transform: scale(0.98);
+  background: rgba(255, 255, 255, 0.07);
+}
+.ny-giftfest-strip__dot {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: rgba(212, 175, 100, 0.14);
+  border: 1px solid rgba(231, 199, 137, 0.25);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.ny-giftfest-strip__text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ny-giftfest-strip__text strong {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #ffffff;
+}
+.ny-giftfest-strip__text small {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.5);
+}
+.ny-giftfest-strip__cta {
+  flex-shrink: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4dfae;
+  font-size: 11px;
+  font-weight: 750;
 }
 
 /* ── Результат выбора на вечер ── */

@@ -169,9 +169,9 @@ export const spinRoulette = (spinId: string) =>
 export const fetchRouletteSpin = (spinId: string) =>
   telegramApi<{ ok: boolean; paid: boolean; spin: RouletteSpin | null }>('/api/roulette/status', { spinId });
 
-export const askSynthax = (prompt: string) =>
-  telegramApi<{ ok: boolean; text: string; model: string; premium: boolean; remaining: number; limit: number; message?: string }>(
-    '/api/ai/chat', { prompt }
+export const askSynthax = (prompt: string, modelId?: 'deepseek' | 'gemini' | 'kimi') =>
+  telegramApi<{ ok: boolean; text: string; model: string; modelId?: string; premium: boolean; remaining: number; limit: number; message?: string }>(
+    '/api/ai/chat', { prompt, modelId }
   );
 
 export const startArcadeRun = () =>

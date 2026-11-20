@@ -36,7 +36,7 @@ const DEFAULT_DATA = {
   announcement: '',
   autoApprove: false,
   requisites: { card: '', sbp: '', crypto: '', note: '' },
-  prices: { month: 180, monthFirst: 15, year: 0, yearFirst: 0 },
+  prices: { month: 249, monthFirst: 29, year: 0, yearFirst: 0 },
   /* Выданный премиум: { name, username, expiry, forever, by, at } */
   premiumGrants: [],
   telegramPremiumGrants: [],
@@ -129,8 +129,8 @@ function isGrantActive(grant) {
 }
 
 const PREMIUM_PLANS = {
-  trial: { days: 7, amount: 15, title: 'ZENOVA PRO · 7 дней' },
-  month: { days: 30, amount: 180, title: 'ZENOVA PRO · 30 дней' },
+  trial: { days: 7, amount: 29, title: 'ZENOVA PRO · 7 дней' },
+  month: { days: 30, amount: 249, title: 'ZENOVA PRO · 30 дней' },
 };
 
 const ROULETTE_PRIZES = [
@@ -162,7 +162,7 @@ function utcDay() {
 }
 
 function aiLimits(premium) {
-  return Math.max(1, Number(process.env[premium ? 'AI_PREMIUM_DAILY_LIMIT' : 'AI_FREE_DAILY_LIMIT']) || (premium ? 8 : 2));
+  return Math.max(1, Number(process.env[premium ? 'AI_PREMIUM_DAILY_LIMIT' : 'AI_FREE_DAILY_LIMIT']) || (premium ? 10 : 2));
 }
 
 function aiUsageFor(userId, premium) {
@@ -292,30 +292,65 @@ async function fulfillRouletteSpin(invoice, user) {
   return invoice.spin;
 }
 
-function aiProvider(premium) {
-  if (premium) {
+function aiProvider(premium, requestedModel) {
+  const choice = String(requestedModel || (premium ? 'gemini' : 'deepseek')).toLowerCase();
+  if (!premium && choice !== 'deepseek') {
+    const err = new Error('Модели Gemini и Kimi K3.1 Pro доступны только в ZENOVA PRO');
+    err.status = 403;
+    throw err;
+  }
+
+  if (choice === 'kimi') {
     return {
+      id: 'kimi',
+      label: 'Kimi K3.1 Pro',
       baseUrl: String(process.env.AI_PREMIUM_BASE_URL || 'https://api.moonshot.cn/v1').replace(/\/+$/, ''),
       apiKey: String(process.env.AI_PREMIUM_API_KEY || process.env.MOONSHOT_API_KEY || '').trim(),
       model: String(process.env.AI_PREMIUM_MODEL || 'kimi-k3.1-pro').trim(),
       premium: true,
     };
   }
+
+  if (choice === 'gemini') {
+    return {
+      id: 'gemini',
+      label: 'Gemini 2.5 Pro',
+      baseUrl: String(process.env.AI_GEMINI_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/+$/, ''),
+      apiKey: String(process.env.AI_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').trim(),
+      model: String(process.env.AI_GEMINI_MODEL || 'gemini-2.5-flash').trim(),
+      premium: true,
+    };
+  }
+
+  const deepseekKey = String(process.env.DEEPSEEK_API_KEY || process.env.AI_BASIC_API_KEY || '').trim();
+  if (deepseekKey) {
+    return {
+      id: 'deepseek',
+      label: 'DeepSeek V3',
+      baseUrl: String(process.env.AI_BASIC_BASE_URL || 'https://api.deepseek.com/v1').replace(/\/+$/, ''),
+      apiKey: deepseekKey,
+      model: String(process.env.AI_BASIC_MODEL || 'deepseek-chat').trim(),
+      premium,
+    };
+  }
+
   return {
-    baseUrl: String(process.env.AI_BASIC_BASE_URL || 'https://generativelanguage.googleapis.com/v1beta/openai').replace(/\/+$/, ''),
-    apiKey: String(process.env.AI_BASIC_API_KEY || process.env.GEMINI_API_KEY || '').trim(),
-    model: String(process.env.AI_BASIC_MODEL || 'gemini-3-flash-preview').trim(),
-    premium: false,
+    id: 'deepseek',
+    label: 'DeepSeek V3',
+    baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai',
+    apiKey: String(process.env.GEMINI_API_KEY || '').trim(),
+    model: 'gemini-2.5-flash',
+    premium,
   };
 }
 
-async function requestAiChat(user, prompt, premium) {
-  const provider = aiProvider(premium);
-  if (!provider.apiKey) throw new Error(premium ? 'Kimi K3.1 Pro пока не настроен на сервере' : 'Базовый ИИ пока не настроен на сервере');
+async function requestAiChat(user, prompt, premium, requestedModel) {
+  const provider = aiProvider(premium, requestedModel);
+  if (!provider.apiKey) throw new Error(`${provider.label} пока не настроен на сервере`);
   const usage = aiUsageFor(user.id, premium);
   const limit = aiLimits(premium);
   if (usage.count >= limit) {
-    const error = new Error(premium ? 'Дневной лимит Kimi исчерпан. Попробуйте завтра.' : 'Бесплатные запросы на сегодня закончились. Локальный Оракул по-прежнему доступен.');
+    const error = new Error(premium ? 'Дневной лимит (10 запросов) исчерпан. Попробуйте завтра.' : 'Бесплатные запросы на сегодня закончились. Перейдите на PRO для 10 запросов в день.');
     error.status = 429;
     throw error;
   }
@@ -325,13 +360,13 @@ async function requestAiChat(user, prompt, premium) {
     messages: [
       {
         role: 'system',
-        content: 'Ты SYNTHAX, кино-консьерж ZENOVA. Отвечай на русском, конкретно и дружелюбно. Помогай выбирать фильмы и сериалы, сравнивать их и составлять план просмотра. Не выдумывай факты, рейтинги, ссылки или доступность на площадках. Не обещай качество видео, озвучку или отсутствие рекламы: это зависит от сторонних плееров. Не запрашивай личные и платёжные данные. До 220 слов.',
+        content: 'Ты SYNTHAX-9, интеллектуальный кино-консьерж ZENOVA. Отвечай на русском, структурно и по делу. Помогай подбирать фильмы и сериалы, сравнивать сюжеты, разбирать финалы без лишних спойлеров и составлять план просмотра. Не выдумывай факты, рейтинги и ссылки. До 220 слов.',
       },
       { role: 'user', content: prompt },
     ],
     temperature: 0.7,
-    max_tokens: premium ? 700 : 450,
-    ...(premium ? { reasoning_effort: 'low' } : {}),
+    max_tokens: premium ? 800 : 450,
+    ...(provider.id === 'kimi' ? { reasoning_effort: 'low' } : {}),
   };
   const response = await fetch(`${provider.baseUrl}/chat/completions`, {
     method: 'POST',
@@ -351,7 +386,8 @@ async function requestAiChat(user, prompt, premium) {
   saveData();
   return {
     text: text.slice(0, 12000),
-    model: provider.model,
+    model: provider.label,
+    modelId: provider.id,
     premium,
     remaining: Math.max(0, limit - usage.count),
     limit,
@@ -576,7 +612,8 @@ async function handleApi(req, res, reqUrl) {
       if (!prompt) return json(res, 400, { ok: false, message: 'Напишите запрос к SYNTHAX' });
       if (prompt.length > 1200) return json(res, 400, { ok: false, message: 'Сократите запрос до 1200 символов' });
       const premium = isGrantActive(findTelegramGrant(user.id));
-      const result = await requestAiChat(user, prompt, premium);
+      const modelId = String(body.modelId || (premium ? 'gemini' : 'deepseek'));
+      const result = await requestAiChat(user, prompt, premium, modelId);
       return json(res, 200, { ok: true, ...result });
     } catch (error) {
       return json(res, error.status || 400, { ok: false, message: error.message || 'ИИ временно недоступен' });

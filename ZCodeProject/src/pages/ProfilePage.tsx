@@ -35,7 +35,7 @@ import { getStoredSeason, setStoredSeason, applySeason, detectSeason } from '../
 import type { SeasonId } from '../services/seasons';
 import { triggerSeasonalBurst } from '../components/SeasonFx';
 import type { Movie, WatchStatus } from '../types';
-import ZenovaArcadeGame from '../components/ZenovaArcadeGame';
+import GiftFestHub from '../components/GiftFestHub';
 import './ProfilePage.css';
 
 type SubPage = 'library' | 'rank' | 'atmosphere' | 'news' | 'arcade' | null;
@@ -1104,21 +1104,16 @@ export const ProfilePage: React.FC = () => {
     );
   }
 
-  /* ══════════════ ПОДСТРАНИЦА: ИГРОВОЙ КЛУБ ZENOVA ARCADE (60 FPS) ══════════════ */
+  /* ══════════════ ПОДСТРАНИЦА: GIFTFEST & РУЛЕТКА ПРИЗОВ ══════════════ */
   if (subPage === 'arcade') {
     return (
       <div className="zen-subpage">
-        <ZenovaArcadeGame
+        <GiftFestHub
           onBack={() => {
             haptic('light');
             setSubPage(null);
-            try {
-              setArcadeBest(Number(localStorage.getItem('zen_arcade_best') || 0));
-            } catch {}
           }}
-          onWinBonus={() => {
-            showToast('Подарок 3 дня ZENOVA PRO активирован!');
-          }}
+          onNotice={(msg) => showToast(msg)}
         />
       </div>
     );
@@ -1282,9 +1277,8 @@ export const ProfilePage: React.FC = () => {
           <span className="zen-shortcut__label">Рейтинг</span>
         </button>
         <button type="button" className="zen-shortcut" onClick={() => { haptic('light'); setSubPage('arcade'); }}>
-          <span className="zen-shortcut__icon"><Gamepad2 size={20} /></span>
-          <span className="zen-shortcut__label">Аркада</span>
-          {arcadeBest > 0 && <span className="zen-shortcut__badge">{arcadeBest}</span>}
+          <span className="zen-shortcut__icon"><Gift size={20} /></span>
+          <span className="zen-shortcut__label">GiftFest</span>
         </button>
       </div>
 

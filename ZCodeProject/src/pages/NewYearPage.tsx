@@ -179,26 +179,22 @@ const NewYearPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Интерактивная аркада ZENOVA Star Runner */}
-        <div
-          className="ny-game-banner"
+        {/* Компактная строка GiftFest (рулетка и розыгрыш) */}
+        <button
+          type="button"
+          className="ny-giftfest-strip"
           onClick={() => {
-            haptic('medium');
+            haptic('light');
             navigate('/profile', { state: { openArcade: true } });
           }}
         >
-          <div className="ny-game-banner__icon">🚀✨</div>
-          <div className="ny-game-banner__content">
-            <span className="ny-game-banner__badge">АРКАДА ZENOVA</span>
-            <div className="ny-game-banner__title">Zenova Star Runner</div>
-            <div className="ny-game-banner__desc">
-              Набери 25 очков и забери <b>3 дня ZENOVA PRO</b>!
-            </div>
-          </div>
-          <button type="button" className="ny-game-banner__btn">
-            Играть ›
-          </button>
-        </div>
+          <span className="ny-giftfest-strip__dot">🎁</span>
+          <span className="ny-giftfest-strip__text">
+            <strong>GiftFest · Рулетка призов</strong>
+            <small>10 Stars за спин · PRO и подарки Telegram</small>
+          </span>
+          <span className="ny-giftfest-strip__cta">Открыть ›</span>
+        </button>
 
         {/* Лаконичные кнопки */}
         <div className="ny-hero-btns">

@@ -72,7 +72,7 @@ const AiPickPage: React.FC = () => {
   const { haptic } = useTelegram();
   const { favorites, watchHistory, isFavorite, addFavorite } = useStore();
   const isWinter = getStoredSeason().season.id === 'winter';
-  const maskSrc = isWinter ? './zenova-mask-mini-winter.png' : './zenova-mask-mini.png';
+  const maskSrc = isWinter ? '/zenova-mask-mini-winter.png' : '/zenova-mask-mini.png';
 
   const [mainTab, setMainTab] = useState<'oracle' | 'synthax'>('oracle');
   const [prompt, setPrompt] = useState('');
@@ -314,7 +314,7 @@ const AiPickPage: React.FC = () => {
         >
           <span className="orc-main-switch__icon">⚡</span>
           <span>SYNTHAX-9</span>
-          <span className="orc-main-switch__badge orc-main-switch__badge--dev">СКОРО</span>
+          <span className="orc-main-switch__badge">AI</span>
         </button>
       </div>
 
