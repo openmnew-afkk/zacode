@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetail, getTrailer, getRecommendations } from '../api/catalog';
 import { buildWatchOptions, isRestrictedContent } from '../api/watch';
@@ -255,6 +255,12 @@ const MovieDetailPage: React.FC = () => {
   const [showAgeGate, setShowAgeGate] = useState(false);
   const [watchOptions, setWatchOptions] = useState<WatchOption[]>([]);
   const [watchIdx, setWatchIdx] = useState(0);
+  const [currentSeason, setCurrentSeason] = useState(1);
+  const [currentEpisode, setCurrentEpisode] = useState(1);
+  const [autoNext, setAutoNext] = useState(() => {
+    try { return localStorage.getItem('zenova_auto_next') !== '0'; } catch { return true; }
+  });
+  const playerFrameRef = useRef<HTMLIFrameElement>(null);
   const [recs, setRecs] = useState<Movie[]>([]);
   const [sheetMode, setSheetMode] = useState<'normal' | 'fullscreen'>('normal');
   const [ambilightOn, setAmbilightOn] = useState(true);
@@ -446,6 +452,57 @@ const MovieDetailPage: React.FC = () => {
     }
   };
 
+  const openEpisode = (season: number, episode: number) => {
+    if (!movie) return;
+    const options = buildWatchOptions({
+      tmdbId,
+      imdbId: movie.imdbID,
+      kinopoiskId: movie.kinopoisk_id,
+      title: movie.title,
+      isSerial: true,
+      season,
+      episode,
+    });
+    const globalIndex = options.findIndex((option) => option.provider === 'GlobalUS');
+    setCurrentSeason(season);
+    setCurrentEpisode(episode);
+    setWatchOptions(options);
+    setWatchIdx(globalIndex >= 0 ? globalIndex : 0);
+    haptic('light');
+  };
+
+  const goToAdjacentEpisode = (direction: -1 | 1) => {
+    if (!movie?.seasons?.length) return;
+    const seasons = movie.seasons.filter((season) => season.episodes_count > 0).sort((a, b) => a.season_number - b.season_number);
+    const seasonIndex = seasons.findIndex((season) => season.season_number === currentSeason);
+    const season = seasons[seasonIndex];
+    if (!season) return;
+    const nextEpisode = currentEpisode + direction;
+    if (nextEpisode >= 1 && nextEpisode <= season.episodes_count) {
+      openEpisode(currentSeason, nextEpisode);
+      return;
+    }
+    const adjacentSeason = seasons[seasonIndex + direction];
+    if (adjacentSeason) {
+      openEpisode(adjacentSeason.season_number, direction > 0 ? 1 : adjacentSeason.episodes_count);
+    }
+  };
+
+  useEffect(() => {
+    if (!showWatch || !autoNext || !movie?.is_serial || watchIdx < 0 || !watchOptions[watchIdx]) return;
+    const allowedOrigin = new URL(watchOptions[watchIdx].url).origin;
+    const onPlayerMessage = (event: MessageEvent) => {
+      if (event.origin !== allowedOrigin || event.source !== playerFrameRef.current?.contentWindow) return;
+      const payload = typeof event.data === 'string' ? { event: event.data } : event.data;
+      const eventName = String(payload?.event || payload?.type || payload?.data?.event || '').toLowerCase().replace(/[_\s]/g, '-');
+      if (['ended', 'video-ended', 'videoended', 'player-ended', 'playback-ended'].includes(eventName)) {
+        goToAdjacentEpisode(1);
+      }
+    };
+    window.addEventListener('message', onPlayerMessage);
+    return () => window.removeEventListener('message', onPlayerMessage);
+  }, [showWatch, autoNext, movie, watchIdx, watchOptions, currentSeason, currentEpisode]);
+
   /* ── Skeleton ── */
   if (loading) {
     return (
@@ -494,6 +551,8 @@ const MovieDetailPage: React.FC = () => {
       kinopoiskId: movie?.kinopoisk_id,
       title: movie?.title || '',
       isSerial,
+      season: currentSeason,
+      episode: currentEpisode,
     }));
     setWatchIdx(0);
     setShowWatch(true);
@@ -993,7 +1052,7 @@ const MovieDetailPage: React.FC = () => {
                   <div className="dp-cinema-hud__meta">
                     <div className="dp-cinema-hud__meta-top">
                       <span className="dp-cinema-hud__brand-name">ZENOVA</span>
-                      <span className="dp-cinema-hud__badge-4k">4K ULTRA HD</span>
+                      <span className="dp-cinema-hud__badge-4k">СТОРОННИЙ ПЛЕЕР</span>
                       <span className="dp-cinema-hud__live-dot" />
                     </div>
                     <h3 className="dp-cinema-hud__title" title={movie.title}>
@@ -1078,8 +1137,9 @@ const MovieDetailPage: React.FC = () => {
                   className="dp-cinema-hud__btn"
                   onClick={() => {
                     haptic('light');
+                    const currentSource = watchIdx;
                     setWatchIdx(-1);
-                    setTimeout(() => setWatchIdx(0), 60);
+                    setTimeout(() => setWatchIdx(currentSource), 60);
                   }}
                   title="Перезагрузить поток"
                 >
@@ -1091,14 +1151,28 @@ const MovieDetailPage: React.FC = () => {
               </div>
             </div>
 
-            {/* ── Чистый видео-экран (только первый основной плеер, все озвучки и серии доступны внутри) ── */}
+            <div className="dp-source-tabs" aria-label="Источник воспроизведения">
+              {watchOptions.map((option, index) => (
+                <button
+                  type="button"
+                  key={option.id}
+                  className={watchIdx === index ? 'is-active' : ''}
+                  onClick={() => { haptic('light'); setWatchIdx(index); }}
+                  aria-pressed={watchIdx === index}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
             <div className="dp-cinema-stage">
-              {watchIdx >= 0 && watchOptions[0] ? (
+              {watchIdx >= 0 && watchOptions[watchIdx] ? (
                 <iframe
-                  key={watchOptions[0].url}
-                  src={watchOptions[0].url}
+                  ref={playerFrameRef}
+                  key={watchOptions[watchIdx].url}
+                  src={watchOptions[watchIdx].url}
                   className="dp-trailer__frame"
-                  title="Просмотр"
+                  title={`Просмотр: ${watchOptions[watchIdx].provider}`}
                   allowFullScreen
                   allow="autoplay *; fullscreen *; encrypted-media *; picture-in-picture *; clipboard-write *"
                   referrerPolicy="strict-origin-when-cross-origin"
@@ -1111,13 +1185,56 @@ const MovieDetailPage: React.FC = () => {
               )}
             </div>
 
+            {isSerial && (
+              <div className="dp-episode-nav">
+                <div className="dp-episode-nav__top">
+                  <div>
+                    <strong>Сезон и серия</strong>
+                    <span>Внешний выбор серии использует GlobalUS</span>
+                  </div>
+                  <label className="dp-auto-next">
+                    <input
+                      type="checkbox"
+                      checked={autoNext}
+                      onChange={(event) => {
+                        setAutoNext(event.target.checked);
+                        try { localStorage.setItem('zenova_auto_next', event.target.checked ? '1' : '0'); } catch {}
+                      }}
+                    />
+                    <span>Автоследующая</span>
+                  </label>
+                </div>
+                <div className="dp-episode-nav__controls">
+                  <button type="button" onClick={() => goToAdjacentEpisode(-1)} aria-label="Предыдущая серия">Назад</button>
+                  <label>
+                    <span>Сезон</span>
+                    <select value={currentSeason} onChange={(event) => openEpisode(Number(event.target.value), 1)}>
+                      {movie.seasons?.filter((season) => season.episodes_count > 0).map((season) => (
+                        <option key={season.id} value={season.season_number}>{season.season_number}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    <span>Серия</span>
+                    <select value={currentEpisode} onChange={(event) => openEpisode(currentSeason, Number(event.target.value))}>
+                      {Array.from({ length: movie.seasons?.find((season) => season.season_number === currentSeason)?.episodes_count || 1 }, (_, index) => index + 1).map((episode) => (
+                        <option key={episode} value={episode}>{episode}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <button type="button" className="dp-episode-next" onClick={() => goToAdjacentEpisode(1)}>Следующая</button>
+                </div>
+                <p>Автопереход сработает, если источник пришлёт событие окончания серии. Иначе нажмите «Следующая» — ZENOVA не может читать состояние произвольного стороннего плеера.</p>
+              </div>
+            )}
+
             {/* ── Нижняя информационная полоса статуса потока (без дергающихся ручек) ── */}
             {!isPlayerFullscreen && (
               <div className="dp-cinema-bottom-strip">
                 <div className="dp-cinema-bottom-strip__left">
-                  <span className="dp-cinema-bottom-strip__tag">DOLBY ATMOS</span>
+                  <span className="dp-cinema-bottom-strip__tag">КАЧЕСТВО ОТ ИСТОЧНИКА</span>
                   <span className="dp-cinema-bottom-strip__dot">·</span>
-                  <span className="dp-cinema-bottom-strip__tag">HDR 60FPS</span>
+                  <span className="dp-cinema-bottom-strip__tag">НАСТРОЙКИ В ПЛЕЕРЕ</span>
                 </div>
                 <div className="dp-cinema-bottom-strip__hint">
                   Озвучка, качество и серии {isSerial ? 'сериала' : 'фильма'} доступны внутри плеера

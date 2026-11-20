@@ -501,8 +501,9 @@
 }
 
 .zen-toggle.on {
-  background: #10b981;
-  border-color: #34d399;
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
 
 .zen-toggle__thumb {
@@ -585,92 +586,198 @@
 
 /* ══════════════ 1. ЕДИНАЯ КИНОТЕКА (LIBRARY) ══════════════ */
 .zen-lib-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: 16px;
+  padding: 16px 17px 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(56, 189, 248, 0.17), transparent 42%),
+    linear-gradient(145deg, #191b29 0%, #10111a 54%, #0b0c12 100%);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.zen-lib-hero::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: -72px;
+  left: -44px;
+  width: 190px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(255, 213, 107, 0.08);
+  filter: blur(28px);
+  pointer-events: none;
+}
+
+.zen-lib-hero__top {
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  padding: 16px;
-  border-radius: 20px;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  backdrop-filter: blur(20px);
-  margin-bottom: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+}
+
+.zen-lib-hero__eyebrow {
+  display: block;
+  color: rgba(255, 222, 148, 0.72);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8.5px;
+  font-weight: 750;
+  letter-spacing: 0.13em;
+}
+
+.zen-lib-hero__headline {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  margin-top: 5px;
+}
+
+.zen-lib-hero__num {
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 30px;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.zen-lib-hero__headline-label {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.zen-lib-hero__emblem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 220, 143, 0.25);
+  border-radius: 14px;
+  color: #ffdc8f;
+  background: linear-gradient(145deg, rgba(255, 213, 107, 0.16), rgba(255, 213, 107, 0.04));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09);
+}
+
+.zen-lib-hero__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 -17px;
+  padding: 11px 0 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(4, 5, 10, 0.22);
 }
 
 .zen-lib-hero__stat {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: 3px;
+  padding: 0 7px;
+  text-align: center;
 }
 
-.zen-lib-hero__num {
-  font-family: 'Unbounded', sans-serif;
-  font-size: 15px;
+.zen-lib-hero__stat + .zen-lib-hero__stat {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.zen-lib-hero__stat-num {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 13px;
   font-weight: 850;
-  color: #ffffff;
+  line-height: 1.1;
 }
 
 .zen-lib-hero__lbl {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.5);
+  overflow: hidden;
+  max-width: 100%;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 9.5px;
   font-weight: 600;
-}
-
-.zen-lib-hero__divider {
-  width: 1px;
-  height: 24px;
-  background: rgba(255, 255, 255, 0.08);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .zen-lib-search {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 13px;
 }
 
 .zen-lib-search__icon {
   position: absolute;
-  left: 14px;
-  color: rgba(255, 255, 255, 0.4);
+  left: 15px;
+  color: rgba(255, 255, 255, 0.44);
   pointer-events: none;
 }
 
 .zen-lib-search__input {
   width: 100%;
-  height: 44px;
-  padding: 0 38px 0 38px;
-  border-radius: 14px;
-  background: rgba(18, 16, 26, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  font-size: 13px;
+  height: 48px;
+  padding: 0 46px 0 43px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 15px;
   outline: none;
-  transition: border-color 0.18s ease;
+  color: #ffffff;
+  background: rgba(18, 19, 29, 0.94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  font-size: 16px;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  -webkit-appearance: none;
+}
+
+.zen-lib-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.38);
 }
 
 .zen-lib-search__input:focus {
-  border-color: rgba(255, 213, 107, 0.5);
+  border-color: rgba(255, 213, 107, 0.58);
+  background: #151621;
+  box-shadow: 0 0 0 3px rgba(255, 213, 107, 0.09);
+}
+
+.zen-lib-search__input::-webkit-search-cancel-button {
+  display: none;
 }
 
 .zen-lib-search__clear {
   position: absolute;
-  right: 12px;
-  background: none;
+  right: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: none;
-  color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  color: rgba(255, 255, 255, 0.66);
+  background: rgba(255, 255, 255, 0.07);
   cursor: pointer;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .zen-lib-tabs {
   display: flex;
-  gap: 6px;
+  gap: 7px;
   overflow-x: auto;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
+  margin: 0 -16px 16px;
+  padding: 2px 16px 6px;
+  scroll-padding-inline: 16px;
   scrollbar-width: none;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .zen-lib-tabs::-webkit-scrollbar {
@@ -678,152 +785,318 @@
 }
 
 .zen-lib-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
   flex-shrink: 0;
-  padding: 8px 14px;
+  gap: 7px;
+  padding: 8px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  background: rgba(15, 15, 22, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.66);
+  background: rgba(18, 19, 29, 0.88);
+  cursor: pointer;
   font-size: 12px;
   font-weight: 700;
-  cursor: pointer;
-  transition: all 0.16s ease;
   white-space: nowrap;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+
+.zen-lib-tab:active {
+  transform: scale(0.96);
 }
 
 .zen-lib-tab.active {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.28);
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  border-color: rgba(255, 222, 148, 0.72);
+  color: #251d0d;
+  background: linear-gradient(135deg, #ffe29a 0%, #eebc62 100%);
+  box-shadow: 0 6px 16px rgba(210, 150, 40, 0.2);
+}
+
+.zen-lib-tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.zen-lib-tab.active .zen-lib-tab__count {
+  color: #33250d;
+  background: rgba(64, 43, 8, 0.12);
 }
 
 .zen-lib-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
 .zen-lib-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 10px 14px;
+  display: block;
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
-  background: rgba(15, 15, 22, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  outline: none;
+  color: #ffffff;
+  background: #11131b;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.34);
   cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease;
+  font: inherit;
+  text-align: left;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .zen-lib-card:active {
-  transform: scale(0.985);
-  background: rgba(255, 255, 255, 0.05);
+  transform: scale(0.975);
+  border-color: rgba(255, 213, 107, 0.36);
 }
 
 .zen-lib-card__poster-wrap {
   position: relative;
-  width: 48px;
-  height: 68px;
-  border-radius: 10px;
+  display: block;
+  width: 100%;
   overflow: hidden;
-  flex-shrink: 0;
-  background: #111;
+  aspect-ratio: 2 / 3;
+  background: #171925;
+  isolation: isolate;
+}
+
+.zen-lib-card__poster-fallback {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  color: rgba(211, 219, 238, 0.5);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(108, 99, 255, 0.2), transparent 42%),
+    linear-gradient(155deg, #25283a 0%, #171925 52%, #101119 100%);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.zen-lib-card__poster-fallback svg {
+  opacity: 0.72;
+  stroke-width: 1.35;
 }
 
 .zen-lib-card__poster {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.zen-lib-card__rating {
+.zen-lib-card__shade {
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  padding: 1px 4px;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.75);
-  color: #ffd56b;
-  font-size: 9px;
-  font-weight: 850;
+  z-index: 2;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(4, 6, 12, 0.52) 0%, transparent 27%, transparent 43%, rgba(4, 5, 10, 0.22) 56%, rgba(4, 5, 10, 0.97) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.12), transparent 50%);
+  pointer-events: none;
 }
 
-.zen-lib-card__content {
-  flex: 1;
-  min-width: 0;
+.zen-lib-card__topline {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 10px;
+  pointer-events: none;
 }
 
 .zen-lib-card__tags {
   display: flex;
+  min-width: 0;
   flex-wrap: wrap;
-  gap: 5px;
-  margin-bottom: 4px;
+  gap: 4px;
 }
 
-.zen-tag-fav {
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: rgba(251, 191, 36, 0.15);
-  border: 1px solid rgba(251, 191, 36, 0.35);
-  color: #fbbf24;
+.zen-tag-watched,
+.zen-tag-want,
+.zen-tag-watching,
+.zen-tag-hist {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   font-size: 9px;
   font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .zen-tag-watched {
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #6ee7b7;
-  font-size: 9px;
-  font-weight: 800;
+  border-color: rgba(110, 231, 183, 0.3);
+  color: #b4f4da;
+  background: rgba(5, 66, 50, 0.82);
 }
 
 .zen-tag-want {
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #7dd3fc;
-  font-size: 9px;
-  font-weight: 800;
+  border-color: rgba(125, 211, 252, 0.3);
+  color: #c1e9fb;
+  background: rgba(7, 54, 78, 0.84);
 }
 
 .zen-tag-watching {
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fde047;
-  font-size: 9px;
-  font-weight: 800;
+  border-color: rgba(253, 224, 71, 0.3);
+  color: #fef0a5;
+  background: rgba(92, 59, 5, 0.84);
 }
 
 .zen-tag-hist {
-  padding: 1px 6px;
-  border-radius: 5px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 9px;
-  font-weight: 800;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(24, 26, 37, 0.82);
+}
+
+.zen-lib-card__rating {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 3px;
+  min-height: 23px;
+  margin-left: auto;
+  padding: 4px 7px;
+  border: 1px solid rgba(255, 222, 148, 0.26);
+  border-radius: 999px;
+  color: #ffe092;
+  background: rgba(12, 12, 17, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1;
+}
+
+.zen-lib-card__content {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  padding: 44px 11px 12px;
+  pointer-events: none;
+}
+
+.zen-lib-card__copy {
+  display: block;
+  min-width: 0;
+  flex: 1;
 }
 
 .zen-lib-card__title {
-  margin: 0 0 3px;
-  font-size: 14.5px;
-  font-weight: 750;
-  color: #ffffff;
-  white-space: nowrap;
+  display: -webkit-box;
   overflow: hidden;
-  text-overflow: ellipsis;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 780;
+  line-height: 1.28;
+  letter-spacing: -0.015em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .zen-lib-card__meta {
-  font-size: 11.5px;
-  color: rgba(255, 255, 255, 0.5);
+  display: block;
+  overflow: hidden;
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  font-weight: 550;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+}
+
+.zen-lib-card__favorite {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+  margin-bottom: 1px;
+  border: 1px solid rgba(255, 222, 148, 0.3);
+  border-radius: 50%;
+  color: #ffd56b;
+  background: rgba(35, 28, 13, 0.72);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24);
+}
+
+.zen-lib-card:focus-visible,
+.zen-lib-tab:focus-visible,
+.zen-lib-search__clear:focus-visible {
+  outline: 2px solid #ffd56b;
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .zen-lib-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.23);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.44);
+  }
+
+  .zen-lib-card:hover .zen-lib-card__poster {
+    transform: scale(1.035);
+  }
+}
+
+@media (max-width: 359px) {
+  .zen-lib-grid { gap: 9px; }
+  .zen-lib-card__topline { padding: 8px; }
+  .zen-lib-card__content { padding: 40px 9px 10px; }
+  .zen-lib-card__title { font-size: 13px; }
+  .zen-lib-card__meta { font-size: 10.5px; }
+  .zen-tag-watched,
+  .zen-tag-want,
+  .zen-tag-watching,
+  .zen-tag-hist { padding: 4px 6px; }
+  .zen-lib-card__favorite { width: 23px; height: 23px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zen-lib-card,
+  .zen-lib-card__poster,
+  .zen-lib-tab,
+  .zen-lib-search__input {
+    transition: none;
+  }
 }
 
 /* ══════════════ 3. АТМОСФЕРА И ТЕМЫ (КРУТОЙ ДИЗАЙН) ══════════════ */
@@ -1448,111 +1721,6 @@
   gap: 5px;
 }
 
-/* ── Баннер подписки PRO ── */
-.zen-pro-banner {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  width: 100%;
-  text-align: left;
-  padding: 16px 18px;
-  margin-bottom: 24px;
-  border-radius: 22px;
-  border: 1px solid rgba(255, 213, 107, 0.32);
-  background:
-    radial-gradient(120% 160% at 0% 0%, rgba(255, 213, 107, 0.16) 0%, transparent 55%),
-    linear-gradient(135deg, rgba(38, 30, 12, 0.92) 0%, rgba(20, 16, 8, 0.94) 100%);
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.16s var(--ease-smooth), border-color 0.16s ease;
-  animation: zen-set-in 0.4s var(--ease-smooth) both;
-}
-
-.zen-pro-banner::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255, 235, 180, 0.09) 50%, transparent 60%);
-  transform: translateX(-100%);
-  animation: zen-pro-shimmer 4.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes zen-pro-shimmer {
-  0%, 55% { transform: translateX(-100%); }
-  85%, 100% { transform: translateX(100%); }
-}
-
-.zen-pro-banner:active { transform: scale(0.98); }
-
-.zen-pro-banner--active {
-  border-color: rgba(74, 222, 128, 0.35);
-  background:
-    radial-gradient(120% 160% at 0% 0%, rgba(74, 222, 128, 0.14) 0%, transparent 55%),
-    linear-gradient(135deg, rgba(12, 32, 20, 0.92) 0%, rgba(8, 18, 12, 0.94) 100%);
-}
-
-.zen-pro-banner__icon {
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffd56b;
-  background: linear-gradient(145deg, rgba(255, 213, 107, 0.24), rgba(255, 160, 60, 0.12));
-  border: 1px solid rgba(255, 213, 107, 0.4);
-  box-shadow: 0 4px 16px rgba(255, 190, 80, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.zen-pro-banner--active .zen-pro-banner__icon {
-  color: #4ade80;
-  background: linear-gradient(145deg, rgba(74, 222, 128, 0.22), rgba(34, 197, 94, 0.1));
-  border-color: rgba(74, 222, 128, 0.4);
-  box-shadow: 0 4px 16px rgba(74, 222, 128, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.25);
-}
-
-.zen-pro-banner__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-
-.zen-pro-banner__title {
-  font-family: var(--font-display);
-  font-size: 14.5px;
-  font-weight: 800;
-  color: #ffe9b8;
-  letter-spacing: 0.01em;
-}
-
-.zen-pro-banner--active .zen-pro-banner__title { color: #bbf7d0; }
-
-.zen-pro-banner__sub {
-  font-size: 11.5px;
-  line-height: 1.35;
-  color: rgba(255, 255, 255, 0.62);
-}
-
-.zen-pro-banner__cta {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 750;
-  color: #1a1206;
-  background: linear-gradient(135deg, #ffd56b, #ffab4a);
-  box-shadow: 0 4px 14px rgba(255, 190, 80, 0.35);
-}
-
-.zen-pro-banner--active .zen-pro-banner__cta {
-  color: #06180d;
-  background: linear-gradient(135deg, #86efac, #4ade80);
-  box-shadow: 0 4px 14px rgba(74, 222, 128, 0.3);
-}
-
 /* ── Группы настроек ── */
 .zen-set-group {
   margin-bottom: 22px;
@@ -1725,114 +1893,17 @@ html.light .zen-user-stat-div { background: rgba(0, 0, 0, 0.08); }
 html.light .zen-user-rank-track { background: rgba(0, 0, 0, 0.08); }
 html.light .zen-user-stats-strip { border-top-color: rgba(0, 0, 0, 0.07); }
 html.light .zen-copy-btn { background: rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1); color: rgba(30, 15, 25, 0.7); }
-html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
 
 
 /* ═══════════════════════════════════════════════════════════════════
  *  ✦ НОВЫЕ СТИЛИ НАСТРОЕК (OBSIDIAN CONTROL CENTER v3.4+)
  * ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Шапка: кнопка смены темы и админка ── */
+/* ── Шапка настроек (кнопка админки) ── */
 .zen-header__actions {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.zen-theme-toggle-btn {
-  width: 34px;
-  height: 34px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #ffffff;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  backdrop-filter: blur(10px);
-}
-
-.zen-theme-toggle-btn:active {
-  transform: scale(0.92);
-  background: rgba(255, 255, 255, 0.16);
-}
-
-/* ── Быстрые переключатели под карточкой профиля ── */
-.zen-quick-toggles-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-bottom: 22px;
-}
-
-.zen-quick-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 6px;
-  border-radius: 16px;
-  background: rgba(20, 20, 28, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.65);
-  cursor: pointer;
-  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.zen-quick-pill:active {
-  transform: scale(0.95);
-}
-
-.zen-quick-pill__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #ffffff;
-  transition: all 0.18s ease;
-}
-
-.zen-quick-pill__label {
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 8.5px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.zen-quick-pill.is-active {
-  background: rgba(30, 32, 45, 0.85);
-  border-color: rgba(56, 189, 248, 0.35);
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(56, 189, 248, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.zen-quick-pill.is-active .zen-quick-pill__icon {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.3) 0%, rgba(2, 132, 199, 0.2) 100%);
-  color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
-}
-
-.zen-quick-pill--aurora.is-active {
-  border-color: rgba(52, 211, 153, 0.4);
-  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-}
-
-.zen-quick-pill--aurora.is-active .zen-quick-pill__icon {
-  background: linear-gradient(135deg, rgba(52, 211, 153, 0.3) 0%, rgba(6, 182, 212, 0.2) 100%);
-  color: #34d399;
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
 }
 
 /* ── Кликабельные чипы статов ── */
@@ -1846,36 +1917,6 @@ html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
 .zen-user-stat-chip.clickable:active {
   transform: scale(0.94);
   background: rgba(255, 255, 255, 0.08);
-}
-
-/* ── Сегментированные чипы качества ── */
-.zen-quality-chips {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(0, 0, 0, 0.3);
-  padding: 3px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.zen-quality-chip {
-  padding: 4px 8px;
-  border-radius: 8px;
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.5);
-  font-family: 'Unbounded', -apple-system, sans-serif;
-  font-size: 9px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.14s ease;
-}
-
-.zen-quality-chip.is-active {
-  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.35);
 }
 
 /* ── Переключатель Switch (Apple Style) ── */
@@ -1906,9 +1947,9 @@ html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
 }
 
 .zen-switch.on {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
 }
 
 .zen-switch.on .zen-switch__thumb {
@@ -1936,6 +1977,14 @@ html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
 .zen-set-btn-sm:active {
   transform: scale(0.95);
   background: rgba(255, 255, 255, 0.14);
+}
+
+.zen-set-btn-sm .animate-spin {
+  animation: zen-spin 0.9s linear infinite;
+}
+
+@keyframes zen-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* ── Облачный статус ── */
@@ -1990,26 +2039,6 @@ html.light .zen-pro-banner__sub { color: rgba(30, 20, 10, 0.6); }
 }
 
 /* ── Светлая тема: новые элементы ── */
-html.light .zen-theme-toggle-btn {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: #1c1218;
-}
-html.light .zen-quick-pill {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 14px rgba(180, 140, 160, 0.12);
-  color: rgba(30, 15, 25, 0.65);
-}
-html.light .zen-quick-pill__icon {
-  background: rgba(0, 0, 0, 0.05);
-  color: #1c1218;
-}
-html.light .zen-quick-pill.is-active {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(2, 132, 199, 0.4);
-  color: #0284c7;
-}
 html.light .zen-quality-chips {
   background: rgba(0, 0, 0, 0.06);
   border-color: rgba(0, 0, 0, 0.08);
@@ -2022,7 +2051,9 @@ html.light .zen-switch {
   border-color: rgba(0, 0, 0, 0.12);
 }
 html.light .zen-switch.on {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow: none;
 }
 html.light .zen-set-btn-sm {
   background: rgba(0, 0, 0, 0.05);
@@ -2034,4 +2065,1265 @@ html.light .zen-profile-toast {
   border-color: rgba(0, 0, 0, 0.1);
   color: #1c1218;
   box-shadow: 0 14px 40px rgba(180, 140, 160, 0.35);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  ✦ TIERING CONTROL CENTER — глубокий индиго-синий холст,
+ *  слоновая кость карточек, бейдж уровня и круглые ярлыки разделов
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Холст страницы: тёмный нейтральный графит с лёгким индиго ── */
+.zen-profile-page {
+  background:
+    radial-gradient(120% 40% at 50% -4%, rgba(124, 140, 205, 0.14) 0%, transparent 60%),
+    radial-gradient(80% 26% at 88% 2%, rgba(146, 118, 215, 0.1) 0%, transparent 58%),
+    linear-gradient(180deg, #201f2c 0%, #1a1926 40%, #16151f 100%);
+}
+
+.zen-profile-page .zen-header__kicker { color: rgba(196, 205, 238, 0.72); }
+.zen-profile-page .zen-header__title { color: #f2f4fb; }
+
+/* ── Карточка пользователя: пастельный градиент как на референсе Tiering ── */
+html:not(.light) .zen-user-card {
+  position: relative;
+  background: linear-gradient(140deg, #d8ecf7 0%, #b3d7ee 46%, #92bde4 100%);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 22px 48px rgba(8, 12, 40, 0.5),
+    0 4px 14px rgba(8, 12, 40, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* PRO — кремово-золотая пастель (S2 на референсе) */
+html:not(.light) .zen-user-card--gold {
+  background: linear-gradient(140deg, #f9efce 0%, #efdf9f 48%, #e6cb7d 100%);
+}
+
+html:not(.light) .zen-user-card__beam { display: none; }
+
+/* 3D-гема ранга справа на карточке */
+.zen-user-gem {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  animation: zenGemFloat 4.2s ease-in-out infinite;
+}
+.zen-user-gem img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 18px rgba(31, 37, 71, 0.35));
+}
+html:not(.light) .zen-user-card .zen-user-info { margin-right: 88px; }
+@keyframes zenGemFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+}
+
+html:not(.light) .zen-user-card .zen-user-kicker { color: rgba(38, 43, 68, 0.62); }
+html:not(.light) .zen-user-card .zen-user-rank-chip {
+  background: rgba(38, 43, 68, 0.08);
+  border-color: rgba(38, 43, 68, 0.16);
+  color: #2c3252;
+}
+html:not(.light) .zen-user-card .zen-user-name { color: #232841; }
+html:not(.light) .zen-user-card .zen-user-handle { color: rgba(38, 43, 68, 0.66); }
+html:not(.light) .zen-user-card .zen-copy-btn {
+  background: rgba(38, 43, 68, 0.07);
+  border-color: rgba(38, 43, 68, 0.14);
+  color: rgba(38, 43, 68, 0.72);
+}
+html:not(.light) .zen-user-card .zen-chevron { color: rgba(38, 43, 68, 0.4); }
+html:not(.light) .zen-user-card .zen-user-avatar {
+  background: linear-gradient(135deg, #eef0fa 0%, #e2e5f2 100%);
+  border-color: rgba(38, 43, 68, 0.16);
+}
+html:not(.light) .zen-user-card .zen-user-lvl-pill {
+  background: #232841;
+  border-color: rgba(255, 213, 107, 0.85);
+  color: #ffd56b;
+}
+html:not(.light) .zen-user-card .zen-user-stat-lbl { color: rgba(38, 43, 68, 0.55); }
+html:not(.light) .zen-user-card .zen-user-stat-val { color: #232841; }
+html:not(.light) .zen-user-card .zen-user-stat-val.text-green { color: #0e9f6e; }
+html:not(.light) .zen-user-card .zen-user-stat-val.text-cyan { color: #0284c7; }
+html:not(.light) .zen-user-card .zen-user-stat-val.text-gold { color: #b7791f; }
+html:not(.light) .zen-user-card .zen-user-stat-div { background: rgba(38, 43, 68, 0.12); }
+html:not(.light) .zen-user-card .zen-user-stats-strip { border-top-color: rgba(38, 43, 68, 0.16); }
+html:not(.light) .zen-user-card .zen-user-rank-track { background: rgba(38, 43, 68, 0.22); }
+html:not(.light) .zen-user-card .zen-user-rank-fill {
+  background: linear-gradient(90deg, #2c3560 0%, #4a5590 100%);
+}
+html:not(.light) .zen-user-card--gold .zen-user-rank-fill {
+  background: linear-gradient(90deg, #8a6414 0%, #b98a1e 100%);
+}
+html:not(.light) .zen-user-card .zen-user-rank-title { color: rgba(38, 43, 68, 0.78); }
+html:not(.light) .zen-user-card .zen-user-rank-pts { color: rgba(38, 43, 68, 0.55); }
+
+/* Прогресс + кнопка Upgrade в одной строке (как на референсе) */
+.zen-user-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+html:not(.light) .zen-user-progress-row .zen-user-rank-bar {
+  flex: 1;
+  min-width: 0;
+}
+
+.zen-upgrade-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 11px 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: #f6f2e6;
+  background: linear-gradient(135deg, #22222f 0%, #3a3a52 100%);
+  box-shadow: 0 8px 18px rgba(10, 12, 30, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.zen-upgrade-btn:active { transform: scale(0.94); }
+
+.zen-upgrade-btn--active {
+  color: #241d06;
+  background: linear-gradient(135deg, #ffe29a 0%, #ffc95e 100%);
+  box-shadow: 0 8px 18px rgba(210, 150, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* ── Круговые быстрые разделы ── */
+.zen-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 24px;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-shortcut {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-shortcut__icon {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f2f4fb;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 6px 14px rgba(6, 8, 18, 0.35);
+  transition: transform 0.18s cubic-bezier(0.2, 1.2, 0.4, 1), background 0.18s ease;
+}
+.zen-shortcut:active .zen-shortcut__icon { transform: scale(0.9); }
+
+.zen-shortcut__icon--emerald {
+  color: #6ee7b7;
+  background: linear-gradient(150deg, rgba(16, 185, 129, 0.22), rgba(16, 185, 129, 0.07));
+  border-color: rgba(110, 231, 183, 0.3);
+}
+.zen-shortcut__icon--amber {
+  color: #fcd34d;
+  background: linear-gradient(150deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.07));
+  border-color: rgba(252, 211, 77, 0.3);
+}
+.zen-shortcut__icon--orange {
+  color: #fdba74;
+  background: linear-gradient(150deg, rgba(249, 115, 22, 0.22), rgba(249, 115, 22, 0.07));
+  border-color: rgba(253, 186, 116, 0.3);
+}
+.zen-shortcut__icon--cyan {
+  color: #7dd3fc;
+  background: linear-gradient(150deg, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0.07));
+  border-color: rgba(125, 211, 252, 0.3);
+}
+
+.zen-shortcut__label {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: rgba(214, 221, 245, 0.78);
+  white-space: nowrap;
+}
+
+.zen-shortcut__badge {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffd56b, #ffab4a);
+  border: 1.5px solid #1d2133;
+  color: #241d06;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 850;
+  box-shadow: 0 3px 8px rgba(210, 150, 40, 0.45);
+}
+
+/* ── Карточки групп: слоновая кость на индиго-холсте ── */
+html:not(.light) .zen-set-card {
+  background: linear-gradient(170deg, #fcf8ee 0%, #f4eee0 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 14px 34px rgba(6, 8, 18, 0.42),
+    0 2px 8px rgba(6, 8, 18, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+html:not(.light) .zen-set-card .zen-set-row__title { color: #262b45; }
+html:not(.light) .zen-set-card .zen-set-row__sub { color: rgba(38, 43, 68, 0.55); }
+html:not(.light) .zen-set-card .zen-set-row__value { color: rgba(38, 43, 68, 0.6); }
+html:not(.light) .zen-set-card .zen-set-row__value--accent { color: #0284c7; }
+html:not(.light) .zen-set-card .zen-set-row__chev { color: rgba(38, 43, 68, 0.34); }
+
+html:not(.light) .zen-set-card .zen-switch {
+  background: rgba(38, 43, 68, 0.16);
+  border-color: rgba(38, 43, 68, 0.14);
+}
+
+html:not(.light) .zen-set-card .zen-set-btn-sm {
+  background: rgba(38, 43, 68, 0.08);
+  border-color: rgba(38, 43, 68, 0.2);
+  color: #2c3252;
+}
+html:not(.light) .zen-set-card .zen-set-btn-sm:active { background: rgba(38, 43, 68, 0.16); }
+
+html:not(.light) .zen-set-card .zen-cloud-status { color: #0e9f6e; }
+
+html:not(.light) .zen-set-group__title { color: rgba(199, 208, 240, 0.62); }
+
+/* Тумблер темы на слоновой кости — активное состояние читается и тут */
+html:not(.light) .zen-set-card .zen-switch.on {
+  background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+/* ── Светлая тема: те же карточки на светлом фоне ── */
+html.light .zen-profile-page {
+  background: var(--bg, #fff5f7);
+}
+html.light .zen-set-card {
+  background: #fffcf5;
+  border: 1px solid rgba(31, 26, 36, 0.08);
+  box-shadow: 0 10px 28px rgba(180, 140, 160, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+html.light .zen-set-group__title { color: rgba(31, 26, 36, 0.55); }
+html.light .zen-profile-page .zen-header__kicker { color: rgba(31, 26, 36, 0.5); }
+html.light .zen-shortcut__icon {
+  background: #ffffff;
+  border-color: rgba(31, 26, 36, 0.09);
+  box-shadow: 0 6px 14px rgba(180, 140, 160, 0.22);
+}
+html.light .zen-shortcut__label { color: rgba(31, 26, 36, 0.66); }
+html.light .zen-shortcut__badge { border-color: #fff5f7; }
+html.light .zen-upgrade-btn {
+  color: #ffffff;
+  background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+  box-shadow: 0 8px 18px rgba(244, 63, 94, 0.3);
+}
+html.light .zen-upgrade-btn--active {
+  color: #241d06;
+  background: linear-gradient(135deg, #ffe29a 0%, #ffc95e 100%);
+  box-shadow: 0 8px 18px rgba(210, 150, 40, 0.35);
+}
+
+/* ── Светлая тема: хром подстраниц (карточки-превью остаются тёмными) ── */
+html.light .zen-subpage__title { color: #1c1218; }
+html.light .zen-subpage__back {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(31, 26, 36, 0.12);
+  color: #1c1218;
+}
+html.light .zen-subpage__back:active { background: rgba(255, 255, 255, 0.95); }
+html.light .zen-section-header { color: rgba(31, 26, 36, 0.5); }
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  ✦ TIERING v2 — табы, теги секций, сетка привилегий, сезонный деск
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Табы с подчёркиванием (Coupons / Earn / Use на референсе) ── */
+.zen-tabs {
+  display: flex;
+  gap: 2px;
+  margin: 0 0 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.zen-tab {
+  flex: 1;
+  position: relative;
+  padding: 11px 0 13px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(210, 216, 240, 0.5);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  transition: color 0.18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-tab.active { color: #f6f2e6; }
+
+.zen-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  transform: translateX(-50%);
+  width: 34px;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #ffd56b 0%, #ffab4a 100%);
+  box-shadow: 0 2px 10px rgba(255, 213, 107, 0.5);
+}
+
+/* ── Тег-пилюля у заголовка секции («Limited offers») ── */
+.zen-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  vertical-align: 2px;
+}
+
+.zen-tag-pill--gold {
+  background: rgba(255, 213, 107, 0.14);
+  border: 1px solid rgba(255, 213, 107, 0.42);
+  color: #ffd56b;
+}
+
+.zen-tag-pill--cyan {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.38);
+  color: #7dd3fc;
+}
+
+/* ── Сетка привилегий (бренд-грид на референсе) ── */
+.zen-perk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-perk-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 13px 12px;
+  border-radius: 18px;
+  background: linear-gradient(170deg, #fcf8ee 0%, #f4eee0 100%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 10px 26px rgba(6, 8, 18, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  transition: transform 0.15s ease;
+}
+
+.zen-perk-card:active { transform: scale(0.97); }
+
+.zen-perk-card__icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+
+.zen-perk-card__icon--blue { color: #0284c7; background: rgba(56, 189, 248, 0.16); }
+.zen-perk-card__icon--violet { color: #8b5cf6; background: rgba(139, 92, 246, 0.15); }
+.zen-perk-card__icon--orange { color: #ea580c; background: rgba(249, 115, 22, 0.15); }
+.zen-perk-card__icon--cyan { color: #0891b2; background: rgba(6, 182, 212, 0.15); }
+.zen-perk-card__icon--amber { color: #d97706; background: rgba(245, 158, 11, 0.16); }
+.zen-perk-card__icon--gold { color: #b7791f; background: rgba(255, 213, 107, 0.25); }
+
+.zen-perk-card__title {
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #262b45;
+}
+
+.zen-perk-card__sub {
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(38, 43, 68, 0.58);
+}
+
+.zen-perk-card__value {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(38, 43, 68, 0.07);
+  border: 1px solid rgba(38, 43, 68, 0.16);
+  color: #2c3252;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0.05em;
+}
+
+.zen-perk-cta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ffd56b 0%, #ffab4a 100%);
+  color: #241d06;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 11px;
+  font-weight: 850;
+  box-shadow: 0 10px 24px rgba(210, 150, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-perk-cta:active { transform: scale(0.97); }
+
+/* ── Деск сезонных коллекций (карточки-градиенты) ── */
+.zen-season-deck {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-season-card {
+  position: relative;
+  padding: 15px 16px 13px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.zen-season-card:active { transform: scale(0.985); }
+
+.zen-season-card.is-active {
+  border-color: rgba(255, 213, 107, 0.75);
+  box-shadow: 0 0 0 1px rgba(255, 213, 107, 0.45), 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.zen-season-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.zen-season-card__badge {
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: rgba(0, 0, 0, 0.38);
+  color: rgba(255, 255, 255, 0.75);
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+}
+
+.zen-season-card__pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #10b981;
+  color: #ffffff;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 7.5px;
+  font-weight: 850;
+  letter-spacing: 0.07em;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+}
+
+.zen-season-card__name {
+  margin: 0 0 4px;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.zen-season-card__sub {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.zen-season-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 13px;
+}
+
+.zen-season-card__palette { display: flex; gap: 5px; }
+
+.zen-season-card__palette span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+}
+
+.zen-season-card__fx {
+  font-size: 9px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ *  TIERING CINEMA — финальная композиция по референсу
+ * ═══════════════════════════════════════════════════════════════════ */
+
+html:not(.light) .zen-user-card {
+  padding: 20px 18px 14px;
+  border-radius: 25px;
+}
+
+html:not(.light) .zen-user-card .zen-user-card__top {
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+html:not(.light) .zen-user-card .zen-user-avatar-wrap {
+  width: 54px;
+  height: 54px;
+}
+
+html:not(.light) .zen-user-card .zen-user-info { margin-right: 68px; }
+html:not(.light) .zen-user-card .zen-user-kicker { display: none; }
+html:not(.light) .zen-user-card .zen-user-kicker-row { margin-bottom: 3px; }
+html:not(.light) .zen-user-card .zen-user-rank-chip {
+  padding: 2px 7px;
+  font-size: 8.5px;
+  background: rgba(35, 40, 65, 0.09);
+}
+html:not(.light) .zen-user-card .zen-user-name {
+  margin-bottom: 5px;
+  font-size: 18px;
+}
+html:not(.light) .zen-user-card .zen-user-handle { font-size: 11.5px; }
+html:not(.light) .zen-user-card .zen-copy-btn { padding: 2px 7px; }
+
+.zen-user-gem {
+  top: -5px;
+  right: 0;
+  width: 102px;
+  height: 102px;
+}
+
+.zen-user-rank-hint {
+  color: rgba(35, 40, 65, 0.62);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.zen-user-progress-row {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+html:not(.light) .zen-user-progress-row .zen-user-rank-bar {
+  gap: 6px;
+  margin-bottom: 0;
+}
+
+html:not(.light) .zen-user-card .zen-user-rank-track { height: 5px; }
+html:not(.light) .zen-user-card .zen-user-rank-labels {
+  font-size: 9.5px;
+  font-weight: 700;
+}
+html:not(.light) .zen-user-card .zen-user-stats-strip { padding-top: 12px; }
+html:not(.light) .zen-user-card .zen-user-stat-val { font-size: 12.5px; }
+html:not(.light) .zen-user-card .zen-user-stat-lbl { font-size: 9.5px; }
+
+.zen-upgrade-btn {
+  padding: 10px 14px;
+  color: #f7f8fb;
+  background: #262b3a;
+  box-shadow: 0 6px 14px rgba(27, 31, 49, 0.24);
+  font-size: 10px;
+}
+
+.zen-upgrade-btn--active {
+  color: #2e250f;
+  background: rgba(255, 255, 255, 0.52);
+  border: 1px solid rgba(87, 66, 17, 0.18);
+  box-shadow: none;
+}
+
+/* Нейтральные тёмные круги и белые line-иконки */
+.zen-shortcuts {
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.zen-shortcut { gap: 7px; }
+
+.zen-shortcut__icon {
+  width: 50px;
+  height: 50px;
+  color: #f5f6fa;
+  background: linear-gradient(145deg, #2b2e3c 0%, #20222e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 7px 16px rgba(4, 5, 12, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.zen-shortcut__icon svg { stroke-width: 1.8; }
+
+.zen-shortcut__label {
+  color: rgba(224, 228, 239, 0.72);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.zen-shortcut__badge {
+  top: 1px;
+  right: 9px;
+  border-color: #1c1b27;
+}
+
+/* Тёмная стеклянная панель контента (Obsidian Dark-Luxury) */
+.zen-panel {
+  position: relative;
+  margin: 0;
+  padding: 0 14px 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(20, 19, 29, 0.92) 0%, rgba(13, 12, 19, 0.96) 100%);
+  box-shadow:
+    0 22px 48px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: zen-set-in 0.45s var(--ease-smooth) both;
+}
+
+.zen-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 38px;
+  height: 4px;
+  border-radius: 0 0 8px 8px;
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateX(-50%);
+}
+
+.zen-panel .zen-tabs {
+  gap: 4px;
+  margin: 0 -14px 18px;
+  padding: 4px 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.zen-panel .zen-tab {
+  padding: 15px 0 13px;
+  color: rgba(255, 255, 255, 0.46);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition: color 0.18s ease;
+}
+
+.zen-panel .zen-tab.active {
+  color: #ffffff;
+}
+
+.zen-panel .zen-tab.active::after {
+  left: 18%;
+  right: 18%;
+  bottom: -1px;
+  width: auto;
+  height: 2.5px;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent));
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: none;
+}
+
+.zen-panel .zen-set-group {
+  margin: 0 0 18px;
+}
+
+.zen-panel .zen-set-group:last-child { margin-bottom: 0; }
+
+html:not(.light) .zen-panel .zen-set-group__title {
+  margin: 0 0 9px 4px;
+  color: rgba(255, 255, 255, 0.46);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+html:not(.light) .zen-panel .zen-set-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.zen-panel .zen-set-row {
+  min-height: 62px;
+  padding: 12px 13px;
+  gap: 12px;
+}
+
+.zen-panel .zen-set-row:not(:last-child)::after {
+  left: 61px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.zen-panel .zen-set-row:active {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.zen-panel .zen-set-row__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.zen-panel .zen-set-row__icon--violet  { color: #c084fc; background: rgba(168, 85, 247, 0.14); border-color: rgba(168, 85, 247, 0.28); }
+.zen-panel .zen-set-row__icon--blue    { color: #60a5fa; background: rgba(59, 130, 246, 0.14); border-color: rgba(59, 130, 246, 0.28); }
+.zen-panel .zen-set-row__icon--emerald { color: #34d399; background: rgba(16, 185, 129, 0.14); border-color: rgba(16, 185, 129, 0.28); }
+.zen-panel .zen-set-row__icon--amber   { color: #fbbf24; background: rgba(245, 158, 11, 0.14); border-color: rgba(245, 158, 11, 0.28); }
+.zen-panel .zen-set-row__icon--slate   { color: #cbd5e1; background: rgba(148, 163, 184, 0.14); border-color: rgba(148, 163, 184, 0.24); }
+.zen-panel .zen-set-row__icon--indigo  { color: #818cf8; background: rgba(99, 102, 241, 0.15); border-color: rgba(99, 102, 241, 0.3); }
+.zen-panel .zen-set-row__icon--red     { color: #fb7185; background: rgba(244, 63, 94, 0.14);  border-color: rgba(244, 63, 94, 0.3); }
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__title {
+  color: #f8fafc;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row--danger .zen-set-row__title {
+  color: #fb7185;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__sub {
+  color: rgba(255, 255, 255, 0.48);
+  font-size: 11px;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__value {
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__value--accent { color: var(--accent-3); }
+html:not(.light) .zen-panel .zen-set-card .zen-set-row__chev { color: rgba(255, 255, 255, 0.28); }
+
+html:not(.light) .zen-panel .zen-set-card .zen-switch {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.35);
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-switch.on {
+  background: linear-gradient(135deg, var(--accent-2), var(--accent));
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 14px var(--accent-glow);
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-set-btn-sm {
+  padding: 6px 11px;
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+html:not(.light) .zen-panel .zen-set-card .zen-cloud-status {
+  color: #34d399;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Привилегии — тёмные стеклянные карточки с золотым акцентом */
+.zen-panel .zen-perk-grid {
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.zen-panel .zen-perk-card {
+  min-height: 152px;
+  padding: 14px 12px 12px;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.zen-panel .zen-perk-card__icon {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 4px;
+  border-radius: 11px;
+}
+
+.zen-panel .zen-perk-card__title {
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 750;
+}
+
+.zen-panel .zen-perk-card__sub {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.zen-panel .zen-perk-card__value {
+  margin-top: auto;
+  padding: 4px 9px;
+  color: var(--cinema-gold-bright);
+  background: rgba(231, 199, 137, 0.12);
+  border: 1px solid rgba(231, 199, 137, 0.28);
+  font-size: 8.5px;
+  font-weight: 800;
+}
+
+.zen-panel .zen-tag-pill { vertical-align: 1px; }
+
+.zen-panel .zen-tag-pill--gold {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.zen-panel .zen-tag-pill--cyan {
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.14);
+  border-color: rgba(56, 189, 248, 0.32);
+}
+
+.zen-panel .zen-perk-cta {
+  padding: 14px 16px;
+  color: #171008;
+  background: linear-gradient(135deg, #f4dfae 0%, #d4af64 100%);
+  border-radius: 16px;
+  box-shadow: 0 10px 26px rgba(212, 175, 100, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.zen-panel .zen-perk-cta svg:first-child { color: #171008; }
+
+/* Сезонные коллекции — тёмные карточки с живым превью */
+.zen-season-deck {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.zen-season-card {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.36);
+  transition: transform 0.18s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.zen-season-card:active {
+  transform: scale(0.97);
+}
+
+.zen-season-card.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 12px 26px var(--accent-glow);
+}
+
+.zen-season-card__preview {
+  position: relative;
+  height: 112px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.zen-season-card__preview::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 78% 20%, rgba(255, 255, 255, 0.28), transparent 34%),
+    radial-gradient(circle at 20% 100%, rgba(255, 255, 255, 0.12), transparent 46%);
+}
+
+.zen-season-card__preview::after {
+  content: '';
+  position: absolute;
+  right: -18px;
+  bottom: -28px;
+  width: 92px;
+  height: 92px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 12px rgba(255, 255, 255, 0.035),
+    0 0 0 26px rgba(255, 255, 255, 0.025);
+}
+
+.zen-season-card__badge {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  z-index: 1;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: rgba(5, 8, 18, 0.56);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.zen-season-card__pill {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  z-index: 1;
+  padding: 3px 7px;
+  font-size: 6.5px;
+  box-shadow: none;
+}
+
+.zen-season-card__name {
+  position: absolute;
+  right: 10px;
+  bottom: 11px;
+  left: 10px;
+  z-index: 1;
+  margin: 0;
+  color: #ffffff;
+  font-size: 11.5px;
+  line-height: 1.3;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+}
+
+.zen-season-card__info { padding: 11px 10px 10px; }
+
+.zen-season-card__sub {
+  display: -webkit-box;
+  min-height: 38px;
+  margin: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.56);
+  font-size: 10px;
+  line-height: 1.4;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.zen-season-card__bottom {
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.zen-season-card__palette { gap: 4px; }
+
+.zen-season-card__palette span {
+  width: 9px;
+  height: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.zen-season-card__fx {
+  max-width: 86px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+/* Дуга рангов и большая 3D-гема */
+.zen-rank-arc {
+  margin: -8px -6px 0;
+}
+
+.zen-rank-arc__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.zen-rank-arc__dot {
+  fill: #737b8e;
+  stroke: #1b1c28;
+  stroke-width: 2;
+}
+
+.zen-rank-arc__dot--active {
+  fill: #d9f6ff;
+  stroke: #73c9ee;
+  filter: drop-shadow(0 0 5px rgba(114, 211, 250, 0.8));
+}
+
+.zen-rank-arc__lbl {
+  fill: #7f8698;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 9px;
+  font-weight: 650;
+}
+
+.zen-rank-arc__lbl--active { fill: #eef8ff; }
+
+.zen-rank-gem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: -4px 0 24px;
+  text-align: center;
+  isolation: isolate;
+}
+
+.zen-rank-gem::before {
+  content: '';
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  z-index: -1;
+  width: 230px;
+  height: 160px;
+  background: radial-gradient(ellipse, rgba(86, 189, 239, 0.17) 0%, transparent 67%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.zen-rank-gem::after {
+  content: '';
+  position: absolute;
+  top: 172px;
+  left: 50%;
+  z-index: -1;
+  width: 190px;
+  height: 42px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(116, 205, 243, 0.18) 0%, transparent 70%);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.zen-rank-gem > img {
+  display: block;
+  width: 190px;
+  height: 190px;
+  margin-bottom: -4px;
+  object-fit: contain;
+  filter:
+    drop-shadow(0 0 16px rgba(77, 183, 235, 0.32))
+    drop-shadow(0 16px 18px rgba(0, 0, 0, 0.36));
+  animation: zenGemFloat 4.2s ease-in-out infinite;
+}
+
+.zen-rank-gem__title {
+  color: #f3f5fb;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.zen-rank-gem__sub {
+  margin-top: 7px;
+  color: #8e96aa;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.zen-rank-gem__bar {
+  width: min(240px, 78%);
+  height: 5px;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.zen-rank-gem__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #71c7eb, #c3efff);
+  box-shadow: 0 0 10px rgba(113, 199, 235, 0.5);
+}
+
+.zen-rank-gem__hint {
+  margin-top: 8px;
+  color: #828b9f;
+  font-size: 10px;
+}
+
+.zen-rank-priv {
+  padding: 19px 16px 17px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.025);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.zen-rank-priv__title {
+  color: #eff1f7;
+  font-family: 'Unbounded', -apple-system, sans-serif;
+  font-size: 14px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.zen-rank-priv__sub {
+  margin-top: 5px;
+  color: #7f8799;
+  font-size: 10.5px;
+}
+
+.zen-rank-priv__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 13px;
+  margin-top: 20px;
+}
+
+.zen-rank-priv__item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  align-content: start;
+  column-gap: 9px;
+  opacity: 0.38;
+}
+
+.zen-rank-priv__item.unlocked { opacity: 1; }
+
+.zen-rank-priv__icon {
+  grid-row: 1 / span 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #dce7f2;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.zen-rank-priv__name {
+  align-self: center;
+  color: #e4e8f0;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.zen-rank-priv__desc {
+  margin-top: 4px;
+  color: #7d8597;
+  font-size: 9px;
+  line-height: 1.4;
+}
+
+@media (max-width: 420px) {
+  html:not(.light) .zen-user-card .zen-user-info { margin-right: 60px; }
+  html:not(.light) .zen-user-card .zen-user-name { font-size: 16px; }
+}
+
+@media (max-width: 359px) {
+  html:not(.light) .zen-user-card { padding-right: 14px; padding-left: 14px; }
+  html:not(.light) .zen-user-card .zen-user-avatar-wrap { width: 48px; height: 48px; }
+  html:not(.light) .zen-user-card .zen-user-info { margin-right: 44px; }
+  html:not(.light) .zen-user-card .zen-user-name { font-size: 14.5px; }
+  html:not(.light) .zen-user-card .zen-copy-btn span { display: none; }
+  .zen-user-gem { top: 0; right: -2px; width: 76px; height: 76px; }
+  .zen-upgrade-btn { padding: 9px 11px; }
+  .zen-shortcut__label { font-size: 8px; }
+  .zen-panel { padding-right: 10px; padding-left: 10px; }
+  .zen-panel .zen-tabs { margin-right: -10px; margin-left: -10px; }
+  .zen-panel .zen-set-row__value { display: none; }
+  .zen-season-card__name { font-size: 10px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zen-user-gem,
+  .zen-rank-gem > img { animation: none; }
 }

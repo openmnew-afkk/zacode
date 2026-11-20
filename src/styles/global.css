@@ -46,6 +46,16 @@
   --font-cinema: 'Unbounded', -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
   --font-display: 'Unbounded', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --control-h: 44px;
+  --btn-h: 44px;
+  --btn-r: 14px;
+  --btn-px: 18px;
+  --btn-grad: linear-gradient(135deg, var(--accent-2), var(--accent));
+  --btn-glow: 0 8px 24px var(--accent-glow);
+  --btn-secondary-bg: rgba(255, 255, 255, 0.07);
+  --btn-secondary-border: rgba(255, 255, 255, 0.14);
+  --cinema-gold: #e7c789;
+  --cinema-gold-bright: #f4dfae;
 }
 
 *,*::before,*::after { margin:0; padding:0; box-sizing:border-box; }
@@ -78,13 +88,16 @@ body {
   min-height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior: none;
   overscroll-behavior-y: none;
+  touch-action: pan-x pan-y;
   -webkit-overflow-scrolling: touch;
 }
 
 #root {
   min-height: 100vh;
   padding-bottom: var(--tabbar-h);
+  overscroll-behavior-y: none;
 }
 
 .page {

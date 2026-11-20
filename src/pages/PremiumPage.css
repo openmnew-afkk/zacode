@@ -302,6 +302,19 @@
 }
 
 .zp-cta:active { transform: scale(0.98); box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3); }
+.zp-cta:disabled { opacity: 0.55; cursor: wait; }
+
+.zp-payment-msg {
+  margin: -5px 0 0;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 213, 107, 0.2);
+  border-radius: 13px;
+  background: rgba(255, 213, 107, 0.06);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+}
 
 .zp-cta-note {
   margin: -6px 0 0;

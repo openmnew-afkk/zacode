@@ -166,30 +166,5 @@
   text-align: center;
   font-size: 10.5px;
   line-height: 1.5;
-  color: rgba(255, 255, 255, 0.32);
+  color: rgba(255, 255, 255, 0.36);
 }
-
-/* Светлая тема */
-html.light .rl-back {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.1);
-  color: rgba(0, 0, 0, 0.7);
-}
-
-html.light .rl-hero__title { color: #16121f; }
-html.light .rl-hero__sub { color: rgba(20, 15, 30, 0.58); }
-
-html.light .rl-nav__chip {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.09);
-  color: rgba(20, 15, 30, 0.62);
-}
-
-html.light .rl-contact {
-  background: linear-gradient(140deg, rgba(52, 211, 153, 0.12), rgba(255, 255, 255, 0.9) 55%);
-  border-color: rgba(16, 185, 129, 0.3);
-}
-
-html.light .rl-contact__copy strong { color: #16121f; }
-html.light .rl-contact__copy span { color: rgba(20, 15, 30, 0.55); }
-html.light .rl-footer { color: rgba(20, 15, 30, 0.35); }

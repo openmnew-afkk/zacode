@@ -18,8 +18,9 @@
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(ellipse 75% 38% at 50% 0%, rgba(244, 63, 94, 0.08), transparent 70%),
-    radial-gradient(ellipse 60% 35% at 85% 20%, rgba(168, 85, 247, 0.06), transparent 70%),
+    radial-gradient(ellipse 80% 42% at 50% 0%, rgba(56, 189, 248, 0.13), transparent 68%),
+    radial-gradient(ellipse 65% 36% at 85% 18%, rgba(168, 85, 247, 0.09), transparent 70%),
+    radial-gradient(ellipse 55% 32% at 15% 24%, rgba(16, 185, 129, 0.07), transparent 70%),
     #09090d;
   pointer-events: none;
 }
@@ -64,15 +65,16 @@
 .ny-hero-card {
   width: min(100%, 760px);
   margin: 0 auto 22px;
-  padding: 20px 18px 18px;
+  padding: 22px 18px 20px;
   border-radius: 26px;
   background:
-    radial-gradient(120% 120% at 100% 0%, rgba(244, 63, 94, 0.09) 0%, transparent 60%),
-    linear-gradient(160deg, rgba(22, 21, 30, 0.92) 0%, rgba(13, 13, 19, 0.96) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+    radial-gradient(120% 100% at 100% 0%, rgba(56, 189, 248, 0.14) 0%, transparent 58%),
+    radial-gradient(90% 90% at 0% 100%, rgba(168, 85, 247, 0.1) 0%, transparent 55%),
+    linear-gradient(160deg, rgba(22, 24, 38, 0.94) 0%, rgba(12, 13, 21, 0.98) 100%);
+  border: 1px solid rgba(147, 197, 253, 0.16);
   box-shadow:
-    0 20px 48px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 24px 54px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
 .ny-hero-top {
@@ -201,15 +203,17 @@
 }
 
 .ny-btn--primary {
-  background: #ffffff;
-  border: 1px solid #ffffff;
-  color: #09090d;
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #061321;
+  box-shadow: 0 10px 26px rgba(56, 189, 248, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .ny-btn--secondary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* ── Результат выбора на вечер ── */

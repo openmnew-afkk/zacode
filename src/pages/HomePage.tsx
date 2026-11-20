@@ -371,7 +371,7 @@ const HomePage: React.FC = () => {
   const { user: tgUser, haptic, showBackButton } = useTelegram();
   const availableTabs = TABS;
 
-  const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium, theme, toggleTheme } = useStore();
+  const { favorites, tracked, addFavorite, removeFavorite, isFavorite, announcement, adsEnabled, isPremium } = useStore();
   const watchingTracked = Object.values(tracked)
     .filter((t) => t.status === 'watching')
     .sort((a, b) => b.addedAt - a.addedAt);

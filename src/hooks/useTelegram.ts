@@ -27,6 +27,9 @@ export const enforceTelegramFullscreen = () => {
     if (typeof tg.disableVerticalSwipes === 'function') {
       try { tg.disableVerticalSwipes(); } catch {}
     }
+    if (typeof (tg as any).enableClosingConfirmation === 'function') {
+      try { (tg as any).enableClosingConfirmation(); } catch {}
+    }
     if (typeof (tg as any).requestFullscreen === 'function' && !(tg as any).isFullscreen) {
       try { (tg as any).requestFullscreen(); } catch {}
     }
@@ -45,10 +48,12 @@ declare global {
         disableVerticalSwipes?: () => void;
         setHeaderColor?: (color: string) => void;
         setBottomBarColor?: (color: string) => void;
+        initData: string;
         initDataUnsafe: {
           user?: TelegramUser;
           query_id?: string;
         };
+        openInvoice?: (url: string, callback?: (status: 'paid' | 'cancelled' | 'failed' | 'pending') => void) => void;
         themeParams: {
           bg_color?: string;
           text_color?: string;
@@ -122,9 +127,52 @@ export const useTelegram = () => {
         enforceTelegramFullscreen();
       };
 
+      // Жёсткая защита от сворачивания Mini App в Telegram (iOS/Android) при свайпе вниз в самом верху страницы
+      let touchStartY = 0;
+      let touchStartX = 0;
+      const findScrollableParent = (node: EventTarget | null): HTMLElement | null => {
+        let el = node as HTMLElement | null;
+        while (el && el !== document.body && el !== document.documentElement) {
+          const style = window.getComputedStyle(el);
+          const overflowY = style.overflowY;
+          if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 1) {
+            return el;
+          }
+          el = el.parentElement;
+        }
+        return null;
+      };
+
+      const onTouchStart = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return;
+        touchStartY = e.touches[0].clientY;
+        touchStartX = e.touches[0].clientX;
+        if (typeof tg.disableVerticalSwipes === 'function' && (tg as any).isVerticalSwipesEnabled !== false) {
+          try { tg.disableVerticalSwipes(); } catch {}
+        }
+      };
+
+      const onTouchMove = (e: TouchEvent) => {
+        if (e.touches.length !== 1) return;
+        const dy = e.touches[0].clientY - touchStartY;
+        const dx = e.touches[0].clientX - touchStartX;
+        // Игнорируем горизонтальные свайпы (карусели фильмов, слайдеры)
+        if (Math.abs(dx) > Math.abs(dy)) return;
+        // Тянем палец вниз (dy > 0), когда скролл уже на самом верху — блокируем overscroll, чтобы Telegram не сворачивал окно
+        if (dy > 0) {
+          const scrollable = findScrollableParent(e.target);
+          const atTop = scrollable ? scrollable.scrollTop <= 0 : (window.scrollY || document.documentElement.scrollTop || 0) <= 0;
+          if (atTop && e.cancelable) {
+            e.preventDefault();
+          }
+        }
+      };
+
       window.addEventListener('focus', onFocusOrVisible);
       window.addEventListener('pageshow', onFocusOrVisible);
       document.addEventListener('visibilitychange', onFocusOrVisible);
+      document.addEventListener('touchstart', onTouchStart, { passive: true });
+      document.addEventListener('touchmove', onTouchMove, { passive: false });
 
       const updateSafeArea = () => {
         const isFs = Boolean((tg as any)?.isFullscreen);
@@ -164,6 +212,8 @@ export const useTelegram = () => {
         window.removeEventListener('focus', onFocusOrVisible);
         window.removeEventListener('pageshow', onFocusOrVisible);
         document.removeEventListener('visibilitychange', onFocusOrVisible);
+        document.removeEventListener('touchstart', onTouchStart);
+        document.removeEventListener('touchmove', onTouchMove);
         if (typeof (tg as any)?.offEvent === 'function') {
           try {
             (tg as any).offEvent('fullscreenChanged', updateSafeArea);
@@ -213,9 +263,12 @@ export const useTelegram = () => {
     tg?.MainButton.hide();
   }, []);
 
-  /** Тактильный отклик */
+  /** Тактильный отклик (уважает переключатель «Виброотклик» в настройках) */
   const haptic = useCallback(
     (type: 'light' | 'medium' | 'heavy' = 'light') => {
+      try {
+        if (localStorage.getItem('zenova_haptics') === '0') return;
+      } catch {}
       tg?.HapticFeedback?.impactOccurred(type);
     },
     []

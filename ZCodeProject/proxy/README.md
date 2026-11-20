@@ -12,8 +12,11 @@ VideoCDN, VideoFrame…) + центральный мини-бэкенд прил
 |---|---|
 | `/?url=<encoded>` | Прокси плееров (запрос с рф IP, обход гео-блока) |
 | `GET /api/config` | Публичный конфиг: реклама, объявление, реквизиты, цены, премия |
-| `POST /api/premium/claim` | Оплата → автоматическая выдача премиума |
-| `POST /api/premium/check` | Проверка премиума по нику |
+| `POST /api/premium/invoice` | Счёт Telegram Stars: 7 дней / 15 Stars или 30 дней / 180 Stars |
+| `POST /api/premium/status` | Проверка подтверждённого Premium по подписанным Telegram initData |
+| `POST /api/telegram/webhook` | Подтверждение `pre_checkout_query` и `successful_payment` |
+| `POST /api/arcade/start` | Серверная игровая сессия Star Runner |
+| `POST /api/arcade/claim` | Одноразовая награда 3 дня PRO за 25+ очков |
 | `POST /api/mod/login` | Вход модератора по имени |
 | `GET/POST /api/admin/config` | Полная админка (заголовок `X-Admin-Token`) |
 
@@ -51,6 +54,21 @@ git clone <репозиторий> && cd proxy
 PORT=8080 ADMIN_TOKEN=ваш_пароль node server.js   # или через pm2:
 PORT=8080 ADMIN_TOKEN=ваш_пароль pm2 start server.js --name ru-proxy
 ```
+
+## Telegram Stars и награда Star Runner
+
+На VPS должны быть заданы `BOT_TOKEN` того бота, который открывает Mini App, и один способ получения платёжных обновлений.
+
+Рекомендуемый webhook (домен должен быть HTTPS):
+
+```bash
+BOT_TOKEN=токен_бота \
+TELEGRAM_WEBHOOK_URL=https://ru-proxy.example.com \
+TELEGRAM_WEBHOOK_SECRET=длинная_случайная_строка \
+PORT=8080 ADMIN_TOKEN=ваш_пароль pm2 start server.js --name ru-proxy
+```
+
+Альтернатива для одного инстанса без webhook: `TELEGRAM_PAYMENTS_POLLING=1`. Нельзя одновременно использовать webhook и polling. Сервер проверяет подпись `initData`, сам задаёт цены, отвечает на `pre_checkout_query` и выдаёт PRO только после `successful_payment`. `proxy/data.json` должен находиться на постоянном диске; для нескольких инстансов нужно общее транзакционное хранилище.
 
 ## Docker
 
