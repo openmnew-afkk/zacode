@@ -367,6 +367,132 @@
   border-color: rgba(255, 255, 255, 0.35);
   color: #171008;
 }
+.gf-hub--embedded {
+  min-height: auto;
+  padding-bottom: 12px;
+}
+
+.gf-hub--embedded .gf-body {
+  padding: 0;
+}
+
+/* Мини-игра «Подарки под ёлкой» */
+.gf-tree-game {
+  padding: 15px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gf-tree-game__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.gf-tree-game__title {
+  margin: 2px 0 3px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.gf-tree-game__sub {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.52);
+  line-height: 1.4;
+}
+
+.gf-tree-boxes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.gf-tree-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border-radius: 16px;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.065), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  color: #ffffff;
+  transition: transform 0.15s ease, border-color 0.18s ease;
+}
+.gf-tree-box:active:not(:disabled) { transform: scale(0.95); }
+.gf-tree-box.is-picked {
+  background: linear-gradient(155deg, rgba(212, 175, 100, 0.2), rgba(212, 175, 100, 0.06));
+  border-color: rgba(231, 199, 137, 0.45);
+  color: #f4dfae;
+}
+.gf-tree-box.is-locked { opacity: 0.45; }
+.gf-tree-box__emoji { font-size: 26px; line-height: 1; }
+.gf-tree-box__lbl { font-size: 11px; font-weight: 750; }
+
+/* Дорожка наград */
+.gf-roadmap__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gf-road-step {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 13px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+.gf-road-step.is-ready {
+  background: rgba(212, 175, 100, 0.09);
+  border-color: rgba(231, 199, 137, 0.3);
+}
+.gf-road-step.is-claimed {
+  opacity: 0.6;
+}
+
+.gf-road-step__cost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 58px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #bae6fd;
+  font-size: 11.5px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.gf-road-step__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.gf-road-step__info strong {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #ffffff;
+}
+.gf-road-step__info span {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.48);
+}
+
 .gf-quest__btn.is-claimed {
   background: rgba(16, 185, 129, 0.14);
   border-color: rgba(16, 185, 129, 0.3);

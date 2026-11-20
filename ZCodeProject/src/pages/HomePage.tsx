@@ -47,10 +47,10 @@ const SeasonalBanner: React.FC<{
 
   const getSub = () => {
     switch (seasonId) {
-      case 'spring': return 'Цветущие новинки и романтика';
-      case 'summer': return 'Блокбастеры и яркие премьеры';
-      case 'autumn': return 'Уютные вечера и атмосферный нуар';
-      default: return 'Коллекция, таймер и рулетка';
+      case 'spring': return 'Цветущие новинки и GiftFest';
+      case 'summer': return 'Блокбастеры и GiftFest';
+      case 'autumn': return 'Уютные вечера и GiftFest';
+      default: return 'GiftFest · Рулетка, ачивки и призы';
     }
   };
 
@@ -59,7 +59,7 @@ const SeasonalBanner: React.FC<{
       case 'spring': return 'Весенний кинофестиваль';
       case 'summer': return 'Летний кинозал';
       case 'autumn': return 'Осенний киноуют';
-      default: return 'Зимний киномарафон';
+      default: return 'Зимний Киномарафон';
     }
   };
 
@@ -71,19 +71,21 @@ const SeasonalBanner: React.FC<{
       tabIndex={0}
     >
       <div className="hp-ny-count__left">
-        <span className="hp-ny-count__dot" aria-hidden="true">{seasonIcon}</span>
-        <span className="hp-ny-count__title">{getTitle()}</span>
-        <span className="hp-ny-count__sub">{getSub()}</span>
+        <span className="hp-ny-count__dot" aria-hidden="true">🎁</span>
+        <div className="hp-ny-count__copy">
+          <span className="hp-ny-count__title">{getTitle()}</span>
+          <span className="hp-ny-count__sub">{getSub()}</span>
+        </div>
       </div>
 
       <div className="hp-ny-count__right">
         {seasonId === 'winter' ? (
           <span className="hp-ny-count__timer">
-            {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}:{String(nyTime.s).padStart(2, '0')}
+            {nyTime.d}д · {String(nyTime.h).padStart(2, '0')}:{String(nyTime.m).padStart(2, '0')}
           </span>
         ) : (
           <span className="hp-ny-count__badge">
-            ✦ Кинозал
+            ❄️ GiftFest
           </span>
         )}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="hp-ny-count__arrow">
@@ -1134,7 +1136,7 @@ const HomePage: React.FC = () => {
             <span>AI</span>
           </button>
 
-          {/* ✦ Вселенные — стильная роскошная капсула доступа к 10 студиям */}
+          {/* ✦ Вселенные — компактная капсула студий */}
           <button
             type="button"
             className="hp-header__studios-btn"
@@ -1147,7 +1149,6 @@ const HomePage: React.FC = () => {
           >
             <span className="hp-header__studios-spark" aria-hidden="true">✦</span>
             <span className="hp-header__studios-text">Вселенные</span>
-            <span className="hp-header__studios-count">{STUDIO_WORLDS.length}</span>
           </button>
 
           {/* Профиль пользователя в чистом золотом свечении */}

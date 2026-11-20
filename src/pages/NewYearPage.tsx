@@ -1,8 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Snowflake, Crown } from 'lucide-react';
 import { getKeywordCollection, CURATED_WINTER_MOVIES } from '../api/catalog';
 import type { Movie } from '../types';
 import { useTelegram } from '../hooks/useTelegram';
+import { useStore } from '../store';
+import GiftFestHub, { GIFTFEST_TICKETS_KEY } from '../components/GiftFestHub';
 import './NewYearPage.css';
 
 interface Countdown {
@@ -40,7 +43,14 @@ const HOLIDAY_MOODS = [
 const NewYearPage: React.FC = () => {
   const navigate = useNavigate();
   const { haptic } = useTelegram();
+  const { isPremium } = useStore();
   const [countdown, setCountdown] = useState(getCountdown);
+
+  const [nyTab, setNyTab] = useState<'giftfest' | 'cinema'>('giftfest');
+  const [tickets, setTickets] = useState<number>(() => {
+    try { return Number(localStorage.getItem(GIFTFEST_TICKETS_KEY) || 0); } catch { return 0; }
+  });
+  const [toast, setToast] = useState<string | null>(null);
 
   const [movies, setMovies] = useState<Movie[]>(CURATED_WINTER_MOVIES);
   const [loading, setLoading] = useState(false);
@@ -50,6 +60,11 @@ const NewYearPage: React.FC = () => {
 
   const [roulettePick, setRoulettePick] = useState<Movie | null>(null);
   const [spinning, setSpinning] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2600);
+  };
 
   useEffect(() => {
     const timer = window.setInterval(() => setCountdown(getCountdown()), 1000);
@@ -130,7 +145,7 @@ const NewYearPage: React.FC = () => {
     <main className="ny-page page">
       <div className="ny-ambient" aria-hidden="true" />
 
-      {/* ── Минималистичная шапка ── */}
+      {/* ── Минималистичная шапка с балансом ❄️ и PRO ── */}
       <header className="ny-header">
         <button className="ny-back" type="button" onClick={() => navigate(-1)} aria-label="Назад">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -138,19 +153,31 @@ const NewYearPage: React.FC = () => {
           </svg>
           <span>Назад</span>
         </button>
-        <span className="ny-header__kicker">WINTER COLLECTION</span>
+
+        <div className="ny-header__badges">
+          {isPremium && (
+            <span className="ny-header__pro">
+              <Crown size={11} />
+              <span>PRO</span>
+            </span>
+          )}
+          <span className="ny-header__tickets">
+            <Snowflake size={12} />
+            <span>{tickets}</span>
+          </span>
+        </div>
       </header>
 
-      {/* ── Эстетичная минималистичная карточка марафона ── */}
+      {/* ── Эстетичная карточка Зимнего Киномарафона & GiftFest ── */}
       <section className="ny-hero-card" aria-labelledby="ny-title">
         <div className="ny-hero-top">
           <div className="ny-hero__copy">
-            <span className="ny-eyebrow">ЗИМНИЙ СЕЗОН · ZENOVA</span>
+            <span className="ny-eyebrow">WINTER MARATHON · GIFTFEST</span>
             <h1 id="ny-title">
-              {countdown.celebrating ? 'С Новым годом' : 'Зимний киномарафон'}
+              {countdown.celebrating ? 'С Новым годом!' : 'Зимний Киномарафон'}
             </h1>
             <p>
-              Избранная коллекция атмосферного зимнего и праздничного кино для уютного вечера.
+              Открывайте подарки под ёлкой, крутите Колесо Фортуны, собирайте ❄️ снежинки и получайте ZENOVA PRO.
             </p>
           </div>
 
@@ -179,160 +206,181 @@ const NewYearPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Компактная строка GiftFest (рулетка и розыгрыш) */}
-        <button
-          type="button"
-          className="ny-giftfest-strip"
-          onClick={() => {
-            haptic('light');
-            navigate('/profile', { state: { openArcade: true } });
-          }}
-        >
-          <span className="ny-giftfest-strip__dot">🎁</span>
-          <span className="ny-giftfest-strip__text">
-            <strong>GiftFest · Рулетка призов</strong>
-            <small>10 Stars за спин · PRO и подарки Telegram</small>
-          </span>
-          <span className="ny-giftfest-strip__cta">Открыть ›</span>
-        </button>
-
-        {/* Лаконичные кнопки */}
-        <div className="ny-hero-btns">
+        {/* Переключатель секций: GiftFest vs Зимний Кинозал */}
+        <div className="ny-section-switch" role="tablist">
           <button
             type="button"
-            className="ny-btn ny-btn--primary"
-            onClick={spinHolidayRoulette}
-          >
-            <span>{spinning ? 'Подбираем фильм…' : 'Случайный фильм на вечер'}</span>
-          </button>
-
-          <button
-            type="button"
-            className="ny-btn ny-btn--secondary"
+            role="tab"
+            aria-selected={nyTab === 'giftfest'}
+            className={`ny-switch-btn ${nyTab === 'giftfest' ? 'is-active' : ''}`}
             onClick={() => {
               haptic('light');
-              navigate('/music');
+              setNyTab('giftfest');
             }}
           >
-            <span>Атмосферная музыка</span>
+            🎁 GiftFest · Игра и рулетка
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={nyTab === 'cinema'}
+            className={`ny-switch-btn ${nyTab === 'cinema' ? 'is-active' : ''}`}
+            onClick={() => {
+              haptic('light');
+              setNyTab('cinema');
+            }}
+          >
+            🎬 Зимний Кинозал ({filteredMovies.length})
           </button>
         </div>
       </section>
 
-      {/* ── Карточка выпавшего фильма ── */}
-      {roulettePick && (
-        <section className="ny-roulette-result">
-          <div className="ny-roulette-card" onClick={() => navigate(`/movie/${roulettePick.id}`)}>
-            <img
-              src={roulettePick.poster_path}
-              alt={roulettePick.title}
-              className="ny-roulette-card__poster"
-            />
-            <div className="ny-roulette-card__body">
-              <div className="ny-roulette-card__top">
-                <span className="ny-roulette-card__kicker">ВЫБОР НА ВЕЧЕР</span>
-                {roulettePick.vote_average > 0 && (
-                  <span className="ny-roulette-card__rate">★ {roulettePick.vote_average.toFixed(1)}</span>
-                )}
-              </div>
-              <h3 className="ny-roulette-card__title">{roulettePick.title}</h3>
-              {roulettePick.overview && (
-                <p className="ny-roulette-card__desc">{roulettePick.overview}</p>
-              )}
-              <div className="ny-roulette-card__actions" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  className="ny-roulette-card__play"
-                  onClick={() => navigate(`/movie/${roulettePick.id}`)}
-                >
-                  Смотреть
-                </button>
-                <button
-                  type="button"
-                  className="ny-roulette-card__again"
-                  onClick={spinHolidayRoulette}
-                >
-                  Другой вариант
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── Каталог фильмов ── */}
-      <section className="ny-catalog-section">
-        <div className="ny-section-head">
-          <h2 className="ny-section-title">Подборка фильмов</h2>
-          <span className="ny-section-count">{filteredMovies.length}</span>
+      {nyTab === 'giftfest' ? (
+        <div className="ny-giftfest-wrap">
+          <GiftFestHub
+            embedded
+            onNotice={showToast}
+            onTicketsChange={setTickets}
+          />
         </div>
-
-        <div className="ny-mood-bar">
-          {HOLIDAY_MOODS.map((m) => (
+      ) : (
+        <>
+          <div className="ny-cinema-actions">
             <button
-              key={m.id}
               type="button"
-              className={`ny-mood-pill ${activeMood === m.id ? 'active' : ''}`}
+              className="ny-btn ny-btn--primary"
+              onClick={spinHolidayRoulette}
+            >
+              <span>{spinning ? 'Подбираем фильм…' : '🎲 Случайный фильм на вечер'}</span>
+            </button>
+            <button
+              type="button"
+              className="ny-btn ny-btn--secondary"
               onClick={() => {
                 haptic('light');
-                setActiveMood(m.id);
+                navigate('/music');
               }}
             >
-              {m.label}
+              <span>🎧 Музыка</span>
             </button>
-          ))}
-        </div>
-
-        {loading ? (
-          <div className="ny-grid">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="ny-card-skeleton" />
-            ))}
           </div>
-        ) : (
-          <>
-            <div className="ny-grid">
-              {filteredMovies.map((movie) => (
-                <article
-                  key={movie.id}
-                  className="ny-movie-card"
-                  onClick={() => {
-                    haptic('light');
-                    navigate(`/movie/${movie.id}`);
-                  }}
-                >
-                  <div className="ny-movie-card__poster-wrap">
-                    <img
-                      src={movie.poster_path}
-                      alt={movie.title}
-                      loading="lazy"
-                      className="ny-movie-card__poster"
-                    />
-                    {movie.vote_average > 0 && (
-                      <span className="ny-movie-card__rate">★ {movie.vote_average.toFixed(1)}</span>
+
+          {roulettePick && (
+            <section className="ny-roulette-result">
+              <div className="ny-roulette-card" onClick={() => navigate(`/movie/${roulettePick.id}`)}>
+                <img
+                  src={roulettePick.poster_path}
+                  alt={roulettePick.title}
+                  className="ny-roulette-card__poster"
+                />
+                <div className="ny-roulette-card__body">
+                  <div className="ny-roulette-card__top">
+                    <span className="ny-roulette-card__kicker">ВЫБОР НА ВЕЧЕР</span>
+                    {roulettePick.vote_average > 0 && (
+                      <span className="ny-roulette-card__rate">★ {roulettePick.vote_average.toFixed(1)}</span>
                     )}
                   </div>
-                  <h3 className="ny-movie-card__title">{movie.title}</h3>
-                  {movie.release_date && (
-                    <span className="ny-movie-card__year">{movie.release_date.slice(0, 4)}</span>
+                  <h3 className="ny-roulette-card__title">{roulettePick.title}</h3>
+                  {roulettePick.overview && (
+                    <p className="ny-roulette-card__desc">{roulettePick.overview}</p>
                   )}
-                </article>
+                  <div className="ny-roulette-card__actions" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      type="button"
+                      className="ny-roulette-card__play"
+                      onClick={() => navigate(`/movie/${roulettePick.id}`)}
+                    >
+                      Смотреть
+                    </button>
+                    <button
+                      type="button"
+                      className="ny-roulette-card__again"
+                      onClick={spinHolidayRoulette}
+                    >
+                      Другой вариант
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          <section className="ny-catalog-section">
+            <div className="ny-section-head">
+              <h2 className="ny-section-title">Подборка фильмов</h2>
+              <span className="ny-section-count">{filteredMovies.length}</span>
+            </div>
+
+            <div className="ny-mood-bar">
+              {HOLIDAY_MOODS.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  className={`ny-mood-pill ${activeMood === m.id ? 'active' : ''}`}
+                  onClick={() => {
+                    haptic('light');
+                    setActiveMood(m.id);
+                  }}
+                >
+                  {m.label}
+                </button>
               ))}
             </div>
 
-            <div className="ny-more-wrap">
-              <button
-                type="button"
-                className="ny-more-btn"
-                onClick={loadMoreHoliday}
-                disabled={loadingMore}
-              >
-                {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
-              </button>
-            </div>
-          </>
-        )}
-      </section>
+            {loading ? (
+              <div className="ny-grid">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="ny-card-skeleton" />
+                ))}
+              </div>
+            ) : (
+              <>
+                <div className="ny-grid">
+                  {filteredMovies.map((movie) => (
+                    <article
+                      key={movie.id}
+                      className="ny-movie-card"
+                      onClick={() => {
+                        haptic('light');
+                        navigate(`/movie/${movie.id}`);
+                      }}
+                    >
+                      <div className="ny-movie-card__poster-wrap">
+                        <img
+                          src={movie.poster_path}
+                          alt={movie.title}
+                          loading="lazy"
+                          className="ny-movie-card__poster"
+                        />
+                        {movie.vote_average > 0 && (
+                          <span className="ny-movie-card__rate">★ {movie.vote_average.toFixed(1)}</span>
+                        )}
+                      </div>
+                      <h3 className="ny-movie-card__title">{movie.title}</h3>
+                      {movie.release_date && (
+                        <span className="ny-movie-card__year">{movie.release_date.slice(0, 4)}</span>
+                      )}
+                    </article>
+                  ))}
+                </div>
+
+                <div className="ny-more-wrap">
+                  <button
+                    type="button"
+                    className="ny-more-btn"
+                    onClick={loadMoreHoliday}
+                    disabled={loadingMore}
+                  >
+                    {loadingMore ? 'Загрузка…' : 'Загрузить ещё'}
+                  </button>
+                </div>
+              </>
+            )}
+          </section>
+        </>
+      )}
+
+      {toast && <div className="ny-toast">{toast}</div>}
     </main>
   );
 };

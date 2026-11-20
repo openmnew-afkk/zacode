@@ -1,26 +1,41 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, Crown, Gift, RotateCw, Sparkles, Star, X } from 'lucide-react';
+import { Check, Crown, Gift, Snowflake, Sparkles, Star, X } from 'lucide-react';
 import {
-  createRouletteInvoice, fetchRouletteConfig, fetchRouletteSpin, spinRoulette,
-  type RoulettePrize, type RouletteSpin,
+  createRouletteInvoice,
+  DEFAULT_ROULETTE_PRIZES,
+  fetchRouletteConfig,
+  fetchRouletteSpin,
+  getApiBase,
+  spinRoulette,
+  spinRouletteLocal,
+  type RoulettePrize,
+  type RouletteSpin,
 } from '../api/backend';
 import { useTelegram } from '../hooks/useTelegram';
+import { useStore } from '../store';
 import '../pages/PremiumRoulette.css';
 
 const PENDING_KEY = 'zenova_roulette_pending';
-const SEGMENT_FILLS = ['#1d192b', '#2b1c3e', '#15243d', '#332413', '#132c25'];
-const DEFAULT_PRIZES: RoulettePrize[] = [
-  { id: 'pro_1', label: '1 день PRO', days: 1, gift: false, chance: 70 },
-  { id: 'pro_2', label: '2 дня PRO', days: 2, gift: false, chance: 20 },
-  { id: 'pro_3', label: '3 дня PRO', days: 3, gift: false, chance: 7 },
-  { id: 'pro_7', label: '7 дней PRO', days: 7, gift: false, chance: 2.8 },
-  { id: 'gift', label: 'Подарок TG', days: 0, gift: true, chance: 0.2 },
+const FREE_SPIN_KEY = 'zenova_roulette_free_spin_at';
+const TICKETS_KEY = 'zenova_giftfest_tickets';
+const DAY_MS = 24 * 60 * 60 * 1000;
+const SPIN_COST_TICKETS = 25;
+
+const SLICE_GRADIENTS = [
+  ['#332410', '#1a1309'], // 0: 1 день PRO (Янтарь)
+  ['#122742', '#0b1628'], // 1: +40 билетов (Сапфир)
+  ['#2f1847', '#170c26'], // 2: 2 дня PRO (Королевский пурпур)
+  ['#103429', '#091c16'], // 3: 3 дня PRO (Изумруд)
+  ['#3f1526', '#1e0a12'], // 4: 7 дней PRO (Рубин)
+  ['#4a3512', '#261a07'], // 5: Подарок (Шампань Золото)
 ];
 
 interface PremiumRouletteProps {
-  onPremium: (expiry: number | null) => void;
+  onPremium?: (expiry: number | null) => void;
   onSpinComplete?: (spin: RouletteSpin) => void;
+  tickets?: number;
+  onTicketsChange?: (nextTickets: number) => void;
 }
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
@@ -35,23 +50,37 @@ function slicePath(cx: number, cy: number, r: number, startAngle: number, endAng
   return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
 }
 
-const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComplete }) => {
+const PremiumRoulette: React.FC<PremiumRouletteProps> = ({
+  onPremium,
+  onSpinComplete,
+  tickets: externalTickets,
+  onTicketsChange,
+}) => {
   const { tg, haptic } = useTelegram();
-  const [prizes, setPrizes] = useState<RoulettePrize[]>(DEFAULT_PRIZES);
-  const [configError, setConfigError] = useState('');
+  const { activatePremiumDays } = useStore();
+  const [prizes, setPrizes] = useState<RoulettePrize[]>(DEFAULT_ROULETTE_PRIZES);
   const [phase, setPhase] = useState<'idle' | 'invoice' | 'waiting' | 'spinning' | 'done'>('idle');
   const [message, setMessage] = useState('');
   const [result, setResult] = useState<RouletteSpin | null>(null);
   const [showPrizeModal, setShowPrizeModal] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [localTickets, setLocalTickets] = useState<number>(() => {
+    try { return Number(localStorage.getItem(TICKETS_KEY) || 0); } catch { return 0; }
+  });
+  const [lastFreeAt, setLastFreeAt] = useState<number>(() => {
+    try { return Number(localStorage.getItem(FREE_SPIN_KEY) || 0); } catch { return 0; }
+  });
+
   const finishTimer = useRef<number | null>(null);
   const busy = phase !== 'idle' && phase !== 'done';
+  const currentTickets = externalTickets !== undefined ? externalTickets : localTickets;
+  const freeSpinReady = Date.now() >= lastFreeAt + DAY_MS;
+  const hasServer = Boolean(getApiBase());
 
   useEffect(() => {
     fetchRouletteConfig()
       .then((config) => {
-        if (config.prizes?.length === 5) setPrizes(config.prizes);
-        setConfigError('');
+        if (config.prizes?.length >= 5) setPrizes(config.prizes);
       })
       .catch(() => {});
     return () => {
@@ -59,19 +88,38 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
     };
   }, []);
 
-  const showResult = (spin: RouletteSpin) => {
+  const updateTickets = (val: number) => {
+    setLocalTickets(val);
+    try { localStorage.setItem(TICKETS_KEY, String(val)); } catch {}
+    onTicketsChange?.(val);
+  };
+
+  const count = prizes.length || 6;
+  const stepAngle = 360 / count;
+
+  const animateSpinResult = (spin: RouletteSpin, extraTicketDelta = 0) => {
     setResult(spin);
     setPhase('spinning');
     setMessage('');
+    const targetAngle = spin.segment * stepAngle;
     setRotation((current) => {
       const turns = Math.ceil(current / 360) * 360 + 2160;
-      return turns + 360 - (spin.segment * 72 + 36);
+      return turns + (360 - targetAngle);
     });
     try { localStorage.removeItem(PENDING_KEY); } catch {}
     finishTimer.current = window.setTimeout(() => {
       setPhase('done');
       setShowPrizeModal(true);
-      if (spin.expiry) onPremium(spin.expiry);
+      if (spin.days && spin.days > 0) {
+        activatePremiumDays(spin.days);
+        const newExpiry = Date.now() + spin.days * DAY_MS;
+        onPremium?.(spin.expiry || newExpiry);
+      } else if (spin.expiry) {
+        onPremium?.(spin.expiry);
+      }
+      if (spin.tickets && spin.tickets > 0) {
+        updateTickets(Math.max(0, currentTickets + extraTicketDelta + spin.tickets));
+      }
       onSpinComplete?.(spin);
       haptic('heavy');
     }, 4500);
@@ -79,30 +127,31 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
 
   const runPaidSpin = async (spinId: string) => {
     setPhase('waiting');
-    setMessage('Платёж принят. Подтверждаем на сервере…');
+    setMessage('Подтверждаем платёж…');
     try {
       for (let attempt = 0; attempt < 10; attempt++) {
         const status = await fetchRouletteSpin(spinId);
         if (status.spin) {
-          showResult(status.spin);
+          animateSpinResult(status.spin);
           return;
         }
         if (status.paid) break;
         await new Promise((resolve) => setTimeout(resolve, 1200));
       }
       const response = await spinRoulette(spinId);
-      showResult(response.spin);
+      animateSpinResult(response.spin);
     } catch (error) {
       setPhase('idle');
       setMessage(
         error instanceof Error
-          ? `${error.message} Оплаченное вращение сохранено — попробуйте продолжить.`
-          : 'Не удалось запустить вращение. Попробуйте ещё раз.'
+          ? `${error.message}`
+          : 'Не удалось завершить вращение.'
       );
     }
   };
 
   useEffect(() => {
+    if (!hasServer) return;
     try {
       const pending = localStorage.getItem(PENDING_KEY);
       if (pending) void runPaidSpin(pending);
@@ -110,15 +159,39 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleSpin = async () => {
+  const handleFreeOrTicketSpin = () => {
+    if (busy) return;
+    if (freeSpinReady) {
+      haptic('medium');
+      const now = Date.now();
+      setLastFreeAt(now);
+      try { localStorage.setItem(FREE_SPIN_KEY, String(now)); } catch {}
+      const spin = spinRouletteLocal(prizes);
+      animateSpinResult(spin, 0);
+      return;
+    }
+    if (currentTickets >= SPIN_COST_TICKETS) {
+      haptic('medium');
+      const nextAfterCost = currentTickets - SPIN_COST_TICKETS;
+      updateTickets(nextAfterCost);
+      const spin = spinRouletteLocal(prizes);
+      animateSpinResult(spin, -SPIN_COST_TICKETS);
+      return;
+    }
+    setMessage(`Нужно ${SPIN_COST_TICKETS} ❄️ для спина — откройте Снежный бокс или выполните кино-квест!`);
+  };
+
+  const handleStarsSpin = async () => {
     haptic('medium');
     setResult(null);
     setShowPrizeModal(false);
     setMessage('');
-    if (!tg?.openInvoice) {
-      setMessage('Оплата Stars доступна внутри Telegram Mini App');
+
+    if (!hasServer || !tg?.openInvoice) {
+      handleFreeOrTicketSpin();
       return;
     }
+
     let pending = '';
     try { pending = localStorage.getItem(PENDING_KEY) || ''; } catch {}
     if (pending) {
@@ -137,29 +210,36 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
         } else {
           try { localStorage.removeItem(PENDING_KEY); } catch {}
           setPhase('idle');
-          setMessage(status === 'cancelled' ? 'Оплата отменена. Stars не списаны.' : 'Платёж не завершён.');
+          setMessage(status === 'cancelled' ? 'Оплата отменена.' : 'Платёж не завершён.');
         }
       });
-    } catch (error) {
-      setPhase('idle');
-      setMessage(error instanceof Error ? error.message : 'Не удалось создать счёт');
+    } catch {
+      handleFreeOrTicketSpin();
     }
   };
 
-  const buttonLabel = phase === 'invoice'
+  const mainButtonText = phase === 'invoice'
     ? 'Создаём счёт…'
     : phase === 'waiting'
-      ? 'Ждём подтверждение…'
+      ? 'Проверяем оплату…'
       : phase === 'spinning'
-        ? 'Колесо вращается…'
-        : 'Крутить за 10 Stars';
+        ? 'Удача в пути…'
+        : freeSpinReady
+          ? 'Крутить бесплатно (1 раз в день)'
+          : currentTickets >= SPIN_COST_TICKETS
+            ? `Крутить за ${SPIN_COST_TICKETS} ❄️`
+            : hasServer
+              ? 'Крутить за 10 Stars'
+              : `Нужно ${SPIN_COST_TICKETS} ❄️ (сейчас ${currentTickets} ❄️)`;
 
   return (
     <section className="pm-roulette" aria-labelledby="roulette-title">
       <div className="pm-roulette__head">
-        <span className="pm-roulette__badge"><Sparkles size={11} /> Беспроигрышная рулетка</span>
-        <h2 id="roulette-title" className="pm-roulette__title">Колесо GiftFest</h2>
-        <p className="pm-roulette__desc">10 Stars за спин. Выигрывайте дни ZENOVA PRO или редкий Подарок Telegram.</p>
+        <span className="pm-roulette__badge"><Sparkles size={11} /> Рулетка GiftFest</span>
+        <h2 id="roulette-title" className="pm-roulette__title">Колесо Фортуны</h2>
+        <p className="pm-roulette__desc">
+          Крутите бесплатно каждый день или за ❄️ снежинки. Выигрывайте дни ZENOVA PRO и призы.
+        </p>
       </div>
 
       <div className={`pm-roulette__stage ${phase === 'spinning' ? 'is-spinning' : ''}`}>
@@ -167,42 +247,53 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
           <span />
         </div>
 
-        {/* Внешний металлический обод с лампочками */}
         <div className="pm-roulette__bezel">
-          {Array.from({ length: 16 }, (_, idx) => (
+          {Array.from({ length: 24 }, (_, idx) => (
             <span
               key={idx}
               className="pm-roulette__bulb"
-              style={{ transform: `rotate(${idx * 22.5}deg) translateY(-132px)` }}
+              style={{ transform: `rotate(${idx * 15}deg) translateY(-136px)` }}
             />
           ))}
 
           <div
             className="pm-roulette__wheel"
             style={{ transform: `rotate(${rotation}deg)` }}
-            aria-label={result ? `Результат: ${result.label}` : 'Колесо с пятью призами'}
+            aria-label={result ? `Результат: ${result.label}` : 'Колесо фортуны'}
           >
             <svg viewBox="0 0 240 240" className="pm-roulette__svg">
+              <defs>
+                {SLICE_GRADIENTS.map(([c1, c2], idx) => (
+                  <linearGradient key={idx} id={`pmSliceGrad${idx}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={c1} />
+                    <stop offset="100%" stopColor={c2} />
+                  </linearGradient>
+                ))}
+              </defs>
               {prizes.map((prize, i) => {
-                const start = i * 72 - 36;
-                const end = start + 72;
-                const midAngle = i * 72;
-                const textPos = polarToCartesian(120, 120, 74, midAngle);
-                const shortLabel = prize.gift ? '🎁 GIFT' : prize.label.replace(' PRO', '');
+                const start = i * stepAngle - stepAngle / 2;
+                const end = start + stepAngle;
+                const midAngle = i * stepAngle;
+                const textPos = polarToCartesian(120, 120, 76, midAngle);
+                const shortLabel = prize.gift
+                  ? '🎁 ПРИЗ'
+                  : prize.tickets
+                    ? `+${prize.tickets} ❄️`
+                    : prize.label.replace(' дней', 'Д').replace(' дня', 'Д').replace(' день', 'Д');
                 return (
                   <g key={prize.id}>
                     <path
-                      d={slicePath(120, 120, 116, start, end)}
-                      fill={SEGMENT_FILLS[i % SEGMENT_FILLS.length]}
-                      stroke="rgba(231, 199, 137, 0.35)"
+                      d={slicePath(120, 120, 117, start, end)}
+                      fill={`url(#pmSliceGrad${i % SLICE_GRADIENTS.length})`}
+                      stroke="rgba(231, 199, 137, 0.42)"
                       strokeWidth="1.2"
                     />
                     <text
                       x={textPos.x}
                       y={textPos.y}
-                      fill={prize.gift ? '#fde68a' : '#f8fafc'}
-                      fontSize="11.5"
-                      fontWeight="800"
+                      fill={prize.gift ? '#f4dfae' : '#f8fafc'}
+                      fontSize="11"
+                      fontWeight="850"
                       textAnchor="middle"
                       dominantBaseline="central"
                       transform={`rotate(${midAngle}, ${textPos.x}, ${textPos.y})`}
@@ -212,22 +303,47 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
                   </g>
                 );
               })}
-              <circle cx="120" cy="120" r="115" fill="none" stroke="rgba(231, 199, 137, 0.55)" strokeWidth="2.5" />
+              <circle cx="120" cy="120" r="116" fill="none" stroke="rgba(231, 199, 137, 0.72)" strokeWidth="2.5" />
             </svg>
 
-            <span className="pm-roulette__hub">
-              <RotateCw size={20} />
-            </span>
+            <button
+              type="button"
+              className="pm-roulette__hub"
+              onClick={handleFreeOrTicketSpin}
+              disabled={busy}
+              aria-label="Крутить колесо"
+            >
+              <span>SPIN</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <button type="button" className="pm-roulette__spin" onClick={handleSpin} disabled={busy || prizes.length !== 5}>
-        <Star size={16} fill="currentColor" />
-        <span>{buttonLabel}</span>
-      </button>
+      <div className="pm-roulette__actions">
+        <button
+          type="button"
+          className="pm-roulette__spin"
+          onClick={handleFreeOrTicketSpin}
+          disabled={busy}
+        >
+          {freeSpinReady ? <Sparkles size={16} /> : <Snowflake size={16} />}
+          <span>{mainButtonText}</span>
+        </button>
 
-      {(message || configError) && <p className="pm-roulette__message" role="status">{configError || message}</p>}
+        {hasServer && (
+          <button
+            type="button"
+            className="pm-roulette__spin-stars"
+            onClick={handleStarsSpin}
+            disabled={busy}
+          >
+            <Star size={14} fill="currentColor" />
+            <span>Крутить за 10 Stars</span>
+          </button>
+        )}
+      </div>
+
+      {message && <p className="pm-roulette__message" role="status">{message}</p>}
 
       {phase === 'done' && result && !showPrizeModal && (
         <button
@@ -235,24 +351,32 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
           className="pm-roulette-result"
           onClick={() => setShowPrizeModal(true)}
         >
-          <span className="pm-roulette-result__icon">{result.prizeId === 'gift' ? <Gift size={22} /> : <Check size={22} />}</span>
-          <span className="pm-roulette-result__text">Ваш приз: <strong>{result.label}</strong></span>
+          <span className="pm-roulette-result__icon">{result.prizeId === 'gift' ? <Gift size={20} /> : <Check size={20} />}</span>
+          <span className="pm-roulette-result__text">Выигрыш: <strong>{result.label}</strong></span>
         </button>
       )}
 
       <details className="pm-roulette__odds">
-        <summary>Шансы и правила рулетки</summary>
+        <summary>Призы и шансы выпадения</summary>
         <div className="pm-roulette__odds-list">
-          {prizes.map((prize) => <div key={prize.id}><span>{prize.label}</span><strong>{prize.chance}%</strong></div>)}
+          {prizes.map((prize) => (
+            <div key={prize.id}>
+              <span>{prize.label}</span>
+              <strong>{prize.chance}%</strong>
+            </div>
+          ))}
         </div>
-        <p>Один счёт — одно вращение. Дни PRO суммируются с текущим сроком. Подарок Telegram отправляется ботом автоматически при доступности, иначе начисляются 7 дней PRO.</p>
+        <p>1 бесплатный спин доступен каждые 24 часа. Дополнительные спины — за 25 ❄️ снежинок из кино-квестов или за 10 Stars. Выигранные дни PRO суммируются с вашим профилем мгновенно.</p>
       </details>
 
-      {/* Всплывающий экран выигрыша (Pop-up Celebration Modal) */}
+      {/* Всплывающий pop-up экран выигрыша */}
       {showPrizeModal && result && createPortal(
         <div className="pm-prize-overlay" onClick={() => setShowPrizeModal(false)}>
           <div className="pm-prize-modal" onClick={(e) => e.stopPropagation()}>
             <div className="pm-prize-modal__rays" aria-hidden="true" />
+            <div className="pm-prize-modal__sparks" aria-hidden="true">
+              <span /><span /><span /><span /><span /><span />
+            </div>
             <button
               type="button"
               className="pm-prize-modal__close"
@@ -263,17 +387,17 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
             </button>
 
             <div className="pm-prize-modal__emblem">
-              {result.prizeId === 'gift' ? <Gift size={38} /> : <Crown size={38} />}
+              {result.tickets ? <Snowflake size={38} /> : result.prizeId === 'gift' ? <Gift size={38} /> : <Crown size={38} />}
             </div>
 
-            <span className="pm-prize-modal__kicker">ПОЗДРАВЛЯЕМ!</span>
+            <span className="pm-prize-modal__kicker">НАГРАДА ПОЛУЧЕНА</span>
             <h3 className="pm-prize-modal__title">{result.label}</h3>
             <p className="pm-prize-modal__desc">
-              {result.compensation
-                ? 'Подарок сейчас недоступен в Telegram, поэтому мы начислили 7 дней ZENOVA PRO.'
-                : result.prizeId === 'gift'
-                  ? 'Подарок отправлен в ваш Telegram-профиль ботом ZENOVA!'
-                  : 'Награда уже активирована и добавлена к вашему профилю.'}
+              {result.tickets
+                ? 'Снежинки-билеты зачислены в ваш баланс GiftFest!'
+                : result.days
+                  ? 'Статус ZENOVA PRO активирован! Модели Gemini 2.5 Pro и Kimi K3.1 Pro в SYNTHAX-9 уже открыты.'
+                  : 'Приз успешно зачислен на ваш аккаунт ZENOVA.'}
             </p>
 
             <button
@@ -284,7 +408,7 @@ const PremiumRoulette: React.FC<PremiumRouletteProps> = ({ onPremium, onSpinComp
                 setShowPrizeModal(false);
               }}
             >
-              Забрать приз
+              Забрать в профиль ✨
             </button>
           </div>
         </div>,

@@ -202,6 +202,98 @@
   transform: scale(0.97);
 }
 
+.ny-header__badges {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.ny-header__pro {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(212, 175, 100, 0.16);
+  border: 1px solid rgba(231, 199, 137, 0.35);
+  color: #f4dfae;
+  font-size: 10.5px;
+  font-weight: 850;
+}
+
+.ny-header__tickets {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  color: #bae6fd;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.ny-section-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ny-switch-btn {
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 11px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.ny-switch-btn.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.ny-giftfest-wrap {
+  width: min(100%, 760px);
+  margin: 0 auto;
+}
+
+.ny-cinema-actions {
+  width: min(100%, 760px);
+  margin: 0 auto 18px;
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 8px;
+}
+
+.ny-toast {
+  position: fixed;
+  bottom: calc(var(--tabbar-h, 80px) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9000;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: rgba(18, 17, 26, 0.94);
+  border: 1px solid rgba(231, 199, 137, 0.35);
+  color: #f4dfae;
+  font-size: 12px;
+  font-weight: 750;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.65);
+}
+
 .ny-btn--primary {
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(255, 255, 255, 0.95);

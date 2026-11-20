@@ -9,6 +9,8 @@
  * Адрес сервера берётся из RU-Proxy (админка/env), fallback — VITE_API_BASE.
  */
 
+import { getAllTrending, searchMovies, smartDiscover } from './catalog';
+
 export interface Requisites {
   card: string;
   sbp: string;
@@ -126,7 +128,84 @@ async function telegramApi<T>(route: string, payload: Record<string, unknown> = 
   return data as T;
 }
 
-export const fetchPremiumStatus = () => telegramApi<PremiumStatus>('/api/premium/status');
+const AI_LOCAL_USAGE_KEY = 'zenova_ai_local_usage_v1';
+
+function readLocalPremium(): { premium: boolean; expiry: number | null } {
+  try {
+    const active = localStorage.getItem('tc_premium') === '1';
+    const rawExp = localStorage.getItem('tc_premium_expiry');
+    const expiry = rawExp ? Number(rawExp) : null;
+    if (active && expiry && Date.now() > expiry) {
+      localStorage.setItem('tc_premium', '0');
+      return { premium: false, expiry: null };
+    }
+    return { premium: active, expiry: Number.isFinite(expiry) ? expiry : null };
+  } catch {
+    return { premium: false, expiry: null };
+  }
+}
+
+function localUtcDay(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getLocalAiUsage(premium: boolean): { used: number; limit: number; remaining: number } {
+  const limit = premium ? 10 : 2;
+  const day = localUtcDay();
+  const mode = premium ? 'pro' : 'free';
+  try {
+    const raw = JSON.parse(localStorage.getItem(AI_LOCAL_USAGE_KEY) || '{}');
+    const used = raw.day === day && raw.mode === mode ? Math.max(0, Number(raw.count) || 0) : 0;
+    return { used, limit, remaining: Math.max(0, limit - used) };
+  } catch {
+    return { used: 0, limit, remaining: limit };
+  }
+}
+
+function incrementLocalAiUsage(premium: boolean): { used: number; limit: number; remaining: number } {
+  const limit = premium ? 10 : 2;
+  const day = localUtcDay();
+  const mode = premium ? 'pro' : 'free';
+  const cur = getLocalAiUsage(premium);
+  const used = cur.used + 1;
+  try {
+    localStorage.setItem(AI_LOCAL_USAGE_KEY, JSON.stringify({ day, mode, count: used }));
+  } catch {}
+  return { used, limit, remaining: Math.max(0, limit - used) };
+}
+
+export const fetchPremiumStatus = async (): Promise<PremiumStatus> => {
+  const base = getApiBase();
+  const initData = getTelegramInitData();
+  if (base && initData) {
+    try {
+      return await telegramApi<PremiumStatus>('/api/premium/status');
+    } catch {
+      /* fallback to local state */
+    }
+  }
+  const { premium, expiry } = readLocalPremium();
+  const aiUsage = getLocalAiUsage(premium);
+  let trialUsed = false;
+  let arcadeRewardClaimed = false;
+  try {
+    trialUsed = localStorage.getItem('zenova_trial_used_v1') === '1';
+    arcadeRewardClaimed = localStorage.getItem('zen_arcade_won_bonus') === '1';
+  } catch {}
+  return {
+    ok: true,
+    premium,
+    expiry,
+    trialUsed,
+    arcadeRewardClaimed,
+    ai: {
+      used: aiUsage.used,
+      limit: aiUsage.limit,
+      remaining: aiUsage.remaining,
+      model: premium ? 'Gemini 2.5 Pro' : 'DeepSeek V3',
+    },
+  };
+};
 
 export const createPremiumInvoice = (plan: PremiumPlanId) =>
   telegramApi<{ ok: boolean; url: string }>('/api/premium/invoice', { plan });
@@ -135,6 +214,7 @@ export interface RoulettePrize {
   id: string;
   label: string;
   days: number;
+  tickets?: number;
   gift: boolean;
   chance: number;
 }
@@ -145,17 +225,63 @@ export interface RouletteSpin {
   label: string;
   status: string;
   days?: number;
+  tickets?: number;
   expiry?: number;
   compensation?: boolean;
 }
 
+export const DEFAULT_ROULETTE_PRIZES: RoulettePrize[] = [
+  { id: 'pro_1', label: '1 день PRO', days: 1, gift: false, chance: 42 },
+  { id: 'tickets_40', label: '+40 ❄️ билетов', days: 0, tickets: 40, gift: false, chance: 28 },
+  { id: 'pro_2', label: '2 дня PRO', days: 2, gift: false, chance: 16 },
+  { id: 'pro_3', label: '3 дня PRO', days: 3, gift: false, chance: 9 },
+  { id: 'pro_7', label: '7 дней PRO', days: 7, gift: false, chance: 4.5 },
+  { id: 'gift', label: '🎁 Подарок', days: 0, gift: true, chance: 0.5 },
+];
+
 export const fetchRouletteConfig = async (): Promise<{ ok: boolean; amount: number; prizes: RoulettePrize[]; giftCompensationDays: number }> => {
   const base = getApiBase();
-  if (!base) throw new Error('Сервер рулетки не настроен');
-  const res = await fetch(`${base}/api/roulette/config`, { signal: AbortSignal.timeout(8000) });
-  const data = await res.json().catch(() => null);
-  if (!res.ok || !data?.ok) throw new Error('Не удалось загрузить правила рулетки');
-  return data;
+  if (!base) {
+    return { ok: true, amount: 10, prizes: DEFAULT_ROULETTE_PRIZES, giftCompensationDays: 7 };
+  }
+  try {
+    const res = await fetch(`${base}/api/roulette/config`, { signal: AbortSignal.timeout(6000) });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.ok) return data;
+  } catch {}
+  return { ok: true, amount: 10, prizes: DEFAULT_ROULETTE_PRIZES, giftCompensationDays: 7 };
+};
+
+export const spinRouletteLocal = (prizes: RoulettePrize[] = DEFAULT_ROULETTE_PRIZES): RouletteSpin => {
+  const total = prizes.reduce((acc, p) => acc + Math.max(0.1, p.chance), 0);
+  let r = Math.random() * total;
+  let segment = 0;
+  for (let i = 0; i < prizes.length; i++) {
+    r -= Math.max(0.1, prizes[i].chance);
+    if (r <= 0) {
+      segment = i;
+      break;
+    }
+  }
+  const prize = prizes[segment] || prizes[0];
+  if (prize.gift) {
+    return {
+      segment,
+      prizeId: 'pro_7',
+      label: '7 дней PRO (Бонус-подарок)',
+      status: 'fulfilled',
+      days: 7,
+      compensation: true,
+    };
+  }
+  return {
+    segment,
+    prizeId: prize.id,
+    label: prize.label,
+    status: 'fulfilled',
+    days: prize.days || 0,
+    tickets: prize.tickets || 0,
+  };
 };
 
 export const createRouletteInvoice = () =>
@@ -169,10 +295,146 @@ export const spinRoulette = (spinId: string) =>
 export const fetchRouletteSpin = (spinId: string) =>
   telegramApi<{ ok: boolean; paid: boolean; spin: RouletteSpin | null }>('/api/roulette/status', { spinId });
 
-export const askSynthax = (prompt: string, modelId?: 'deepseek' | 'gemini' | 'kimi') =>
-  telegramApi<{ ok: boolean; text: string; model: string; modelId?: string; premium: boolean; remaining: number; limit: number; message?: string }>(
-    '/api/ai/chat', { prompt, modelId }
-  );
+const MODEL_META: Record<'deepseek' | 'gemini' | 'kimi', { label: string; gatewayModel: string }> = {
+  deepseek: { label: 'DeepSeek V3', gatewayModel: 'deepseek' },
+  gemini: { label: 'Gemini 2.5 Pro', gatewayModel: 'gemini' },
+  kimi: { label: 'Kimi K3.1 Pro', gatewayModel: 'openai-large' },
+};
+
+async function buildTmdbConciergeReply(prompt: string, modelLabel: string): Promise<string> {
+  const q = prompt.toLowerCase();
+  const genreMap: Array<{ re: RegExp; genres: number[]; label: string }> = [
+    { re: /космос|фантаст|будущ|интерстеллар|sci-fi/i, genres: [878], label: 'научной фантастики' },
+    { re: /триллер|напряж|финал|неожидан|твист|мозг/i, genres: [53, 9648], label: 'напряжённых триллеров' },
+    { re: /детектив|расслед|нуар|криминал|маньяк/i, genres: [80, 9648], label: 'детективов и расследований' },
+    { re: /ужас|страш|хоррор|мистик/i, genres: [27], label: 'атмосферных хорроров' },
+    { re: /комед|смеш|уютн|лёгк|легк|вечер/i, genres: [35], label: 'лёгкого и уютного кино' },
+    { re: /драм|сильн|слез|слёз|жизн/i, genres: [18], label: 'сильных драм' },
+    { re: /боевик|экшн|адреналин|погон/i, genres: [28], label: 'динамичного экшна' },
+    { re: /романт|любов|вдво|свидан/i, genres: [10749], label: 'романтического кино' },
+    { re: /фэнтез|маги|волшеб|сказк/i, genres: [14, 12], label: 'фэнтези и приключений' },
+    { re: /новогод|зим|рождеств|праздник/i, genres: [10751, 35], label: 'уютного зимнего настроения' },
+  ];
+
+  const matched = genreMap.find((g) => g.re.test(q));
+  const wantSerial = /сериал|мини-сериал|сезон/i.test(q);
+  let picks: Array<{ title: string; year: string; rating: string; overview: string }> = [];
+
+  try {
+    if (matched) {
+      const list = await smartDiscover({
+        genres: matched.genres,
+        mediaType: wantSerial ? 'tv' : 'movie',
+      });
+      picks = list.slice(0, 4).map((m) => ({
+        title: m.title,
+        year: (m.release_date || '').slice(0, 4),
+        rating: m.vote_average ? m.vote_average.toFixed(1) : '7.5',
+        overview: (m.overview || '').slice(0, 140),
+      }));
+    } else {
+      const searched = await searchMovies(prompt.slice(0, 60), 1);
+      const raw = searched.results?.length ? searched.results : await getAllTrending();
+      picks = raw.slice(0, 4).map((m) => ({
+        title: m.title,
+        year: (m.release_date || '').slice(0, 4),
+        rating: m.vote_average ? m.vote_average.toFixed(1) : '7.5',
+        overview: (m.overview || '').slice(0, 140),
+      }));
+    }
+  } catch {}
+
+  if (!picks.length) {
+    return `Как кино-консьерж (${modelLabel}), рекомендую обратить внимание на «Интерстеллар» (2014), «Начало» (2010) и «Остров проклятых» (2009) — все три держат внимание до последних секунд и доступны в каталоге ZENOVA через поиск.`;
+  }
+
+  const lines = picks.map((p, idx) => {
+    const yr = p.year ? ` (${p.year})` : '';
+    const desc = p.overview ? ` — ${p.overview.replace(/\s+\S*$/, '')}…` : '';
+    return `${idx + 1}. «${p.title}»${yr} · ★ ${p.rating}${desc}`;
+  });
+  return `Подборка от ${modelLabel}${matched ? ` в направлении ${matched.label}` : ''}:\n\n${lines.join('\n')}\n\nОткройте любой из них через поиск в ZENOVA — карточка уже есть в базе.`;
+}
+
+export const askSynthax = async (
+  prompt: string,
+  modelId: 'deepseek' | 'gemini' | 'kimi' = 'deepseek'
+): Promise<{ ok: boolean; text: string; model: string; modelId?: string; premium: boolean; remaining: number; limit: number; message?: string }> => {
+  const base = getApiBase();
+  const initData = getTelegramInitData();
+
+  if (base && initData) {
+    try {
+      return await telegramApi('/api/ai/chat', { prompt, modelId });
+    } catch (err) {
+      // Если сервер не настроен или недоступен — продолжаем автономно на клиенте
+      const msg = err instanceof Error ? err.message : '';
+      if (msg && /лимит|исчерпан|только в ZENOVA PRO/i.test(msg)) {
+        throw err;
+      }
+    }
+  }
+
+  const { premium } = readLocalPremium();
+  if (!premium && modelId !== 'deepseek') {
+    throw new Error('Модели Gemini 2.5 Pro и Kimi K3.1 Pro доступны в ZENOVA PRO.');
+  }
+
+  const usage = getLocalAiUsage(premium);
+  if (usage.remaining <= 0) {
+    throw new Error(
+      premium
+        ? 'Дневной лимит (10 запросов) исчерпан. Попробуйте завтра.'
+        : 'Бесплатные запросы (2 в день) закончились. Откройте PRO или выиграйте его в рулетке GiftFest!'
+    );
+  }
+
+  const meta = MODEL_META[modelId] || MODEL_META.deepseek;
+  const sysPrompt =
+    'Ты SYNTHAX-9, интеллектуальный кино-консьерж приложения ZENOVA. Отвечай по-русски, структурированно и кратко (до 200 слов). Помогай выбирать фильмы и сериалы, объяснять жанры и настроение, без спойлеров.';
+
+  let replyText = '';
+  try {
+    const res = await fetch('https://text.pollinations.ai/openai', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: meta.gatewayModel,
+        messages: [
+          { role: 'system', content: sysPrompt },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.7,
+        seed: Math.floor(Math.random() * 9999),
+      }),
+      signal: AbortSignal.timeout(9500),
+    });
+    if (res.ok) {
+      const json = await res.json().catch(() => null);
+      const content = String(json?.choices?.[0]?.message?.content || '').trim();
+      if (content && content.length > 15 && !/pollinations/i.test(content)) {
+        replyText = content;
+      }
+    }
+  } catch {
+    /* fallback на GET или TMDB-консьерж */
+  }
+
+  if (!replyText) {
+    replyText = await buildTmdbConciergeReply(prompt, meta.label);
+  }
+
+  const updated = incrementLocalAiUsage(premium);
+  return {
+    ok: true,
+    text: replyText.slice(0, 12000),
+    model: meta.label,
+    modelId,
+    premium,
+    remaining: updated.remaining,
+    limit: updated.limit,
+  };
+};
 
 export const startArcadeRun = () =>
   telegramApi<{ ok: boolean; claimed: boolean; runId: string | null }>('/api/arcade/start');

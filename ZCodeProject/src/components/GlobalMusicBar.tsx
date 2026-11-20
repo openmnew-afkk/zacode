@@ -114,40 +114,48 @@ const GlobalMusicBar: React.FC = () => {
       setImgError(false);
       const alreadyFull = isFullTrack(currentTrack);
       setPlayingFull(alreadyFull);
-      audioEngine.playTrack(
-        currentTrack.streamUrl,
-        speed,
-        {
-          title: currentTrack.title,
-          artist: currentTrack.artist,
-          album: currentTrack.album || 'ZENOVA Sound',
-          artwork: currentTrack.artwork,
-        },
-        currentTrack.fallbackUrl
-      ).catch(() => {});
 
-      // Поиск ПОЛНОЙ версии (Internet Archive → Audius), если трек ещё превью
-      if (!alreadyFull && !currentTrack.isLiveRadio) {
-        resolveFullAudioTrack(currentTrack).then((full) => {
-          if (
-            full.streamUrl &&
-            full.streamUrl !== currentTrack.streamUrl &&
-            currentTrackIdRef.current === currentTrack.id
-          ) {
-            setPlayingFull(true);
+      if (alreadyFull || currentTrack.isLiveRadio) {
+        audioEngine.playTrack(
+          currentTrack.streamUrl,
+          speed,
+          {
+            title: currentTrack.title,
+            artist: currentTrack.artist,
+            album: currentTrack.album || 'ZENOVA Sound',
+            artwork: currentTrack.artwork,
+          },
+          currentTrack.fallbackUrl
+        ).catch(() => {});
+      } else {
+        // Сначала быстро ищем полный трек (Archive/Audius до 3.5 сек), превью — только как резерв
+        const trackSnapshot = currentTrack;
+        const timeoutPromise = new Promise<typeof trackSnapshot>((resolve) =>
+          window.setTimeout(() => resolve(trackSnapshot), 3500)
+        );
+        Promise.race([resolveFullAudioTrack(trackSnapshot), timeoutPromise])
+          .then((resolved) => {
+            if (currentTrackIdRef.current !== trackSnapshot.id) return;
+            const foundFull = Boolean(resolved.streamUrl && resolved.streamUrl !== trackSnapshot.streamUrl);
+            setPlayingFull(foundFull);
+            if (foundFull && resolved.duration > 0) {
+              setDuration(resolved.duration);
+            }
+            const primaryUrl = foundFull ? resolved.streamUrl : trackSnapshot.streamUrl;
+            const fallback = foundFull ? trackSnapshot.streamUrl : trackSnapshot.fallbackUrl;
             audioEngine.playTrack(
-              full.streamUrl,
+              primaryUrl,
               speed,
               {
-                title: full.title,
-                artist: full.artist,
-                album: full.album || 'ZENOVA Sound',
-                artwork: full.artwork,
+                title: resolved.title || trackSnapshot.title,
+                artist: resolved.artist || trackSnapshot.artist,
+                album: resolved.album || trackSnapshot.album || 'ZENOVA Sound',
+                artwork: resolved.artwork || trackSnapshot.artwork,
               },
-              currentTrack.streamUrl
+              fallback
             ).catch(() => {});
-          }
-        });
+          })
+          .catch(() => {});
       }
     }
   }, [currentTrack?.id, currentTrack?.streamUrl, speed]);

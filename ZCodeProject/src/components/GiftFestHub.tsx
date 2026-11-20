@@ -1,18 +1,25 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, Gift, Snowflake, Sparkles, Crown, Clock, CheckCircle2, Film, Star, Bookmark, Award } from 'lucide-react';
+import {
+  ChevronLeft, Gift, Snowflake, Sparkles, Crown, Clock,
+  Film, Star, Bookmark, Award, Check,
+} from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
 import PremiumRoulette from './PremiumRoulette';
 import './GiftFestHub.css';
 
-interface GiftFestHubProps {
-  onBack: () => void;
+export interface GiftFestHubProps {
+  onBack?: () => void;
   onNotice?: (msg: string) => void;
+  embedded?: boolean;
+  onTicketsChange?: (tickets: number) => void;
 }
 
-const TICKETS_KEY = 'zenova_giftfest_tickets';
+export const GIFTFEST_TICKETS_KEY = 'zenova_giftfest_tickets';
 const DAILY_KEY = 'zenova_giftfest_daily_at';
+const TREE_PICK_KEY = 'zenova_giftfest_tree_at';
 const QUESTS_KEY = 'zenova_giftfest_quests_v1';
+const ROADMAP_KEY = 'zenova_giftfest_roadmap_v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface QuestDef {
@@ -25,20 +32,58 @@ interface QuestDef {
   done: boolean;
 }
 
-export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) => {
+interface RoadmapTier {
+  id: string;
+  cost: number;
+  title: string;
+  rewardLabel: string;
+  proDays?: number;
+}
+
+const ROADMAP_TIERS: RoadmapTier[] = [
+  { id: 'r_50', cost: 50, title: 'Зимний Зритель', rewardLabel: 'Бейдж сезона + старт марафона' },
+  { id: 'r_120', cost: 120, title: '2 дня PRO', rewardLabel: 'Полный доступ к Gemini & Kimi', proDays: 2 },
+  { id: 'r_220', cost: 220, title: '5 дней PRO', rewardLabel: 'Недельный буст и золотой ранг', proDays: 5 },
+  { id: 'r_350', cost: 350, title: '7 дней PRO', rewardLabel: 'Титул «Магистр Кино»', proDays: 7 },
+  { id: 'r_500', cost: 500, title: '30 дней PRO', rewardLabel: 'Гранд-приз Зимнего Киномарафона', proDays: 30 },
+];
+
+export const GiftFestHub: React.FC<GiftFestHubProps> = ({
+  onBack,
+  onNotice,
+  embedded = false,
+  onTicketsChange,
+}) => {
   const { haptic } = useTelegram();
-  const { applyRemotePremium, isPremium, watchHistory, favorites, tracked } = useStore();
+  const {
+    applyRemotePremium,
+    activatePremiumDays,
+    isPremium,
+    watchHistory,
+    favorites,
+    tracked,
+  } = useStore();
 
   const [tickets, setTickets] = useState<number>(() => {
-    try { return Number(localStorage.getItem(TICKETS_KEY) || 0); } catch { return 0; }
+    try { return Number(localStorage.getItem(GIFTFEST_TICKETS_KEY) || 0); } catch { return 0; }
   });
 
   const [lastDailyAt, setLastDailyAt] = useState<number>(() => {
     try { return Number(localStorage.getItem(DAILY_KEY) || 0); } catch { return 0; }
   });
 
+  const [lastTreeAt, setLastTreeAt] = useState<number>(() => {
+    try { return Number(localStorage.getItem(TREE_PICK_KEY) || 0); } catch { return 0; }
+  });
+
+  const [treeResult, setTreeResult] = useState<{ idx: number; amount: number } | null>(null);
+
   const [claimedQuests, setClaimedQuests] = useState<string[]>(() => {
     try { return JSON.parse(localStorage.getItem(QUESTS_KEY) || '[]'); } catch { return []; }
+  });
+
+  const [claimedRoadmap, setClaimedRoadmap] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(ROADMAP_KEY) || '[]'); } catch { return []; }
   });
 
   const [dailyOpening, setDailyOpening] = useState(false);
@@ -50,9 +95,68 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
     return () => window.clearInterval(t);
   }, []);
 
+  const syncTickets = (next: number) => {
+    setTickets(next);
+    try { localStorage.setItem(GIFTFEST_TICKETS_KEY, String(next)); } catch {}
+    onTicketsChange?.(next);
+  };
+
+  const nextDailyInMs = Math.max(0, lastDailyAt + DAY_MS - now);
+  const canOpenDaily = nextDailyInMs === 0;
+  const canPickTree = now >= lastTreeAt + DAY_MS;
+
+  const formatCooldown = (ms: number) => {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    return `${h}ч ${String(m).padStart(2, '0')}м`;
+  };
+
+  const handleOpenDailyBox = () => {
+    if (!canOpenDaily || dailyOpening) return;
+    haptic('medium');
+    setDailyOpening(true);
+    window.setTimeout(() => {
+      const gained = [20, 25, 30, 40, 50][Math.floor(Math.random() * 5)];
+      syncTickets(tickets + gained);
+      const ts = Date.now();
+      setLastDailyAt(ts);
+      setDailyReward(gained);
+      setDailyOpening(false);
+      try { localStorage.setItem(DAILY_KEY, String(ts)); } catch {}
+      haptic('heavy');
+      onNotice?.(`Снежный бокс: +${gained} ❄️!`);
+    }, 550);
+  };
+
+  const handlePickTreeGift = (boxIdx: number) => {
+    if (!canPickTree) return;
+    haptic('heavy');
+    const rewards = [15, 25, 45].sort(() => Math.random() - 0.5);
+    const amount = rewards[boxIdx] || 25;
+    const ts = Date.now();
+    setLastTreeAt(ts);
+    setTreeResult({ idx: boxIdx, amount });
+    syncTickets(tickets + amount);
+    try { localStorage.setItem(TREE_PICK_KEY, String(ts)); } catch {}
+    onNotice?.(`Подарок под ёлкой: +${amount} ❄️!`);
+  };
+
+  const handleClaimRoadmap = (tier: RoadmapTier) => {
+    if (tickets < tier.cost || claimedRoadmap.includes(tier.id)) return;
+    haptic('heavy');
+    const nextClaimed = [...claimedRoadmap, tier.id];
+    setClaimedRoadmap(nextClaimed);
+    try { localStorage.setItem(ROADMAP_KEY, JSON.stringify(nextClaimed)); } catch {}
+    if (tier.proDays) {
+      activatePremiumDays(tier.proDays);
+      onNotice?.(`Открыто: ${tier.title}! Подписка активирована.`);
+    } else {
+      onNotice?.(`Получено достижение: ${tier.title}!`);
+    }
+  };
+
   const quests = useMemo<QuestDef[]>(() => {
     const ratedCount = Object.values(tracked || {}).filter((t) => (t.rating || 0) > 0).length;
-    const hasOpenedBox = lastDailyAt > 0;
     return [
       {
         id: 'first_watch',
@@ -88,7 +192,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
         badge: 'Ачивка: Удачливый',
         reward: 40,
         icon: <Gift size={16} />,
-        done: hasOpenedBox,
+        done: lastDailyAt > 0,
       },
       {
         id: 'marathon',
@@ -106,95 +210,105 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
     if (!q.done || claimedQuests.includes(q.id)) return;
     haptic('heavy');
     const nextClaimed = [...claimedQuests, q.id];
-    const nextTickets = tickets + q.reward;
     setClaimedQuests(nextClaimed);
-    setTickets(nextTickets);
-    try {
-      localStorage.setItem(QUESTS_KEY, JSON.stringify(nextClaimed));
-      localStorage.setItem(TICKETS_KEY, String(nextTickets));
-    } catch {}
+    syncTickets(tickets + q.reward);
+    try { localStorage.setItem(QUESTS_KEY, JSON.stringify(nextClaimed)); } catch {}
     onNotice?.(`${q.badge} открыта! +${q.reward} ❄️`);
   };
 
-  const nextDailyInMs = Math.max(0, lastDailyAt + DAY_MS - now);
-  const canOpenDaily = nextDailyInMs === 0;
-
-  const formatCooldown = (ms: number) => {
-    const h = Math.floor(ms / 3600000);
-    const m = Math.floor((ms % 3600000) / 60000);
-    return `${h}ч ${String(m).padStart(2, '0')}м`;
-  };
-
-  const handleOpenDailyBox = () => {
-    if (!canOpenDaily || dailyOpening) return;
-    haptic('medium');
-    setDailyOpening(true);
-    window.setTimeout(() => {
-      const gained = [15, 20, 25, 35, 50][Math.floor(Math.random() * 5)];
-      const nextTickets = tickets + gained;
-      const ts = Date.now();
-      setTickets(nextTickets);
-      setLastDailyAt(ts);
-      setDailyReward(gained);
-      setDailyOpening(false);
-      try {
-        localStorage.setItem(TICKETS_KEY, String(nextTickets));
-        localStorage.setItem(DAILY_KEY, String(ts));
-      } catch {}
-      haptic('heavy');
-      onNotice?.(`Получено +${gained} ❄️ в GiftFest!`);
-    }, 600);
-  };
-
-  const milestone = 200;
-  const milestonePct = Math.min(100, Math.round((tickets / milestone) * 100));
+  const maxRoadmap = ROADMAP_TIERS[ROADMAP_TIERS.length - 1].cost;
+  const roadmapPct = Math.min(100, Math.round((tickets / maxRoadmap) * 100));
 
   return (
-    <div className="gf-hub">
-      <header className="gf-nav">
-        <button
-          type="button"
-          className="gf-nav__back"
-          onClick={() => {
-            haptic('light');
-            onBack();
-          }}
-        >
-          <ChevronLeft size={18} />
-          <span>Назад</span>
-        </button>
-        <h1 className="gf-nav__title">GiftFest</h1>
-        <div className="gf-nav__tickets" title="Снежинки-билеты">
-          <Snowflake size={13} />
-          <span>{tickets}</span>
-        </div>
-      </header>
+    <div className={`gf-hub ${embedded ? 'gf-hub--embedded' : ''}`}>
+      {!embedded && (
+        <header className="gf-nav">
+          <button
+            type="button"
+            className="gf-nav__back"
+            onClick={() => {
+              haptic('light');
+              onBack?.();
+            }}
+          >
+            <ChevronLeft size={18} />
+            <span>Назад</span>
+          </button>
+          <h1 className="gf-nav__title">GiftFest</h1>
+          <div className="gf-nav__tickets" title="Снежинки-билеты">
+            <Snowflake size={13} />
+            <span>{tickets}</span>
+          </div>
+        </header>
+      )}
 
       <div className="gf-body">
-        {/* Hero ивента */}
-        <section className="gf-hero">
-          <div className="gf-hero__badge">
-            <Sparkles size={11} />
-            <span>ЗИМНИЙ РОЗЫГРЫШ · ZENOVA</span>
-          </div>
-          <h2 className="gf-hero__title">Новогодний GiftFest</h2>
-          <p className="gf-hero__sub">
-            Крутите колесо за 10 Stars, выигрывайте дни ZENOVA PRO и редкий Telegram Подарок, а также собирайте снежинки каждый день.
-          </p>
+        {/* Hero ивента (показываем в standalone-режиме) */}
+        {!embedded && (
+          <section className="gf-hero">
+            <div className="gf-hero__badge">
+              <Sparkles size={11} />
+              <span>СЕЗОННЫЙ ИВЕНТ · ZENOVA</span>
+            </div>
+            <h2 className="gf-hero__title">Новогодний GiftFest</h2>
+            <p className="gf-hero__sub">
+              Смотрите фильмы, открывайте подарки под ёлкой, крутите Колесо Фортуны бесплатно каждый день и забирайте дни ZENOVA PRO.
+            </p>
+            <div className="gf-progress-box">
+              <div className="gf-progress-box__top">
+                <span>Прогресс сезона GiftFest</span>
+                <strong>{tickets} / {maxRoadmap} ❄️</strong>
+              </div>
+              <div className="gf-progress-box__track">
+                <div className="gf-progress-box__fill" style={{ width: `${roadmapPct}%` }} />
+              </div>
+              <span className="gf-progress-box__hint">
+                {isPremium ? 'Статус PRO активен — модели Gemini и Kimi открыты' : 'Соберите 120 ❄️ или крутите рулетку для получения PRO'}
+              </span>
+            </div>
+          </section>
+        )}
 
-          <div className="gf-progress-box">
-            <div className="gf-progress-box__top">
-              <span>Билеты розыгрыша</span>
-              <strong>{tickets} / {milestone} ❄️</strong>
+        {/* Мини-игра «Подарки под ёлкой» */}
+        <section className="gf-tree-game">
+          <div className="gf-tree-game__head">
+            <div>
+              <span className="gf-daily__kicker">СЕЗОННАЯ ИГРА</span>
+              <h3 className="gf-tree-game__title">Подарки под ёлкой</h3>
+              <p className="gf-tree-game__sub">
+                {treeResult
+                  ? `Вы нашли +${treeResult.amount} ❄️! Новая попытка завтра.`
+                  : canPickTree
+                    ? 'Выберите 1 из 3 коробок — в одной скрыт супер-приз +45 ❄️'
+                    : `Коробки обновятся через ${formatCooldown(Math.max(0, lastTreeAt + DAY_MS - now))}`}
+              </p>
             </div>
-            <div className="gf-progress-box__track">
-              <div className="gf-progress-box__fill" style={{ width: `${milestonePct}%` }} />
-            </div>
-            <span className="gf-progress-box__hint">
-              {tickets >= milestone
-                ? 'Вы участник главного новогоднего розыгрыша!'
-                : `Соберите ${milestone} ❄️ для участия в большом зимнем розыгрыше призов`}
-            </span>
+            {embedded && (
+              <div className="gf-nav__tickets">
+                <Snowflake size={12} />
+                <span>{tickets}</span>
+              </div>
+            )}
+          </div>
+
+          <div className="gf-tree-boxes">
+            {[0, 1, 2].map((idx) => {
+              const picked = treeResult?.idx === idx;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`gf-tree-box ${picked ? 'is-picked' : ''} ${!canPickTree && !picked ? 'is-locked' : ''}`}
+                  onClick={() => handlePickTreeGift(idx)}
+                  disabled={!canPickTree}
+                >
+                  <span className="gf-tree-box__emoji">{picked ? '✨' : '🎁'}</span>
+                  <span className="gf-tree-box__lbl">
+                    {picked ? `+${treeResult.amount} ❄️` : `Бокс #${idx + 1}`}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
 
@@ -204,14 +318,14 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
             <Gift size={22} />
           </div>
           <div className="gf-daily__info">
-            <span className="gf-daily__kicker">БЕСПЛАТНО РАЗ В 24 ЧАСА</span>
+            <span className="gf-daily__kicker">КАЖДЫЕ 24 ЧАСА</span>
             <h3 className="gf-daily__title">Снежный бокс дня</h3>
             <p className="gf-daily__sub">
               {dailyReward
-                ? `Вы получили +${dailyReward} ❄️ билетов!`
+                ? `Получено +${dailyReward} ❄️!`
                 : canOpenDaily
-                  ? 'Откройте сейчас и заберите от 15 до 50 снежинок'
-                  : `Следующий бокс через ${formatCooldown(nextDailyInMs)}`}
+                  ? 'Бесплатно +20…50 ❄️ на баланс'
+                  : `Через ${formatCooldown(nextDailyInMs)}`}
             </p>
           </div>
           <button
@@ -233,23 +347,60 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
           </button>
         </section>
 
-        {/* Колесо Фортуны 10 Stars */}
+        {/* Колесо Фортуны */}
         <PremiumRoulette
-          onPremium={(expiry) => {
-            applyRemotePremium(expiry);
-          }}
-          onSpinComplete={() => {
-            const bonusTickets = tickets + 30;
-            setTickets(bonusTickets);
-            try { localStorage.setItem(TICKETS_KEY, String(bonusTickets)); } catch {}
-            onNotice?.('Приз начислен + 30 ❄️ за спин!');
+          tickets={tickets}
+          onTicketsChange={syncTickets}
+          onPremium={(expiry) => applyRemotePremium(expiry)}
+          onSpinComplete={(spin) => {
+            if (!spin.tickets) {
+              const bonus = 15;
+              syncTickets(tickets + bonus);
+              onNotice?.(`${spin.label} + ${bonus} ❄️ за спин!`);
+            } else {
+              onNotice?.(`Начислено ${spin.label}!`);
+            }
           }}
         />
 
-        {/* План подарков и Ачивки в стиле кино */}
+        {/* Дорожка наград PRO */}
+        <section className="gf-roadmap">
+          <div className="gf-quests__head">
+            <h3 className="gf-prizes__title">Дорожка подарков · План наград</h3>
+            <span className="gf-quests__count">{tickets} ❄️</span>
+          </div>
+          <div className="gf-roadmap__list">
+            {ROADMAP_TIERS.map((tier) => {
+              const unlocked = tickets >= tier.cost;
+              const claimed = claimedRoadmap.includes(tier.id);
+              return (
+                <div key={tier.id} className={`gf-road-step ${claimed ? 'is-claimed' : unlocked ? 'is-ready' : ''}`}>
+                  <div className="gf-road-step__cost">
+                    <Snowflake size={12} />
+                    <span>{tier.cost}</span>
+                  </div>
+                  <div className="gf-road-step__info">
+                    <strong>{tier.title}</strong>
+                    <span>{tier.rewardLabel}</span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`gf-quest__btn ${claimed ? 'is-claimed' : unlocked ? 'is-ready' : ''}`}
+                    onClick={() => handleClaimRoadmap(tier)}
+                    disabled={!unlocked || claimed}
+                  >
+                    {claimed ? <Check size={14} /> : unlocked ? 'Забрать' : <Crown size={13} />}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Кино-Ачивки */}
         <section className="gf-quests">
           <div className="gf-quests__head">
-            <h3 className="gf-prizes__title">План подарков · Кино-ачивки</h3>
+            <h3 className="gf-prizes__title">Кино-ачивки</h3>
             <span className="gf-quests__count">{claimedQuests.length} / {quests.length}</span>
           </div>
           <div className="gf-quests__list">
@@ -274,33 +425,6 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({ onBack, onNotice }) =>
                 </div>
               );
             })}
-          </div>
-        </section>
-
-        {/* Призовой фонд */}
-        <section className="gf-prizes">
-          <h3 className="gf-prizes__title">Что можно выиграть</h3>
-          <div className="gf-prizes__grid">
-            <div className="gf-prize-card">
-              <span className="gf-prize-card__icon gf-prize-card__icon--gold"><Gift size={18} /></span>
-              <strong>Подарок Telegram</strong>
-              <span>Коллекционный подарок напрямую в ваш профиль</span>
-            </div>
-            <div className="gf-prize-card">
-              <span className="gf-prize-card__icon gf-prize-card__icon--amber"><Crown size={18} /></span>
-              <strong>До 7 дней PRO</strong>
-              <span>Доступ к Gemini, Kimi K3.1 Pro и золотой статус</span>
-            </div>
-            <div className="gf-prize-card">
-              <span className="gf-prize-card__icon gf-prize-card__icon--cyan"><Snowflake size={18} /></span>
-              <strong>+30 ❄️ за спин</strong>
-              <span>Билеты за каждое вращение в общий зачёт</span>
-            </div>
-            <div className="gf-prize-card">
-              <span className="gf-prize-card__icon gf-prize-card__icon--green"><CheckCircle2 size={18} /></span>
-              <strong>{isPremium ? 'PRO активен' : 'Гарант приза'}</strong>
-              <span>Ни одного пустого сектора — выигрыш в каждом спине</span>
-            </div>
           </div>
         </section>
       </div>
