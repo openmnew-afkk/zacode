@@ -209,28 +209,16 @@ const Row: React.FC<{
 });
 
 /* ──────────────────────────────────────────────────────── */
-/*  Продолжить просмотр — градиентные карточки с прогрессом  */
+/*  Продолжить просмотр — компактные карточки с прогрессом */
 /* ──────────────────────────────────────────────────────── */
-const CW_GRADS: Array<[string, string, string]> = [
-  ['#3a2a10', '#8a6a2e', '#d4b06a'], // бронза
-  ['#0a3a32', '#0e7d5e', '#2bbf96'], // изумруд
-  ['#2a1250', '#5b2a9e', '#a06ee8'], // фиолет
-  ['#4d0a2e', '#8a1d55', '#e05a96'], // малина
-  ['#0a234d', '#1d4e8a', '#5aa0e8'], // синий
-];
 const cwHash = (id: string): number => {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
   return Math.abs(h);
 };
-const cwGrad = (id: string): string => {
-  const [c1, c2, c3] = CW_GRADS[cwHash(id) % CW_GRADS.length];
-  return `linear-gradient(100deg, ${c1} 0%, ${c2} 55%, ${c3} 125%)`;
-};
 
 const ContinueCard: React.FC<{ item: TrackedItem; onOpen: (id: string) => void }> = ({ item, onOpen }) => {
   const m = item.movie;
-  // Пока плеер не отдаёт точную позицию — прогресс оценочный, поле progress готово для него
   const pct = item.progress != null
     ? Math.round(item.progress * 100)
     : 20 + (cwHash(m.id) % 60);
@@ -238,7 +226,7 @@ const ContinueCard: React.FC<{ item: TrackedItem; onOpen: (id: string) => void }
     ? Math.max(5, Math.round(m.runtime * (1 - pct / 100)))
     : 25 + (cwHash(m.id) % 20);
   return (
-    <button className="hp-cw__card" style={{ background: cwGrad(m.id) }} onClick={() => onOpen(m.id)}>
+    <button type="button" className="hp-cw__card" onClick={() => onOpen(m.id)}>
       <span className="hp-cw__thumb-wrap">
         <img className="hp-cw__thumb" src={m.poster_path} alt={m.title} loading="lazy" />
       </span>
@@ -246,11 +234,11 @@ const ContinueCard: React.FC<{ item: TrackedItem; onOpen: (id: string) => void }
         <span className="hp-cw__name">{m.title}</span>
         <span className="hp-cw__bar"><i style={{ width: `${pct}%` }} /></span>
         <span className="hp-cw__meta">
-          {pct}%{m.runtime ? ` · осталось ~${minsLeft} мин` : ' · смотрю'}
+          {pct}%{m.runtime ? ` · ~${minsLeft} мин` : ' · смотрю'}
         </span>
       </span>
       <span className="hp-cw__play">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5z" /></svg>
       </span>
     </button>
   );
@@ -869,7 +857,7 @@ const HomePage: React.FC = () => {
               <p style={{fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 6}}>Не удалось загрузить</p>
               <p style={{fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 16}}>Проверьте интернет-соединение</p>
               <button
-                style={{display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'rgba(251,113,133,0.16)', border: '1px solid rgba(251,113,133,0.3)', color: '#fda4af', fontWeight: 700, fontSize: 13, cursor: 'pointer'}}
+                style={{display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'rgba(125,211,252,0.14)', border: '1px solid rgba(186,230,253,0.28)', color: '#e0f2fe', fontWeight: 700, fontSize: 13, cursor: 'pointer'}}
                 onClick={() => setRetryCount(c => c + 1)}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
@@ -888,10 +876,14 @@ const HomePage: React.FC = () => {
 
           {watchingTracked.length > 0 && (
             <div className="hp-cw">
-              <h3 className="hp-cw__heading">Продолжить просмотр</h3>
-              {watchingTracked.slice(0, 4).map((t) => (
-                <ContinueCard key={t.movie.id} item={t} onOpen={go} />
-              ))}
+              <div className="hp-row__header">
+                <h3 className="hp-row__title">Продолжить просмотр</h3>
+              </div>
+              <div className="hp-cw__track">
+                {watchingTracked.slice(0, 8).map((t) => (
+                  <ContinueCard key={t.movie.id} item={t} onOpen={go} />
+                ))}
+              </div>
             </div>
           )}
 
@@ -1111,29 +1103,32 @@ const HomePage: React.FC = () => {
       )}
 
       {/* ── Шапка ── */}
-      {/* ── Шапка ── */}
       <div className="hp-header">
         <div className="hp-header__brand">
           <VeloraEmblem size="sm" />
           <span className="hp-header__wordmark">
             <span>ZENOVA</span>
           </span>
+          {isPremium && <span className="hp-header__pro-tag">PRO</span>}
         </div>
 
         <div className="hp-header__actions">
-          {/* ✨ AI SYNTHAX-9 — светящаяся кнопка нейросети в шапке */}
+          {/* 🎲 Случайный фильм в один тап */}
           <button
             type="button"
-            className="hp-header__ai-btn"
-            onClick={() => {
-              haptic('medium');
-              navigate('/synthax');
-            }}
-            title="Нейросеть SYNTHAX-9"
-            aria-label="Открыть SYNTHAX-9 AI"
+            className={`hp-header__lucky-icon ${luckySpinning ? 'spinning' : ''}`}
+            onClick={feelingLucky}
+            title="Случайный выбор"
+            aria-label="Случайный фильм"
           >
-            <span className="hp-header__ai-dot" aria-hidden="true" />
-            <span>AI</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+              <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" />
+              <circle cx="15.5" cy="8.5" r="1.2" fill="currentColor" />
+              <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+              <circle cx="8.5" cy="15.5" r="1.2" fill="currentColor" />
+              <circle cx="15.5" cy="15.5" r="1.2" fill="currentColor" />
+            </svg>
           </button>
 
           {/* ✦ Вселенные — компактная капсула студий */}
@@ -1151,7 +1146,7 @@ const HomePage: React.FC = () => {
             <span className="hp-header__studios-text">Вселенные</span>
           </button>
 
-          {/* Профиль пользователя в чистом золотом свечении */}
+          {/* Профиль пользователя */}
           <button
             type="button"
             className="hp-header__avatar-pod"
@@ -1315,7 +1310,7 @@ const HomePage: React.FC = () => {
                 }}
                 aria-label="В избранное"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite(preview.id) ? '#ec4899' : 'none'} stroke={isFavorite(preview.id) ? '#ec4899' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={isFavorite(preview.id) ? '#7dd3fc' : 'none'} stroke={isFavorite(preview.id) ? '#7dd3fc' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
               </button>

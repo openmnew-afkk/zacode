@@ -272,7 +272,7 @@ const AiPickPage: React.FC = () => {
             <img src={maskSrc} alt="" />
           </span>
           <div className="orc-brand__copy">
-            <span className="orc-brand__kicker">ZENOVA · AI</span>
+            <span className="orc-brand__kicker">ZENOVA · CINEMA</span>
             <h1 className="orc-brand__title">Оракул</h1>
           </div>
         </div>

@@ -27,7 +27,7 @@ const COMPARISON = [
   { label: 'Каталог и поиск', free: 'Полные', pro: 'Полные', icon: <MonitorPlay size={16} /> },
   { label: 'Плееры, качество и озвучка', free: 'От источника', pro: 'От источника', icon: <Sparkles size={16} /> },
   { label: 'Внутреннее объявление', free: 'Показывается', pro: 'Скрыто', icon: <ShieldOff size={16} /> },
-  { label: 'Нейросеть SYNTHAX-9', free: 'DeepSeek · 2 / день', pro: 'Gemini + Kimi · 10 / день', icon: <Sparkles size={16} /> },
+  { label: 'Колесо Фортуны GiftFest', free: '100 ❄️ за спин', pro: 'Супер-приз 25Д PRO', icon: <Gift size={16} /> },
   { label: 'Опыт профиля', free: 'Базовый', pro: '+250 XP', icon: <Zap size={16} /> },
   { label: 'Оформление профиля', free: 'Обычное', pro: 'Золотое PRO', icon: <BadgeCheck size={16} /> },
 ];
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Как работает пробный период?',
-    a: '7 дней PRO стоят 29 Stars. Предложение доступно один раз на Telegram-аккаунт. Это платный пробный период с полным доступом к Gemini и Kimi K3.1 Pro.',
+    a: '7 дней PRO стоят 29 Stars. Предложение доступно один раз на Telegram-аккаунт. Вы получаете золотое оформление, отключение объявлений и +250 XP.',
   },
   {
     q: 'PRO улучшает качество фильмов?',
@@ -202,7 +202,7 @@ const PremiumPage: React.FC = () => {
             <ul className="zp-perks">
               <li><Check size={15} /> Золотой бейдж, кристалл и оформление профиля PRO</li>
               <li><Check size={15} /> +250 XP к прогрессу кинематографического ранга</li>
-              <li><Check size={15} /> SYNTHAX-9: Gemini Pro, Kimi K3.1 Pro и DeepSeek — 10 запросов в день</li>
+              <li><Check size={15} /> Синхронизация избранного и статуса PRO через Telegram Cloud</li>
               <li><Check size={15} /> Внутреннее промообъявление ZENOVA скрыто</li>
               <li><Check size={15} /> Срок PRO привязан к Telegram-аккаунту и проверяется сервером</li>
             </ul>
@@ -234,7 +234,7 @@ const PremiumPage: React.FC = () => {
           <div className="zp-hero__crown"><Crown size={28} /></div>
           <h1 className="zp-hero__title">ZENOVA <span>PRO</span></h1>
           <p className="zp-hero__sub">
-            Нейросеть SYNTHAX-9 (Gemini Pro и Kimi K3.1 Pro · 10 запросов/день), золотое оформление и бонусы внутри приложения.
+            Золотое оформление профиля, +250 XP к рангу, скрытие промо-баннеров и облачная синхронизация коллекции.
           </p>
         </header>
 

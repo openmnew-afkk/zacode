@@ -94,8 +94,8 @@ function App() {
     try {
       const tg = (window as any).Telegram?.WebApp;
       if (tg) {
-        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#09080b');
-        if (typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor('#09080b');
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#070a10');
+        if (typeof tg.setBottomBarColor === 'function') tg.setBottomBarColor('#070a10');
       }
       const user = (window as any).Telegram?.WebApp?.initDataUnsafe?.user;
       if (user?.username) setTelegramUsername(user.username);

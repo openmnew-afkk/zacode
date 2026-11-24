@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useTelegram } from '../hooks/useTelegram';
 import { useStore } from '../store';
+import { readRouletteCycleStats, writeRouletteCycleStats } from '../api/backend';
 import {
   idbGet,
   idbSet,
@@ -27,14 +28,14 @@ const TREE_PICK_KEY = 'zenova_giftfest_tree_at';
 const QUESTS_KEY = 'zenova_giftfest_quests_v1';
 const ROADMAP_KEY = 'zenova_giftfest_roadmap_v1';
 const UPDATED_KEY = 'zenova_giftfest_updated_at';
-const FREE_SPIN_KEY = 'zenova_roulette_free_spin_at';
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface GiftFestSyncPayload {
   tickets: number;
   lastDailyAt: number;
   lastTreeAt: number;
-  lastFreeSpinAt?: number;
+  rouletteTotalSpins?: number;
+  rouletteWonCycle?: number;
   claimedQuests: string[];
   claimedRoadmap: string[];
   updatedAt: number;
@@ -60,7 +61,7 @@ interface RoadmapTier {
 
 const ROADMAP_TIERS: RoadmapTier[] = [
   { id: 'r_50', cost: 50, title: 'Зимний Зритель', rewardLabel: 'Бейдж сезона + старт марафона' },
-  { id: 'r_120', cost: 120, title: '2 дня PRO', rewardLabel: 'Полный доступ к Gemini & Kimi', proDays: 2 },
+  { id: 'r_120', cost: 120, title: '2 дня PRO', rewardLabel: 'Золотой статус PRO в профиле', proDays: 2 },
   { id: 'r_220', cost: 220, title: '5 дней PRO', rewardLabel: 'Недельный буст и золотой ранг', proDays: 5 },
   { id: 'r_350', cost: 350, title: '7 дней PRO', rewardLabel: 'Титул «Магистр Кино»', proDays: 7 },
   { id: 'r_500', cost: 500, title: '30 дней PRO', rewardLabel: 'Гранд-приз Зимнего Киномарафона', proDays: 30 },
@@ -143,11 +144,12 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
       localStorage.setItem(QUESTS_KEY, JSON.stringify(next.claimedQuests));
       localStorage.setItem(ROADMAP_KEY, JSON.stringify(next.claimedRoadmap));
       localStorage.setItem(UPDATED_KEY, String(next.updatedAt));
-      if (next.lastFreeSpinAt && next.lastFreeSpinAt > 0) {
-        const curFree = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
-        if (next.lastFreeSpinAt > curFree) {
-          localStorage.setItem(FREE_SPIN_KEY, String(next.lastFreeSpinAt));
-        }
+      if (typeof next.rouletteTotalSpins === 'number' || typeof next.rouletteWonCycle === 'number') {
+        const curCycle = readRouletteCycleStats();
+        writeRouletteCycleStats(
+          Math.max(curCycle.totalSpins, next.rouletteTotalSpins ?? 0),
+          Math.max(curCycle.wonCycle, next.rouletteWonCycle ?? -1)
+        );
       }
     } catch {}
 
@@ -165,7 +167,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
     const hydrate = async () => {
       try {
         const localUpdated = Number(localStorage.getItem(UPDATED_KEY) || 0) || 0;
-        const localFreeSpin = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
+        const localCycle = readRouletteCycleStats();
         const cur = stateRef.current;
 
         const [idbState, cloudState] = await Promise.all([
@@ -178,10 +180,18 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
           (s): s is Partial<GiftFestSyncPayload> => Boolean(s && typeof s === 'object')
         );
         if (remoteSources.length === 0) {
-          if (cur.tickets > 0 || cur.claimedQuests.length > 0 || cur.claimedRoadmap.length > 0 || cur.lastDailyAt > 0 || cur.lastTreeAt > 0) {
+          if (
+            cur.tickets > 0 ||
+            cur.claimedQuests.length > 0 ||
+            cur.claimedRoadmap.length > 0 ||
+            cur.lastDailyAt > 0 ||
+            cur.lastTreeAt > 0 ||
+            localCycle.totalSpins > 0
+          ) {
             const initial: GiftFestSyncPayload = {
               ...cur,
-              lastFreeSpinAt: localFreeSpin,
+              rouletteTotalSpins: localCycle.totalSpins,
+              rouletteWonCycle: localCycle.wonCycle,
               updatedAt: localUpdated || Date.now(),
             };
             idbSet('tc_giftfest_state', initial);
@@ -204,11 +214,9 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
         );
         const mergedDailyAt = Math.max(cur.lastDailyAt, ...remoteSources.map((s) => Number(s.lastDailyAt || 0)));
         const mergedTreeAt = Math.max(cur.lastTreeAt, ...remoteSources.map((s) => Number(s.lastTreeAt || 0)));
-        const mergedFreeSpinAt = Math.max(localFreeSpin, ...remoteSources.map((s) => Number(s.lastFreeSpinAt || 0)));
+        const mergedSpins = Math.max(localCycle.totalSpins, ...remoteSources.map((s) => Number(s.rouletteTotalSpins || 0)));
+        const mergedWonCycle = Math.max(localCycle.wonCycle, ...remoteSources.map((s) => (s.rouletteWonCycle ?? -1)));
 
-        // Для снежинок: если локально ещё не было timestamp (миграция или сброс) — берём Math.max;
-        // если есть timestamp'ы, побеждает самое свежее событие (чтобы трата -25 ❄️ не откатывалась),
-        // но если локально 0 и в облаке > 0 — всегда восстанавливаем облако.
         let bestTickets = cur.tickets;
         let bestUpdated = localUpdated;
         for (const s of remoteSources) {
@@ -229,7 +237,8 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
           tickets: bestTickets,
           lastDailyAt: mergedDailyAt,
           lastTreeAt: mergedTreeAt,
-          lastFreeSpinAt: mergedFreeSpinAt,
+          rouletteTotalSpins: mergedSpins,
+          rouletteWonCycle: mergedWonCycle,
           claimedQuests: mergedQuests,
           claimedRoadmap: mergedRoadmap,
           updatedAt: Math.max(bestUpdated, Date.now()),
@@ -239,12 +248,15 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
           merged.tickets !== cur.tickets ||
           merged.lastDailyAt !== cur.lastDailyAt ||
           merged.lastTreeAt !== cur.lastTreeAt ||
+          mergedSpins !== localCycle.totalSpins ||
+          mergedWonCycle !== localCycle.wonCycle ||
           merged.claimedQuests.length !== cur.claimedQuests.length ||
           merged.claimedRoadmap.length !== cur.claimedRoadmap.length;
 
         const needsCloudPush =
           !cloudState ||
           Number(cloudState.tickets ?? -1) !== merged.tickets ||
+          Number(cloudState.rouletteTotalSpins ?? -1) !== mergedSpins ||
           (cloudState.claimedQuests?.length || 0) !== merged.claimedQuests.length ||
           (cloudState.claimedRoadmap?.length || 0) !== merged.claimedRoadmap.length;
 
@@ -275,10 +287,12 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
         setLastTreeAt(detail.lastTreeAt);
         stateRef.current.lastTreeAt = detail.lastTreeAt;
       }
-      if (typeof detail.lastFreeSpinAt === 'number' && detail.lastFreeSpinAt > 0 && !detail.updatedAt) {
+      if ((typeof detail.rouletteTotalSpins === 'number' || typeof detail.rouletteWonCycle === 'number') && !detail.updatedAt) {
+        const curCycle = readRouletteCycleStats();
         const snapshot: GiftFestSyncPayload = {
           ...stateRef.current,
-          lastFreeSpinAt: detail.lastFreeSpinAt,
+          rouletteTotalSpins: Math.max(curCycle.totalSpins, detail.rouletteTotalSpins ?? 0),
+          rouletteWonCycle: Math.max(curCycle.wonCycle, detail.rouletteWonCycle ?? -1),
           updatedAt: Date.now(),
         };
         idbSet('tc_giftfest_state', snapshot);
@@ -308,11 +322,12 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
   }, []);
 
   const syncTickets = (next: number) => {
-    const freeAt = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
+    const cycle = readRouletteCycleStats();
     persistGiftFest({
       ...stateRef.current,
       tickets: next,
-      lastFreeSpinAt: freeAt,
+      rouletteTotalSpins: cycle.totalSpins,
+      rouletteWonCycle: cycle.wonCycle,
       updatedAt: Date.now(),
     });
   };
@@ -332,17 +347,18 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
     haptic('medium');
     setDailyOpening(true);
     window.setTimeout(() => {
-      const gained = [20, 25, 30, 40, 50][Math.floor(Math.random() * 5)];
+      const gained = [30, 40, 50, 60][Math.floor(Math.random() * 4)];
       const ts = Date.now();
       const cur = stateRef.current;
-      const freeAt = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
+      const cycle = readRouletteCycleStats();
       setDailyReward(gained);
       setDailyOpening(false);
       persistGiftFest({
         ...cur,
         tickets: cur.tickets + gained,
         lastDailyAt: ts,
-        lastFreeSpinAt: freeAt,
+        rouletteTotalSpins: cycle.totalSpins,
+        rouletteWonCycle: cycle.wonCycle,
         updatedAt: ts,
       });
       haptic('heavy');
@@ -353,17 +369,18 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
   const handlePickTreeGift = (boxIdx: number) => {
     if (!canPickTree) return;
     haptic('heavy');
-    const rewards = [15, 25, 45].sort(() => Math.random() - 0.5);
-    const amount = rewards[boxIdx] || 25;
+    const rewards = [25, 35, 55].sort(() => Math.random() - 0.5);
+    const amount = rewards[boxIdx] || 35;
     const ts = Date.now();
     const cur = stateRef.current;
-    const freeAt = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
+    const cycle = readRouletteCycleStats();
     setTreeResult({ idx: boxIdx, amount });
     persistGiftFest({
       ...cur,
       tickets: cur.tickets + amount,
       lastTreeAt: ts,
-      lastFreeSpinAt: freeAt,
+      rouletteTotalSpins: cycle.totalSpins,
+      rouletteWonCycle: cycle.wonCycle,
       updatedAt: ts,
     });
     onNotice?.(`Подарок под ёлкой: +${amount} ❄️!`);
@@ -374,11 +391,12 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
     if (cur.tickets < tier.cost || cur.claimedRoadmap.includes(tier.id)) return;
     haptic('heavy');
     const nextClaimed = [...cur.claimedRoadmap, tier.id];
-    const freeAt = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
+    const cycle = readRouletteCycleStats();
     persistGiftFest({
       ...cur,
       claimedRoadmap: nextClaimed,
-      lastFreeSpinAt: freeAt,
+      rouletteTotalSpins: cycle.totalSpins,
+      rouletteWonCycle: cycle.wonCycle,
       updatedAt: Date.now(),
     });
     if (tier.proDays) {
@@ -445,12 +463,13 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
     if (!q.done || cur.claimedQuests.includes(q.id)) return;
     haptic('heavy');
     const nextClaimed = [...cur.claimedQuests, q.id];
-    const freeAt = Number(localStorage.getItem(FREE_SPIN_KEY) || 0) || 0;
+    const cycle = readRouletteCycleStats();
     persistGiftFest({
       ...cur,
       tickets: cur.tickets + q.reward,
       claimedQuests: nextClaimed,
-      lastFreeSpinAt: freeAt,
+      rouletteTotalSpins: cycle.totalSpins,
+      rouletteWonCycle: cycle.wonCycle,
       updatedAt: Date.now(),
     });
     onNotice?.(`${q.badge} открыта! +${q.reward} ❄️`);
@@ -475,7 +494,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
             <span>Назад</span>
           </button>
           <h1 className="gf-nav__title">GiftFest</h1>
-          <div className="gf-nav__tickets" title="Снежинки-билеты">
+          <div className="gf-nav__tickets" title="Морозные снежинки">
             <Snowflake size={13} />
             <span>{tickets}</span>
           </div>
@@ -492,7 +511,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
             </div>
             <h2 className="gf-hero__title">Новогодний GiftFest</h2>
             <p className="gf-hero__sub">
-              Смотрите фильмы, открывайте подарки под ёлкой, крутите Колесо Фортуны бесплатно каждый день и забирайте дни ZENOVA PRO.
+              Открывайте подарки, выполняйте кино-ачивки, собирайте 100 ❄️ морозных и крутите PRO-рулетку с супер-призом 25 дней PRO.
             </p>
             <div className="gf-progress-box">
               <div className="gf-progress-box__top">
@@ -503,7 +522,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
                 <div className="gf-progress-box__fill" style={{ width: `${roadmapPct}%` }} />
               </div>
               <span className="gf-progress-box__hint">
-                {isPremium ? 'Статус PRO активен — модели Gemini и Kimi открыты' : 'Соберите 120 ❄️ или крутите рулетку для получения PRO'}
+                {isPremium ? 'Статус PRO активен — дни из рулетки суммируются с вашим профилем' : 'Копите 100 ❄️ морозных или 120 ❄️ на дорожке для получения PRO'}
               </span>
             </div>
           </section>
@@ -525,7 +544,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
                 {dailyReward
                   ? `+${dailyReward} ❄️ получено`
                   : canOpenDaily
-                    ? '+20…50 ❄️ бесплатно'
+                    ? '+30…60 ❄️ морозных'
                     : formatCooldown(nextDailyInMs)}
               </p>
             </div>
@@ -558,7 +577,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
                   {treeResult
                     ? `Приз +${treeResult.amount} ❄️`
                     : canPickTree
-                      ? 'До +45 ❄️ в одной из 3'
+                      ? 'До +55 ❄️ в одной из 3'
                       : formatCooldown(Math.max(0, lastTreeAt + DAY_MS - now))}
                 </p>
               </div>
@@ -592,13 +611,7 @@ export const GiftFestHub: React.FC<GiftFestHubProps> = ({
           onTicketsChange={syncTickets}
           onPremium={(expiry) => applyRemotePremium(expiry)}
           onSpinComplete={(spin) => {
-            if (!spin.tickets) {
-              const bonus = 15;
-              syncTickets(stateRef.current.tickets + bonus);
-              onNotice?.(`${spin.label} + ${bonus} ❄️ за спин!`);
-            } else {
-              onNotice?.(`Начислено ${spin.label}!`);
-            }
+            onNotice?.(`Выигрыш: ${spin.label} — зачислено в профиль!`);
           }}
         />
 

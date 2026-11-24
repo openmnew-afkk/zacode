@@ -11,13 +11,13 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 10px 14px 10px;
+  padding: 8px 14px 8px;
   padding-top: var(--header-safe-top);
-  background: rgba(9, 8, 12, 0.86);
-  backdrop-filter: blur(22px) saturate(180%);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  min-height: 54px;
+  background: rgba(7, 10, 16, 0.84);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  border-bottom: 1px solid rgba(186, 230, 253, 0.08);
+  min-height: 50px;
 }
 .hp-header__brand {
   display: flex;
@@ -64,39 +64,37 @@
   flex-shrink: 0;
 }
 
-/* ✨ Компактная светящаяся кнопка AI SYNTHAX-9 в шапке */
-.hp-header__ai-btn {
-  position: relative;
+.hp-header__pro-tag {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(212, 175, 100, 0.16);
+  border: 1px solid rgba(231, 199, 137, 0.34);
+  color: #f4dfae;
+  font-size: 8.5px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+}
+
+/* 🎲 Компактная кнопка случайного выбора в шапке */
+.hp-header__lucky-icon {
+  width: 31px;
+  height: 31px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  height: 31px;
-  padding: 0 10px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(231, 199, 137, 0.16), rgba(168, 85, 247, 0.12));
-  border: 1px solid rgba(231, 199, 137, 0.42);
-  color: #f4dfae;
-  font-size: 10.5px;
-  font-weight: 850;
-  letter-spacing: 0.06em;
-  box-shadow: 0 0 14px rgba(231, 199, 137, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22);
-  transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  justify-content: center;
+  background: rgba(224, 242, 254, 0.06);
+  border: 1px solid rgba(186, 230, 253, 0.14);
+  color: #bae6fd;
+  transition: transform 0.16s ease, background 0.18s ease, border-color 0.18s ease;
   -webkit-tap-highlight-color: transparent;
 }
-.hp-header__ai-btn:active {
-  transform: scale(0.94);
+.hp-header__lucky-icon:active {
+  transform: scale(0.92);
 }
-.hp-header__ai-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #f4dfae;
-  box-shadow: 0 0 7px #f4dfae;
-  animation: hpAiPulse 2s ease-in-out infinite alternate;
-}
-@keyframes hpAiPulse {
-  from { opacity: 0.6; transform: scale(0.9); }
-  to   { opacity: 1; transform: scale(1.2); }
+.hp-header__lucky-icon.spinning svg {
+  animation: lucky-roll 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
 }
 
 /* ✦ Вселенные — аккуратная компактная стеклянная капсула */
@@ -105,11 +103,11 @@
   align-items: center;
   gap: 5px;
   height: 31px;
-  padding: 0 10px;
+  padding: 0 11px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.11);
-  color: rgba(255, 255, 255, 0.92);
+  background: rgba(224, 242, 254, 0.065);
+  border: 1px solid rgba(186, 230, 253, 0.13);
+  color: #f8fbff;
   cursor: pointer;
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
@@ -199,8 +197,8 @@
 }
 .hp-header__avatar-gold-frame {
   position: relative;
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   padding: 1.5px;
   background: linear-gradient(135deg, #f4dfae 0%, #b5893d 100%);
@@ -369,12 +367,12 @@
   transform: scale(0.92);
 }
 
-/* ── Вкладки категорий — бесшовные, с эффектом плавного растворения по краям ── */
+/* ── Вкладки категорий — компактные арктические пилюли ── */
 .hp-tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px 12px;
+  gap: 6px;
+  padding: 4px 14px 8px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -383,46 +381,46 @@
   border-radius: 0;
   box-shadow: none;
   margin: 0;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 14px, black calc(100% - 24px), transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 14px, black calc(100% - 24px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12px, black calc(100% - 20px), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 12px, black calc(100% - 20px), transparent 100%);
 }
 .hp-tabs::-webkit-scrollbar { display: none; }
 
 .hp-tab {
   flex-shrink: 0;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(186, 230, 253, 0.1);
+  background: rgba(224, 242, 254, 0.05);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  color: rgba(255, 255, 255, 0.55);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
+  color: rgba(203, 222, 244, 0.68);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.15px;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
 .hp-tab:active {
   transform: scale(0.94);
 }
 .hp-tab.active {
-  background: rgba(255, 255, 255, 0.92);
-  border-color: rgba(255, 255, 255, 0.92);
-  color: #0b0b14;
-  font-weight: 750;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(135deg, #f8fbff, #dbeafe);
+  border-color: rgba(255, 255, 255, 0.85);
+  color: #070a10;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(125, 211, 252, 0.22);
 }
 
 /* ── Контент ── */
 .hp-content { flex: 1; }
 
-/* ── Floating Hero Billboard ── */
+/* ── Компактный кинематографический Hero Billboard ── */
 .hp-hero-wrap {
   position: relative;
-  margin: 8px 14px 14px;
+  margin: 6px 14px 8px;
 }
 .hp-hero-wrap__ambient {
   display: none;
@@ -432,15 +430,15 @@
   position: relative;
   z-index: 1;
   margin: 0;
-  border-radius: 26px;
+  border-radius: 20px;
   overflow: hidden;
-  height: 68vw;
-  min-height: 290px;
-  max-height: 410px;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 4px 16px rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  height: 50vw;
+  min-height: 204px;
+  max-height: 256px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(186, 230, 253, 0.12);
   cursor: pointer;
-  background: #110e1c;
+  background: #0c111b;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
@@ -451,7 +449,7 @@
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center 25%;
+  background-position: center 22%;
   transition: opacity 0.28s ease, transform 6s ease-out;
   transform: scale(1.02);
 }
@@ -464,10 +462,10 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(9, 8, 16, 0.05) 0%,
-    rgba(9, 8, 16, 0.25) 45%,
-    rgba(9, 8, 16, 0.88) 82%,
-    rgba(9, 8, 16, 0.98) 100%
+    rgba(7, 10, 16, 0.04) 0%,
+    rgba(7, 10, 16, 0.28) 42%,
+    rgba(7, 10, 16, 0.88) 80%,
+    rgba(7, 10, 16, 0.98) 100%
   );
 }
 .hp-hero__content {
@@ -475,7 +473,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16px 18px 18px;
+  padding: 12px 15px 14px;
   transition: opacity 0.25s ease, transform 0.25s ease;
   z-index: 2;
 }
@@ -486,68 +484,68 @@
 .hp-hero__chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  padding: 3px 10px;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 750;
+  color: #e0f2fe;
+  background: rgba(14, 20, 34, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(186, 230, 253, 0.18);
+  padding: 2.5px 9px;
   border-radius: 999px;
-  margin-bottom: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  margin-bottom: 6px;
 }
 .hp-hero__chip-dot {
-  width: 6px; height: 6px;
+  width: 5px; height: 5px;
   border-radius: 50%;
-  background: #10b981;
-  box-shadow: 0 0 8px #10b981;
+  background: #7dd3fc;
+  box-shadow: 0 0 8px #7dd3fc;
   animation: dot-pulse 2s ease-in-out infinite;
 }
 .hp-hero__title {
   font-family: var(--font-cinema);
-  font-size: 21px;
-  font-weight: 800;
-  color: #fff;
-  line-height: 1.2;
-  margin-bottom: 6px;
+  font-size: clamp(17px, 4.4vw, 21px);
+  font-weight: 850;
+  color: #f8fbff;
+  line-height: 1.15;
+  margin-bottom: 4px;
   letter-spacing: -0.02em;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.65);
 }
 .hp-hero__desc {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.4;
-  margin-bottom: 12px;
+  font-size: 11px;
+  color: rgba(214, 230, 248, 0.66);
+  line-height: 1.35;
+  margin-bottom: 9px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 .hp-hero__actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 .hp-hero__btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 18px;
-  border-radius: 13px;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(255, 255, 255, 0.95);
-  color: #090810;
-  font-size: 13px;
-  font-weight: 800;
+  gap: 5px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f8fbff, #dbeafe);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  color: #070a10;
+  font-size: 12px;
+  font-weight: 850;
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 6px 16px rgba(125, 211, 252, 0.2);
   transition: transform 0.15s ease;
 }
 .hp-hero__btn:active {
@@ -556,57 +554,58 @@
 .hp-hero__tag {
   display: inline-flex;
   align-items: center;
-  padding: 7px 11px;
+  height: 28px;
+  padding: 0 9px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(14, 20, 34, 0.68);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 11.5px;
+  border: 1px solid rgba(186, 230, 253, 0.14);
+  font-size: 11px;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
+  color: #e0f2fe;
 }
 .hp-hero__tag--gold {
-  color: #fbbf24;
-  background: rgba(251, 191, 36, 0.14);
-  border-color: rgba(251, 191, 36, 0.28);
+  color: #fde68a;
+  background: rgba(212, 175, 100, 0.16);
+  border-color: rgba(231, 199, 137, 0.32);
 }
 /* Пейджер hero — аккуратные точки */
 .hp-hero__dots {
   position: absolute;
   bottom: 14px;
-  right: 18px;
+  right: 15px;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   z-index: 3;
 }
 .hp-hero__dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(224, 242, 254, 0.32);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
 }
 .hp-hero__dot--on {
-  width: 18px;
+  width: 15px;
   border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.65);
+  background: #f0f9ff;
+  box-shadow: 0 0 8px rgba(125, 211, 252, 0.65);
 }
 
 /* ── Ряд ── */
 .hp-row {
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   content-visibility: auto;
-  contain-intrinsic-size: 0 245px;
+  contain-intrinsic-size: 0 225px;
 }
 .hp-row__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 14px 8px;
+  padding: 8px 14px 6px;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -672,7 +671,7 @@
 /* ── Карточка ── */
 .hp-card {
   flex-shrink: 0;
-  width: 110px;
+  width: 102px;
   cursor: pointer;
   transition: transform 0.18s;
 }
@@ -681,11 +680,12 @@
 
 .hp-card__img-wrap {
   position: relative;
-  width: 110px;
-  height: 160px;
+  width: 102px;
+  height: 150px;
   border-radius: 12px;
   overflow: hidden;
-  background: rgba(255,255,255,0.04);
+  background: rgba(224, 242, 254, 0.045);
+  border: 1px solid rgba(186, 230, 253, 0.09);
 }
 .hp-card__img-wrap img {
   width: 100%; height: 100%;
@@ -710,46 +710,49 @@
 }
 .hp-card__rating {
   position: absolute;
-  bottom: 6px;
+  top: 6px;
   left: 6px;
-  background: rgba(8, 8, 12, 0.78);
-  border: 1px solid rgba(251, 191, 36, 0.28);
+  z-index: 3;
+  background: rgba(7, 10, 16, 0.8);
+  border: 1px solid rgba(251, 191, 36, 0.3);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   color: #fde047;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
-  padding: 2.5px 6.5px;
-  border-radius: 8px;
+  padding: 2px 6px;
+  border-radius: 7px;
   display: inline-flex;
   align-items: center;
-  gap: 3.5px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  gap: 3px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
 }
 .hp-card__badge {
   position: absolute;
   top: 6px;
   right: 6px;
-  background: rgba(226,61,61,0.9);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 700;
-  padding: 2px 6px;
+  z-index: 3;
+  background: rgba(14, 20, 34, 0.85);
+  border: 1px solid rgba(186, 230, 253, 0.24);
+  color: #e0f2fe;
+  font-size: 8.5px;
+  font-weight: 750;
+  padding: 2px 5.5px;
   border-radius: 6px;
 }
 .hp-card__title {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: rgba(255,255,255,0.8);
-  margin: 6px 0 2px;
+  font-size: 11px;
+  font-weight: 650;
+  color: #f0f6ff;
+  margin: 5px 0 1px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 110px;
+  max-width: 102px;
 }
 .hp-card__year {
-  font-size: 10px;
-  color: rgba(255,255,255,0.3);
+  font-size: 9.5px;
+  color: rgba(196, 218, 242, 0.48);
 }
 
 /* ── Поиск результаты ── */
@@ -960,9 +963,9 @@
 }
 
 .hp-preview__tag--accent {
-  background: rgba(251, 113, 133, 0.12);
-  border-color: rgba(251, 113, 133, 0.35);
-  color: var(--accent, #fb7185);
+  background: rgba(125, 211, 252, 0.13);
+  border-color: rgba(186, 230, 253, 0.34);
+  color: #7dd3fc;
 }
 
 .hp-preview__actions {
@@ -989,14 +992,14 @@
 }
 .hp-preview__btn:active { transform: scale(0.96); }
 
-/* Главная кнопка — фирменный розовый градиент */
+/* Главная кнопка — белоснежный арктический акцент */
 .hp-preview__btn--primary {
-  background: linear-gradient(135deg, var(--accent-2, #f43f5e), var(--accent, #fb7185));
-  color: #ffffff;
-  box-shadow: 0 8px 26px var(--accent-glow, rgba(251, 113, 133, 0.35)), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  background: linear-gradient(135deg, #f8fbff, #bae6fd);
+  color: #070a10;
+  box-shadow: 0 8px 22px rgba(125, 211, 252, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 .hp-preview__btn--primary:active {
-  box-shadow: 0 4px 14px var(--accent-glow, rgba(251, 113, 133, 0.35));
+  box-shadow: 0 4px 12px rgba(125, 211, 252, 0.2);
 }
 
 .hp-preview__btn--fav {
@@ -1007,9 +1010,9 @@
   color: var(--text-2);
 }
 .hp-preview__btn--fav.active {
-  background: rgba(251, 113, 133, 0.13);
-  border-color: rgba(251, 113, 133, 0.45);
-  color: var(--accent, #fb7185);
+  background: rgba(125, 211, 252, 0.14);
+  border-color: rgba(186, 230, 253, 0.42);
+  color: #7dd3fc;
 }
 
 .hp-preview__close {
@@ -1091,53 +1094,49 @@
   50%       { opacity: 0.15; transform: scale(1.25); }
 }
 
-/* ── Продолжить просмотр: градиентные карточки с прогрессом ── */
+/* ── Продолжить просмотр: компактная горизонтальная лента в стиле Arctic Obsidian ── */
 .hp-cw {
-  margin: 6px 14px 22px;
+  margin: 2px 0 12px;
   display: flex;
   flex-direction: column;
+}
+.hp-cw__track {
+  display: flex;
   gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 14px 4px;
+  -webkit-overflow-scrolling: touch;
 }
-.hp-cw__heading {
-  font-size: 17px;
-  font-weight: 800;
-  color: #fff;
-  margin: 0 0 4px;
-}
+.hp-cw__track::-webkit-scrollbar { display: none; }
 .hp-cw__card {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 9px 12px 9px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 22px;
+  gap: 10px;
+  width: 244px;
+  flex-shrink: 0;
+  padding: 8px 10px 8px 8px;
+  background: rgba(13, 19, 32, 0.8);
+  border: 1px solid rgba(186, 230, 253, 0.12);
+  border-radius: 16px;
   cursor: pointer;
   text-align: left;
   overflow: hidden;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
   transition: transform 0.18s, border-color 0.2s;
 }
-/* нежный стеклянный блик поверх градиента */
-.hp-cw__card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), transparent 45%);
-  pointer-events: none;
-}
-.hp-cw__card:active { transform: scale(0.977); }
+.hp-cw__card:active { transform: scale(0.97); }
 .hp-cw__thumb-wrap {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 44px;
+  height: 54px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
-  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  background: rgba(224, 242, 254, 0.06);
 }
 .hp-cw__thumb {
   width: 100%;
@@ -1152,22 +1151,22 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
 }
 .hp-cw__name {
-  font-size: 14.5px;
-  font-weight: 700;
-  color: #fff;
+  font-size: 12.5px;
+  font-weight: 750;
+  color: #f8fbff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-/* светящаяся полоса прогресса */
+/* светящаяся арктическая полоса прогресса */
 .hp-cw__bar {
   position: relative;
   height: 3px;
   border-radius: 3px;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(224, 242, 254, 0.16);
   flex-shrink: 0;
 }
 .hp-cw__bar i {
@@ -1175,42 +1174,29 @@
   height: 100%;
   min-width: 6px;
   border-radius: 3px;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), #fff);
+  background: linear-gradient(90deg, #38bdf8, #e0f2fe);
   position: relative;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.45);
 }
 .hp-cw__bar i::after {
-  content: '';
-  position: absolute;
-  right: -2px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.6);
+  display: none;
 }
 .hp-cw__meta {
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.66);
+  color: rgba(203, 222, 244, 0.6);
 }
 .hp-cw__play {
   position: relative;
   z-index: 1;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: #fff;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+  background: rgba(224, 242, 254, 0.1);
+  border: 1px solid rgba(186, 230, 253, 0.2);
+  color: #e0f2fe;
 }
 
 /* ── Российский контент: значок на карточке ── */
@@ -1670,17 +1656,17 @@
   justify-content: space-between;
   gap: 10px;
   width: calc(100% - 28px);
-  margin: 6px auto 6px;
-  padding: 11px 14px;
-  border-radius: 16px;
-  background: rgba(20, 19, 28, 0.72);
+  margin: 0 auto 6px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  background: rgba(13, 19, 32, 0.78);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(186, 230, 253, 0.12);
   box-shadow:
-    0 10px 26px rgba(0, 0, 0, 0.45),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
+    0 8px 22px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(224, 242, 254, 0.08);
+  color: #f8fbff;
   cursor: pointer;
   transition: transform 0.18s ease, border-color 0.2s ease, background 0.2s ease;
   -webkit-tap-highlight-color: transparent;
@@ -1868,10 +1854,9 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: var(--accent-glow);
-  background: rgba(251, 113, 133, 0.12);
-  border: 1px solid rgba(251, 113, 133, 0.35);
+  color: #7dd3fc;
+  background: rgba(125, 211, 252, 0.13);
+  border: 1px solid rgba(186, 230, 253, 0.32);
   border-radius: 999px;
   padding: 4px 12px;
   margin-bottom: 10px;
@@ -2018,9 +2003,9 @@
 
 .aip-lucky__btn--primary {
   border: none;
-  background: linear-gradient(135deg, var(--accent-2, #f43f5e), var(--accent, #fb7185));
-  color: #fff;
-  box-shadow: 0 6px 22px var(--accent-glow);
+  background: linear-gradient(135deg, #f8fbff, #bae6fd);
+  color: #070a10;
+  box-shadow: 0 6px 18px rgba(125, 211, 252, 0.24);
 }
 
 /* ════════════ Кнопка «Кино-Миры» в шапке (PRO иконка без текста) и Список Студий ════════════ */
@@ -2069,16 +2054,16 @@
   to { opacity: 0.95; }
 }
 
-/* ТОП-10 сегодня с большими номерами */
+/* ТОП-10 сегодня с компактными номерами */
 .hp-top10 {
-  margin: 4px 0 18px;
+  margin: 2px 0 12px;
 }
 
 .hp-top10__scroll {
   display: flex;
-  gap: 11px;
+  gap: 10px;
   overflow-x: auto;
-  padding: 4px 14px 10px;
+  padding: 4px 14px 8px;
   scrollbar-width: none;
 }
 .hp-top10__scroll::-webkit-scrollbar {
@@ -2087,16 +2072,16 @@
 
 .hp-top10__item {
   position: relative;
-  width: 98px;
+  width: 92px;
   flex-shrink: 0;
   cursor: pointer;
-  padding-left: 12px;
+  padding-left: 10px;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   -webkit-tap-highlight-color: transparent;
 }
 
 .hp-top10__item:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px) scale(1.02);
 }
 
 .hp-top10__item:active {
@@ -2106,18 +2091,18 @@
 .hp-top10__num {
   position: absolute;
   left: -1px;
-  bottom: -3px;
-  font-size: 56px;
+  bottom: -2px;
+  font-size: 46px;
   font-weight: 950;
   line-height: 0.78;
   font-family: var(--font-display, -apple-system, BlinkMacSystemFont, sans-serif);
-  color: #0b0a12;
-  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.85);
-  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.9);
+  color: #070a10;
+  -webkit-text-stroke: 1.6px rgba(224, 242, 254, 0.88);
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
   z-index: 5;
   pointer-events: none;
   user-select: none;
-  letter-spacing: -3px;
+  letter-spacing: -2.5px;
 }
 
 .hp-top10__poster {
@@ -2126,9 +2111,9 @@
   aspect-ratio: 2 / 3;
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
-  background: #14131d;
+  border: 1px solid rgba(186, 230, 253, 0.12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
+  background: #0c111b;
 }
 
 .hp-top10__poster img {

@@ -236,56 +236,112 @@ export interface RouletteSpin {
 }
 
 export const DEFAULT_ROULETTE_PRIZES: RoulettePrize[] = [
-  { id: 'pro_1', label: '1 день PRO', days: 1, gift: false, chance: 42 },
-  { id: 'tickets_40', label: '+40 ❄️ билетов', days: 0, tickets: 40, gift: false, chance: 28 },
-  { id: 'pro_2', label: '2 дня PRO', days: 2, gift: false, chance: 16 },
-  { id: 'pro_3', label: '3 дня PRO', days: 3, gift: false, chance: 9 },
-  { id: 'pro_7', label: '7 дней PRO', days: 7, gift: false, chance: 4.5 },
-  { id: 'gift', label: '🎁 Подарок', days: 0, gift: true, chance: 0.5 },
+  { id: 'pro_1', label: '1 день PRO', days: 1, gift: false, chance: 40 },
+  { id: 'pro_2', label: '2 дня PRO', days: 2, gift: false, chance: 25 },
+  { id: 'pro_3', label: '3 дня PRO', days: 3, gift: false, chance: 16 },
+  { id: 'pro_5', label: '5 дней PRO', days: 5, gift: false, chance: 10 },
+  { id: 'pro_7', label: '7 дней PRO', days: 7, gift: false, chance: 8 },
+  { id: 'pro_25', label: 'Супер-приз · 25 дней PRO', days: 25, gift: false, chance: 1 },
 ];
 
-export const fetchRouletteConfig = async (): Promise<{ ok: boolean; amount: number; prizes: RoulettePrize[]; giftCompensationDays: number }> => {
-  const base = getApiBase();
-  if (!base) {
-    return { ok: true, amount: 10, prizes: DEFAULT_ROULETTE_PRIZES, giftCompensationDays: 7 };
-  }
+export const ROULETTE_CYCLE_KEY = 'zenova_roulette_cycle_v1';
+
+export interface RouletteCycleStats {
+  totalSpins: number;
+  wonCycle: number;
+  currentCycle: number;
+  spinsDoneInCycle: number;
+  superAvailableInCycle: boolean;
+}
+
+export function readRouletteCycleStats(): RouletteCycleStats {
+  let totalSpins = 0;
+  let wonCycle = -1;
   try {
-    const res = await fetch(`${base}/api/roulette/config`, { signal: AbortSignal.timeout(6000) });
-    const data = await res.json().catch(() => null);
-    if (res.ok && data?.ok) return data;
+    const raw = JSON.parse(localStorage.getItem(ROULETTE_CYCLE_KEY) || '{}');
+    if (Number.isFinite(raw?.totalSpins) && raw.totalSpins >= 0) totalSpins = Math.floor(raw.totalSpins);
+    if (Number.isFinite(raw?.wonCycle)) wonCycle = Math.floor(raw.wonCycle);
   } catch {}
-  return { ok: true, amount: 10, prizes: DEFAULT_ROULETTE_PRIZES, giftCompensationDays: 7 };
+  const currentCycle = Math.floor(totalSpins / 100);
+  return {
+    totalSpins,
+    wonCycle,
+    currentCycle,
+    spinsDoneInCycle: totalSpins % 100,
+    superAvailableInCycle: wonCycle !== currentCycle,
+  };
+}
+
+export function writeRouletteCycleStats(totalSpins: number, wonCycle: number): RouletteCycleStats {
+  const safeSpins = Math.max(0, Math.floor(totalSpins));
+  const safeWon = Math.floor(wonCycle);
+  try {
+    localStorage.setItem(ROULETTE_CYCLE_KEY, JSON.stringify({ totalSpins: safeSpins, wonCycle: safeWon }));
+  } catch {}
+  const currentCycle = Math.floor(safeSpins / 100);
+  return {
+    totalSpins: safeSpins,
+    wonCycle: safeWon,
+    currentCycle,
+    spinsDoneInCycle: safeSpins % 100,
+    superAvailableInCycle: safeWon !== currentCycle,
+  };
+}
+
+export const fetchRouletteConfig = async (): Promise<{ ok: boolean; amount: number; prizes: RoulettePrize[]; giftCompensationDays: number }> => {
+  return { ok: true, amount: 10, prizes: DEFAULT_ROULETTE_PRIZES, giftCompensationDays: 25 };
 };
 
 export const spinRouletteLocal = (prizes: RoulettePrize[] = DEFAULT_ROULETTE_PRIZES): RouletteSpin => {
-  const total = prizes.reduce((acc, p) => acc + Math.max(0.1, p.chance), 0);
-  let r = Math.random() * total;
+  const list = prizes.length >= 6 && prizes.every((p) => !p.gift && !p.tickets && p.days > 0)
+    ? prizes
+    : DEFAULT_ROULETTE_PRIZES;
+  const stats = readRouletteCycleStats();
+  const isSuperPrize = (p: RoulettePrize) => p.id === 'pro_25' || p.days >= 25;
+
   let segment = 0;
-  for (let i = 0; i < prizes.length; i++) {
-    r -= Math.max(0.1, prizes[i].chance);
-    if (r <= 0) {
-      segment = i;
-      break;
+  // Супер-приз 25 дней PRO может выпасть максимум 1 раз за 100 круток с человека
+  if (stats.superAvailableInCycle && stats.spinsDoneInCycle === 99) {
+    const superIdx = list.findIndex(isSuperPrize);
+    if (superIdx >= 0) segment = superIdx;
+  } else {
+    const weights = list.map((p) => {
+      if (isSuperPrize(p) && !stats.superAvailableInCycle) return 0;
+      return Math.max(0.1, p.chance);
+    });
+    const total = weights.reduce((acc, w) => acc + w, 0);
+    let r = Math.random() * total;
+    for (let i = 0; i < list.length; i++) {
+      if (weights[i] <= 0) continue;
+      r -= weights[i];
+      if (r <= 0) {
+        segment = i;
+        break;
+      }
     }
   }
-  const prize = prizes[segment] || prizes[0];
-  if (prize.gift) {
-    return {
-      segment,
-      prizeId: 'pro_7',
-      label: '7 дней PRO (Бонус-подарок)',
-      status: 'fulfilled',
-      days: 7,
-      compensation: true,
-    };
-  }
+
+  const prize = list[segment] || list[0];
+  const wonSuperNow = isSuperPrize(prize);
+  const nextCycleStats = writeRouletteCycleStats(
+    stats.totalSpins + 1,
+    wonSuperNow ? stats.currentCycle : stats.wonCycle
+  );
+
+  window.dispatchEvent(new CustomEvent('zenova-giftfest-sync', {
+    detail: {
+      rouletteTotalSpins: nextCycleStats.totalSpins,
+      rouletteWonCycle: nextCycleStats.wonCycle,
+    },
+  }));
+
   return {
     segment,
     prizeId: prize.id,
     label: prize.label,
     status: 'fulfilled',
-    days: prize.days || 0,
-    tickets: prize.tickets || 0,
+    days: prize.days || 1,
+    tickets: 0,
   };
 };
 
